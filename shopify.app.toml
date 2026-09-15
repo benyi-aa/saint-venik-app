@@ -1,21 +1,21 @@
-# App extension-only de Saint Venik: no hay servidor, todo vive en theme app extensions.
-# `client_id` lo escribe la CLI la primera vez que ejecutes `npm run link`.
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-name = "Saint Venik"
+name = "Color & Size Picker"
 handle = "saint-venik"
-application_url = "https://saintvenik.com"
-embedded = false
+application_url = "https://shopify.dev/apps/default-app-home"
+embedded = true
+client_id = "feb92266442449d38f005beb90710f05"
 
 [access_scopes]
-# Sin backend no pedimos permisos de API: los bloques leen datos con Liquid en el storefront.
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = ""
 use_legacy_install_flow = true
 
 [auth]
-redirect_urls = [ "https://saintvenik.com/" ]
+redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]
 
 [webhooks]
-api_version = "2026-01"
+api_version = "2026-10"
 
 [build]
-automatically_update_urls_on_dev = false
+automatically_update_urls_on_dev = true
