@@ -7,9 +7,14 @@ embedded = true
 client_id = "feb92266442449d38f005beb90710f05"
 
 [access_scopes]
-# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = ""
-use_legacy_install_flow = true
+# Los bloques leen los datos con Liquid en el storefront, no con la Admin API,
+# pero Shopify exige al menos un permiso valido para conceder la instalacion:
+# pedimos el minimo coherente con lo que hace la app.
+scopes = "read_products"
+# Instalacion gestionada por Shopify. No ponemos use_legacy_install_flow = true:
+# ese modo usa el OAuth antiguo y necesita un servidor que atienda el callback,
+# que es justo lo que esta app no tiene.
+use_legacy_install_flow = false
 
 [auth]
 redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]
