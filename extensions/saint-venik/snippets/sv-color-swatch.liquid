@@ -1,0 +1,56 @@
+{% comment %}
+  Saint Venik · Una muestra de color.
+
+  Parametros:
+    producto         (product)  obligatorio
+    nombre           (string)   texto accesible y etiqueta visible
+    color            (color)    campo `muestra` del metaobjeto
+    imagen           (imagen)   campo `imagen_muestra`; manda sobre el color
+    actual           (boolean)  true si es el producto de esta pagina
+    mostrar_etiqueta (boolean)
+    marcar_agotado   (boolean)
+{% endcomment %}
+
+{%- liquid
+  assign sv_nombre = nombre | default: producto.title
+  assign sv_agotado = false
+  unless producto.available
+    assign sv_agotado = true
+  endunless
+
+  assign sv_etiqueta = sv_nombre
+  if sv_agotado
+    assign sv_agotado_txt = 'sold_out' | t
+    assign sv_etiqueta = sv_nombre | append: ' — ' | append: sv_agotado_txt
+  endif
+
+  assign sv_clases = 'sv-colors__item'
+  if actual
+    assign sv_clases = sv_clases | append: ' is-current'
+  endif
+  if sv_agotado and marcar_agotado
+    assign sv_clases = sv_clases | append: ' is-soldout'
+  endif
+-%}
+
+{%- capture sv_estilo -%}
+  {%- if color != blank %}background-color: {{ color }};{% endif -%}
+  {%- if imagen != blank %}background-image: url('{{ imagen | image_url: width: 160 }}');{% endif -%}
+{%- endcapture -%}
+
+{%- capture sv_interior -%}
+  <span class="sv-colors__swatch" style="{{ sv_estilo | strip }}"></span>
+  {%- if mostrar_etiqueta -%}
+    <span class="sv-colors__name">{{ sv_nombre }}</span>
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if actual -%}
+  <span class="{{ sv_clases }}" aria-current="true" aria-label="{{ sv_etiqueta | escape }}" title="{{ sv_nombre | escape }}">
+    {{- sv_interior -}}
+  </span>
+{%- else -%}
+  <a class="{{ sv_clases }}" href="{{ producto.url }}" aria-label="{{ sv_etiqueta | escape }}" title="{{ sv_nombre | escape }}">
+    {{- sv_interior -}}
+  </a>
+{%- endif -%}

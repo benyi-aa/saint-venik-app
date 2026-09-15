@@ -1,0 +1,21 @@
+# App extension-only de Saint Venik: no hay servidor, todo vive en theme app extensions.
+# `client_id` lo escribe la CLI la primera vez que ejecutes `npm run link`.
+
+name = "Saint Venik"
+handle = "saint-venik"
+application_url = "https://saintvenik.com"
+embedded = false
+
+[access_scopes]
+# Sin backend no pedimos permisos de API: los bloques leen datos con Liquid en el storefront.
+scopes = ""
+use_legacy_install_flow = true
+
+[auth]
+redirect_urls = [ "https://saintvenik.com/" ]
+
+[webhooks]
+api_version = "2026-01"
+
+[build]
+automatically_update_urls_on_dev = false

@@ -1,0 +1,278 @@
+{% comment %}
+  Saint Venik · Selector de color entre productos hermanos
+  ---------------------------------------------------------------------------
+  En esta tienda los colores NO son variantes: son productos separados que se
+  apuntan entre si con el metacampo `custom.hermano_de_color`
+  (lista de referencias a producto).
+
+  El aspecto de cada muestra sale del metaobjeto `color`:
+    nombre         -> texto visible (Shopify ya lo devuelve traducido)
+    muestra        -> color de la muestra
+    imagen_muestra -> archivo, tiene prioridad sobre el color
+    etiqueta       -> etiqueta del producto que corresponde (oro, acero-inox)
+
+  El producto se asocia a su color porque lleva esa etiqueta. El orden de las
+  muestras es el orden de las entradas del metaobjeto, asi es igual en todas
+  las fichas. Los enlaces usan `product.url`, que ya incluye /en/ cuando toca.
+
+  Si el producto no tiene hermanos, el bloque no dibuja nada.
+{% endcomment %}
+
+{%- assign hermanos = product.metafields.custom.hermano_de_color.value -%}
+
+{%- if product != blank and hermanos != blank and hermanos.size > 0 -%}
+
+  {%- liquid
+    assign lang = localization.language.iso_code | slice: 0, 2 | downcase
+
+    assign encabezado = block.settings.encabezado_es
+    if lang == 'en' and block.settings.encabezado_en != blank
+      assign encabezado = block.settings.encabezado_en
+    endif
+
+    assign etiqueta_grupo = encabezado
+    if etiqueta_grupo == blank
+      assign etiqueta_grupo = 'color' | t
+    endif
+
+    assign colores = shop.metaobjects.color.values
+    assign etiquetas_actuales = product.tags | join: '|' | downcase | prepend: '|' | append: '|'
+    assign dibujados = '|'
+    assign nombre_actual = ''
+  -%}
+
+  {%- comment -%} Nombre del color de este producto, para el encabezado. {%- endcomment -%}
+  {%- for entrada in colores -%}
+    {%- assign etiqueta = entrada.etiqueta.value | downcase | strip -%}
+    {%- if etiqueta != blank -%}
+      {%- assign aguja = etiqueta | prepend: '|' | append: '|' -%}
+      {%- if etiquetas_actuales contains aguja -%}
+        {%- assign nombre_actual = entrada.nombre.value -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  <div
+    class="sv-colors sv-colors--{{ block.settings.forma }} sv-colors--al-{{ block.settings.alineacion }}"
+    style="--sv-size: {{ block.settings.tamano }}px; --sv-gap: {{ block.settings.espacio }}px; --sv-ring: {{ block.settings.color_borde }}; --sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
+    {{ block.shopify_attributes }}
+  >
+    {%- if block.settings.mostrar_encabezado and encabezado != blank -%}
+      <div class="sv-colors__heading">
+        <span class="sv-colors__label">{{ encabezado }}</span>
+        {%- if block.settings.mostrar_nombre_actual and nombre_actual != blank -%}
+          <span class="sv-colors__current">{{ nombre_actual }}</span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="sv-colors__list" role="group" aria-label="{{ etiqueta_grupo | escape }}">
+
+      {%- comment -%} 1) Una muestra por entrada del metaobjeto, en su orden. {%- endcomment -%}
+      {%- for entrada in colores -%}
+        {%- assign etiqueta = entrada.etiqueta.value | downcase | strip -%}
+        {%- if etiqueta != blank -%}
+          {%- assign aguja = etiqueta | prepend: '|' | append: '|' -%}
+          {%- assign encontrado = false -%}
+          {%- assign es_actual = false -%}
+          {%- assign candidato = null -%}
+
+          {%- if etiquetas_actuales contains aguja -%}
+            {%- assign candidato = product -%}
+            {%- assign encontrado = true -%}
+            {%- assign es_actual = true -%}
+          {%- else -%}
+            {%- for hermano in hermanos -%}
+              {%- assign etiquetas_hermano = hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
+              {%- if etiquetas_hermano contains aguja -%}
+                {%- assign candidato = hermano -%}
+                {%- assign encontrado = true -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+
+          {%- if encontrado -%}
+            {%- assign dibujados = dibujados | append: candidato.id | append: '|' -%}
+            {%- render 'sv-color-swatch',
+              producto: candidato,
+              nombre: entrada.nombre.value,
+              color: entrada.muestra.value,
+              imagen: entrada.imagen_muestra.value,
+              actual: es_actual,
+              mostrar_etiqueta: block.settings.mostrar_etiquetas,
+              marcar_agotado: block.settings.marcar_agotado
+            -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- comment -%}
+        2) Red de seguridad: si un producto no coincide con ninguna entrada
+        (le falta la etiqueta, o es un color nuevo sin metaobjeto todavia),
+        se dibuja igual usando su imagen destacada.
+      {%- endcomment -%}
+      {%- assign aguja_actual = product.id | prepend: '|' | append: '|' -%}
+      {%- unless dibujados contains aguja_actual -%}
+        {%- assign dibujados = dibujados | append: product.id | append: '|' -%}
+        {%- render 'sv-color-swatch',
+          producto: product,
+          nombre: product.title,
+          imagen: product.featured_image,
+          actual: true,
+          mostrar_etiqueta: block.settings.mostrar_etiquetas,
+          marcar_agotado: block.settings.marcar_agotado
+        -%}
+      {%- endunless -%}
+
+      {%- for hermano in hermanos -%}
+        {%- assign aguja_hermano = hermano.id | prepend: '|' | append: '|' -%}
+        {%- unless dibujados contains aguja_hermano -%}
+          {%- assign dibujados = dibujados | append: hermano.id | append: '|' -%}
+          {%- render 'sv-color-swatch',
+            producto: hermano,
+            nombre: hermano.title,
+            imagen: hermano.featured_image,
+            actual: false,
+            mostrar_etiqueta: block.settings.mostrar_etiquetas,
+            marcar_agotado: block.settings.marcar_agotado
+          -%}
+        {%- endunless -%}
+      {%- endfor -%}
+
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Selector de color",
+  "target": "section",
+  "stylesheet": "sv-color-selector.css",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Lee el metacampo custom.hermano_de_color y el metaobjeto color. Si el producto no tiene hermano de color, el bloque no se muestra."
+    },
+    {
+      "type": "header",
+      "content": "Encabezado"
+    },
+    {
+      "type": "checkbox",
+      "id": "mostrar_encabezado",
+      "label": "Mostrar encabezado",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "encabezado_es",
+      "label": "Encabezado en español",
+      "default": "Color"
+    },
+    {
+      "type": "text",
+      "id": "encabezado_en",
+      "label": "Encabezado en inglés",
+      "default": "Color"
+    },
+    {
+      "type": "checkbox",
+      "id": "mostrar_nombre_actual",
+      "label": "Mostrar el nombre del color actual",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Muestras"
+    },
+    {
+      "type": "select",
+      "id": "forma",
+      "label": "Forma",
+      "options": [
+        { "value": "circulo", "label": "Círculo" },
+        { "value": "cuadrado", "label": "Cuadrado" }
+      ],
+      "default": "circulo"
+    },
+    {
+      "type": "range",
+      "id": "tamano",
+      "label": "Tamaño",
+      "min": 20,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "espacio",
+      "label": "Separación",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "color_borde",
+      "label": "Color del indicador activo",
+      "default": "#111111"
+    },
+    {
+      "type": "checkbox",
+      "id": "mostrar_etiquetas",
+      "label": "Mostrar el nombre bajo cada muestra",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "marcar_agotado",
+      "label": "Atenuar y tachar los colores agotados",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Diseño"
+    },
+    {
+      "type": "select",
+      "id": "alineacion",
+      "label": "Alineación",
+      "options": [
+        { "value": "izquierda", "label": "Izquierda" },
+        { "value": "centro", "label": "Centro" },
+        { "value": "derecha", "label": "Derecha" }
+      ],
+      "default": "izquierda"
+    },
+    {
+      "type": "range",
+      "id": "margen_superior",
+      "label": "Margen superior",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "margen_inferior",
+      "label": "Margen inferior",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    }
+  ]
+}
+{% endschema %}

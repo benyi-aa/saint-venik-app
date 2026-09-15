@@ -1,0 +1,16 @@
+{
+  "name": "saint-venik-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "App de Saint Venik: bloques de tema (selector de color, selector de talla, guia de tallas). Sin backend.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "link": "shopify app config link",
+    "dev": "shopify app dev",
+    "deploy": "shopify app deploy",
+    "info": "shopify app info"
+  },
+  "devDependencies": {
+    "@shopify/cli": "^4.8.0"
+  }
+}
