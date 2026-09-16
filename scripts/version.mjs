@@ -24,9 +24,8 @@ for (const nombre of readdirSync(dir)) {
   const despues = antes
     // imports entre modulos del panel
     .replace(/from '\.\/([\w.-]+\.js)(\?v=[\w.-]+)?'/g, `from './$1?v=${sello}'`)
-    // el <script> de entrada y la hoja de estilos
-    .replace(/src="\.\/([\w.-]+\.js)(\?v=[\w.-]+)?"/g, `src="./$1?v=${sello}"`)
-    .replace(/href="(\.\.?\/[\w./-]+\.css)(\?v=[\w.-]+)?"/g, `href="$1?v=${sello}"`);
+    // el sello que se muestra en pantalla
+    .replace(/^const VERSION = '[^']*';$/m, `const VERSION = '${sello}';`);
 
   if (despues !== antes) {
     writeFileSync(ruta, despues);
