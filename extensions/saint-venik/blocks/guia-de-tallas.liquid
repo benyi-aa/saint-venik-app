@@ -67,6 +67,8 @@
     {%- if visibles > 0 -%}
       {%- liquid
         assign config = shop.metaobjects.sv_configuracion.values.first
+        assign sv_alin = config.alineacion.value | default: block.settings.alineacion
+        assign sv_escala = config.escala.value | default: 'compacto'
 
         if lang == 'en'
           assign rotulo = config.boton_guia_en.value
@@ -92,7 +94,7 @@
         assign id_dialogo = 'sv-guia-' | append: block.id
       -%}
 
-      <div class="sv-guia-abrir sv-guia-abrir--{{ block.settings.alineacion }}"
+      <div class="sv-guia-abrir sv-guia-abrir--{{ sv_alin }} sv-guia-abrir--{{ sv_escala }}"
         style="--sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
         {{ block.shopify_attributes }}>
         <button type="button" class="sv-guia-abrir__boton" data-sv-abre-guia="{{ id_dialogo }}">

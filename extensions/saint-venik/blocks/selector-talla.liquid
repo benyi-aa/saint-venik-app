@@ -34,6 +34,14 @@
       endif
 
       assign seleccionada = product.selected_or_first_available_variant
+    comment
+      La apariencia la manda la app. El ajuste del editor de temas queda de
+      respaldo por si la configuracion todavia no existe.
+    endcomment
+    assign sv_cfg = shop.metaobjects.sv_configuracion.values.first
+    assign sv_alin = sv_cfg.alineacion.value | default: block.settings.alineacion
+    assign sv_escala = sv_cfg.escala.value | default: 'compacto'
+
     -%}
 
     {%- assign ocultar = false -%}
@@ -43,7 +51,7 @@
 
     {%- unless ocultar -%}
       <div
-        class="sv-sizes sv-sizes--al-{{ block.settings.alineacion }}"
+        class="sv-sizes sv-sizes--al-{{ sv_alin }} sv-sizes--{{ sv_escala }}"
         style="--sv-gap: {{ block.settings.espacio }}px; --sv-ring: {{ block.settings.color_activo }}; --sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
         data-sv-sizes
         data-sv-recargar="{{ block.settings.recargar_al_elegir }}"

@@ -25,11 +25,28 @@
   gap: var(--sv-gap, 8px);
 }
 
+.sv-sizes--al-izquierda .sv-sizes__list,
+.sv-sizes--al-izquierda .sv-sizes__heading { justify-content: flex-start; }
+
 .sv-sizes--al-centro .sv-sizes__list,
 .sv-sizes--al-centro .sv-sizes__heading { justify-content: center; }
 
 .sv-sizes--al-derecha .sv-sizes__list,
 .sv-sizes--al-derecha .sv-sizes__heading { justify-content: flex-end; }
+
+/* Compacto: botones más pequeños y encabezado discreto, para que el bloque no
+ * pese más que el precio. */
+.sv-sizes--compacto .sv-sizes__heading {
+  margin-bottom: 0.5em;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.sv-sizes--compacto .sv-sizes__item {
+  min-width: 2.9em;
+  padding: 0.5em 0.7em;
+  font-size: 0.75rem;
+}
 
 .sv-sizes__item {
   position: relative;

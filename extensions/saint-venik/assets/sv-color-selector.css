@@ -26,11 +26,24 @@
   gap: var(--sv-gap, 12px);
 }
 
+/* Las tres alineaciones se declaran, incluida la izquierda. Antes "izquierda"
+ * era la ausencia de regla, así que en un tema que centre el contenedor el
+ * ajuste parecía no hacer nada. */
+.sv-colors--al-izquierda .sv-colors__list,
+.sv-colors--al-izquierda .sv-colors__heading { justify-content: flex-start; }
+
 .sv-colors--al-centro .sv-colors__list,
 .sv-colors--al-centro .sv-colors__heading { justify-content: center; }
 
 .sv-colors--al-derecha .sv-colors__list,
 .sv-colors--al-derecha .sv-colors__heading { justify-content: flex-end; }
+
+/* Compacto: el encabezado en una línea discreta, como el resto de la ficha. */
+.sv-colors--compacto .sv-colors__heading {
+  margin-bottom: 0.5em;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
 
 .sv-colors__item {
   display: inline-flex;

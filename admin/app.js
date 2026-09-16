@@ -1,23 +1,23 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161910';
+import { estaEmbebida } from './api.js?v=202609162010';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609161910';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton } from './config.js?v=202609161910';
-import { buscarProductos, vincular, desvincular, sinHermano } from './productos.js?v=202609161910';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161910';
+} from './colores.js?v=202609162010';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202609162010';
+import { buscarProductos, vincular, desvincular, sinHermano } from './productos.js?v=202609162010';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609162010';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto,
-} from './guias.js?v=202609161910';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161910';
+} from './guias.js?v=202609162010';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609162010';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609161910';
+const VERSION = '202609162010';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -689,13 +689,48 @@ async function pintarEditor(handle) {
 async function pintarApariencia() {
   pantalla.innerHTML = '<p class="cargando">Cargando…</p>';
 
-  const [config, revision] = await Promise.all([leerConfig(), revisarEstructura()]);
+  const [config, revision, colores] = await Promise.all([
+    leerConfig(), revisarEstructura(), cargarColores(),
+  ]);
+
+  const opcion = (v, actual, texto) =>
+    `<option value="${v}" ${v === actual ? 'selected' : ''}>${texto}</option>`;
 
   pantalla.innerHTML = `
     <h1>Apariencia</h1>
-    <p class="subtitulo">Lo que se edita aquí manda sobre los ajustes del bloque en el editor de temas.</p>
+    <p class="subtitulo">Vale para los tres bloques a la vez, y manda sobre los ajustes del editor de temas.</p>
 
     ${tarjetaPendientes(revision.pendientes)}
+
+    <section class="tarjeta">
+      <div class="color__campos">
+        <div>
+          <label for="alineacion">Alineación</label>
+          <select id="alineacion">
+            ${opcion('izquierda', config.alineacion, 'Izquierda')}
+            ${opcion('centro', config.alineacion, 'Centro')}
+            ${opcion('derecha', config.alineacion, 'Derecha')}
+          </select>
+        </div>
+        <div>
+          <label for="escala">Tamaño</label>
+          <select id="escala">
+            ${opcion('compacto', config.escala, 'Compacto')}
+            ${opcion('normal', config.escala, 'Normal')}
+          </select>
+        </div>
+        <div>
+          <label for="tamano">Muestras de color: <span id="tamano-valor">${config.tamanoMuestra}</span> px</label>
+          <input type="range" id="tamano" min="20" max="64" step="2" value="${config.tamanoMuestra}" />
+        </div>
+      </div>
+      <div class="acciones"><button class="principal" id="guardar-apariencia">Guardar</button></div>
+    </section>
+
+    <section class="tarjeta previa">
+      <p class="previa__titulo">Así se ve en la ficha</p>
+      <div id="previa-apariencia"></div>
+    </section>
 
     <section class="tarjeta">
       <p class="previa__titulo">Botón de la guía de tallas</p>
@@ -709,11 +744,50 @@ async function pintarApariencia() {
           <input type="text" id="boton-en" value="${escapar(config.botonGuiaEn)}" placeholder="Size guide" />
         </div>
       </div>
-      <p class="ayuda">Es el enlace que abre la ventana en la ficha de producto. Si lo dejas vacío se usa el texto por defecto en cada idioma.</p>
+      <p class="ayuda">Si lo dejas vacío se usa el texto por defecto en cada idioma.</p>
       <div class="acciones"><button class="principal" id="guardar-boton">Guardar</button></div>
     </section>`;
 
   conectarPendientes(pintarApariencia);
+
+  const lienzo = document.getElementById('previa-apariencia');
+  const ordenados = ordenarComoLaTienda(colores, config.ordenColores);
+
+  /* La previa se repinta al mover los controles, sin guardar: así se prueba
+   * antes de decidir, que es lo que uno quiere de una previa. */
+  function repintar() {
+    lienzo.innerHTML = coloresHtml(ordenados, {
+      alineacion: document.getElementById('alineacion').value,
+      escala: document.getElementById('escala').value,
+      tamano: Number(document.getElementById('tamano').value),
+    });
+  }
+
+  document.getElementById('tamano').addEventListener('input', (e) => {
+    document.getElementById('tamano-valor').textContent = e.target.value;
+    repintar();
+  });
+  document.getElementById('alineacion').addEventListener('change', repintar);
+  document.getElementById('escala').addEventListener('change', repintar);
+  repintar();
+
+  document.getElementById('guardar-apariencia').addEventListener('click', async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = 'Guardando…';
+    try {
+      await guardarApariencia({
+        alineacion: document.getElementById('alineacion').value,
+        escala: document.getElementById('escala').value,
+        tamanoMuestra: Number(document.getElementById('tamano').value),
+      });
+      avisar('Apariencia guardada');
+    } catch (error) {
+      avisar(error.message, true);
+    } finally {
+      e.target.disabled = false;
+      e.target.textContent = 'Guardar';
+    }
+  });
 
   document.getElementById('guardar-boton').addEventListener('click', async (e) => {
     e.target.disabled = true;

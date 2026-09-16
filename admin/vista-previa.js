@@ -100,15 +100,18 @@ export function guiaHtml(guia, idioma) {
 /* `colores` tiene que llegar YA ordenado como lo pinta la tienda. La vista
  * previa no reordena por su cuenta: si lo hiciera podría enseñar un orden que la
  * ficha no tiene. */
-export function coloresHtml(colores) {
+export function coloresHtml(colores, apariencia = {}) {
+  const alineacion = apariencia.alineacion ?? 'izquierda';
+  const escala = apariencia.escala ?? 'compacto';
+  const tamano = apariencia.tamano ?? 34;
   const pintables = colores.filter((c) => c.etiqueta);
 
   if (!pintables.length) {
     return '<p class="sv-guia__vacio">Ningún color tiene etiqueta, así que el selector no aparecería en ninguna ficha.</p>';
   }
 
-  return `<div class="sv-colors sv-colors--circulo sv-colors--al-izquierda"
-      style="--sv-size:36px;--sv-gap:12px;--sv-ring:#111111;--sv-pt:0px;--sv-pb:0px;">
+  return `<div class="sv-colors sv-colors--circulo sv-colors--al-${alineacion} sv-colors--${escala}"
+      style="--sv-size:${tamano}px;--sv-gap:12px;--sv-ring:#111111;--sv-pt:0px;--sv-pb:0px;">
     <div class="sv-colors__heading">
       <span class="sv-colors__label">Color</span>
       <span class="sv-colors__current">${escapar(pintables[0].nombre)}</span>

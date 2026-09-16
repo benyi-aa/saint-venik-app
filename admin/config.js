@@ -8,17 +8,28 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161910';
+import { gql, comprobarErrores } from './api.js?v=202609162010';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
 
 export const ORDEN_POR_DEFECTO = ['acero-inox', 'oro'];
 
+/* Por defecto, lo más discreto: alineado a la izquierda y compacto. Un bloque de
+ * app que llega gritando obliga a que la primera tarea sea apagarlo. */
+export const APARIENCIA_POR_DEFECTO = {
+  alineacion: 'izquierda',
+  tamanoMuestra: 34,
+  escala: 'compacto',
+};
+
 const CAMPOS_CONFIG = [
   { key: 'orden_colores', name: 'Orden de los colores', type: 'single_line_text_field' },
   { key: 'boton_guia_es', name: 'Texto del botón de guía (español)', type: 'single_line_text_field' },
   { key: 'boton_guia_en', name: 'Texto del botón de guía (inglés)', type: 'single_line_text_field' },
+  { key: 'alineacion', name: 'Alineación de los bloques', type: 'single_line_text_field' },
+  { key: 'tamano_muestra', name: 'Tamaño de las muestras de color', type: 'number_integer' },
+  { key: 'escala', name: 'Tamaño de los textos y botones', type: 'single_line_text_field' },
 ];
 
 const DEFINICION = `
@@ -128,7 +139,24 @@ export async function leerConfig() {
     ordenColores: crudo.length ? crudo : ORDEN_POR_DEFECTO,
     botonGuiaEs: campos.boton_guia_es ?? '',
     botonGuiaEn: campos.boton_guia_en ?? '',
+    alineacion: campos.alineacion || APARIENCIA_POR_DEFECTO.alineacion,
+    tamanoMuestra: Number(campos.tamano_muestra) || APARIENCIA_POR_DEFECTO.tamanoMuestra,
+    escala: campos.escala || APARIENCIA_POR_DEFECTO.escala,
   };
+}
+
+export async function guardarApariencia({ alineacion, tamanoMuestra, escala }) {
+  const r = await gql(GUARDAR, {
+    handle: { type: TIPO_CONFIG, handle: HANDLE },
+    metaobject: {
+      fields: [
+        { key: 'alineacion', value: alineacion },
+        { key: 'tamano_muestra', value: String(tamanoMuestra) },
+        { key: 'escala', value: escala },
+      ],
+    },
+  });
+  return comprobarErrores(r, 'metaobjectUpsert');
 }
 
 export async function guardarTextosBoton({ es, en }) {

@@ -44,6 +44,9 @@
       por si la configuracion todavia no existe.
     endcomment
     assign config = shop.metaobjects.sv_configuracion.values.first
+    assign sv_alin = config.alineacion.value | default: block.settings.alineacion
+    assign sv_escala = config.escala.value | default: 'compacto'
+    assign sv_tam = config.tamano_muestra.value | default: block.settings.tamano
     assign orden_crudo = config.orden_colores.value
     if orden_crudo == blank
       assign orden_crudo = block.settings.orden_etiquetas
@@ -66,8 +69,8 @@
   {%- endfor -%}
 
   <div
-    class="sv-colors sv-colors--{{ block.settings.forma }} sv-colors--al-{{ block.settings.alineacion }}"
-    style="--sv-size: {{ block.settings.tamano }}px; --sv-gap: {{ block.settings.espacio }}px; --sv-ring: {{ block.settings.color_borde }}; --sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
+    class="sv-colors sv-colors--{{ block.settings.forma }} sv-colors--al-{{ sv_alin }} sv-colors--{{ sv_escala }}"
+    style="--sv-size: {{ sv_tam }}px; --sv-gap: {{ block.settings.espacio }}px; --sv-ring: {{ block.settings.color_borde }}; --sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
     {{ block.shopify_attributes }}
   >
     {%- if block.settings.mostrar_encabezado and encabezado != blank -%}
