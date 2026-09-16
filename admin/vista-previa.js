@@ -30,6 +30,16 @@ function bloqueHtml(b, idioma) {
   const texto = idioma === 'en' ? b.textoEn : b.textoEs;
 
   switch (b.tipo) {
+    case 'html':
+      /* Único sitio donde el contenido NO se escapa, y es deliberado: el bloque
+       * existe precisamente para publicar marcado. Lo escribe la persona dueña
+       * de la tienda desde su propio admin, igual que un bloque de HTML del
+       * editor de temas. */
+      return texto
+        ? `<div class="sv-guia__bloque sv-guia__bloque--html">${texto}</div>`
+        : `<div class="sv-guia__bloque"><p class="sv-guia__vacio">Este bloque no tiene HTML en ${
+            idioma === 'en' ? 'inglés' : 'español'
+          }.</p></div>`;
     case 'video':
       return `<div class="sv-guia__bloque sv-guia__bloque--video">${incrustarVideo(b.videoUrl)}</div>`;
     case 'imagen':

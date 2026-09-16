@@ -1,17 +1,17 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161210';
+import { estaEmbebida } from './api.js?v=202609161310';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609161210';
-import { leerConfig, guardarOrdenColores } from './config.js?v=202609161210';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161210';
+} from './colores.js?v=202609161310';
+import { leerConfig, guardarOrdenColores } from './config.js?v=202609161310';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161310';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
-} from './guias.js?v=202609161210';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161210';
+} from './guias.js?v=202609161310';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161310';
 
 /* La version sale de la URL con la que se cargo este archivo, no de una
  * constante escrita a mano: asi lo que se muestra es siempre lo que el navegador
@@ -351,6 +351,9 @@ function controlesArchivo(b) {
 function tarjetaBloque(b, i, total) {
   const esVideo = b.tipo === 'video';
   const esArchivo = b.tipo === 'imagen' || b.tipo === 'pdf';
+  const esHtml = b.tipo === 'html';
+  const etiquetaEs = esHtml ? 'HTML en español' : 'Texto en español';
+  const etiquetaEn = esHtml ? 'HTML en inglés' : 'Texto en inglés';
   return `
     <section class="tarjeta" data-bloque="${escapar(b.id)}">
       <div class="bloque__cabecera">
@@ -370,15 +373,17 @@ function tarjetaBloque(b, i, total) {
           <input type="text" data-campo="videoUrl" value="${escapar(b.videoUrl)}" placeholder="https://..." />
         </div>` : ''}
 
+      ${esHtml ? '<p class="ayuda">Se publica tal cual en la ficha. Útil para tablas de medidas. Si no estás seguro, usa un bloque de Texto.</p>' : ''}
+
       <div class="bloque__idiomas">
         <div>
-          <label>Texto en español</label>
-          <textarea data-campo="textoEs" rows="4">${escapar(b.textoEs)}</textarea>
+          <label>${etiquetaEs}</label>
+          <textarea data-campo="textoEs" rows="${esHtml ? 8 : 4}" ${esHtml ? 'class="codigo" spellcheck="false"' : ''}>${escapar(b.textoEs)}</textarea>
           <label class="casilla"><input type="checkbox" data-campo="mostrarEs" ${b.mostrarEs ? 'checked' : ''} /> Mostrar en español</label>
         </div>
         <div>
-          <label>Texto en inglés</label>
-          <textarea data-campo="textoEn" rows="4">${escapar(b.textoEn)}</textarea>
+          <label>${etiquetaEn}</label>
+          <textarea data-campo="textoEn" rows="${esHtml ? 8 : 4}" ${esHtml ? 'class="codigo" spellcheck="false"' : ''}>${escapar(b.textoEn)}</textarea>
           <label class="casilla"><input type="checkbox" data-campo="mostrarEn" ${b.mostrarEn ? 'checked' : ''} /> Mostrar en inglés</label>
         </div>
       </div>

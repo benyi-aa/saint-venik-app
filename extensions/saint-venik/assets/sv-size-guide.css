@@ -63,3 +63,21 @@
   color: #6b6b6b;
   text-align: center;
 }
+
+/* Bloque de HTML libre. Se le dan estilos mínimos a las tablas porque es el uso
+ * esperado (tablas de medidas) y sin esto salen sin bordes ni espaciado. */
+.sv-guia__bloque--html table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.sv-guia__bloque--html th,
+.sv-guia__bloque--html td {
+  padding: 6px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
+
+.sv-guia__bloque--html th { font-weight: 600; background: rgba(0, 0, 0, 0.03); }
+.sv-guia__bloque--html img { max-width: 100%; height: auto; }

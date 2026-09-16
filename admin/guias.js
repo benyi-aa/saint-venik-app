@@ -26,11 +26,13 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161210';
-import { asegurarConfig, existeConfig } from './config.js?v=202609161210';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161210';
+import { gql, comprobarErrores } from './api.js?v=202609161310';
+import { asegurarConfig, existeConfig } from './config.js?v=202609161310';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161310';
 
 export const TIPO_BLOQUE = 'bloque_guia';
+
+export const TIPOS = ['texto', 'html', 'imagen', 'video', 'pdf'];
 export const TIPO_GUIA = 'guia_de_tallas';
 
 export const GUIAS_INICIALES = [
@@ -66,7 +68,10 @@ const ACTUALIZAR_DEFINICION = `
 
 const CAMPOS_DE = `
   query CamposDe($type: String!) {
-    metaobjectDefinitionByType(type: $type) { id fieldDefinitions { key } }
+    metaobjectDefinitionByType(type: $type) {
+      id
+      fieldDefinitions { key validations { name value } }
+    }
   }
 `;
 
@@ -104,7 +109,7 @@ const GUIAS = `
 
 const CAMPOS_BLOQUE = [
   { key: 'tipo', name: 'Tipo', type: 'single_line_text_field', required: true,
-    validations: [{ name: 'choices', value: JSON.stringify(['texto', 'imagen', 'video', 'pdf']) }] },
+    validations: [{ name: 'choices', value: JSON.stringify(TIPOS) } ] },
   { key: 'texto_es', name: 'Texto en español', type: 'multi_line_text_field' },
   { key: 'texto_en', name: 'Texto en inglés', type: 'multi_line_text_field' },
   { key: 'imagen', name: 'Imagen', type: 'file_reference' },
@@ -131,6 +136,18 @@ async function faltanCampos(tipo, esperados) {
   return esperados.filter((c) => !presentes.has(c.key)).map((c) => c.key);
 }
 
+async function faltanOpcionesDeTipo() {
+  const d = await gql(CAMPOS_DE, { type: TIPO_BLOQUE });
+  const campo = d.metaobjectDefinitionByType?.fieldDefinitions.find((f) => f.key === 'tipo');
+  if (!campo) return [];
+
+  const choices = campo.validations.find((v) => v.name === 'choices');
+  let actuales = [];
+  try { actuales = JSON.parse(choices?.value ?? '[]'); } catch { actuales = []; }
+
+  return TIPOS.filter((t) => !actuales.includes(t));
+}
+
 /* La estructura no son solo los tipos de contenido: son tambien sus campos.
  * Mirar solo los tipos dejaba al panel ofreciendo un campo que en la tienda no
  * existia, y el fallo aparecia al guardar, que es tarde y desconcierta. */
@@ -155,6 +172,11 @@ export async function revisarEstructura() {
   /* Los colores también son estructura. En saintvenik.com existen porque se
    * crearon a mano, pero la app tiene que poder montarlos en cualquier tienda. */
   pendientes.push(...(await faltaEstructuraColor()));
+
+  if (estado.bloque) {
+    const faltan = await faltanOpcionesDeTipo();
+    if (faltan.length) pendientes.push(`Tipos de bloque que faltan: ${faltan.join(', ')}.`);
+  }
 
   return { estado, pendientes };
 }
@@ -210,6 +232,28 @@ export async function crearEstructura() {
 
   await asegurarConfig(pasos);
   await asegurarEstructuraColor(pasos);
+
+  /* El campo `tipo` limita sus valores con una lista de opciones. Un tipo nuevo
+   * no basta con soportarlo en el panel: hay que ampliar esa lista o Shopify
+   * rechaza el bloque al crearlo. */
+  if (idBloque) {
+    const faltanTipos = await faltanOpcionesDeTipo();
+    if (faltanTipos.length) {
+      const r = await gql(ACTUALIZAR_DEFINICION, {
+        id: idBloque,
+        definition: {
+          fieldDefinitions: [{
+            update: {
+              key: 'tipo',
+              validations: [{ name: 'choices', value: JSON.stringify(TIPOS) }],
+            },
+          }],
+        },
+      });
+      comprobarErrores(r, 'metaobjectDefinitionUpdate');
+      pasos.push(`Tipos de bloque añadidos: ${faltanTipos.join(', ')}`);
+    }
+  }
 
   const idGuia = estado.guia ?? (await estadoEstructura()).guia;
   if (idGuia) await completarCampos(TIPO_GUIA, idGuia, CAMPOS_GUIA, pasos, idBloque);
@@ -314,10 +358,11 @@ const BORRAR_ENTRADA = `
   }
 `;
 
-const TIPOS = ['texto', 'imagen', 'video', 'pdf'];
+
 
 export const NOMBRE_TIPO = {
   texto: 'Texto',
+  html: 'HTML',
   imagen: 'Imagen',
   video: 'Vídeo',
   pdf: 'PDF',

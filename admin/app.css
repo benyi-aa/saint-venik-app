@@ -293,3 +293,9 @@ select {
   margin-bottom: 10px;
   border-radius: 6px;
 }
+
+textarea.codigo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
