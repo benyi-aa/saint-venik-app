@@ -109,17 +109,20 @@ button.principal:disabled { opacity: .5; cursor: default; }
   font-size: 13px;
 }
 
+/* Va pegado arriba, no flotando abajo: el admin mete la app en un iframe del
+ * alto del contenido, y ahi un `position: fixed` puede caer fuera de lo que el
+ * usuario tiene delante. */
 .aviso {
-  position: fixed;
-  left: 50%;
-  bottom: 20px;
-  transform: translateX(-50%);
-  max-width: min(520px, calc(100vw - 32px));
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  max-width: 860px;
+  margin: 0 auto 12px;
   padding: 10px 16px;
   border-radius: 8px;
   background: var(--tinta);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
 
 .aviso.is-error { background: var(--peligro); }
