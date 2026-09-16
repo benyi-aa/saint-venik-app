@@ -44,7 +44,18 @@
       La apariencia la manda la app. El ajuste del editor de temas queda de
       respaldo por si la configuracion todavia no existe.
     endcomment
-    assign sv_cfg = shop.metaobjects.sv_configuracion.values.first
+    comment
+      Se coge con un bucle y no con `.first`. La lista que devuelve
+      shop.metaobjects.<tipo>.values dice que tiene una entrada, pero `.first`
+      sobre ella devuelve vacio: no es un array normal. Con `.first` la
+      configuracion de la app se ignoraba entera y todo caia en los valores de
+      respaldo del tema.
+    endcomment
+    assign sv_cfg = null
+    for sv_entrada in shop.metaobjects.sv_configuracion.values
+      assign sv_cfg = sv_entrada
+      break
+    endfor
     assign sv_alin = sv_cfg.alineacion.value | default: block.settings.alineacion
     assign sv_escala = sv_cfg.escala.value | default: 'compacto'
 
