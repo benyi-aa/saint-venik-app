@@ -67,12 +67,17 @@ export function guiaHtml(guia, idioma) {
     </div>`;
   }
 
+  const titulo = (idioma === 'en' && guia.nombreEn) ? guia.nombreEn : guia.nombre;
+
   return `<div class="sv-guia">
-    <h2 class="sv-guia__titulo">${escapar(guia.nombre)}</h2>
+    <h2 class="sv-guia__titulo">${escapar(titulo)}</h2>
     ${bloques.map((b) => bloqueHtml(b, idioma)).join('')}
   </div>`;
 }
 
+/* `colores` tiene que llegar YA ordenado como lo pinta la tienda. La vista
+ * previa no reordena por su cuenta: si lo hiciera podría enseñar un orden que la
+ * ficha no tiene. */
 export function coloresHtml(colores) {
   const pintables = colores.filter((c) => c.etiqueta);
 

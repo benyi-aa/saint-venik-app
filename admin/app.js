@@ -1,12 +1,15 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609160410';
-import { cargarColores, guardarColor, problemasDe } from './colores.js?v=202609160410';
+import { estaEmbebida } from './api.js?v=202609160520';
+import {
+  cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
+} from './colores.js?v=202609160520';
+import { leerConfig, guardarOrdenColores } from './config.js?v=202609160520';
 import {
   estadoEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
-  crearBloque, guardarBloque, borrarBloque, moverBloque, NOMBRE_TIPO,
-} from './guias.js?v=202609160410';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609160410';
+  crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, NOMBRE_TIPO,
+} from './guias.js?v=202609160520';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609160520';
 
 /* La version sale de la URL con la que se cargo este archivo, no de una
  * constante escrita a mano: asi lo que se muestra es siempre lo que el navegador
@@ -37,7 +40,7 @@ function fondoDe(color) {
   return '';
 }
 
-function tarjetaColor(color) {
+function tarjetaColor(color, i, total) {
   const problemas = problemasDe(color);
   return `
     <section class="tarjeta" data-id="${escapar(color.id)}">
@@ -45,20 +48,28 @@ function tarjetaColor(color) {
         <div class="color__muestra" style="${fondoDe(color)}"></div>
         <div class="color__campos">
           <div>
-            <label for="nombre-${escapar(color.handle)}">Nombre visible</label>
-            <input type="text" id="nombre-${escapar(color.handle)}" data-campo="nombre" value="${escapar(color.nombre)}" />
+            <label>Nombre visible</label>
+            <input type="text" data-campo="nombre" value="${escapar(color.nombre)}" />
             <p class="ayuda">Lo que ve el cliente. Se traduce en Translate &amp; Adapt.</p>
           </div>
           <div>
-            <label for="etiqueta-${escapar(color.handle)}">Etiqueta del producto</label>
-            <input type="text" id="etiqueta-${escapar(color.handle)}" data-campo="etiqueta" value="${escapar(color.etiqueta)}" />
+            <label>Etiqueta del producto</label>
+            <input type="text" data-campo="etiqueta" value="${escapar(color.etiqueta)}" />
             <p class="ayuda">Los productos con esta etiqueta se muestran en este color.</p>
+          </div>
+          <div>
+            <label>Color de la muestra</label>
+            <input type="color" data-campo="muestra" value="${escapar(color.muestra || '#cccccc')}" />
+            <p class="ayuda">${color.imagen ? 'Hay una imagen, y la imagen manda sobre el color.' : 'Se usa si no hay imagen.'}</p>
           </div>
         </div>
       </div>
       ${problemas.map((p) => `<p class="problema">${escapar(p)}</p>`).join('')}
       <div class="acciones">
         <button class="principal" data-guardar>Guardar</button>
+        <button class="secundario" data-mover="arriba" ${i === 0 ? 'disabled' : ''} title="Subir">↑</button>
+        <button class="secundario" data-mover="abajo" ${i === total - 1 ? 'disabled' : ''} title="Bajar">↓</button>
+        <button class="secundario secundario--peligro" data-borrar>Eliminar</button>
       </div>
     </section>
   `;
@@ -67,105 +78,104 @@ function tarjetaColor(color) {
 async function pintarColores() {
   pantalla.innerHTML = '<p class="cargando">Cargando colores…</p>';
 
-  const colores = await cargarColores();
-
-  if (!colores.length) {
-    pantalla.innerHTML = '<div class="vacio">Todavía no hay colores.</div>';
-    return;
-  }
+  const [crudos, config] = await Promise.all([cargarColores(), leerConfig()]);
+  const colores = ordenarComoLaTienda(crudos, config.ordenColores);
 
   pantalla.innerHTML = `
     <h1>Colores</h1>
-    <p class="subtitulo">Cada color es una muestra en la ficha de producto. Un producto se asocia a su color por la etiqueta.</p>
+    <p class="subtitulo">Cada color es una muestra en la ficha de producto. Un producto se asocia a su color por la etiqueta, y el orden de aquí es el orden en que salen.</p>
+
     <section class="tarjeta previa">
       <p class="previa__titulo">Así se ve en la ficha de producto</p>
       ${coloresHtml(colores)}
       <p class="ayuda previa__nota">La tipografía y los colores del texto los pone tu tema; aquí se ven los del panel.</p>
     </section>
-    ${colores.map(tarjetaColor).join('')}
+
+    ${colores.map((c, i) => tarjetaColor(c, i, colores.length)).join('')}
+
+    <section class="tarjeta">
+      <label>Añadir un color</label>
+      <div class="color__campos" style="margin-bottom:12px;">
+        <div><input type="text" id="nuevo-nombre" placeholder="Nombre visible, p. ej. ROSADO" /></div>
+        <div><input type="text" id="nueva-etiqueta" placeholder="Etiqueta, p. ej. oro-rosa" /></div>
+        <div><input type="color" id="nueva-muestra" value="#cccccc" /></div>
+      </div>
+      <div class="acciones"><button class="principal" id="anadir-color">Añadir color</button></div>
+    </section>
   `;
 
-  pantalla.querySelectorAll('[data-guardar]').forEach((boton) => {
-    boton.addEventListener('click', async () => {
-      const tarjeta = boton.closest('.tarjeta');
-      const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`).value.trim();
+  /* Reordenar escribe la lista de etiquetas en la configuración, que es lo que
+   * lee el bloque de la tienda. Un color sin etiqueta no puede ordenarse porque
+   * tampoco puede mostrarse. */
+  async function reordenar(id, direccion) {
+    const orden = colores.map((c) => c.etiqueta).filter(Boolean);
+    const actual = colores.find((c) => c.id === id);
+    const i = orden.indexOf(actual?.etiqueta);
+    const j = direccion === 'arriba' ? i - 1 : i + 1;
+    if (i < 0 || j < 0 || j >= orden.length) return;
+    [orden[i], orden[j]] = [orden[j], orden[i]];
+    await guardarOrdenColores(orden);
+  }
 
-      boton.disabled = true;
-      boton.textContent = 'Guardando…';
+  pantalla.querySelectorAll('.tarjeta[data-id]').forEach((tarjeta) => {
+    const id = tarjeta.dataset.id;
+    const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`)?.value.trim() ?? '';
+
+    tarjeta.querySelector('[data-guardar]')?.addEventListener('click', async (e) => {
+      e.target.disabled = true;
+      e.target.textContent = 'Guardando…';
       try {
-        await guardarColor(tarjeta.dataset.id, { nombre: valor('nombre'), etiqueta: valor('etiqueta') });
+        await guardarColor(id, { nombre: valor('nombre'), etiqueta: valor('etiqueta'), muestra: valor('muestra') });
         avisar('Color guardado');
+        await pintarColores();
       } catch (error) {
         avisar(error.message, true);
-      } finally {
-        boton.disabled = false;
-        boton.textContent = 'Guardar';
+        e.target.disabled = false;
+        e.target.textContent = 'Guardar';
+      }
+    });
+
+    tarjeta.querySelectorAll('[data-mover]').forEach((boton) => {
+      boton.addEventListener('click', async () => {
+        boton.disabled = true;
+        try {
+          await reordenar(id, boton.dataset.mover);
+          await pintarColores();
+        } catch (error) {
+          avisar(error.message, true);
+          boton.disabled = false;
+        }
+      });
+    });
+
+    tarjeta.querySelector('[data-borrar]')?.addEventListener('click', async () => {
+      const nombre = valor('nombre') || 'este color';
+      if (!window.confirm(`¿Eliminar ${nombre}? Los productos con su etiqueta dejarán de mostrar esa muestra.`)) return;
+      try {
+        await borrarColor(id);
+        avisar('Color eliminado');
+        await pintarColores();
+      } catch (error) {
+        avisar(error.message, true);
       }
     });
   });
-}
 
-async function pintarGuias() {
-  pantalla.innerHTML = '<p class="cargando">Comprobando la estructura…</p>';
-
-  const estado = await estadoEstructura();
-  const hayDefiniciones = Boolean(estado.bloque && estado.guia);
-  const guias = hayDefiniciones ? await cargarGuias() : [];
-  const faltan = GUIAS_INICIALES.filter((g) => !guias.some((x) => x.handle === g.handle));
-
-  /* La estructura son dos cosas: las definiciones y las guías. Mirar solo las
-   * definiciones dejaba la pantalla vacía y sin salida cuando existían las
-   * primeras pero no las segundas. */
-  const completa = hayDefiniciones && faltan.length === 0;
-
-  const listado = guias.length
-    ? guias.map((g) => `
-        <section class="tarjeta tarjeta--pulsable" data-guia="${escapar(g.handle)}" role="button" tabindex="0">
-          <h2 style="margin:0 0 4px;font-size:16px;">${escapar(g.nombre)}</h2>
-          <p class="ayuda">${g.bloques.length} ${g.bloques.length === 1 ? 'bloque' : 'bloques'} · editar</p>
-        </section>`).join('')
-    : '';
-
-  const pendientes = [];
-  if (!hayDefiniciones) pendientes.push('Los tipos de contenido donde se guardan las guías.');
-  for (const g of faltan) pendientes.push(`La guía «${g.nombre}».`);
-
-  const tarjetaSetup = completa ? '' : `
-    <section class="tarjeta">
-      <p><strong>Falta parte de la estructura.</strong> Se va a crear:</p>
-      <ul>${pendientes.map((t) => `<li>${escapar(t)}</li>`).join('')}</ul>
-      <p class="ayuda">Se puede pulsar las veces que haga falta: no duplica lo que ya existe.</p>
-      <div class="acciones"><button class="principal" id="crear">Crear lo que falta</button></div>
-    </section>`;
-
-  pantalla.innerHTML = `
-    <h1>Guías de tallas</h1>
-    <p class="subtitulo">Cada guía se compone de bloques. Un bloque puede existir solo en un idioma.</p>
-    ${tarjetaSetup}
-    ${listado}`;
-
-  pantalla.querySelectorAll('[data-guia]').forEach((t) => {
-    const abrir = () => pintarEditor(t.dataset.guia);
-    t.addEventListener('click', abrir);
-    t.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(); }
-    });
-  });
-
-  const boton = document.getElementById('crear');
-  if (!boton) return;
-
-  boton.addEventListener('click', async () => {
-    boton.disabled = true;
-    boton.textContent = 'Creando…';
+  document.getElementById('anadir-color').addEventListener('click', async (e) => {
+    const nombre = document.getElementById('nuevo-nombre').value.trim();
+    if (!nombre) { avisar('Ponle un nombre al color', true); return; }
+    e.target.disabled = true;
     try {
-      const pasos = await crearEstructura();
-      avisar(pasos.length ? pasos.join(' · ') : 'Ya estaba todo creado');
-      await pintarGuias();
+      await crearColor({
+        nombre,
+        etiqueta: document.getElementById('nueva-etiqueta').value.trim(),
+        muestra: document.getElementById('nueva-muestra').value,
+      });
+      avisar('Color añadido');
+      await pintarColores();
     } catch (error) {
       avisar(error.message, true);
-      boton.disabled = false;
-      boton.textContent = 'Crear lo que falta';
+      e.target.disabled = false;
     }
   });
 }
@@ -225,6 +235,21 @@ async function pintarEditor(handle) {
     </p>
 
     <section class="tarjeta">
+      <div class="bloque__idiomas">
+        <div>
+          <label>Título en español</label>
+          <input type="text" id="nombre-es" value="${escapar(guia.nombre)}" />
+        </div>
+        <div>
+          <label>Título en inglés</label>
+          <input type="text" id="nombre-en" value="${escapar(guia.nombreEn)}" placeholder="${escapar(guia.nombre)}" />
+        </div>
+      </div>
+      <p class="ayuda">Es el encabezado de la ventana. Si dejas el inglés vacío, se usa el español.</p>
+      <div class="acciones"><button class="principal" id="guardar-titulo">Guardar título</button></div>
+    </section>
+
+    <section class="tarjeta">
       <label for="nuevo-tipo">Añadir un bloque</label>
       <div class="acciones">
         <select id="nuevo-tipo">
@@ -271,6 +296,23 @@ async function pintarEditor(handle) {
   });
 
   document.getElementById('volver').addEventListener('click', pintarGuias);
+
+  document.getElementById('guardar-titulo').addEventListener('click', async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = 'Guardando…';
+    try {
+      await guardarGuia(guia.id, {
+        nombre: document.getElementById('nombre-es').value.trim(),
+        nombreEn: document.getElementById('nombre-en').value.trim(),
+      });
+      avisar('Título guardado');
+      await pintarEditor(handle);
+    } catch (error) {
+      avisar(error.message, true);
+      e.target.disabled = false;
+      e.target.textContent = 'Guardar título';
+    }
+  });
 
   document.getElementById('anadir').addEventListener('click', async (e) => {
     const tipo = document.getElementById('nuevo-tipo').value;

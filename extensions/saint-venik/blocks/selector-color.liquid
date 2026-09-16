@@ -38,7 +38,17 @@
 
     assign colores = shop.metaobjects.color.values
     assign etiquetas_actuales = product.tags | join: '|' | downcase | prepend: '|' | append: '|'
-    assign orden = block.settings.orden_etiquetas | downcase | split: ','
+    comment
+      El orden lo manda la configuracion de la app, para que el panel y la ficha
+      no puedan discrepar. El ajuste del editor de temas queda solo de respaldo
+      por si la configuracion todavia no existe.
+    endcomment
+    assign config = shop.metaobjects.sv_configuracion.values.first
+    assign orden_crudo = config.orden_colores.value
+    if orden_crudo == blank
+      assign orden_crudo = block.settings.orden_etiquetas
+    endif
+    assign orden = orden_crudo | downcase | split: ','
     assign dibujadas = '|'
     assign nombre_actual = ''
   -%}

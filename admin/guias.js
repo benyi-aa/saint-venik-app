@@ -26,7 +26,7 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609160410';
+import { gql, comprobarErrores } from './api.js?v=202609160520';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 export const TIPO_GUIA = 'guia_de_tallas';
@@ -113,6 +113,12 @@ const CAMPOS_BLOQUE = [
   { key: 'orden', name: 'Posición', type: 'number_integer' },
 ];
 
+const CAMPOS_GUIA = [
+  { key: 'nombre', name: 'Nombre en español', type: 'single_line_text_field', required: true },
+  { key: 'nombre_en', name: 'Nombre en inglés', type: 'single_line_text_field' },
+  { key: 'bloques', name: 'Bloques', type: 'list.metaobject_reference' },
+];
+
 export async function estadoEstructura() {
   const datos = await gql(DEFINICIONES);
   return { bloque: datos.bloque?.id ?? null, guia: datos.guia?.id ?? null };
@@ -137,18 +143,9 @@ export async function crearEstructura() {
     pasos.push('Definición de bloques creada');
   }
 
-  /* La definicion de bloques pudo crearse antes de que existiera el campo `orden`. */
-  const campos = await gql(CAMPOS_DE, { type: TIPO_BLOQUE });
-  const presentes = new Set((campos.metaobjectDefinitionByType?.fieldDefinitions ?? []).map((f) => f.key));
-  const faltan = CAMPOS_BLOQUE.filter((c) => !presentes.has(c.key));
-  if (faltan.length) {
-    const r = await gql(ACTUALIZAR_DEFINICION, {
-      id: idBloque,
-      definition: { fieldDefinitions: faltan.map((c) => ({ create: c })) },
-    });
-    comprobarErrores(r, 'metaobjectDefinitionUpdate');
-    pasos.push(`Campos añadidos: ${faltan.map((c) => c.key).join(', ')}`);
-  }
+  /* Una definicion creada por una version anterior de la app puede no tener
+   * todos los campos. Se completan en vez de obligar a rehacerla. */
+  await completarCampos(TIPO_BLOQUE, idBloque, CAMPOS_BLOQUE, pasos);
 
   if (!estado.guia) {
     const r = await gql(CREAR_DEFINICION, {
@@ -158,7 +155,8 @@ export async function crearEstructura() {
         access: { storefront: 'PUBLIC_READ' },
         displayNameKey: 'nombre',
         fieldDefinitions: [
-          { key: 'nombre', name: 'Nombre', type: 'single_line_text_field', required: true },
+          { key: 'nombre', name: 'Nombre en español', type: 'single_line_text_field', required: true },
+          { key: 'nombre_en', name: 'Nombre en inglés', type: 'single_line_text_field' },
           {
             key: 'bloques', name: 'Bloques', type: 'list.metaobject_reference',
             validations: [{ name: 'metaobject_definition_id', value: idBloque }],
@@ -169,6 +167,11 @@ export async function crearEstructura() {
     comprobarErrores(r, 'metaobjectDefinitionCreate');
     pasos.push('Definición de guías creada');
   }
+
+  await asegurarConfig(pasos);
+
+  const idGuia = estado.guia ?? (await estadoEstructura()).guia;
+  if (idGuia) await completarCampos(TIPO_GUIA, idGuia, CAMPOS_GUIA, pasos);
 
   const existentes = new Set((await cargarGuias()).map((g) => g.handle));
   for (const guia of GUIAS_INICIALES) {
@@ -187,6 +190,20 @@ export async function crearEstructura() {
   return pasos;
 }
 
+async function completarCampos(tipo, id, esperados, pasos) {
+  const campos = await gql(CAMPOS_DE, { type: tipo });
+  const presentes = new Set((campos.metaobjectDefinitionByType?.fieldDefinitions ?? []).map((f) => f.key));
+  const faltan = esperados.filter((c) => !presentes.has(c.key));
+  if (!faltan.length) return;
+
+  const r = await gql(ACTUALIZAR_DEFINICION, {
+    id,
+    definition: { fieldDefinitions: faltan.map((c) => ({ create: c })) },
+  });
+  comprobarErrores(r, 'metaobjectDefinitionUpdate');
+  pasos.push(`Campos añadidos a ${tipo}: ${faltan.map((c) => c.key).join(', ')}`);
+}
+
 export async function cargarGuias() {
   const datos = await gql(GUIAS);
   return datos.metaobjects.nodes.map((n) => {
@@ -195,6 +212,7 @@ export async function cargarGuias() {
       id: n.id,
       handle: n.handle,
       nombre: campos.nombre?.value ?? n.handle,
+      nombreEn: campos.nombre_en?.value ?? '',
       bloques: (campos.bloques?.references?.nodes ?? []).map((b) => {
         const c = Object.fromEntries(b.fields.map((f) => [f.key, f]));
         return {
@@ -318,4 +336,18 @@ export async function moverBloque(guia, id, direccion) {
     });
     comprobarErrores(r, 'metaobjectUpdate');
   }
+}
+
+
+export async function guardarGuia(id, { nombre, nombreEn }) {
+  const r = await gql(ACTUALIZAR_ENTRADA, {
+    id,
+    metaobject: {
+      fields: [
+        { key: 'nombre', value: nombre },
+        { key: 'nombre_en', value: nombreEn ?? '' },
+      ],
+    },
+  });
+  return comprobarErrores(r, 'metaobjectUpdate');
 }
