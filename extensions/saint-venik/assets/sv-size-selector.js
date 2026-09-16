@@ -4,7 +4,10 @@
  * sigue funcionando: elegir talla recarga la pagina. Lo que hace este script es
  * evitar esa recarga cuando puede hacerlo sin mentir.
  *
- * Se deja navegar, a proposito, en tres casos:
+ * Se deja navegar, a proposito, en cuatro casos:
+ *   - el producto tiene varias opciones de variante (los conjuntos), porque al
+ *     cambiar una medida cambian las combinaciones validas de la otra y habria
+ *     que recalcular la cuadricula entera
  *   - el ajuste "Recargar la pagina al elegir talla" esta activado
  *   - no encontramos el campo de variante, asi que no hay nada que cambiar
  *   - la talla elegida cuesta distinto que la actual, porque el precio que
@@ -63,6 +66,7 @@
       var elegido = evento.target.closest('.sv-sizes__item');
       if (!elegido || !raiz.contains(elegido)) return;
 
+      if (raiz.dataset.svVarias === 'true') return;
       if (raiz.dataset.svRecargar === 'true') return;
 
       var campo = campoDeVariante(raiz);

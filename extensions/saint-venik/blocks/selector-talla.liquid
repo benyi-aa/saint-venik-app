@@ -4,36 +4,42 @@
   Lee las variantes reales del producto. No inventa tallas ni las saca de
   metacampos: cada boton es una variante, con su disponibilidad.
 
-  El bloque maneja productos de UNA opcion de variante, que es como esta armado
-  el catalogo (los anillos son "Tamano" con 8 US y 10 US). Si un producto tuviera
-  dos o mas opciones, no dibuja nada y deja constancia en un comentario HTML, en
-  vez de mostrar algo a medias.
+  Dibuja UNA FILA POR OPCION. Casi todo el catalogo tiene una sola ("Tamano",
+  con 8 US y 10 US), pero los conjuntos llevan dos: el Cuban Set tiene la talla
+  de la cadena y la de la pulsera por separado. Antes esos productos no
+  mostraban nada; ahora muestran una fila para cada medida.
+
+  Con dos o mas opciones, un valor puede no existir: no toda combinacion tiene
+  variante. Esos se dibujan apagados y sin enlace, distintos de los agotados.
 
   Cada boton es un enlace a ?variant=..., asi funciona sin JavaScript y el
-  enlace se puede compartir. Con JavaScript, elegir talla no recarga: se cambia
-  el input del formulario. Con una excepcion deliberada: si la talla elegida
-  cuesta distinto que la actual, se deja navegar, porque el precio que pinta el
-  tema se quedaria desactualizado.
+  enlace se puede compartir. Con una sola opcion y JavaScript, elegir talla no
+  recarga: se cambia el input del formulario. Con varias opciones siempre se
+  navega, porque al cambiar una medida cambian las combinaciones validas de la
+  otra, y recalcularlas en el navegador seria repetir en JavaScript lo que
+  Liquid ya sabe hacer bien.
 {% endcomment %}
 
 {%- if product != blank and product.has_only_default_variant == false -%}
-  {%- assign opciones = product.options_with_values -%}
+  {%- liquid
+    assign opciones = product.options_with_values
+    assign lang = localization.language.iso_code | slice: 0, 2 | downcase
 
-  {%- if opciones.size == 1 -%}
-    {%- liquid
-      assign opcion = opciones[0]
-      assign valores = opcion.values
-      assign lang = localization.language.iso_code | slice: 0, 2 | downcase
+    assign encabezado_cfg = block.settings.encabezado_es
+    if lang == 'en' and block.settings.encabezado_en != blank
+      assign encabezado_cfg = block.settings.encabezado_en
+    endif
 
-      assign encabezado = block.settings.encabezado_es
-      if lang == 'en' and block.settings.encabezado_en != blank
-        assign encabezado = block.settings.encabezado_en
-      endif
-      if encabezado == blank
-        assign encabezado = opcion.name
-      endif
+    assign seleccionada = product.selected_or_first_available_variant
+    comment
+      Si no queda ninguna variante disponible -los dos Cuban Set estan asi-
+      el filtro devuelve vacio, y sin este respaldo no habria con que comparar
+      y todos los botones saldrian como inexistentes.
+    endcomment
+    if seleccionada == blank
+      assign seleccionada = product.variants.first
+    endif
 
-      assign seleccionada = product.selected_or_first_available_variant
     comment
       La apariencia la manda la app. El ajuste del editor de temas queda de
       respaldo por si la configuracion todavia no existe.
@@ -42,90 +48,165 @@
     assign sv_alin = sv_cfg.alineacion.value | default: block.settings.alineacion
     assign sv_escala = sv_cfg.escala.value | default: 'compacto'
 
-    -%}
+    assign varias = false
+    if opciones.size > 1
+      assign varias = true
+    endif
 
-    {%- assign ocultar = false -%}
-    {%- if block.settings.ocultar_opcion_unica and valores.size < 2 -%}
-      {%- assign ocultar = true -%}
-    {%- endif -%}
+    comment
+      Para comparar combinaciones se juntan los valores en una cadena. El
+      separador es raro a proposito: un valor con espacios o guiones no puede
+      producir una coincidencia falsa.
+    endcomment
+    assign sep = ' ~|~ '
 
-    {%- unless ocultar -%}
-      <div
-        class="sv-sizes sv-sizes--al-{{ sv_alin }} sv-sizes--{{ sv_escala }}"
-        style="--sv-gap: {{ block.settings.espacio }}px; --sv-ring: {{ block.settings.color_activo }}; --sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
-        data-sv-sizes
-        data-sv-recargar="{{ block.settings.recargar_al_elegir }}"
-        {{ block.shopify_attributes }}
-      >
-        {%- if block.settings.mostrar_encabezado -%}
-          <div class="sv-sizes__heading">
-            <span class="sv-sizes__label">{{ encabezado }}</span>
-            {%- if block.settings.mostrar_valor_actual -%}
-              <span class="sv-sizes__current" data-sv-current>{{ seleccionada.option1 }}</span>
+    assign filas = 0
+    for opcion in opciones
+      unless block.settings.ocultar_opcion_unica and opcion.values.size < 2
+        assign filas = filas | plus: 1
+      endunless
+    endfor
+  -%}
+
+  {%- if filas > 0 -%}
+    <div
+      class="sv-sizes sv-sizes--al-{{ sv_alin }} sv-sizes--{{ sv_escala }}{% if varias %} sv-sizes--varias{% endif %}"
+      style="--sv-gap: {{ block.settings.espacio }}px; --sv-ring: {{ block.settings.color_activo }}; --sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
+      data-sv-sizes
+      data-sv-recargar="{{ block.settings.recargar_al_elegir }}"
+      {% if varias %}data-sv-varias="true"{% endif %}
+      {{ block.shopify_attributes }}
+    >
+      {%- for opcion in opciones -%}
+        {%- unless block.settings.ocultar_opcion_unica and opcion.values.size < 2 -%}
+          {%- liquid
+            assign idx = forloop.index0
+
+            comment
+              Con una sola opcion manda el encabezado del bloque ("Talla" /
+              "Size"). Con varias, cada fila se llama como su opcion, que es lo
+              unico que las distingue.
+            endcomment
+            assign encabezado = opcion.name
+            unless varias
+              if encabezado_cfg != blank
+                assign encabezado = encabezado_cfg
+              endif
+            endunless
+          -%}
+
+          <div class="sv-sizes__grupo">
+            {%- if block.settings.mostrar_encabezado -%}
+              <div class="sv-sizes__heading">
+                <span class="sv-sizes__label">{{ encabezado }}</span>
+                {%- if block.settings.mostrar_valor_actual -%}
+                  <span class="sv-sizes__current" data-sv-current>{{ seleccionada.options[idx] }}</span>
+                {%- endif -%}
+              </div>
             {%- endif -%}
-          </div>
-        {%- endif -%}
 
-        <div class="sv-sizes__list" role="group" aria-label="{{ encabezado | escape }}">
-          {%- for valor in valores -%}
-            {%- assign variante = null -%}
-            {%- for v in product.variants -%}
-              {%- if v.option1 == valor -%}
-                {%- assign variante = v -%}
-                {%- break -%}
-              {%- endif -%}
-            {%- endfor -%}
+            <div class="sv-sizes__list" role="group" aria-label="{{ encabezado | escape }}">
+              {%- for valor in opcion.values -%}
+                {%- liquid
+                  comment
+                    La combinacion buscada es la elegida ahora mismo, cambiando
+                    solo esta opcion. Asi cada fila respeta lo que haya elegido
+                    el cliente en las otras.
+                  endcomment
+                  assign objetivo = ''
+                  for puesto in seleccionada.options
+                    assign parte = puesto
+                    if forloop.index0 == idx
+                      assign parte = valor
+                    endif
+                    if forloop.first
+                      assign objetivo = parte
+                    else
+                      assign objetivo = objetivo | append: sep | append: parte
+                    endif
+                  endfor
 
-            {%- if variante -%}
-              {%- liquid
-                assign agotada = false
-                unless variante.available
-                  assign agotada = true
-                endunless
+                  assign variante = null
+                  for v in product.variants
+                    assign clave = v.options | join: sep
+                    if clave == objetivo
+                      assign variante = v
+                      break
+                    endif
+                  endfor
 
-                assign saltar = false
-                if agotada and block.settings.mostrar_agotadas == false
-                  assign saltar = true
-                endif
+                  assign inexistente = false
+                  assign agotada = false
+                  if variante == blank
+                    assign inexistente = true
+                  else
+                    unless variante.available
+                      assign agotada = true
+                    endunless
+                  endif
 
-                assign es_actual = false
-                if seleccionada.id == variante.id
-                  assign es_actual = true
-                endif
+                  assign saltar = false
+                  if block.settings.mostrar_agotadas == false
+                    if agotada
+                      assign saltar = true
+                    endif
+                    if inexistente
+                      assign saltar = true
+                    endif
+                  endif
 
-                assign nombre_accesible = valor
-                if agotada
+                  assign es_actual = false
+                  if variante != blank
+                    if seleccionada.id == variante.id
+                      assign es_actual = true
+                    endif
+                  endif
+
+                  assign nombre_accesible = valor
                   comment
                     El filtro t va aparte: encadenado detras del append se
                     aplicaria a la frase entera, y se imprimiria
                     "Translation missing: es.8 US — sold_out".
                   endcomment
-                  assign txt_agotada = 'sold_out' | t
-                  assign nombre_accesible = valor | append: ' — ' | append: txt_agotada
-                endif
-              -%}
+                  if agotada
+                    assign txt_estado = 'sold_out' | t
+                    assign nombre_accesible = valor | append: ' — ' | append: txt_estado
+                  endif
+                  if inexistente
+                    assign txt_estado = 'no_disponible' | t
+                    assign nombre_accesible = valor | append: ' — ' | append: txt_estado
+                  endif
+                -%}
 
-              {%- unless saltar -%}
-                <a
-                  class="sv-sizes__item{% if es_actual %} is-selected{% endif %}{% if agotada %} is-soldout{% endif %}"
-                  href="{{ product.url }}?variant={{ variante.id }}"
-                  data-sv-variant="{{ variante.id }}"
-                  data-sv-precio="{{ variante.price }}"
-                  data-sv-valor="{{ valor | escape }}"
-                  aria-label="{{ nombre_accesible | escape }}"
-                  {% if es_actual %}aria-current="true"{% endif %}
-                >
-                  {{ valor }}
-                </a>
-              {%- endunless -%}
-            {%- endif -%}
-          {%- endfor -%}
-        </div>
-      </div>
-    {%- endunless -%}
-
-  {%- else -%}
-    <!-- Saint Venik · selector de talla: este producto tiene {{ opciones.size }} opciones de variante y el bloque solo maneja una. No se dibuja nada a proposito. -->
+                {%- unless saltar -%}
+                  {%- if inexistente -%}
+                    <span
+                      class="sv-sizes__item is-unavailable"
+                      aria-label="{{ nombre_accesible | escape }}"
+                      aria-disabled="true"
+                    >
+                      {{ valor }}
+                    </span>
+                  {%- else -%}
+                    <a
+                      class="sv-sizes__item{% if es_actual %} is-selected{% endif %}{% if agotada %} is-soldout{% endif %}"
+                      href="{{ product.url }}?variant={{ variante.id }}"
+                      data-sv-variant="{{ variante.id }}"
+                      data-sv-precio="{{ variante.price }}"
+                      data-sv-valor="{{ valor | escape }}"
+                      aria-label="{{ nombre_accesible | escape }}"
+                      {% if es_actual %}aria-current="true"{% endif %}
+                    >
+                      {{ valor }}
+                    </a>
+                  {%- endif -%}
+                {%- endunless -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endunless -%}
+      {%- endfor -%}
+    </div>
   {%- endif -%}
 {%- endif -%}
 
@@ -141,7 +222,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Lee las variantes reales del producto. Si el producto no tiene variantes, el bloque no se muestra."
+      "content": "Lee las variantes reales del producto y dibuja una fila por cada medida. Si el producto no tiene variantes, el bloque no se muestra."
     },
     {
       "type": "header",
@@ -179,13 +260,13 @@
       "type": "checkbox",
       "id": "mostrar_agotadas",
       "label": "Mostrar las tallas agotadas",
-      "info": "Si lo desactivas, las tallas sin stock desaparecen en vez de mostrarse tachadas.",
+      "info": "Si lo desactivas, las tallas sin stock y las combinaciones que no existen desaparecen en vez de mostrarse apagadas.",
       "default": true
     },
     {
       "type": "checkbox",
       "id": "ocultar_opcion_unica",
-      "label": "Ocultar el bloque cuando solo hay una talla",
+      "label": "Ocultar una medida cuando solo tiene un valor",
       "default": false
     },
     {

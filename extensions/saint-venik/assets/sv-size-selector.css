@@ -5,6 +5,11 @@
   margin-bottom: var(--sv-pb, 16px);
 }
 
+/* Una fila por opcion de variante. Los conjuntos llevan dos: la medida de la
+ * cadena y la de la pulsera. */
+.sv-sizes__grupo + .sv-sizes__grupo { margin-top: 1.1em; }
+.sv-sizes--compacto .sv-sizes__grupo + .sv-sizes__grupo { margin-top: 0.85em; }
+
 .sv-sizes__heading {
   display: flex;
   flex-wrap: wrap;
@@ -78,6 +83,15 @@
   background-color: var(--sv-ring, #111111);
   border-color: var(--sv-ring, #111111);
   color: #ffffff;
+}
+
+/* Agotado y no disponible no son lo mismo: lo primero es una variante que
+ * existe y no tiene stock; lo segundo es una combinacion que no existe. */
+.sv-sizes__item.is-unavailable {
+  opacity: 0.3;
+  border-style: dotted;
+  cursor: default;
+  pointer-events: none;
 }
 
 .sv-sizes__item.is-soldout {
