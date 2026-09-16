@@ -16,8 +16,10 @@
   text-transform: uppercase;
 }
 
-.sv-colors__label { opacity: 0.65; }
-.sv-colors__current { font-weight: 600; }
+/* El titulo ("Color") va en negrita y el valor ("Oro") acompaña en tono
+ * suave: se lee primero que se elige un color y despues cual es. */
+.sv-colors__label { font-weight: 600; }
+.sv-colors__current { opacity: 0.65; }
 
 .sv-colors__list {
   display: flex;

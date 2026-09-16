@@ -5,7 +5,7 @@
  * color es la etiqueta: el producto lleva `oro` o `acero-inox`, y la entrada
  * guarda esa misma etiqueta en el campo `etiqueta`.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161728';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202609162214';
 
 export const TIPO_COLOR = 'color';
 
@@ -14,6 +14,10 @@ export const TIPO_COLOR = 'color';
  * app no se puede instalar en otra parte sin trabajo manual. */
 const CAMPOS_COLOR = [
   { key: 'nombre', name: 'Nombre', type: 'single_line_text_field', required: true },
+  /* El nombre en ingles se escribe aqui, igual que el titulo de las guias. Si
+   * queda vacio, la tienda usa la traduccion de Translate & Adapt, asi que los
+   * colores que ya estaban traducidos no cambian por crear el campo. */
+  { key: 'nombre_en', name: 'Nombre en inglés', type: 'single_line_text_field' },
   { key: 'muestra', name: 'Muestra', type: 'color' },
   { key: 'imagen_muestra', name: 'Imagen Muestra', type: 'file_reference' },
   { key: 'etiqueta', name: 'Etiqueta', type: 'single_line_text_field' },
@@ -112,6 +116,7 @@ function aObjeto(entrada) {
     id: entrada.id,
     handle: entrada.handle,
     nombre: campos.nombre?.valor ?? '',
+    nombreEn: campos.nombre_en?.valor ?? '',
     etiqueta: campos.etiqueta?.valor ?? '',
     muestra: campos.muestra?.valor ?? '',
     imagen: campos.imagen_muestra?.imagen ?? null,
@@ -124,11 +129,14 @@ export async function cargarColores() {
   return datos.metaobjects.nodes.map(aObjeto);
 }
 
-export async function guardarColor(id, { nombre, etiqueta, muestra, muestraOriginal }) {
+export async function guardarColor(id, { nombre, nombreEn, etiqueta, muestra, muestraOriginal }) {
   const campos = [
     { key: 'nombre', value: nombre },
     { key: 'etiqueta', value: etiqueta },
   ];
+  /* undefined quiere decir "el campo todavia no existe en la tienda": escribirlo
+   * haria fallar el guardado entero. Una cadena vacia si se escribe, y borra. */
+  if (nombreEn !== undefined) campos.push({ key: 'nombre_en', value: nombreEn });
 
   /* Un <input type="color"> nunca está vacío, así que "no elegí color" y "elegí
    * gris" llegan aquí iguales. Solo se escribe si el usuario lo tocó de verdad,
@@ -140,12 +148,17 @@ export async function guardarColor(id, { nombre, etiqueta, muestra, muestraOrigi
   return comprobarErrores(resultado, 'metaobjectUpdate');
 }
 
-export async function crearColor({ nombre, etiqueta, muestra }) {
+export async function crearColor({ nombre, nombreEn, etiqueta, muestra }) {
   const campos = [{ key: 'nombre', value: nombre }];
+  if (nombreEn) campos.push({ key: 'nombre_en', value: nombreEn });
   if (etiqueta) campos.push({ key: 'etiqueta', value: etiqueta });
   if (muestra) campos.push({ key: 'muestra', value: muestra });
 
-  const r = await gql(CREAR, { metaobject: { type: 'color', fields: campos } });
+  const metaobject = { type: 'color', fields: campos };
+  const capabilities = await capacidadActiva(TIPO_COLOR);
+  if (capabilities) metaobject.capabilities = capabilities;
+
+  const r = await gql(CREAR, { metaobject });
   return comprobarErrores(r, 'metaobjectCreate').metaobject;
 }
 
@@ -203,6 +216,13 @@ export async function guardarImagenColor(id, idArchivo) {
  * Para que la app sirva en mas de una tienda tiene que saber crear lo que
  * necesita, no dar por hecho que alguien ya lo monto a mano.
  * ------------------------------------------------------------------------- */
+
+/* El panel no debe ofrecer un campo que la tienda aun no tiene: el error saldria
+ * al guardar, que es tarde. Ya nos paso con el titulo en ingles de las guias. */
+export async function camposDeColor() {
+  const d = await gql(DEFINICION_COLOR);
+  return new Set((d.metaobjectDefinitionByType?.fieldDefinitions ?? []).map((f) => f.key));
+}
 
 export async function faltaEstructuraColor() {
   const pendientes = [];

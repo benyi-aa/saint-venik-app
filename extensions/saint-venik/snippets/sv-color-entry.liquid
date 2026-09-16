@@ -9,6 +9,7 @@
     producto_actual    (product)    el producto de esta pagina
     hermanos           (array)      custom.hermano_de_color
     etiquetas_actuales (string)     etiquetas del producto actual, entre barras
+    idioma             (string)     'es' o 'en'
     mostrar_etiqueta   (boolean)
     marcar_agotado     (boolean)
 {% endcomment %}
@@ -41,9 +42,18 @@
   {%- endunless -%}
 
   {%- if sv_hallado -%}
+    {%- comment -%}
+      En ingles manda nombre_en si alguien lo escribio en el panel. Si esta
+      vacio se usa nombre, que Translate & Adapt ya devuelve traducido: asi
+      los colores que no se tocaron siguen como estaban.
+    {%- endcomment -%}
+    {%- assign sv_nombre_color = entrada.nombre.value -%}
+    {%- if idioma == 'en' and entrada.nombre_en.value != blank -%}
+      {%- assign sv_nombre_color = entrada.nombre_en.value -%}
+    {%- endif -%}
     {%- render 'sv-color-swatch',
       producto: sv_producto,
-      nombre: entrada.nombre.value,
+      nombre: sv_nombre_color,
       color: entrada.muestra.value,
       imagen: entrada.imagen_muestra.value,
       actual: sv_es_actual,

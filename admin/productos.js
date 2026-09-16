@@ -9,14 +9,15 @@
  * selector apareciendo en una ficha y no en la otra, que es un fallo molesto de
  * encontrar porque cada ficha por separado parece correcta.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161728';
+import { gql, comprobarErrores } from './api.js?v=202609162214';
 
 const NAMESPACE = 'custom';
 const CLAVE = 'hermano_de_color';
 
 const BUSCAR = `
-  query BuscarProductos($consulta: String!) {
-    products(first: 50, query: $consulta) {
+  query BuscarProductos($consulta: String!, $cursor: String, $n: Int = 50) {
+    products(first: $n, query: $consulta, after: $cursor) {
+      pageInfo { hasNextPage endCursor }
       nodes {
         id
         title
@@ -54,11 +55,39 @@ function aProducto(n) {
   };
 }
 
+function consultaDe(texto) {
+  /* Sin texto se listan todos; con texto, se busca por título. */
+  return texto ? `title:*${texto}*` : '';
+}
+
 export async function buscarProductos(texto) {
-  /* Sin texto se listan los primeros; con texto, se busca por título. */
-  const consulta = texto ? `title:*${texto}*` : '';
-  const d = await gql(BUSCAR, { consulta });
+  const d = await gql(BUSCAR, { consulta: consultaDe(texto) });
   return d.products.nodes.map(aProducto);
+}
+
+/* Un filtro sobre los primeros 50 mentiria: con 154 productos, "ninguno sin
+ * color" podria querer decir solo "ninguno entre los 50 primeros". Por eso los
+ * filtros recorren el catalogo entero.
+ *
+ * Va de 25 en 25. Shopify cobra por adelantado lo que la consulta PODRIA
+ * gastar, y cada producto trae hasta 10 hermanos: una pagina de 50 pide unos
+ * 850 puntos de un cupo de 2000, y dos recorridos seguidos lo agotan. Con 25
+ * la mitad, y si aun asi se frena, gql espera y reintenta. */
+const POR_PAGINA = 25;
+export const TOPE_PAGINAS = 80;
+
+export async function todosLosProductos(texto) {
+  const productos = [];
+  let cursor = null;
+  let paginas = 0;
+  do {
+    const d = await gql(BUSCAR, { consulta: consultaDe(texto), cursor, n: POR_PAGINA });
+    productos.push(...d.products.nodes.map(aProducto));
+    cursor = d.products.pageInfo.hasNextPage ? d.products.pageInfo.endCursor : null;
+    paginas += 1;
+  } while (cursor && paginas < TOPE_PAGINAS);
+  /* Si se corto por el tope, quedaron productos fuera y hay que decirlo. */
+  return { productos, incompleto: Boolean(cursor) };
 }
 
 async function escribirHermanos(idProducto, idsHermanos) {
@@ -95,11 +124,26 @@ export async function desvincular(a, idHermano) {
   }
 }
 
+/* Tener color es llevar la etiqueta de alguna entrada de color. Se compara en
+ * minusculas y sin espacios, igual que el Liquid (downcase | strip): si no, una
+ * etiqueta escrita "Oro" contaria distinto aqui que en la tienda. */
+const normal = (e) => String(e ?? '').trim().toLowerCase();
+
+export function tieneColor(producto, etiquetasDeColor) {
+  const suyas = new Set(producto.etiquetas.map(normal));
+  return etiquetasDeColor.map(normal).some((e) => e && suyas.has(e));
+}
+
 /* Un producto con etiqueta de color pero sin hermano puede ser correcto (una
  * pieza que solo existe en un color) o un enlace que se olvidó. La app no puede
  * saberlo, así que lo señala sin llamarlo error. */
 export function sinHermano(producto, etiquetasDeColor) {
-  const suyas = producto.etiquetas.map((e) => e.trim().toLowerCase());
-  const tieneColor = etiquetasDeColor.some((e) => suyas.includes(e));
-  return tieneColor && producto.hermanos.length === 0;
+  return tieneColor(producto, etiquetasDeColor) && producto.hermanos.length === 0;
+}
+
+/* Sin ninguna etiqueta de color, la ficha nunca puede pintar su propia muestra.
+ * Tambien puede ser correcto (un empaque, una tarjeta regalo), asi que tampoco
+ * se llama error. */
+export function sinColor(producto, etiquetasDeColor) {
+  return !tieneColor(producto, etiquetasDeColor);
 }

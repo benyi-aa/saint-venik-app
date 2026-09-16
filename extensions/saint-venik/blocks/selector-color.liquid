@@ -6,7 +6,8 @@
   (lista de referencias a producto).
 
   El aspecto de cada muestra sale del metaobjeto `color`:
-    nombre         -> texto visible (Shopify ya lo devuelve traducido)
+    nombre         -> texto visible en espanol (Translate & Adapt lo traduce)
+    nombre_en      -> texto visible en ingles; si esta vacio, manda la traduccion
     muestra        -> color de la muestra
     imagen_muestra -> archivo, tiene prioridad sobre el color
     etiqueta       -> etiqueta del producto que corresponde (oro, acero-inox)
@@ -74,6 +75,9 @@
       {%- assign aguja = etiqueta | prepend: '|' | append: '|' -%}
       {%- if etiquetas_actuales contains aguja -%}
         {%- assign nombre_actual = entrada.nombre.value -%}
+        {%- if lang == 'en' and entrada.nombre_en.value != blank -%}
+          {%- assign nombre_actual = entrada.nombre_en.value -%}
+        {%- endif -%}
         {%- break -%}
       {%- endif -%}
     {%- endif -%}
@@ -108,6 +112,7 @@
                 producto_actual: product,
                 hermanos: hermanos,
                 etiquetas_actuales: etiquetas_actuales,
+                idioma: lang,
                 mostrar_etiqueta: block.settings.mostrar_etiquetas,
                 marcar_agotado: block.settings.marcar_agotado
               -%}
@@ -133,6 +138,7 @@
               producto_actual: product,
               hermanos: hermanos,
               etiquetas_actuales: etiquetas_actuales,
+              idioma: lang,
               mostrar_etiqueta: block.settings.mostrar_etiquetas,
               marcar_agotado: block.settings.marcar_agotado
             -%}

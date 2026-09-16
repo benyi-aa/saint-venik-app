@@ -26,9 +26,9 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161728';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609161728';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161728';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202609162214';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609162214';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609162214';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
@@ -504,6 +504,31 @@ export async function moverBloque(guia, id, direccion) {
   }
 }
 
+
+/* Una guia nueva nace sin bloques, y asi no se ve en la tienda: el bloque de
+ * la ficha no dibuja el boton si la guia no tiene nada visible. Se puede crear
+ * y rellenar con calma sin que un cliente vea una ventana vacia.
+ *
+ * Ojo con las palabras clave: si un producto encaja en dos guias, la tienda usa
+ * la primera que devuelve Shopify, y ese orden no esta garantizado. Para eso
+ * esta "Comprobar que productos coinciden" en el editor. */
+export async function crearGuia({ nombre, nombreEn, palabras }) {
+  const actuales = await cargarGuias();
+  if (actuales.length >= TOPE_GUIAS) {
+    throw new Error(`Ya hay ${TOPE_GUIAS} guías, que es lo máximo que lee el panel. Quita una en Contenido → Metaobjetos antes de crear otra.`);
+  }
+  const fields = [{ key: 'nombre', value: nombre }];
+  if (nombreEn) fields.push({ key: 'nombre_en', value: nombreEn });
+  if (palabras) fields.push({ key: 'palabras_clave', value: palabras });
+
+  /* Sin handle: Shopify lo deriva del nombre, que es el campo que se muestra. */
+  const metaobject = { type: TIPO_GUIA, fields };
+  const capabilities = await capacidadActiva(TIPO_GUIA);
+  if (capabilities) metaobject.capabilities = capabilities;
+
+  const r = await gql(CREAR_ENTRADA, { metaobject });
+  return comprobarErrores(r, 'metaobjectCreate').metaobject;
+}
 
 export async function guardarGuia(id, { nombre, nombreEn, palabras }) {
   const r = await gql(ACTUALIZAR_ENTRADA, {

@@ -21,8 +21,9 @@
   text-transform: uppercase;
 }
 
-.sv-sizes__label { opacity: 0.65; }
-.sv-sizes__current { font-weight: 600; }
+/* Igual que en el selector de color: titulo en negrita, valor suave. */
+.sv-sizes__label { font-weight: 600; }
+.sv-sizes__current { opacity: 0.65; }
 
 .sv-sizes__list {
   display: flex;

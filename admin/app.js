@@ -1,23 +1,25 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161728';
+import { estaEmbebida } from './api.js?v=202609162214';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
-  guardarImagenColor,
-} from './colores.js?v=202609161728';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202609161728';
-import { buscarProductos, vincular, desvincular, sinHermano } from './productos.js?v=202609161728';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161728';
+  guardarImagenColor, camposDeColor,
+} from './colores.js?v=202609162214';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202609162214';
+import {
+  buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
+} from './productos.js?v=202609162214';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609162214';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
-  revisarReparto,
-} from './guias.js?v=202609161728';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161728';
+  revisarReparto, crearGuia, TOPE_GUIAS,
+} from './guias.js?v=202609162214';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609162214';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609161728';
+const VERSION = '202609162214';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -55,7 +57,7 @@ function fondoDe(color) {
   return '';
 }
 
-function tarjetaColor(color, i, total) {
+function tarjetaColor(color, i, total, hayNombreEn) {
   const problemas = problemasDe(color);
   return `
     <section class="tarjeta" data-id="${escapar(color.id)}">
@@ -63,9 +65,16 @@ function tarjetaColor(color, i, total) {
         <div class="color__muestra" style="${fondoDe(color)}"></div>
         <div class="color__campos">
           <div>
-            <label>Nombre visible</label>
+            <label>Nombre en español</label>
             <input type="text" data-campo="nombre" value="${escapar(color.nombre)}" />
-            <p class="ayuda">Lo que ve el cliente. Se traduce en Translate &amp; Adapt.</p>
+            <p class="ayuda">Lo que ve el cliente en la tienda en español.</p>
+          </div>
+          <div>
+            <label>Nombre en inglés</label>
+            ${hayNombreEn
+              ? `<input type="text" data-campo="nombre_en" value="${escapar(color.nombreEn)}" placeholder="Vacío: traducción automática" />
+                 <p class="ayuda">Lo que se ve en /en/. Vacío, se usa la traducción de Translate &amp; Adapt.</p>`
+              : '<p class="ayuda">Todavía no existe en tu tienda: pulsa «Crear lo que falta» arriba.</p>'}
           </div>
           <div>
             <label>Etiqueta del producto</label>
@@ -106,10 +115,11 @@ function tarjetaColor(color, i, total) {
 async function pintarColores() {
   pantalla.innerHTML = '<p class="cargando">Cargando colores…</p>';
 
-  const [crudos, config, revision] = await Promise.all([
-    cargarColores(), leerConfig(), revisarEstructura(),
+  const [crudos, config, revision, campos] = await Promise.all([
+    cargarColores(), leerConfig(), revisarEstructura(), camposDeColor(),
   ]);
   const colores = ordenarComoLaTienda(crudos, config.ordenColores);
+  const hayNombreEn = campos.has('nombre_en');
 
   /* Colores es la pantalla que se abre por defecto, y reordenar escribe en la
    * configuración. Si esa estructura no existe, aquí tiene que poder crearse:
@@ -128,12 +138,13 @@ async function pintarColores() {
       <p class="ayuda previa__nota">La tipografía y los colores del texto los pone tu tema; aquí se ven los del panel.</p>
     </section>
 
-    ${colores.map((c) => tarjetaColor(c, ordenables.indexOf(c), ordenables.length)).join('')}
+    ${colores.map((c) => tarjetaColor(c, ordenables.indexOf(c), ordenables.length, hayNombreEn)).join('')}
 
     <section class="tarjeta">
       <label>Añadir un color</label>
       <div class="color__campos" style="margin-bottom:12px;">
-        <div><input type="text" id="nuevo-nombre" placeholder="Nombre visible, p. ej. ROSADO" /></div>
+        <div><input type="text" id="nuevo-nombre" placeholder="En español, p. ej. ROSADO" /></div>
+        ${hayNombreEn ? '<div><input type="text" id="nuevo-nombre-en" placeholder="En inglés, p. ej. ROSE" /></div>' : ''}
         <div><input type="text" id="nueva-etiqueta" placeholder="Etiqueta, p. ej. oro-rosa" /></div>
         <div><input type="color" id="nueva-muestra" value="#cccccc" /></div>
       </div>
@@ -168,6 +179,9 @@ async function pintarColores() {
         const original = colores.find((c) => c.id === id);
         await guardarColor(id, {
           nombre: valor('nombre'),
+          /* Sin el campo en la tienda no se manda: guardarColor lo trata como
+           * "no existe" y no lo escribe, en vez de fallar el guardado entero. */
+          nombreEn: hayNombreEn ? valor('nombre_en') : undefined,
           etiqueta: valor('etiqueta'),
           muestra: valor('muestra'),
           muestraOriginal: original?.muestra ? original.muestra : '#cccccc',
@@ -254,6 +268,7 @@ async function pintarColores() {
     try {
       await crearColor({
         nombre,
+        nombreEn: document.getElementById('nuevo-nombre-en')?.value.trim() ?? '',
         etiqueta: document.getElementById('nueva-etiqueta').value.trim(),
         muestra: document.getElementById('nueva-muestra').value,
       });
@@ -264,6 +279,11 @@ async function pintarColores() {
       e.target.disabled = false;
     }
   });
+
+  /* La tarjeta de pendientes se pintaba en esta pantalla sin que nadie
+   * escuchara su boton: pulsarlo no hacia nada. Las demas pantallas si lo
+   * conectaban. */
+  conectarPendientes(pintarColores);
 }
 
 /* Se ofrece donde el usuario se topa con el problema, no solo en la pantalla de
@@ -319,11 +339,34 @@ async function pintarGuias() {
         </section>`).join('')
     : '';
 
+  /* Solo se ofrece crear cuando la estructura existe: sin la definicion de
+   * guias, Shopify rechazaria la entrada nueva. */
+  const puedeCrear = hayDefiniciones && guias.length < TOPE_GUIAS;
+  const nueva = !hayDefiniciones ? '' : puedeCrear
+    ? `
+      <section class="tarjeta">
+        <label>Nueva guía</label>
+        <div class="color__campos" style="margin-bottom:12px;">
+          <div><input type="text" id="guia-nombre" placeholder="Nombre en español, p. ej. Aros" /></div>
+          <div><input type="text" id="guia-nombre-en" placeholder="Nombre en inglés, p. ej. Earrings" /></div>
+          <div><input type="text" id="guia-palabras" placeholder="Palabras clave, p. ej. aro, earring" /></div>
+        </div>
+        <p class="ayuda">
+          Las palabras clave deciden qué productos la usan: basta con que una aparezca en el
+          título, el tipo o las etiquetas. Pon también la palabra en inglés, que en /en/ el
+          título va traducido. Nace sin bloques, así que no se ve en la tienda hasta que le
+          añadas contenido.
+        </p>
+        <div class="acciones"><button class="principal" id="crear-guia">Crear guía</button></div>
+      </section>`
+    : `<p class="ayuda">Hay ${TOPE_GUIAS} guías, que es lo máximo que lee el panel.</p>`;
+
   pantalla.innerHTML = `
     <h1>Guías de tallas</h1>
     <p class="subtitulo">Cada guía se compone de bloques. Un bloque puede existir solo en un idioma.</p>
     ${tarjetaPendientes(porHacer)}
-    ${listado}`;
+    ${listado}
+    ${nueva}`;
 
   pantalla.querySelectorAll('[data-guia]').forEach((t) => {
     const abrir = () => pintarEditor(t.dataset.guia);
@@ -331,6 +374,31 @@ async function pintarGuias() {
     t.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(); }
     });
+  });
+
+  document.getElementById('crear-guia')?.addEventListener('click', async (e) => {
+    const nombre = document.getElementById('guia-nombre').value.trim();
+    const palabras = document.getElementById('guia-palabras').value.trim();
+    if (!nombre) { avisar('Ponle un nombre a la guía', true); return; }
+    /* Sin palabras clave la guia existe pero ningun producto la encuentra. Se
+     * permite, porque se pueden poner despues en el editor, pero se avisa. */
+    if (!palabras && !window.confirm('Sin palabras clave ningún producto usará esta guía hasta que se las pongas. ¿Crearla igual?')) return;
+    e.target.disabled = true;
+    e.target.textContent = 'Creando…';
+    try {
+      const creada = await crearGuia({
+        nombre,
+        nombreEn: document.getElementById('guia-nombre-en').value.trim(),
+        palabras,
+      });
+      avisar(`Guía «${nombre}» creada`);
+      /* Directo a su editor: una guia nueva solo sirve cuando tiene bloques. */
+      await pintarEditor(creada.handle);
+    } catch (error) {
+      avisar(error.message, true);
+      e.target.disabled = false;
+      e.target.textContent = 'Crear guía';
+    }
   });
 
   conectarPendientes(pintarGuias);
@@ -807,10 +875,18 @@ async function pintarApariencia() {
   });
 }
 
-let estadoProductos = { texto: '', soloSinHermano: false };
+/* filtro: 'todos' | 'sin-hermano' | 'sin-color' */
+let estadoProductos = { texto: '', filtro: 'todos' };
+
+const FILTROS = {
+  'todos': 'Todos',
+  'sin-hermano': 'Tienen color pero no hermano',
+  'sin-color': 'No tienen ningún color',
+};
 
 function tarjetaProducto(p, etiquetasColor) {
   const falta = sinHermano(p, etiquetasColor);
+  const incoloro = sinColor(p, etiquetasColor);
   const hermanos = p.hermanos.length
     ? p.hermanos.map((h) => `
         <li>${escapar(h.titulo)}
@@ -828,10 +904,12 @@ function tarjetaProducto(p, etiquetasColor) {
 
           ${hermanos
             ? `<p class="ayuda" style="margin-top:8px;">Hermano de color:</p><ul class="producto__hermanos">${hermanos}</ul>`
-            : `<p class="${falta ? 'problema' : 'ayuda'}" style="margin-top:8px;">${
+            : `<p class="${falta || incoloro ? 'problema' : 'ayuda'}" style="margin-top:8px;">${
                 falta
                   ? 'Tiene etiqueta de color pero no tiene hermano: en su ficha no aparecerá el selector.'
-                  : 'Sin hermano de color.'
+                  : incoloro
+                    ? `No lleva la etiqueta de ningún color (${escapar(etiquetasColor.join(', ') || 'no hay colores')}): su propia muestra no puede dibujarse.`
+                    : 'Sin hermano de color.'
               }</p>`}
 
           <div class="acciones">
@@ -845,16 +923,34 @@ function tarjetaProducto(p, etiquetasColor) {
 }
 
 async function pintarProductos() {
-  pantalla.innerHTML = '<p class="cargando">Buscando productos…</p>';
+  pantalla.innerHTML = estadoProductos.filtro === 'todos'
+    ? '<p class="cargando">Buscando productos…</p>'
+    : '<p class="cargando">Recorriendo todo el catálogo…</p>';
 
-  const [productos, config] = await Promise.all([
-    buscarProductos(estadoProductos.texto),
-    leerConfig(),
+  const filtrando = estadoProductos.filtro !== 'todos';
+
+  /* Las etiquetas de color salen de las entradas de color, no de la lista de
+   * orden: un color que no este en el orden sigue siendo un color, y la tienda
+   * lo pinta al final. Antes se usaba el orden, y un color nuevo sin ordenar
+   * habria contado como "sin color". */
+  const [lote, colores] = await Promise.all([
+    filtrando
+      ? todosLosProductos(estadoProductos.texto)
+      : buscarProductos(estadoProductos.texto).then((productos) => ({ productos, incompleto: false })),
+    cargarColores(),
   ]);
+  const { productos, incompleto } = lote;
+  const etiquetasColor = [...new Set(colores.map((c) => c.etiqueta.trim()).filter(Boolean))];
 
-  const visibles = estadoProductos.soloSinHermano
-    ? productos.filter((p) => sinHermano(p, config.ordenColores))
-    : productos;
+  const criterio = {
+    'sin-hermano': (p) => sinHermano(p, etiquetasColor),
+    'sin-color': (p) => sinColor(p, etiquetasColor),
+  }[estadoProductos.filtro];
+  const visibles = criterio ? productos.filter(criterio) : productos;
+
+  const resumen = filtrando
+    ? `${visibles.length} de ${productos.length} productos${incompleto ? ' revisados — el catálogo es más grande y no se recorrió entero' : ''}.`
+    : 'Se muestran hasta 50 resultados. Elige un filtro para recorrer el catálogo entero.';
 
   pantalla.innerHTML = `
     <h1>Productos</h1>
@@ -867,26 +963,26 @@ async function pintarProductos() {
       <div class="acciones acciones--envolver">
         <input type="text" id="buscar" value="${escapar(estadoProductos.texto)}" placeholder="Buscar por nombre…" />
         <button class="principal" id="buscar-boton">Buscar</button>
-        <label class="casilla">
-          <input type="checkbox" id="solo-sin" ${estadoProductos.soloSinHermano ? 'checked' : ''} />
-          Solo los que tienen color pero no hermano
-        </label>
+        <select id="filtro" aria-label="Filtrar productos">
+          ${Object.entries(FILTROS).map(([valor, texto]) =>
+            `<option value="${valor}" ${estadoProductos.filtro === valor ? 'selected' : ''}>${texto}</option>`).join('')}
+        </select>
       </div>
-      <p class="ayuda">Se muestran hasta 50 resultados.</p>
+      <p class="ayuda">${resumen}</p>
     </section>
 
     ${visibles.length
-      ? visibles.map((p) => tarjetaProducto(p, config.ordenColores)).join('')
+      ? visibles.map((p) => tarjetaProducto(p, etiquetasColor)).join('')
       : '<div class="vacio">Ningún producto coincide.</div>'}`;
 
   const buscar = () => {
     estadoProductos.texto = document.getElementById('buscar').value.trim();
-    estadoProductos.soloSinHermano = document.getElementById('solo-sin').checked;
-    pintarProductos();
+    estadoProductos.filtro = document.getElementById('filtro').value;
+    ir('productos');
   };
   document.getElementById('buscar-boton').addEventListener('click', buscar);
   document.getElementById('buscar').addEventListener('keydown', (e) => { if (e.key === 'Enter') buscar(); });
-  document.getElementById('solo-sin').addEventListener('change', buscar);
+  document.getElementById('filtro').addEventListener('change', buscar);
 
   pantalla.querySelectorAll('[data-producto]').forEach((tarjeta) => {
     const id = tarjeta.dataset.producto;
@@ -898,7 +994,7 @@ async function pintarProductos() {
         try {
           await desvincular(producto, boton.dataset.desvincular);
           avisar('Desvinculados los dos productos');
-          await pintarProductos();
+          await ir('productos');
         } catch (error) {
           avisar(error.message, true);
           boton.disabled = false;
@@ -927,7 +1023,7 @@ async function pintarProductos() {
               const otro = candidatos.find((c) => c.id === boton.dataset.elegir);
               await vincular(producto, otro);
               avisar('Vinculados en los dos sentidos');
-              await pintarProductos();
+              await ir('productos');
             } catch (error) {
               avisar(error.message, true);
               boton.disabled = false;
