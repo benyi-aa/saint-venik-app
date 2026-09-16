@@ -1,23 +1,23 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161716';
+import { estaEmbebida } from './api.js?v=202609161728';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609161716';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202609161716';
-import { buscarProductos, vincular, desvincular, sinHermano } from './productos.js?v=202609161716';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161716';
+} from './colores.js?v=202609161728';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202609161728';
+import { buscarProductos, vincular, desvincular, sinHermano } from './productos.js?v=202609161728';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161728';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto,
-} from './guias.js?v=202609161716';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161716';
+} from './guias.js?v=202609161728';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161728';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609161716';
+const VERSION = '202609161728';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
