@@ -26,7 +26,7 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609160225';
+import { gql, comprobarErrores } from './api.js?v=202609160310';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 export const TIPO_GUIA = 'guia_de_tallas';
@@ -202,10 +202,120 @@ export async function cargarGuias() {
           tipo: c.tipo?.value ?? 'texto',
           textoEs: c.texto_es?.value ?? '',
           textoEn: c.texto_en?.value ?? '',
+          videoUrl: c.video_url?.value ?? '',
           mostrarEs: c.mostrar_es?.value === 'true',
           mostrarEn: c.mostrar_en?.value === 'true',
+          orden: Number(c.orden?.value ?? 0),
         };
-      }),
+      }).sort((a, b2) => a.orden - b2.orden),
     };
   });
+}
+
+
+/* ---------------------------------------------------------------------------
+ * Bloques
+ *
+ * La pertenencia de un bloque a una guia la da la lista `bloques` de la guia.
+ * El ORDEN, en cambio, lo da el campo `orden` de cada bloque, y es el que manda:
+ * mover un bloque intercambia dos numeros, no reescribe la lista. Asi el orden
+ * no depende de que Shopify conserve el de la lista, que no esta garantizado.
+ * ------------------------------------------------------------------------- */
+
+const ACTUALIZAR_ENTRADA = `
+  mutation ActualizarEntrada($id: ID!, $metaobject: MetaobjectUpdateInput!) {
+    metaobjectUpdate(id: $id, metaobject: $metaobject) {
+      metaobject { id }
+      userErrors { field message code }
+    }
+  }
+`;
+
+const BORRAR_ENTRADA = `
+  mutation BorrarEntrada($id: ID!) {
+    metaobjectDelete(id: $id) {
+      deletedId
+      userErrors { field message code }
+    }
+  }
+`;
+
+const TIPOS = ['texto', 'imagen', 'video', 'pdf'];
+
+export const NOMBRE_TIPO = {
+  texto: 'Texto',
+  imagen: 'Imagen',
+  video: 'Vídeo',
+  pdf: 'PDF',
+};
+
+async function escribirLista(guia, ids) {
+  const r = await gql(ACTUALIZAR_ENTRADA, {
+    id: guia.id,
+    metaobject: { fields: [{ key: 'bloques', value: JSON.stringify(ids) }] },
+  });
+  return comprobarErrores(r, 'metaobjectUpdate');
+}
+
+export async function crearBloque(guia, tipo) {
+  if (!TIPOS.includes(tipo)) throw new Error(`Tipo desconocido: ${tipo}`);
+
+  const siguiente = guia.bloques.reduce((max, b) => Math.max(max, b.orden), 0) + 1;
+
+  const r = await gql(CREAR_ENTRADA, {
+    metaobject: {
+      type: TIPO_BLOQUE,
+      fields: [
+        { key: 'tipo', value: tipo },
+        { key: 'orden', value: String(siguiente) },
+        { key: 'mostrar_es', value: 'true' },
+        { key: 'mostrar_en', value: 'true' },
+      ],
+    },
+  });
+  const creado = comprobarErrores(r, 'metaobjectCreate').metaobject;
+
+  await escribirLista(guia, [...guia.bloques.map((b) => b.id), creado.id]);
+  return creado.id;
+}
+
+export async function guardarBloque(id, datos) {
+  const campos = [
+    { key: 'texto_es', value: datos.textoEs ?? '' },
+    { key: 'texto_en', value: datos.textoEn ?? '' },
+    { key: 'mostrar_es', value: String(Boolean(datos.mostrarEs)) },
+    { key: 'mostrar_en', value: String(Boolean(datos.mostrarEn)) },
+  ];
+  if (datos.tipo === 'video') campos.push({ key: 'video_url', value: datos.videoUrl ?? '' });
+
+  const r = await gql(ACTUALIZAR_ENTRADA, { id, metaobject: { fields: campos } });
+  return comprobarErrores(r, 'metaobjectUpdate');
+}
+
+export async function borrarBloque(guia, id) {
+  await escribirLista(guia, guia.bloques.filter((b) => b.id !== id).map((b) => b.id));
+  const r = await gql(BORRAR_ENTRADA, { id });
+  return comprobarErrores(r, 'metaobjectDelete');
+}
+
+/* Mover = intercambiar la posicion con el vecino. Dos escrituras, sin tocar la
+ * lista de la guia. */
+export async function moverBloque(guia, id, direccion) {
+  const orden = [...guia.bloques].sort((a, b) => a.orden - b.orden);
+  const i = orden.findIndex((b) => b.id === id);
+  const j = direccion === 'arriba' ? i - 1 : i + 1;
+  if (i < 0 || j < 0 || j >= orden.length) return;
+
+  /* Las posiciones pueden venir repetidas o en cero de datos viejos, asi que se
+   * reescribe la secuencia entera: barato y deja el estado siempre sano. */
+  const intercambiado = [...orden];
+  [intercambiado[i], intercambiado[j]] = [intercambiado[j], intercambiado[i]];
+
+  for (let k = 0; k < intercambiado.length; k++) {
+    const r = await gql(ACTUALIZAR_ENTRADA, {
+      id: intercambiado[k].id,
+      metaobject: { fields: [{ key: 'orden', value: String(k + 1) }] },
+    });
+    comprobarErrores(r, 'metaobjectUpdate');
+  }
 }

@@ -141,3 +141,89 @@ button.principal:disabled { opacity: .5; cursor: default; }
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
+
+/* --- Editor de guías --- */
+
+.tarjeta--pulsable { cursor: pointer; transition: border-color .12s ease, box-shadow .12s ease; }
+.tarjeta--pulsable:hover { border-color: #b5b5b5; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.tarjeta--pulsable:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+
+.volver {
+  border: 0;
+  background: none;
+  padding: 0;
+  margin-bottom: 12px;
+  color: var(--tinta-suave);
+  font: inherit;
+  cursor: pointer;
+}
+.volver:hover { color: var(--tinta); }
+
+.bloque__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.etiqueta-tipo {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #ececec;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bloque__acciones { display: flex; gap: 6px; }
+
+button.secundario {
+  padding: 6px 10px;
+  border: 1px solid #b5b5b5;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+button.secundario:hover:not(:disabled) { border-color: var(--tinta); }
+button.secundario:disabled { opacity: .35; cursor: default; }
+button.secundario--peligro { color: var(--peligro); border-color: #e0b4ab; }
+
+/* Los dos idiomas lado a lado, porque lo que importa al editar es ver de un
+ * vistazo qué falta en cuál. En pantalla estrecha se apilan. */
+.bloque__idiomas {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #8a8a8a;
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+  background: #fff;
+}
+textarea:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-weight: 400;
+  cursor: pointer;
+}
+.casilla input { margin: 0; }
+
+select {
+  padding: 8px 10px;
+  border: 1px solid #8a8a8a;
+  border-radius: 8px;
+  font: inherit;
+  background: #fff;
+}
