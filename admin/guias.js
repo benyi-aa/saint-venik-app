@@ -26,8 +26,8 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609160910';
-import { asegurarConfig, existeConfig } from './config.js?v=202609160910';
+import { gql, comprobarErrores } from './api.js?v=202609161010';
+import { asegurarConfig, existeConfig } from './config.js?v=202609161010';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 export const TIPO_GUIA = 'guia_de_tallas';
@@ -117,7 +117,10 @@ const CAMPOS_BLOQUE = [
 const CAMPOS_GUIA = [
   { key: 'nombre', name: 'Nombre en español', type: 'single_line_text_field', required: true },
   { key: 'nombre_en', name: 'Nombre en inglés', type: 'single_line_text_field' },
-  { key: 'bloques', name: 'Bloques', type: 'list.metaobject_reference' },
+  /* Sin la validación que lo ata a bloque_guia, Shopify rechaza el campo. La
+   * definición del bloque no se conoce hasta ejecutar, así que se completa
+   * justo antes de crearlo. */
+  { key: 'bloques', name: 'Bloques', type: 'list.metaobject_reference', necesitaIdDeBloque: true },
 ];
 
 async function faltanCampos(tipo, esperados) {
@@ -203,7 +206,7 @@ export async function crearEstructura() {
   await asegurarConfig(pasos);
 
   const idGuia = estado.guia ?? (await estadoEstructura()).guia;
-  if (idGuia) await completarCampos(TIPO_GUIA, idGuia, CAMPOS_GUIA, pasos);
+  if (idGuia) await completarCampos(TIPO_GUIA, idGuia, CAMPOS_GUIA, pasos, idBloque);
 
   const existentes = new Set((await cargarGuias()).map((g) => g.handle));
   for (const guia of GUIAS_INICIALES) {
@@ -222,7 +225,7 @@ export async function crearEstructura() {
   return pasos;
 }
 
-async function completarCampos(tipo, id, esperados, pasos) {
+async function completarCampos(tipo, id, esperados, pasos, idBloque = null) {
   const campos = await gql(CAMPOS_DE, { type: tipo });
   const presentes = new Set((campos.metaobjectDefinitionByType?.fieldDefinitions ?? []).map((f) => f.key));
   const faltan = esperados.filter((c) => !presentes.has(c.key));
@@ -230,7 +233,18 @@ async function completarCampos(tipo, id, esperados, pasos) {
 
   const r = await gql(ACTUALIZAR_DEFINICION, {
     id,
-    definition: { fieldDefinitions: faltan.map((c) => ({ create: c })) },
+    definition: {
+      fieldDefinitions: faltan.map((campo) => {
+        const { necesitaIdDeBloque, ...limpio } = campo;
+        if (!necesitaIdDeBloque) return { create: limpio };
+        return {
+          create: {
+            ...limpio,
+            validations: [{ name: 'metaobject_definition_id', value: idBloque }],
+          },
+        };
+      }),
+    },
   });
   comprobarErrores(r, 'metaobjectDefinitionUpdate');
   pasos.push(`Campos añadidos a ${tipo}: ${faltan.map((c) => c.key).join(', ')}`);

@@ -1,22 +1,27 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609160910';
+import { estaEmbebida } from './api.js?v=202609161010';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609160910';
-import { leerConfig, guardarOrdenColores } from './config.js?v=202609160910';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609160910';
+} from './colores.js?v=202609161010';
+import { leerConfig, guardarOrdenColores } from './config.js?v=202609161010';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161010';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, NOMBRE_TIPO,
-} from './guias.js?v=202609160910';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609160910';
+} from './guias.js?v=202609161010';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161010';
 
 /* La version sale de la URL con la que se cargo este archivo, no de una
  * constante escrita a mano: asi lo que se muestra es siempre lo que el navegador
  * tiene de verdad, aunque haya servido algo de cache. */
 const VERSION = new URL(import.meta.url).searchParams.get('v') ?? 'local';
+
+/* Imagen y PDF existen en el modelo de datos pero todavía no tienen campos en el
+ * editor. Ofrecerlos en el desplegable solo consigue que alguien cree un bloque
+ * que no puede rellenar y que la guía quede con un hueco. */
+const TIPOS_EDITABLES = ['texto', 'video'];
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -80,8 +85,10 @@ function tarjetaColor(color, i, total) {
       ${problemas.map((p) => `<p class="problema">${escapar(p)}</p>`).join('')}
       <div class="acciones">
         <button class="principal" data-guardar>Guardar</button>
-        <button class="secundario" data-mover="arriba" ${i === 0 ? 'disabled' : ''} title="Subir">↑</button>
-        <button class="secundario" data-mover="abajo" ${i === total - 1 ? 'disabled' : ''} title="Bajar">↓</button>
+        <button class="secundario" data-mover="arriba" ${i <= 0 ? 'disabled' : ''}
+          title="${i < 0 ? 'Sin etiqueta no se puede ordenar' : 'Subir'}">↑</button>
+        <button class="secundario" data-mover="abajo" ${i < 0 || i === total - 1 ? 'disabled' : ''}
+          title="${i < 0 ? 'Sin etiqueta no se puede ordenar' : 'Bajar'}">↓</button>
         <button class="secundario secundario--peligro" data-borrar>Eliminar</button>
       </div>
     </section>
@@ -91,12 +98,21 @@ function tarjetaColor(color, i, total) {
 async function pintarColores() {
   pantalla.innerHTML = '<p class="cargando">Cargando colores…</p>';
 
-  const [crudos, config] = await Promise.all([cargarColores(), leerConfig()]);
+  const [crudos, config, revision] = await Promise.all([
+    cargarColores(), leerConfig(), revisarEstructura(),
+  ]);
   const colores = ordenarComoLaTienda(crudos, config.ordenColores);
+
+  /* Colores es la pantalla que se abre por defecto, y reordenar escribe en la
+   * configuración. Si esa estructura no existe, aquí tiene que poder crearse:
+   * mandar a la persona a otra pestaña a buscar el botón es perderla. */
+  const ordenables = colores.filter((c) => c.etiqueta);
 
   pantalla.innerHTML = `
     <h1>Colores</h1>
     <p class="subtitulo">Cada color es una muestra en la ficha de producto. Un producto se asocia a su color por la etiqueta, y el orden de aquí es el orden en que salen.</p>
+
+    ${tarjetaPendientes(revision.pendientes)}
 
     <section class="tarjeta previa">
       <p class="previa__titulo">Así se ve en la ficha de producto</p>
@@ -104,7 +120,7 @@ async function pintarColores() {
       <p class="ayuda previa__nota">La tipografía y los colores del texto los pone tu tema; aquí se ven los del panel.</p>
     </section>
 
-    ${colores.map((c, i) => tarjetaColor(c, i, colores.length)).join('')}
+    ${colores.map((c) => tarjetaColor(c, ordenables.indexOf(c), ordenables.length)).join('')}
 
     <section class="tarjeta">
       <label>Añadir un color</label>
@@ -121,11 +137,14 @@ async function pintarColores() {
    * lee el bloque de la tienda. Un color sin etiqueta no puede ordenarse porque
    * tampoco puede mostrarse. */
   async function reordenar(id, direccion) {
-    const orden = colores.map((c) => c.etiqueta).filter(Boolean);
-    const actual = colores.find((c) => c.id === id);
+    const orden = ordenables.map((c) => c.etiqueta);
+    const actual = ordenables.find((c) => c.id === id);
     const i = orden.indexOf(actual?.etiqueta);
     const j = direccion === 'arriba' ? i - 1 : i + 1;
-    if (i < 0 || j < 0 || j >= orden.length) return;
+    if (i < 0 || j < 0 || j >= orden.length) {
+      avisar('Ese color no se puede mover: sin etiqueta no tiene sitio en la ficha.', true);
+      return;
+    }
     [orden[i], orden[j]] = [orden[j], orden[i]];
     await guardarOrdenColores(orden);
   }
@@ -138,7 +157,13 @@ async function pintarColores() {
       e.target.disabled = true;
       e.target.textContent = 'Guardando…';
       try {
-        await guardarColor(id, { nombre: valor('nombre'), etiqueta: valor('etiqueta'), muestra: valor('muestra') });
+        const original = colores.find((c) => c.id === id);
+        await guardarColor(id, {
+          nombre: valor('nombre'),
+          etiqueta: valor('etiqueta'),
+          muestra: valor('muestra'),
+          muestraOriginal: original?.muestra ? original.muestra : '#cccccc',
+        });
         avisar('Color guardado');
         await pintarColores();
       } catch (error) {
@@ -179,6 +204,9 @@ async function pintarColores() {
 
     tarjeta.querySelector('[data-subir]')?.addEventListener('change', (e) => {
       const file = e.target.files?.[0];
+      /* Se limpia enseguida: si no, reintentar con el MISMO archivo no dispara
+       * el evento y el botón parece muerto, justo después de un error. */
+      e.target.value = '';
       if (!file) return;
       aplicarImagen(subirArchivo(file, { onPaso: decir }));
     });
@@ -374,7 +402,9 @@ async function pintarEditor(handle) {
       <label for="nuevo-tipo">Añadir un bloque</label>
       <div class="acciones">
         <select id="nuevo-tipo">
-          ${Object.entries(NOMBRE_TIPO).map(([v, n]) => `<option value="${v}">${escapar(n)}</option>`).join('')}
+          ${Object.entries(NOMBRE_TIPO)
+            .filter(([v]) => TIPOS_EDITABLES.includes(v))
+            .map(([v, n]) => `<option value="${v}">${escapar(n)}</option>`).join('')}
         </select>
         <button class="principal" id="anadir">Añadir</button>
       </div>
@@ -399,7 +429,10 @@ async function pintarEditor(handle) {
   const lienzo = document.getElementById('lienzo');
   const resumen = document.getElementById('previa-resumen');
 
+  let idiomaActivo = 'es';
+
   function pintarPrevia(idioma) {
+    idiomaActivo = idioma;
     lienzo.innerHTML = guiaHtml(guia, idioma);
     const salen = guia.bloques.filter((b) => visible(b, idioma)).length;
     const ocultos = guia.bloques.length - salen;
@@ -462,14 +495,19 @@ async function pintarEditor(handle) {
       e.target.textContent = 'Guardando…';
       try {
         const original = guia.bloques.find((b) => b.id === id);
-        await guardarBloque(id, {
+        const nuevos = {
           tipo: original.tipo,
           textoEs: leer('textoEs'),
           textoEn: leer('textoEn'),
           videoUrl: leer('videoUrl'),
           mostrarEs: leer('mostrarEs'),
           mostrarEn: leer('mostrarEn'),
-        });
+        };
+        await guardarBloque(id, nuevos);
+        /* Sin esto la vista previa sigue mostrando lo anterior después de decir
+         * "guardado", que es la peor combinación posible en una vista previa. */
+        Object.assign(original, nuevos);
+        pintarPrevia(idiomaActivo);
         avisar('Bloque guardado');
       } catch (error) {
         avisar(error.message, true);

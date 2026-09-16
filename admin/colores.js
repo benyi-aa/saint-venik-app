@@ -5,7 +5,7 @@
  * color es la etiqueta: el producto lleva `oro` o `acero-inox`, y la entrada
  * guarda esa misma etiqueta en el campo `etiqueta`.
  */
-import { gql, comprobarErrores } from './api.js?v=202609160910';
+import { gql, comprobarErrores } from './api.js?v=202609161010';
 
 const CONSULTA_COLORES = `
   query Colores {
@@ -71,15 +71,17 @@ export async function cargarColores() {
   return datos.metaobjects.nodes.map(aObjeto);
 }
 
-export async function guardarColor(id, { nombre, etiqueta, muestra }) {
+export async function guardarColor(id, { nombre, etiqueta, muestra, muestraOriginal }) {
   const campos = [
     { key: 'nombre', value: nombre },
     { key: 'etiqueta', value: etiqueta },
   ];
 
-  /* La muestra solo se manda si viene con algo: un valor vacío en un campo de
-   * tipo color es un error de validación, no un "déjalo en blanco". */
-  if (muestra) campos.push({ key: 'muestra', value: muestra });
+  /* Un <input type="color"> nunca está vacío, así que "no elegí color" y "elegí
+   * gris" llegan aquí iguales. Solo se escribe si el usuario lo tocó de verdad,
+   * porque si no, guardar un nombre dejaría un gris que nadie eligió y la tienda
+   * lo pintaría. */
+  if (muestra && muestra !== muestraOriginal) campos.push({ key: 'muestra', value: muestra });
 
   const resultado = await gql(ACTUALIZAR, { id, fields: campos });
   return comprobarErrores(resultado, 'metaobjectUpdate');
@@ -106,13 +108,21 @@ export async function borrarColor(id) {
  * devuelve las entradas: lo decide esta lista de etiquetas, que es la misma que
  * lee el bloque de la tienda. Sin esto la vista previa y la tienda pueden
  * discrepar, que es el peor fallo de una vista previa. */
+export function normalizarEtiqueta(e) {
+  return String(e ?? '').trim().toLowerCase();
+}
+
 export function ordenarComoLaTienda(colores, ordenEtiquetas) {
-  const posicion = new Map(ordenEtiquetas.map((e, i) => [e, i]));
-  return [...colores].sort((a, b) => {
-    const pa = posicion.has(a.etiqueta) ? posicion.get(a.etiqueta) : Number.MAX_SAFE_INTEGER;
-    const pb = posicion.has(b.etiqueta) ? posicion.get(b.etiqueta) : Number.MAX_SAFE_INTEGER;
-    return pa - pb;
-  });
+  /* El Liquid compara en minúsculas y sin espacios (downcase | strip). Si aquí
+   * se compara en crudo, basta una etiqueta escrita "Oro" para que el panel la
+   * mande al final y la tienda la ponga primera: dos órdenes distintos y ningún
+   * error. */
+  const posicion = new Map(ordenEtiquetas.map((e, i) => [normalizarEtiqueta(e), i]));
+  const donde = (c) => {
+    const k = normalizarEtiqueta(c.etiqueta);
+    return posicion.has(k) ? posicion.get(k) : Number.MAX_SAFE_INTEGER;
+  };
+  return [...colores].sort((a, b) => donde(a) - donde(b));
 }
 
 export function problemasDe(color) {

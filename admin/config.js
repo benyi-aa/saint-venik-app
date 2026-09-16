@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202609160910';
+import { gql, comprobarErrores } from './api.js?v=202609161010';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
@@ -70,6 +70,16 @@ export async function asegurarConfig(pasos = []) {
     comprobarErrores(r, 'metaobjectDefinitionCreate');
     pasos.push('Configuración creada');
   }
+
+  /* Si no hay entrada, el Liquid cae al ajuste del tema y el panel a su
+   * constante: dos fuentes de verdad que pueden discrepar. Se escribe una
+   * entrada desde el principio para que solo haya una. */
+  const actual = await leerConfig();
+  if (!actual.id) {
+    await guardarOrdenColores(actual.ordenColores);
+    pasos.push('Orden de colores inicializado');
+  }
+
   return pasos;
 }
 
@@ -87,9 +97,13 @@ export async function leerConfig() {
 }
 
 export async function guardarOrdenColores(etiquetas) {
+  /* Se guarda normalizado para que lo escrito y lo leído coincidan siempre, y
+   * para que coincida con lo que compara el Liquid. */
+  const limpias = etiquetas.map((e) => String(e ?? '').trim().toLowerCase()).filter(Boolean);
+
   const r = await gql(GUARDAR, {
     handle: { type: TIPO_CONFIG, handle: HANDLE },
-    metaobject: { fields: [{ key: 'orden_colores', value: etiquetas.join(', ') }] },
+    metaobject: { fields: [{ key: 'orden_colores', value: limpias.join(', ') }] },
   });
   return comprobarErrores(r, 'metaobjectUpsert');
 }

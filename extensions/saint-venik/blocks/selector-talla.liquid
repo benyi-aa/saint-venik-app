@@ -87,7 +87,13 @@
 
                 assign nombre_accesible = valor
                 if agotada
-                  assign nombre_accesible = valor | append: ' — ' | append: 'sold_out' | t
+                  comment
+                    El filtro t va aparte: encadenado detras del append se
+                    aplicaria a la frase entera, y se imprimiria
+                    "Translation missing: es.8 US — sold_out".
+                  endcomment
+                  assign txt_agotada = 'sold_out' | t
+                  assign nombre_accesible = valor | append: ' — ' | append: txt_agotada
                 endif
               -%}
 
