@@ -16,7 +16,9 @@ embedded_app_direct_api_access = true
 # Los bloques del storefront no necesitan ninguno: leen con Liquid. Estos son
 # para el panel, que escribe metaobjetos (colores y guias), metacampos de
 # producto (el hermano de color) y sube archivos (imagenes y PDF).
-scopes = "write_products, write_metaobjects, write_files"
+# Las definiciones son un permiso aparte de las entradas: write_metaobjects deja
+# editar un color, pero no leer ni crear el tipo de metaobjeto en si.
+scopes = "write_products, write_metaobjects, write_metaobject_definitions, write_files"
 # Instalacion gestionada por Shopify. No ponemos use_legacy_install_flow = true:
 # ese modo usa el OAuth antiguo y necesita un servidor que atienda el callback,
 # que es justo lo que esta app no tiene.

@@ -12,6 +12,11 @@
  *
  * Los dos se crean con acceso PUBLIC_READ desde el storefront: sin eso el
  * bloque Liquid no podria leerlos y la guia saldria vacia en la tienda.
+ *
+ * No se usa la capacidad `publishable` (el borrador/publicado de Shopify).
+ * Pedir estado ACTIVE en una entrada cuya definicion no la tiene activada falla
+ * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
+ * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
 import { gql, comprobarErrores } from './api.js';
 
@@ -136,7 +141,6 @@ export async function crearEstructura() {
         type: TIPO_GUIA,
         handle: guia.handle,
         fields: [{ key: 'nombre', value: guia.nombre }],
-        capabilities: { publishable: { status: 'ACTIVE' } },
       },
     });
     comprobarErrores(r, 'metaobjectCreate');
