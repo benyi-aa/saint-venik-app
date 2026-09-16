@@ -11,9 +11,10 @@
     imagen_muestra -> archivo, tiene prioridad sobre el color
     etiqueta       -> etiqueta del producto que corresponde (oro, acero-inox)
 
-  El producto se asocia a su color porque lleva esa etiqueta. El orden de las
-  muestras es el orden de las entradas del metaobjeto, asi es igual en todas
-  las fichas. Los enlaces usan `product.url`, que ya incluye /en/ cuando toca.
+  El producto se asocia a su color porque lleva esa etiqueta. El orden lo fija
+  el ajuste "Orden de los colores", no el orden del metacampo ni el del
+  metaobjeto, para que sea identico en todas las fichas. Los enlaces usan
+  `product.url`, que ya incluye /en/ cuando toca.
 
   Si el producto no tiene hermanos, el bloque no dibuja nada.
 {% endcomment %}
@@ -37,7 +38,8 @@
 
     assign colores = shop.metaobjects.color.values
     assign etiquetas_actuales = product.tags | join: '|' | downcase | prepend: '|' | append: '|'
-    assign dibujados = '|'
+    assign orden = block.settings.orden_etiquetas | downcase | split: ','
+    assign dibujadas = '|'
     assign nombre_actual = ''
   -%}
 
@@ -69,53 +71,67 @@
 
     <div class="sv-colors__list" role="group" aria-label="{{ etiqueta_grupo | escape }}">
 
-      {%- comment -%} 1) Una muestra por entrada del metaobjeto, en su orden. {%- endcomment -%}
-      {%- for entrada in colores -%}
-        {%- assign etiqueta = entrada.etiqueta.value | downcase | strip -%}
+      {%- comment -%} 1) En el orden que fija el ajuste. {%- endcomment -%}
+      {%- for etiqueta_pedida in orden -%}
+        {%- assign etiqueta = etiqueta_pedida | strip -%}
         {%- if etiqueta != blank -%}
-          {%- assign aguja = etiqueta | prepend: '|' | append: '|' -%}
-          {%- assign encontrado = false -%}
-          {%- assign es_actual = false -%}
-          {%- assign candidato = null -%}
-
-          {%- if etiquetas_actuales contains aguja -%}
-            {%- assign candidato = product -%}
-            {%- assign encontrado = true -%}
-            {%- assign es_actual = true -%}
-          {%- else -%}
-            {%- for hermano in hermanos -%}
-              {%- assign etiquetas_hermano = hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
-              {%- if etiquetas_hermano contains aguja -%}
-                {%- assign candidato = hermano -%}
-                {%- assign encontrado = true -%}
-                {%- break -%}
-              {%- endif -%}
-            {%- endfor -%}
-          {%- endif -%}
-
-          {%- if encontrado -%}
-            {%- assign dibujados = dibujados | append: candidato.id | append: '|' -%}
-            {%- render 'sv-color-swatch',
-              producto: candidato,
-              nombre: entrada.nombre.value,
-              color: entrada.muestra.value,
-              imagen: entrada.imagen_muestra.value,
-              actual: es_actual,
-              mostrar_etiqueta: block.settings.mostrar_etiquetas,
-              marcar_agotado: block.settings.marcar_agotado
-            -%}
-          {%- endif -%}
+          {%- for entrada in colores -%}
+            {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
+            {%- if etiqueta_entrada == etiqueta -%}
+              {%- assign dibujadas = dibujadas | append: etiqueta | append: '|' -%}
+              {%- render 'sv-color-entry',
+                entrada: entrada,
+                producto_actual: product,
+                hermanos: hermanos,
+                etiquetas_actuales: etiquetas_actuales,
+                mostrar_etiqueta: block.settings.mostrar_etiquetas,
+                marcar_agotado: block.settings.marcar_agotado
+              -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
         {%- endif -%}
       {%- endfor -%}
 
       {%- comment -%}
-        2) Red de seguridad: si un producto no coincide con ninguna entrada
-        (le falta la etiqueta, o es un color nuevo sin metaobjeto todavia),
-        se dibuja igual usando su imagen destacada.
+        2) Colores que existen en el metaobjeto pero no estan en el ajuste:
+        van detras, en el orden del metaobjeto, para que un color nuevo
+        aparezca sin tener que tocar nada.
       {%- endcomment -%}
-      {%- assign aguja_actual = product.id | prepend: '|' | append: '|' -%}
-      {%- unless dibujados contains aguja_actual -%}
-        {%- assign dibujados = dibujados | append: product.id | append: '|' -%}
+      {%- for entrada in colores -%}
+        {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
+        {%- if etiqueta_entrada != blank -%}
+          {%- assign aguja = etiqueta_entrada | prepend: '|' | append: '|' -%}
+          {%- unless dibujadas contains aguja -%}
+            {%- assign dibujadas = dibujadas | append: etiqueta_entrada | append: '|' -%}
+            {%- render 'sv-color-entry',
+              entrada: entrada,
+              producto_actual: product,
+              hermanos: hermanos,
+              etiquetas_actuales: etiquetas_actuales,
+              mostrar_etiqueta: block.settings.mostrar_etiquetas,
+              marcar_agotado: block.settings.marcar_agotado
+            -%}
+          {%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- comment -%}
+        3) Red de seguridad: un producto sin ninguna etiqueta de color se
+        dibuja igual con su imagen destacada, en vez de desaparecer.
+      {%- endcomment -%}
+      {%- assign actual_tiene_color = false -%}
+      {%- for entrada in colores -%}
+        {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
+        {%- if etiqueta_entrada != blank -%}
+          {%- assign aguja = etiqueta_entrada | prepend: '|' | append: '|' -%}
+          {%- if etiquetas_actuales contains aguja -%}
+            {%- assign actual_tiene_color = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless actual_tiene_color -%}
         {%- render 'sv-color-swatch',
           producto: product,
           nombre: product.title,
@@ -127,9 +143,19 @@
       {%- endunless -%}
 
       {%- for hermano in hermanos -%}
-        {%- assign aguja_hermano = hermano.id | prepend: '|' | append: '|' -%}
-        {%- unless dibujados contains aguja_hermano -%}
-          {%- assign dibujados = dibujados | append: hermano.id | append: '|' -%}
+        {%- assign etiquetas_hermano = hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
+        {%- assign hermano_tiene_color = false -%}
+        {%- for entrada in colores -%}
+          {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
+          {%- if etiqueta_entrada != blank -%}
+            {%- assign aguja = etiqueta_entrada | prepend: '|' | append: '|' -%}
+            {%- if etiquetas_hermano contains aguja -%}
+              {%- assign hermano_tiene_color = true -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- unless hermano_tiene_color -%}
           {%- render 'sv-color-swatch',
             producto: hermano,
             nombre: hermano.title,
@@ -157,6 +183,13 @@
     {
       "type": "paragraph",
       "content": "Lee el metacampo custom.hermano_de_color y el metaobjeto color. Si el producto no tiene hermano de color, el bloque no se muestra."
+    },
+    {
+      "type": "text",
+      "id": "orden_etiquetas",
+      "label": "Orden de los colores",
+      "default": "acero-inox, oro",
+      "info": "Etiquetas de producto separadas por comas. Manda sobre el orden del metaobjeto, así el orden es el mismo en todas las fichas. Un color que no esté en la lista se dibuja detrás."
     },
     {
       "type": "header",

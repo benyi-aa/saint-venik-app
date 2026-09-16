@@ -1,0 +1,54 @@
+{% comment %}
+  Saint Venik · Una entrada del metaobjeto `color` dibujada como muestra.
+
+  Busca, entre el producto actual y sus hermanos, el que lleva la etiqueta de
+  esta entrada, y lo dibuja. Si ningun producto la lleva, no dibuja nada.
+
+  Parametros:
+    entrada            (metaobject) entrada del metaobjeto `color`
+    producto_actual    (product)    el producto de esta pagina
+    hermanos           (array)      custom.hermano_de_color
+    etiquetas_actuales (string)     etiquetas del producto actual, entre barras
+    mostrar_etiqueta   (boolean)
+    marcar_agotado     (boolean)
+{% endcomment %}
+
+{%- assign sv_etq = entrada.etiqueta.value | downcase | strip -%}
+
+{%- if sv_etq != blank -%}
+  {%- liquid
+    assign sv_aguja = sv_etq | prepend: '|' | append: '|'
+    assign sv_hallado = false
+    assign sv_es_actual = false
+    assign sv_producto = null
+
+    if etiquetas_actuales contains sv_aguja
+      assign sv_producto = producto_actual
+      assign sv_hallado = true
+      assign sv_es_actual = true
+    endif
+  -%}
+
+  {%- unless sv_hallado -%}
+    {%- for sv_hermano in hermanos -%}
+      {%- assign sv_tags = sv_hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
+      {%- if sv_tags contains sv_aguja -%}
+        {%- assign sv_producto = sv_hermano -%}
+        {%- assign sv_hallado = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endunless -%}
+
+  {%- if sv_hallado -%}
+    {%- render 'sv-color-swatch',
+      producto: sv_producto,
+      nombre: entrada.nombre.value,
+      color: entrada.muestra.value,
+      imagen: entrada.imagen_muestra.value,
+      actual: sv_es_actual,
+      mostrar_etiqueta: mostrar_etiqueta,
+      marcar_agotado: marcar_agotado
+    -%}
+  {%- endif -%}
+{%- endif -%}
