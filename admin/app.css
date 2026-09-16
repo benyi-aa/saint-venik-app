@@ -227,3 +227,42 @@ select {
   font: inherit;
   background: #fff;
 }
+
+/* --- Vista previa --- */
+
+.previa { background: #fbfbfb; }
+
+.previa__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.previa__titulo {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+.previa__cabecera .previa__titulo { margin: 0; }
+
+.previa__idiomas { display: flex; gap: 6px; }
+.previa__idiomas .is-activo { background: var(--acento); border-color: var(--acento); color: #fff; }
+
+/* Fondo blanco y encuadre estrecho: la guía se ve dentro de una ventana modal,
+ * no a lo ancho del panel. */
+.previa__lienzo {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+}
+
+.previa__nota { margin-top: 12px; text-align: center; }

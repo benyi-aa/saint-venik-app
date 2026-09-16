@@ -1,11 +1,12 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609160310';
-import { cargarColores, guardarColor, problemasDe } from './colores.js?v=202609160310';
+import { estaEmbebida } from './api.js?v=202609160410';
+import { cargarColores, guardarColor, problemasDe } from './colores.js?v=202609160410';
 import {
   estadoEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, NOMBRE_TIPO,
-} from './guias.js?v=202609160310';
+} from './guias.js?v=202609160410';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609160410';
 
 /* La version sale de la URL con la que se cargo este archivo, no de una
  * constante escrita a mano: asi lo que se muestra es siempre lo que el navegador
@@ -76,6 +77,11 @@ async function pintarColores() {
   pantalla.innerHTML = `
     <h1>Colores</h1>
     <p class="subtitulo">Cada color es una muestra en la ficha de producto. Un producto se asocia a su color por la etiqueta.</p>
+    <section class="tarjeta previa">
+      <p class="previa__titulo">Así se ve en la ficha de producto</p>
+      ${coloresHtml(colores)}
+      <p class="ayuda previa__nota">La tipografía y los colores del texto los pone tu tema; aquí se ven los del panel.</p>
+    </section>
     ${colores.map(tarjetaColor).join('')}
   `;
 
@@ -228,9 +234,41 @@ async function pintarEditor(handle) {
       </div>
     </section>
 
+    <section class="tarjeta previa">
+      <div class="previa__cabecera">
+        <p class="previa__titulo">Así lo ve el cliente</p>
+        <div class="previa__idiomas">
+          <button class="secundario is-activo" data-idioma="es">Español</button>
+          <button class="secundario" data-idioma="en">Inglés</button>
+        </div>
+      </div>
+      <div class="previa__lienzo" id="lienzo">${guiaHtml(guia, 'es')}</div>
+      <p class="ayuda previa__nota" id="previa-resumen"></p>
+    </section>
+
     ${guia.bloques.length
       ? guia.bloques.map((b, i) => tarjetaBloque(b, i, guia.bloques.length)).join('')
       : '<div class="vacio">Esta guía todavía no tiene bloques.</div>'}`;
+
+  const lienzo = document.getElementById('lienzo');
+  const resumen = document.getElementById('previa-resumen');
+
+  function pintarPrevia(idioma) {
+    lienzo.innerHTML = guiaHtml(guia, idioma);
+    const salen = guia.bloques.filter((b) => visible(b, idioma)).length;
+    const ocultos = guia.bloques.length - salen;
+    resumen.textContent = ocultos
+      ? `${salen} de ${guia.bloques.length} bloques se muestran en este idioma; ${ocultos} está${ocultos === 1 ? '' : 'n'} oculto${ocultos === 1 ? '' : 's'}.`
+      : `Se muestran los ${salen} bloques.`;
+  }
+  pintarPrevia('es');
+
+  pantalla.querySelectorAll('[data-idioma]').forEach((boton) => {
+    boton.addEventListener('click', () => {
+      pantalla.querySelectorAll('[data-idioma]').forEach((b) => b.classList.toggle('is-activo', b === boton));
+      pintarPrevia(boton.dataset.idioma);
+    });
+  });
 
   document.getElementById('volver').addEventListener('click', pintarGuias);
 

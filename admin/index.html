@@ -6,7 +6,11 @@
     <title>Color &amp; Size Picker · Saint Venik</title>
     <!-- App Bridge. El client id de una app es publico. -->
     <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" data-api-key="feb92266442449d38f005beb90710f05"></script>
-    <link rel="stylesheet" href="./app.css?v=202609160310" />
+    <link rel="stylesheet" href="./app.css?v=202609160410" />
+    <!-- El CSS de verdad de los bloques, servido desde la extensión. La vista
+         previa usa el mismo archivo que la tienda para que no puedan divergir. -->
+    <link rel="stylesheet" href="../extensions/saint-venik/assets/sv-color-selector.css?v=202609160410" />
+    <link rel="stylesheet" href="../extensions/saint-venik/assets/sv-size-guide.css?v=202609160410" />
   </head>
   <body>
     <nav class="nav">
@@ -23,6 +27,6 @@
 
     <p class="version" id="version"></p>
 
-    <script type="module" src="./app.js?v=202609160310"></script>
+    <script type="module" src="./app.js?v=202609160410"></script>
   </body>
 </html>
