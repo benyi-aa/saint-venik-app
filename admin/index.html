@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Color &amp; Size Picker · Saint Venik</title>
+    <!-- App Bridge. El client id de una app es publico. -->
+    <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" data-api-key="feb92266442449d38f005beb90710f05"></script>
+    <link rel="stylesheet" href="./app.css" />
+  </head>
+  <body>
+    <nav class="nav">
+      <button class="nav__item is-active" data-pantalla="colores">Colores</button>
+      <button class="nav__item" data-pantalla="guias">Guías de tallas</button>
+      <button class="nav__item" data-pantalla="apariencia">Apariencia</button>
+    </nav>
+
+    <main id="pantalla" class="pantalla">
+      <p class="cargando">Cargando…</p>
+    </main>
+
+    <div id="aviso" class="aviso" hidden></div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
