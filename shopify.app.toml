@@ -2,22 +2,28 @@
 
 name = "Color & Size Picker"
 handle = "saint-venik"
-application_url = "https://shopify.dev/apps/default-app-home"
+application_url = "https://diegogardilcic.github.io/saint-venik-app/admin/"
 embedded = true
 client_id = "feb92266442449d38f005beb90710f05"
 
+[access.admin]
+# El panel habla con la Admin API desde el navegador, autenticado con la sesion
+# del usuario que lo esta mirando. Sin esto haria falta un servidor.
+direct_api_mode = "online"
+embedded_app_direct_api_access = true
+
 [access_scopes]
-# Los bloques leen los datos con Liquid en el storefront, no con la Admin API,
-# pero Shopify exige al menos un permiso valido para conceder la instalacion:
-# pedimos el minimo coherente con lo que hace la app.
-scopes = "read_products"
+# Los bloques del storefront no necesitan ninguno: leen con Liquid. Estos son
+# para el panel, que escribe metaobjetos (colores y guias), metacampos de
+# producto (el hermano de color) y sube archivos (imagenes y PDF).
+scopes = "write_products, write_metaobjects, write_files"
 # Instalacion gestionada por Shopify. No ponemos use_legacy_install_flow = true:
 # ese modo usa el OAuth antiguo y necesita un servidor que atienda el callback,
 # que es justo lo que esta app no tiene.
 use_legacy_install_flow = false
 
 [auth]
-redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]
+redirect_urls = [ "https://diegogardilcic.github.io/saint-venik-app/admin/" ]
 
 [webhooks]
 api_version = "2026-10"
