@@ -10,7 +10,7 @@
  * Por eso se comprueba el host ANTES de intentarlo y, si no es de los conocidos,
  * se explica que paso en vez de dejar un error mudo.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161704';
+import { gql, comprobarErrores } from './api.js?v=202609161716';
 
 const HOSTS_CON_CORS = /(storage\.googleapis\.com|s3\.amazonaws\.com)$/;
 

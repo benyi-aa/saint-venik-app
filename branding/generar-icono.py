@@ -58,20 +58,24 @@ def pick(target_x0):
     return best
 cs,cv=pick(103),pick(535)
 print('S=',cs,info[cs],' V=',cv,info[cv])
-def cut(c, ytop, ybot):
+def cut(c, ytop, ybot, tinta=0):
     n,x0,y0,x1,y1=info[c]; cw,chh=x1-x0+1, ybot-ytop+1; buf=bytearray(cw*chh*4)
     for y in range(chh):
         for x in range(cw):
             p=(ytop+y)*W+(x0+x)
-            if lab[p]==c: buf[(y*cw+x)*4+3]=255-L[px[p]]
+            if lab[p]==c:
+                o=(y*cw+x)*4
+                buf[o]=buf[o+1]=buf[o+2]=tinta
+                buf[o+3]=255-L[px[p]]
     return cw,chh,png_rgba(cw,chh,buf)
 TOP=min(info[cs][2],info[cv][2]); BOT=max(info[cs][4],info[cv][4])
-sw,sh,spng=cut(cs,TOP,BOT); vw,vh,vpng=cut(cv,TOP,BOT)
+sw,sh,spng=cut(cs,TOP,BOT,255); vw,vh,vpng=cut(cv,TOP,BOT,255)
+_,_,spng_n=cut(cs,TOP,BOT,0); _,_,vpng_n=cut(cv,TOP,BOT,0)
 print('S',sw,'x',sh,'  V',vw,'x',vh)
-GAP=14; mono_w=sw+GAP+vw; TARGET=900.0; k=TARGET/mono_w; mh=sh*k
+GAP=8; mono_w=sw+GAP+vw; TARGET=864.0; k=TARGET/mono_w; mh=sh*k
 ox=(1200-TARGET)/2; oy=(1200-mh)/2
 svg=f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
-<rect width="1200" height="1200" fill="#ffffff"/>
+<rect width="1200" height="1200" fill="#000000"/>
 <image x="{ox:.2f}" y="{oy:.2f}" width="{sw*k:.2f}" height="{mh:.2f}" href="data:image/png;base64,{base64.b64encode(spng).decode()}"/>
 <image x="{ox+(sw+GAP)*k:.2f}" y="{oy:.2f}" width="{vw*k:.2f}" height="{mh:.2f}" href="data:image/png;base64,{base64.b64encode(vpng).decode()}"/>
 </svg>'''
@@ -80,8 +84,8 @@ open('icono.svg','w').write(svg); print('ok')
 # Variante ajustada y sin fondo, para la cabecera del panel.
 mw, mh2 = sw + GAP + vw, sh
 tight = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{mw}" height="{mh2}" viewBox="0 0 {mw} {mh2}">
-<image x="0" y="0" width="{sw}" height="{sh}" href="data:image/png;base64,{base64.b64encode(spng).decode()}"/>
-<image x="{sw+GAP}" y="0" width="{vw}" height="{vh}" href="data:image/png;base64,{base64.b64encode(vpng).decode()}"/>
+<image x="0" y="0" width="{sw}" height="{sh}" href="data:image/png;base64,{base64.b64encode(spng_n).decode()}"/>
+<image x="{sw+GAP}" y="0" width="{vw}" height="{vh}" href="data:image/png;base64,{base64.b64encode(vpng_n).decode()}"/>
 </svg>'''
 open('logo.svg','w').write(tight)
 print('logo.svg', mw, 'x', mh2)
