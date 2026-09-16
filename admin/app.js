@@ -1,22 +1,22 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161510';
+import { estaEmbebida } from './api.js?v=202609161610';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609161510';
-import { leerConfig, guardarOrdenColores } from './config.js?v=202609161510';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161510';
+} from './colores.js?v=202609161610';
+import { leerConfig, guardarOrdenColores } from './config.js?v=202609161610';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161610';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
-  contarCoincidencias,
-} from './guias.js?v=202609161510';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161510';
+  revisarReparto,
+} from './guias.js?v=202609161610';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161610';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609161510';
+const VERSION = '202609161610';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -447,6 +447,8 @@ async function pintarEditor(handle) {
       </div>
     </section>
 
+    <section class="tarjeta" id="informe" hidden></section>
+
     <section class="tarjeta previa">
       <div class="previa__cabecera">
         <p class="previa__titulo">Así lo ve el cliente</p>
@@ -494,14 +496,41 @@ async function pintarEditor(handle) {
   document.getElementById('comprobar').addEventListener('click', async (e) => {
     e.target.disabled = true;
     e.target.textContent = 'Revisando el catálogo…';
+    const informe = document.getElementById('informe');
     try {
       const guias = await cargarGuias();
-      const r = await contarCoincidencias(guias);
-      const mias = r.conteo.get(handle) ?? 0;
-      const partes = [`${mias} de ${r.total} productos usan esta guía`];
-      if (r.sinGuia) partes.push(`${r.sinGuia} no encajan en ninguna`);
-      if (r.ambiguos) partes.push(`${r.ambiguos} encajan en más de una y se quedan con la primera`);
-      avisar(partes.join(' · '));
+      const r = await revisarReparto(guias);
+
+      const lista = (productos) => `
+        <ul class="informe__lista">
+          ${productos.slice(0, 40).map((p) => `<li>${escapar(p.title)}</li>`).join('')}
+        </ul>
+        ${productos.length > 40 ? `<p class="ayuda">…y ${productos.length - 40} más.</p>` : ''}`;
+
+      informe.innerHTML = `
+        <h2 style="margin:0 0 4px;font-size:16px;">Reparto del catálogo</h2>
+        <p class="ayuda">${r.total} productos a la venta${r.borradores ? ` · ${r.borradores} en borrador, no se cuentan` : ''}</p>
+
+        <ul class="informe__lista">
+          ${guias.map((g) => `<li><strong>${escapar(g.nombre)}</strong>: ${r.conteo.get(g.handle) ?? 0}</li>`).join('')}
+        </ul>
+
+        ${r.sinGuia.length ? `
+          <p class="problema" style="margin-top:14px;">
+            ${r.sinGuia.length} productos no encajan en ninguna guía, así que no verán el botón.
+            Si alguno debería tenerla, añade una palabra suya arriba.
+          </p>
+          ${lista(r.sinGuia)}` : '<p class="ayuda" style="margin-top:14px;">Todos los productos a la venta tienen guía.</p>'}
+
+        ${r.ambiguos.length ? `
+          <p class="problema">
+            ${r.ambiguos.length} encajan en más de una guía y se quedan con la primera:
+          </p>
+          <ul class="informe__lista">
+            ${r.ambiguos.slice(0, 20).map((a) => `<li>${escapar(a.producto.title)} — ${escapar(a.guias.join(', '))}</li>`).join('')}
+          </ul>` : ''}`;
+      informe.hidden = false;
+      informe.scrollIntoView({ block: 'nearest' });
     } catch (error) {
       avisar(error.message, true);
     } finally {

@@ -26,9 +26,9 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161510';
-import { asegurarConfig, existeConfig } from './config.js?v=202609161510';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161510';
+import { gql, comprobarErrores } from './api.js?v=202609161610';
+import { asegurarConfig, existeConfig } from './config.js?v=202609161610';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161610';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
@@ -502,7 +502,7 @@ const PRODUCTOS = `
   query Productos($cursor: String) {
     products(first: 100, after: $cursor) {
       pageInfo { hasNextPage endCursor }
-      nodes { id title productType tags }
+      nodes { id title productType tags status }
     }
   }
 `;
@@ -520,7 +520,7 @@ export function coincide(producto, palabras) {
 
 /* Bajo demanda, no al cargar la pantalla: recorrer el catalogo entero cuesta
  * varias llamadas y no hace falta salvo que se quiera comprobar. */
-export async function contarCoincidencias(guias) {
+export async function revisarReparto(guias) {
   const productos = [];
   let cursor = null;
   do {
@@ -529,16 +529,26 @@ export async function contarCoincidencias(guias) {
     cursor = d.products.pageInfo.hasNextPage ? d.products.pageInfo.endCursor : null;
   } while (cursor);
 
-  const conteo = new Map(guias.map((g) => [g.handle, 0]));
-  let sinGuia = 0;
-  let ambiguos = 0;
+  /* Solo cuentan los que estan a la venta. Un borrador sin guia no es un
+   * problema que haya que resolver, y meterlo en la cuenta solo asusta. */
+  const activos = productos.filter((p) => p.status === 'ACTIVE');
 
-  for (const producto of productos) {
+  const conteo = new Map(guias.map((g) => [g.handle, 0]));
+  const sinGuia = [];
+  const ambiguos = [];
+
+  for (const producto of activos) {
     const suyas = guias.filter((g) => g.palabras && coincide(producto, g.palabras));
-    if (!suyas.length) { sinGuia++; continue; }
-    if (suyas.length > 1) ambiguos++;
+    if (!suyas.length) { sinGuia.push(producto); continue; }
+    if (suyas.length > 1) ambiguos.push({ producto, guias: suyas.map((g) => g.nombre) });
     conteo.set(suyas[0].handle, conteo.get(suyas[0].handle) + 1);
   }
 
-  return { total: productos.length, conteo, sinGuia, ambiguos };
+  return {
+    total: activos.length,
+    borradores: productos.length - activos.length,
+    conteo,
+    sinGuia,
+    ambiguos,
+  };
 }
