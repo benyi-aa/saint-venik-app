@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202609160810';
+import { gql, comprobarErrores } from './api.js?v=202609160910';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';

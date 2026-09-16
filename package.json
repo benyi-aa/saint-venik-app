@@ -9,9 +9,13 @@
     "dev": "shopify app dev",
     "deploy": "shopify app deploy",
     "info": "shopify app info",
-    "version": "node scripts/version.mjs"
+    "version": "node scripts/version.mjs",
+    "revisar": "node scripts/revisar.mjs",
+    "publicar": "node scripts/version.mjs && node scripts/revisar.mjs"
   },
   "devDependencies": {
-    "@shopify/cli": "^4.8.0"
+    "@shopify/cli": "^4.8.0",
+    "acorn": "^8.18.0",
+    "acorn-walk": "^8.3.5"
   }
 }
