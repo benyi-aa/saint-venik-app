@@ -8,7 +8,8 @@
     "link": "shopify app config link",
     "dev": "shopify app dev",
     "deploy": "shopify app deploy",
-    "info": "shopify app info"
+    "info": "shopify app info",
+    "version": "node scripts/version.mjs"
   },
   "devDependencies": {
     "@shopify/cli": "^4.8.0"

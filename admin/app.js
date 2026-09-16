@@ -1,8 +1,13 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js';
-import { cargarColores, guardarColor, problemasDe } from './colores.js';
-import { estadoEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES } from './guias.js';
+import { estaEmbebida } from './api.js?v=202609160225';
+import { cargarColores, guardarColor, problemasDe } from './colores.js?v=202609160225';
+import { estadoEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES } from './guias.js?v=202609160225';
+
+/* La version sale de la URL con la que se cargo este archivo, no de una
+ * constante escrita a mano: asi lo que se muestra es siempre lo que el navegador
+ * tiene de verdad, aunque haya servido algo de cache. */
+const VERSION = new URL(import.meta.url).searchParams.get('v') ?? 'local';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -170,6 +175,9 @@ async function ir(nombre) {
 document.querySelectorAll('.nav__item').forEach((boton) => {
   boton.addEventListener('click', () => ir(boton.dataset.pantalla));
 });
+
+const sello = document.getElementById('version');
+if (sello) sello.textContent = `v${VERSION}`;
 
 if (!estaEmbebida()) {
   pantalla.innerHTML = `

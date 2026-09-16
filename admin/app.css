@@ -131,3 +131,13 @@ button.principal:disabled { opacity: .5; cursor: default; }
 .cargando { color: var(--tinta-suave); }
 
 .vacio { padding: 32px; text-align: center; color: var(--tinta-suave); }
+
+/* Sello de versión. Discreto, pero visible: sirve para saber de un vistazo si el
+ * navegador está sirviendo el panel de hace diez minutos. */
+.version {
+  max-width: 860px;
+  margin: 28px auto 0;
+  color: #8a8a8a;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
