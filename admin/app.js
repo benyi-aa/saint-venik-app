@@ -1,17 +1,17 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161010';
+import { estaEmbebida } from './api.js?v=202609161110';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609161010';
-import { leerConfig, guardarOrdenColores } from './config.js?v=202609161010';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161010';
+} from './colores.js?v=202609161110';
+import { leerConfig, guardarOrdenColores } from './config.js?v=202609161110';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161110';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, NOMBRE_TIPO,
-} from './guias.js?v=202609161010';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161010';
+} from './guias.js?v=202609161110';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161110';
 
 /* La version sale de la URL con la que se cargo este archivo, no de una
  * constante escrita a mano: asi lo que se muestra es siempre lo que el navegador

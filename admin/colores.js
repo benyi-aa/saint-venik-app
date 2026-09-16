@@ -5,7 +5,60 @@
  * color es la etiqueta: el producto lleva `oro` o `acero-inox`, y la entrada
  * guarda esa misma etiqueta en el campo `etiqueta`.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161010';
+import { gql, comprobarErrores } from './api.js?v=202609161110';
+
+export const TIPO_COLOR = 'color';
+
+/* Los campos que el bloque de la tienda espera encontrar. En saintvenik.com
+ * existen porque se crearon a mano; en cualquier otra tienda no, y sin esto la
+ * app no se puede instalar en otra parte sin trabajo manual. */
+const CAMPOS_COLOR = [
+  { key: 'nombre', name: 'Nombre', type: 'single_line_text_field', required: true },
+  { key: 'muestra', name: 'Muestra', type: 'color' },
+  { key: 'imagen_muestra', name: 'Imagen Muestra', type: 'file_reference' },
+  { key: 'etiqueta', name: 'Etiqueta', type: 'single_line_text_field' },
+];
+
+const DEFINICION_COLOR = `
+  query DefinicionColor {
+    metaobjectDefinitionByType(type: "${'color'}") { id fieldDefinitions { key } }
+  }
+`;
+
+const ACTUALIZAR_DEFINICION_COLOR = `
+  mutation ActualizarDefinicionColor($id: ID!, $definition: MetaobjectDefinitionUpdateInput!) {
+    metaobjectDefinitionUpdate(id: $id, definition: $definition) {
+      metaobjectDefinition { id }
+      userErrors { field message code }
+    }
+  }
+`;
+
+const CREAR_DEFINICION_COLOR = `
+  mutation CrearDefinicionColor($definition: MetaobjectDefinitionCreateInput!) {
+    metaobjectDefinitionCreate(definition: $definition) {
+      metaobjectDefinition { id }
+      userErrors { field message code }
+    }
+  }
+`;
+
+const METACAMPO_HERMANO = `
+  query MetacampoHermano {
+    metafieldDefinitions(ownerType: PRODUCT, namespace: "custom", key: "hermano_de_color", first: 1) {
+      nodes { id }
+    }
+  }
+`;
+
+const CREAR_METACAMPO = `
+  mutation CrearMetacampo($definition: MetafieldDefinitionInput!) {
+    metafieldDefinitionCreate(definition: $definition) {
+      createdDefinition { id }
+      userErrors { field message code }
+    }
+  }
+`;
 
 const CONSULTA_COLORES = `
   query Colores {
@@ -141,4 +194,80 @@ export async function guardarImagenColor(id, idArchivo) {
     fields: [{ key: 'imagen_muestra', value: idArchivo ?? '' }],
   });
   return comprobarErrores(r, 'metaobjectUpdate');
+}
+
+
+/* ---------------------------------------------------------------------------
+ * Estructura de colores
+ *
+ * Para que la app sirva en mas de una tienda tiene que saber crear lo que
+ * necesita, no dar por hecho que alguien ya lo monto a mano.
+ * ------------------------------------------------------------------------- */
+
+export async function faltaEstructuraColor() {
+  const pendientes = [];
+
+  const d = await gql(DEFINICION_COLOR);
+  if (!d.metaobjectDefinitionByType) {
+    pendientes.push('El tipo de contenido de los colores.');
+  } else {
+    const presentes = new Set(d.metaobjectDefinitionByType.fieldDefinitions.map((f) => f.key));
+    const faltan = CAMPOS_COLOR.filter((c) => !presentes.has(c.key)).map((c) => c.key);
+    if (faltan.length) pendientes.push(`Campos que faltan en los colores: ${faltan.join(', ')}.`);
+  }
+
+  const m = await gql(METACAMPO_HERMANO);
+  if (!m.metafieldDefinitions.nodes.length) {
+    pendientes.push('El metacampo de producto «hermano de color».');
+  }
+
+  return pendientes;
+}
+
+export async function asegurarEstructuraColor(pasos = []) {
+  const d = await gql(DEFINICION_COLOR);
+
+  if (!d.metaobjectDefinitionByType) {
+    const r = await gql(CREAR_DEFINICION_COLOR, {
+      definition: {
+        type: TIPO_COLOR,
+        name: 'Color',
+        access: { storefront: 'PUBLIC_READ' },
+        displayNameKey: 'nombre',
+        fieldDefinitions: CAMPOS_COLOR,
+      },
+    });
+    comprobarErrores(r, 'metaobjectDefinitionCreate');
+    pasos.push('Tipo de contenido de colores creado');
+  } else {
+    const presentes = new Set(d.metaobjectDefinitionByType.fieldDefinitions.map((f) => f.key));
+    const faltan = CAMPOS_COLOR.filter((c) => !presentes.has(c.key));
+    if (faltan.length) {
+      const r = await gql(ACTUALIZAR_DEFINICION_COLOR, {
+        id: d.metaobjectDefinitionByType.id,
+        definition: { fieldDefinitions: faltan.map((c) => ({ create: c })) },
+      });
+      comprobarErrores(r, 'metaobjectDefinitionUpdate');
+      pasos.push(`Campos de color añadidos: ${faltan.map((c) => c.key).join(', ')}`);
+    }
+  }
+
+  const m = await gql(METACAMPO_HERMANO);
+  if (!m.metafieldDefinitions.nodes.length) {
+    const r = await gql(CREAR_METACAMPO, {
+      definition: {
+        name: 'Hermano de color',
+        namespace: 'custom',
+        key: 'hermano_de_color',
+        description: 'El mismo modelo en otro color. Lo usa Color & Size Picker.',
+        type: 'list.product_reference',
+        ownerType: 'PRODUCT',
+        access: { storefront: 'PUBLIC_READ' },
+      },
+    });
+    comprobarErrores(r, 'metafieldDefinitionCreate');
+    pasos.push('Metacampo «hermano de color» creado');
+  }
+
+  return pasos;
 }
