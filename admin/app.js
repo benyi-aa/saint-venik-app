@@ -2,6 +2,7 @@
  * archivos estaticos que el admin de Shopify carga embebidos. */
 import { estaEmbebida } from './api.js';
 import { cargarColores, guardarColor, problemasDe } from './colores.js';
+import { estadoEstructura, crearEstructura, cargarGuias } from './guias.js';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -90,11 +91,59 @@ async function pintarColores() {
   });
 }
 
+async function pintarGuias() {
+  pantalla.innerHTML = '<p class="cargando">Comprobando la estructura…</p>';
+
+  const estado = await estadoEstructura();
+
+  if (!estado.bloque || !estado.guia) {
+    pantalla.innerHTML = `
+      <h1>Guías de tallas</h1>
+      <p class="subtitulo">
+        Todavía no existe la estructura donde se guardan las guías. Se crea una vez
+        y queda en tu tienda: dos tipos de contenido y las tres guías vacías,
+        listas para escribir dentro.
+      </p>
+      <section class="tarjeta">
+        <p>Se van a crear:</p>
+        <ul>
+          <li><strong>Bloque de guía de tallas</strong> — texto, imagen, vídeo o PDF, con versión en español y en inglés y una casilla de visibilidad por idioma.</li>
+          <li><strong>Guía de tallas</strong> — con sus bloques en orden.</li>
+          <li>Las tres guías: Anillos, Cadenas y colgantes, Pulseras.</li>
+        </ul>
+        <div class="acciones"><button class="principal" id="crear">Crear estructura</button></div>
+      </section>`;
+
+    document.getElementById('crear').addEventListener('click', async (e) => {
+      e.target.disabled = true;
+      e.target.textContent = 'Creando…';
+      try {
+        const pasos = await crearEstructura();
+        avisar(pasos.length ? pasos.join(' · ') : 'Ya estaba todo creado');
+        await pintarGuias();
+      } catch (error) {
+        avisar(error.message, true);
+        e.target.disabled = false;
+        e.target.textContent = 'Crear estructura';
+      }
+    });
+    return;
+  }
+
+  const guias = await cargarGuias();
+  pantalla.innerHTML = `
+    <h1>Guías de tallas</h1>
+    <p class="subtitulo">Cada guía se compone de bloques. Un bloque puede existir solo en un idioma.</p>
+    ${guias.map((g) => `
+      <section class="tarjeta">
+        <h2 style="margin:0 0 4px;font-size:16px;">${escapar(g.nombre)}</h2>
+        <p class="ayuda">${g.bloques.length} ${g.bloques.length === 1 ? 'bloque' : 'bloques'}</p>
+      </section>`).join('')}`;
+}
+
 const PANTALLAS = {
   colores: pintarColores,
-  guias: async () => {
-    pantalla.innerHTML = '<h1>Guías de tallas</h1><div class="vacio">En construcción.</div>';
-  },
+  guias: pintarGuias,
   apariencia: async () => {
     pantalla.innerHTML = '<h1>Apariencia</h1><div class="vacio">En construcción.</div>';
   },
