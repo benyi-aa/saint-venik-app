@@ -82,3 +82,31 @@ en las tres plantillas.
 El `select[name="id"]` **no** lo pinta ese bloque sino el formulario del
 producto, así que sigue ahí y el botón de compra funciona igual. Verificado en
 `anillo-signet` tras retirarlo.
+
+## Trampas verificadas contra la documentación (16-09-2026)
+
+Cinco decisiones de API se comprobaron con documentación y una pasada adversaria.
+Las cinco respuestas optimistas tenían un error material. Lo que quedó:
+
+- **El orden de una lista de referencias no está garantizado.** Ni la doc de
+  `MetaobjectField` ni la de Liquid dicen que `list.metaobject_reference`
+  conserve el orden de inserción; en Liquid hay fallos conocidos (`.value`
+  devolviendo solo el primer elemento, orden por handle). Por eso cada bloque
+  lleva un campo `orden` y el Liquid ordena por él.
+- **Subir archivos desde el navegador no está resuelto.** El bucket de staged
+  uploads (`shopify-staged-uploads.storage.googleapis.com`) sí manda
+  `Access-Control-Allow-Origin: *`, pero para `IMAGE`/`FILE` Shopify puede
+  devolver `<shop>.myshopify.com/admin/tmp/files`, que **no** manda CORS, y la
+  doc de imágenes indica `PUT` con los parámetros como cabeceras, no `POST` con
+  FormData. Hay que implementarlo con guarda por host y una salida alternativa.
+- **El editor masivo de Shopify probablemente no edita columnas
+  `metaobject_reference`.** Si se asocia producto → guía con un metacampo de ese
+  tipo, la asignación por lote la tiene que dar el panel de la app: son 154
+  productos.
+- **Trampa de Liquid:** `guia != blank and guia.bloques.value.count > 0` se
+  evalúa de derecha a izquierda e imprime `Liquid error: comparison of Nil with 0
+  failed` al cliente en cualquier ficha sin guía. Hay que anidar los `if`.
+- **Dos campos por idioma se mantienen.** Las traducciones nativas no cubren el
+  requisito (contenido que existe en un idioma y no en el otro, oculto por
+  idioma de forma independiente), y para metaobjetos de una app tienen un fallo
+  abierto y no se autotraducen en masa.

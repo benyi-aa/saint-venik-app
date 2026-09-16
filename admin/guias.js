@@ -13,6 +13,14 @@
  * Los dos se crean con acceso PUBLIC_READ desde el storefront: sin eso el
  * bloque Liquid no podria leerlos y la guia saldria vacia en la tienda.
  *
+ * Cada bloque lleva su propia posicion en el campo `orden`, y el Liquid ordena
+ * por ese numero. Podria bastar con el orden de la lista `bloques`, pero Shopify
+ * no documenta en ningun sitio que ese orden se conserve, y en Liquid los campos
+ * list.metaobject_reference tienen fallos conocidos: `.value` devolviendo solo el
+ * primer elemento, y orden por handle en vez de por insercion. Un numero explicito
+ * cuesta un campo y quita una forma de fallar en silencio, que es la peor: se veria
+ * bien en el panel y desordenado en la tienda.
+ *
  * No se usa la capacidad `publishable` (el borrador/publicado de Shopify).
  * Pedir estado ACTIVE en una entrada cuya definicion no la tiene activada falla
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
@@ -42,6 +50,21 @@ const CREAR_DEFINICION = `
       metaobjectDefinition { id type }
       userErrors { field message code }
     }
+  }
+`;
+
+const ACTUALIZAR_DEFINICION = `
+  mutation ActualizarDefinicion($id: ID!, $definition: MetaobjectDefinitionUpdateInput!) {
+    metaobjectDefinitionUpdate(id: $id, definition: $definition) {
+      metaobjectDefinition { id }
+      userErrors { field message code }
+    }
+  }
+`;
+
+const CAMPOS_DE = `
+  query CamposDe($type: String!) {
+    metaobjectDefinitionByType(type: $type) { id fieldDefinitions { key } }
   }
 `;
 
@@ -87,6 +110,7 @@ const CAMPOS_BLOQUE = [
   { key: 'pdf', name: 'PDF', type: 'file_reference' },
   { key: 'mostrar_es', name: 'Mostrar en español', type: 'boolean' },
   { key: 'mostrar_en', name: 'Mostrar en inglés', type: 'boolean' },
+  { key: 'orden', name: 'Posición', type: 'number_integer' },
 ];
 
 export async function estadoEstructura() {
@@ -111,6 +135,19 @@ export async function crearEstructura() {
     });
     idBloque = comprobarErrores(r, 'metaobjectDefinitionCreate').metaobjectDefinition.id;
     pasos.push('Definición de bloques creada');
+  }
+
+  /* La definicion de bloques pudo crearse antes de que existiera el campo `orden`. */
+  const campos = await gql(CAMPOS_DE, { type: TIPO_BLOQUE });
+  const presentes = new Set((campos.metaobjectDefinitionByType?.fieldDefinitions ?? []).map((f) => f.key));
+  const faltan = CAMPOS_BLOQUE.filter((c) => !presentes.has(c.key));
+  if (faltan.length) {
+    const r = await gql(ACTUALIZAR_DEFINICION, {
+      id: idBloque,
+      definition: { fieldDefinitions: faltan.map((c) => ({ create: c })) },
+    });
+    comprobarErrores(r, 'metaobjectDefinitionUpdate');
+    pasos.push(`Campos añadidos: ${faltan.map((c) => c.key).join(', ')}`);
   }
 
   if (!estado.guia) {
