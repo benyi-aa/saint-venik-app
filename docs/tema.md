@@ -1,0 +1,68 @@
+# Lo que hay que tocar en el tema
+
+La app no puede hacer esto sola: son cambios en el tema, y hay que repetirlos en
+cualquier tema donde se quiera usar el bloque. Probado en
+**Saint Venik · bloques app (pruebas)** (id 160802897967), duplicado del tema en
+vivo *Copia de theme-export-saintvenik-cl-working-q1-…*
+
+## 1. Añadir el bloque a las plantillas de producto
+
+Tres plantillas tienen productos asignados: `acero-inox` (74), `orov2` (80) e
+`ice` (9). En cada `templates/product.<nombre>.json`, dentro de la sección
+`main`, el bloque va justo después de `price`:
+
+```json
+"sv_selector_color": {
+  "type": "shopify://apps/saint-venik/blocks/selector-color/01a0a760-9c51-786e-8540-94248eb04d7c",
+  "settings": {}
+}
+```
+
+Ese último UUID es el de **registro** de la extensión, no el `uid` que aparece en
+`extensions/saint-venik/shopify.extension.toml`. Los dos se parecen y no son el
+mismo: usar el `uid` hace que el bloque no renderice y sin ningún error. El bueno
+sale de `.shopify/deploy-bundle/manifest.json`, campo `uuid` del módulo
+`theme_app_extension`.
+
+Desde el editor de temas se añade solo: Producto → Añadir bloque → Apps →
+Selector de color.
+
+## 2. Quitar el selector de color que ya traía el tema
+
+El tema lleva su propia versión escrita a mano, que hace lo mismo que el bloque
+leyendo `custom.hermano_de_color` y el metaobjeto `color`. Vive en
+`snippets/sv-color-swatch.liquid` y se invoca desde `snippets/product-template.liquid`,
+dentro de la rama `when 'variant_picker'`:
+
+```liquid
+{%- render 'sv-color-swatch', product: product -%}
+```
+
+Borrar esa línea. Además de duplicar el selector, imprime
+`Translation missing: es.products.product.color` porque usa
+`{{ 'products.product.color' | t | default: 'Color' }}` y esa clave no existe en
+los locales del tema; el `default` no lo tapa, porque `t` devuelve el texto
+"Translation missing…", que no es un valor vacío.
+
+Ojo: ese snippet del tema se llama igual que el de la extensión
+(`sv-color-swatch`). No chocan, porque los archivos de una theme app extension
+están aislados, pero confunde al leer el código.
+
+## 3. Desactivar OPTIS Color Swatch
+
+Es un *app embed*, así que se activa y desactiva por tema:
+`config/settings_data.json` → `current.blocks` → el de
+`shopify://apps/optis-color-swatch/blocks/bss-se-script/…` → `"disabled": true`.
+Desde el admin: Personalizar → Configuración → Incrustaciones de apps.
+
+Desactivarlo en un tema **no cancela la suscripción**: son $49,90 al mes hasta
+desinstalar la app en Configuración → Apps, y eso afecta a todos los temas a la
+vez. Hacerlo solo después de publicar.
+
+## Datos de la tienda
+
+El metaobjeto `color` tiene cuatro entradas, no dos. `oro` y `plateado` llevan la
+imagen pero no la etiqueta; `oro-1` y `plateado-1` llevan la etiqueta y, desde el
+15-09-2026, también la imagen. El bloque empareja por etiqueta, así que usa las
+terminadas en `-1`. Las otras dos marcan 0 referencias y se pueden borrar.
+El campo `muestra` (color plano) está vacío en las cuatro: la muestra es la imagen.
