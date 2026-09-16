@@ -26,8 +26,8 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609160610';
-import { asegurarConfig } from './config.js?v=202609160610';
+import { gql, comprobarErrores } from './api.js?v=202609160710';
+import { asegurarConfig } from './config.js?v=202609160710';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 export const TIPO_GUIA = 'guia_de_tallas';
@@ -119,6 +119,37 @@ const CAMPOS_GUIA = [
   { key: 'nombre_en', name: 'Nombre en inglés', type: 'single_line_text_field' },
   { key: 'bloques', name: 'Bloques', type: 'list.metaobject_reference' },
 ];
+
+async function faltanCampos(tipo, esperados) {
+  const d = await gql(CAMPOS_DE, { type: tipo });
+  if (!d.metaobjectDefinitionByType) return esperados.map((c) => c.key);
+  const presentes = new Set(d.metaobjectDefinitionByType.fieldDefinitions.map((f) => f.key));
+  return esperados.filter((c) => !presentes.has(c.key)).map((c) => c.key);
+}
+
+/* La estructura no son solo los tipos de contenido: son tambien sus campos.
+ * Mirar solo los tipos dejaba al panel ofreciendo un campo que en la tienda no
+ * existia, y el fallo aparecia al guardar, que es tarde y desconcierta. */
+export async function revisarEstructura() {
+  const estado = await estadoEstructura();
+  const pendientes = [];
+
+  if (!estado.bloque) pendientes.push('El tipo de contenido de los bloques.');
+  if (!estado.guia) pendientes.push('El tipo de contenido de las guías.');
+
+  if (estado.bloque) {
+    const faltan = await faltanCampos(TIPO_BLOQUE, CAMPOS_BLOQUE);
+    if (faltan.length) pendientes.push(`Campos que faltan en los bloques: ${faltan.join(', ')}.`);
+  }
+  if (estado.guia) {
+    const faltan = await faltanCampos(TIPO_GUIA, CAMPOS_GUIA);
+    if (faltan.length) pendientes.push(`Campos que faltan en las guías: ${faltan.join(', ')}.`);
+  }
+
+  if (!(await existeConfig())) pendientes.push('El sitio donde se guarda la configuración.');
+
+  return { estado, pendientes };
+}
 
 export async function estadoEstructura() {
   const datos = await gql(DEFINICIONES);

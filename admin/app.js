@@ -1,15 +1,15 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609160610';
+import { estaEmbebida } from './api.js?v=202609160710';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
-} from './colores.js?v=202609160610';
-import { leerConfig, guardarOrdenColores } from './config.js?v=202609160610';
+} from './colores.js?v=202609160710';
+import { leerConfig, guardarOrdenColores } from './config.js?v=202609160710';
 import {
-  estadoEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
+  estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, NOMBRE_TIPO,
-} from './guias.js?v=202609160610';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609160610';
+} from './guias.js?v=202609160710';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609160710';
 
 /* La version sale de la URL con la que se cargo este archivo, no de una
  * constante escrita a mano: asi lo que se muestra es siempre lo que el navegador
@@ -180,10 +180,42 @@ async function pintarColores() {
   });
 }
 
+/* Se ofrece donde el usuario se topa con el problema, no solo en la pantalla de
+ * inicio: si falta un campo, el error aparece al guardar, y mandar a la persona
+ * a buscar otro botón en otra pantalla es una forma de perderla. */
+function tarjetaPendientes(pendientes, alTerminar) {
+  if (!pendientes.length) return '';
+  return `
+    <section class="tarjeta" id="tarjeta-pendientes">
+      <p><strong>Falta parte de la estructura en tu tienda.</strong> Se va a crear:</p>
+      <ul>${pendientes.map((t) => `<li>${escapar(t)}</li>`).join('')}</ul>
+      <p class="ayuda">Se puede pulsar las veces que haga falta: no duplica lo que ya existe.</p>
+      <div class="acciones"><button class="principal" id="crear">Crear lo que falta</button></div>
+    </section>`;
+}
+
+function conectarPendientes(alTerminar) {
+  const boton = document.getElementById('crear');
+  if (!boton) return;
+  boton.addEventListener('click', async () => {
+    boton.disabled = true;
+    boton.textContent = 'Creando…';
+    try {
+      const pasos = await crearEstructura();
+      avisar(pasos.length ? pasos.join(' · ') : 'Ya estaba todo creado');
+      await alTerminar();
+    } catch (error) {
+      avisar(error.message, true);
+      boton.disabled = false;
+      boton.textContent = 'Crear lo que falta';
+    }
+  });
+}
+
 async function pintarGuias() {
   pantalla.innerHTML = '<p class="cargando">Comprobando la estructura…</p>';
 
-  const estado = await estadoEstructura();
+  const { estado, pendientes } = await revisarEstructura();
   const hayDefiniciones = Boolean(estado.bloque && estado.guia);
   const guias = hayDefiniciones ? await cargarGuias() : [];
   const faltan = GUIAS_INICIALES.filter((g) => !guias.some((x) => x.handle === g.handle));
@@ -191,7 +223,7 @@ async function pintarGuias() {
   /* La estructura son dos cosas: las definiciones y las guías. Mirar solo las
    * definiciones dejaba la pantalla vacía y sin salida cuando existían las
    * primeras pero no las segundas. */
-  const completa = hayDefiniciones && faltan.length === 0;
+  const porHacer = [...pendientes, ...faltan.map((g) => `La guía «${g.nombre}».`)];
 
   const listado = guias.length
     ? guias.map((g) => `
@@ -201,22 +233,10 @@ async function pintarGuias() {
         </section>`).join('')
     : '';
 
-  const pendientes = [];
-  if (!hayDefiniciones) pendientes.push('Los tipos de contenido donde se guardan las guías.');
-  for (const g of faltan) pendientes.push(`La guía «${g.nombre}».`);
-
-  const tarjetaSetup = completa ? '' : `
-    <section class="tarjeta">
-      <p><strong>Falta parte de la estructura.</strong> Se va a crear:</p>
-      <ul>${pendientes.map((t) => `<li>${escapar(t)}</li>`).join('')}</ul>
-      <p class="ayuda">Se puede pulsar las veces que haga falta: no duplica lo que ya existe.</p>
-      <div class="acciones"><button class="principal" id="crear">Crear lo que falta</button></div>
-    </section>`;
-
   pantalla.innerHTML = `
     <h1>Guías de tallas</h1>
     <p class="subtitulo">Cada guía se compone de bloques. Un bloque puede existir solo en un idioma.</p>
-    ${tarjetaSetup}
+    ${tarjetaPendientes(porHacer)}
     ${listado}`;
 
   pantalla.querySelectorAll('[data-guia]').forEach((t) => {
@@ -227,22 +247,7 @@ async function pintarGuias() {
     });
   });
 
-  const boton = document.getElementById('crear');
-  if (!boton) return;
-
-  boton.addEventListener('click', async () => {
-    boton.disabled = true;
-    boton.textContent = 'Creando…';
-    try {
-      const pasos = await crearEstructura();
-      avisar(pasos.length ? pasos.join(' · ') : 'Ya estaba todo creado');
-      await pintarGuias();
-    } catch (error) {
-      avisar(error.message, true);
-      boton.disabled = false;
-      boton.textContent = 'Crear lo que falta';
-    }
-  });
+  conectarPendientes(pintarGuias);
 }
 
 function tarjetaBloque(b, i, total) {
@@ -287,13 +292,14 @@ function tarjetaBloque(b, i, total) {
 async function pintarEditor(handle) {
   pantalla.innerHTML = '<p class="cargando">Cargando la guía…</p>';
 
-  const guias = await cargarGuias();
+  const [guias, revision] = await Promise.all([cargarGuias(), revisarEstructura()]);
   const guia = guias.find((g) => g.handle === handle);
   if (!guia) { await pintarGuias(); return; }
 
   pantalla.innerHTML = `
     <button class="volver" id="volver">← Guías de tallas</button>
     <h1>${escapar(guia.nombre)}</h1>
+    ${tarjetaPendientes(revision.pendientes)}
     <p class="subtitulo">
       Los bloques se muestran en la tienda en este orden. Cada uno puede existir
       solo en un idioma: desmarca la casilla del idioma donde no quieras que aparezca.
@@ -361,6 +367,7 @@ async function pintarEditor(handle) {
   });
 
   document.getElementById('volver').addEventListener('click', pintarGuias);
+  conectarPendientes(() => pintarEditor(handle));
 
   document.getElementById('guardar-titulo').addEventListener('click', async (e) => {
     e.target.disabled = true;
