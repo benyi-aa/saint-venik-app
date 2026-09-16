@@ -2,7 +2,7 @@
 
 name = "Color & Size Picker"
 handle = "saint-venik"
-application_url = "https://diegogardilcic.github.io/saint-venik-app/admin/"
+application_url = "https://benyi-aa.github.io/saint-venik-app/admin/"
 embedded = true
 client_id = "feb92266442449d38f005beb90710f05"
 
@@ -25,7 +25,7 @@ scopes = "write_products, write_metaobjects, write_metaobject_definitions, write
 use_legacy_install_flow = false
 
 [auth]
-redirect_urls = [ "https://diegogardilcic.github.io/saint-venik-app/admin/" ]
+redirect_urls = [ "https://benyi-aa.github.io/saint-venik-app/admin/" ]
 
 [webhooks]
 api_version = "2026-10"
