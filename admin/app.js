@@ -2,7 +2,7 @@
  * archivos estaticos que el admin de Shopify carga embebidos. */
 import { estaEmbebida } from './api.js';
 import { cargarColores, guardarColor, problemasDe } from './colores.js';
-import { estadoEstructura, crearEstructura, cargarGuias } from './guias.js';
+import { estadoEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES } from './guias.js';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -95,50 +95,57 @@ async function pintarGuias() {
   pantalla.innerHTML = '<p class="cargando">Comprobando la estructura…</p>';
 
   const estado = await estadoEstructura();
+  const hayDefiniciones = Boolean(estado.bloque && estado.guia);
+  const guias = hayDefiniciones ? await cargarGuias() : [];
+  const faltan = GUIAS_INICIALES.filter((g) => !guias.some((x) => x.handle === g.handle));
 
-  if (!estado.bloque || !estado.guia) {
-    pantalla.innerHTML = `
-      <h1>Guías de tallas</h1>
-      <p class="subtitulo">
-        Todavía no existe la estructura donde se guardan las guías. Se crea una vez
-        y queda en tu tienda: dos tipos de contenido y las tres guías vacías,
-        listas para escribir dentro.
-      </p>
-      <section class="tarjeta">
-        <p>Se van a crear:</p>
-        <ul>
-          <li><strong>Bloque de guía de tallas</strong> — texto, imagen, vídeo o PDF, con versión en español y en inglés y una casilla de visibilidad por idioma.</li>
-          <li><strong>Guía de tallas</strong> — con sus bloques en orden.</li>
-          <li>Las tres guías: Anillos, Cadenas y colgantes, Pulseras.</li>
-        </ul>
-        <div class="acciones"><button class="principal" id="crear">Crear estructura</button></div>
-      </section>`;
+  /* La estructura son dos cosas: las definiciones y las guías. Mirar solo las
+   * definiciones dejaba la pantalla vacía y sin salida cuando existían las
+   * primeras pero no las segundas. */
+  const completa = hayDefiniciones && faltan.length === 0;
 
-    document.getElementById('crear').addEventListener('click', async (e) => {
-      e.target.disabled = true;
-      e.target.textContent = 'Creando…';
-      try {
-        const pasos = await crearEstructura();
-        avisar(pasos.length ? pasos.join(' · ') : 'Ya estaba todo creado');
-        await pintarGuias();
-      } catch (error) {
-        avisar(error.message, true);
-        e.target.disabled = false;
-        e.target.textContent = 'Crear estructura';
-      }
-    });
-    return;
-  }
+  const listado = guias.length
+    ? guias.map((g) => `
+        <section class="tarjeta">
+          <h2 style="margin:0 0 4px;font-size:16px;">${escapar(g.nombre)}</h2>
+          <p class="ayuda">${g.bloques.length} ${g.bloques.length === 1 ? 'bloque' : 'bloques'}</p>
+        </section>`).join('')
+    : '';
 
-  const guias = await cargarGuias();
+  const pendientes = [];
+  if (!hayDefiniciones) pendientes.push('Los tipos de contenido donde se guardan las guías.');
+  for (const g of faltan) pendientes.push(`La guía «${g.nombre}».`);
+
+  const tarjetaSetup = completa ? '' : `
+    <section class="tarjeta">
+      <p><strong>Falta parte de la estructura.</strong> Se va a crear:</p>
+      <ul>${pendientes.map((t) => `<li>${escapar(t)}</li>`).join('')}</ul>
+      <p class="ayuda">Se puede pulsar las veces que haga falta: no duplica lo que ya existe.</p>
+      <div class="acciones"><button class="principal" id="crear">Crear lo que falta</button></div>
+    </section>`;
+
   pantalla.innerHTML = `
     <h1>Guías de tallas</h1>
     <p class="subtitulo">Cada guía se compone de bloques. Un bloque puede existir solo en un idioma.</p>
-    ${guias.map((g) => `
-      <section class="tarjeta">
-        <h2 style="margin:0 0 4px;font-size:16px;">${escapar(g.nombre)}</h2>
-        <p class="ayuda">${g.bloques.length} ${g.bloques.length === 1 ? 'bloque' : 'bloques'}</p>
-      </section>`).join('')}`;
+    ${tarjetaSetup}
+    ${listado}`;
+
+  const boton = document.getElementById('crear');
+  if (!boton) return;
+
+  boton.addEventListener('click', async () => {
+    boton.disabled = true;
+    boton.textContent = 'Creando…';
+    try {
+      const pasos = await crearEstructura();
+      avisar(pasos.length ? pasos.join(' · ') : 'Ya estaba todo creado');
+      await pintarGuias();
+    } catch (error) {
+      avisar(error.message, true);
+      boton.disabled = false;
+      boton.textContent = 'Crear lo que falta';
+    }
+  });
 }
 
 const PANTALLAS = {
