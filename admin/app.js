@@ -1,15 +1,15 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609160520';
+import { estaEmbebida } from './api.js?v=202609160610';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
-} from './colores.js?v=202609160520';
-import { leerConfig, guardarOrdenColores } from './config.js?v=202609160520';
+} from './colores.js?v=202609160610';
+import { leerConfig, guardarOrdenColores } from './config.js?v=202609160610';
 import {
   estadoEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, NOMBRE_TIPO,
-} from './guias.js?v=202609160520';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609160520';
+} from './guias.js?v=202609160610';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609160610';
 
 /* La version sale de la URL con la que se cargo este archivo, no de una
  * constante escrita a mano: asi lo que se muestra es siempre lo que el navegador
@@ -176,6 +176,71 @@ async function pintarColores() {
     } catch (error) {
       avisar(error.message, true);
       e.target.disabled = false;
+    }
+  });
+}
+
+async function pintarGuias() {
+  pantalla.innerHTML = '<p class="cargando">Comprobando la estructura…</p>';
+
+  const estado = await estadoEstructura();
+  const hayDefiniciones = Boolean(estado.bloque && estado.guia);
+  const guias = hayDefiniciones ? await cargarGuias() : [];
+  const faltan = GUIAS_INICIALES.filter((g) => !guias.some((x) => x.handle === g.handle));
+
+  /* La estructura son dos cosas: las definiciones y las guías. Mirar solo las
+   * definiciones dejaba la pantalla vacía y sin salida cuando existían las
+   * primeras pero no las segundas. */
+  const completa = hayDefiniciones && faltan.length === 0;
+
+  const listado = guias.length
+    ? guias.map((g) => `
+        <section class="tarjeta tarjeta--pulsable" data-guia="${escapar(g.handle)}" role="button" tabindex="0">
+          <h2 style="margin:0 0 4px;font-size:16px;">${escapar(g.nombre)}</h2>
+          <p class="ayuda">${g.bloques.length} ${g.bloques.length === 1 ? 'bloque' : 'bloques'} · editar</p>
+        </section>`).join('')
+    : '';
+
+  const pendientes = [];
+  if (!hayDefiniciones) pendientes.push('Los tipos de contenido donde se guardan las guías.');
+  for (const g of faltan) pendientes.push(`La guía «${g.nombre}».`);
+
+  const tarjetaSetup = completa ? '' : `
+    <section class="tarjeta">
+      <p><strong>Falta parte de la estructura.</strong> Se va a crear:</p>
+      <ul>${pendientes.map((t) => `<li>${escapar(t)}</li>`).join('')}</ul>
+      <p class="ayuda">Se puede pulsar las veces que haga falta: no duplica lo que ya existe.</p>
+      <div class="acciones"><button class="principal" id="crear">Crear lo que falta</button></div>
+    </section>`;
+
+  pantalla.innerHTML = `
+    <h1>Guías de tallas</h1>
+    <p class="subtitulo">Cada guía se compone de bloques. Un bloque puede existir solo en un idioma.</p>
+    ${tarjetaSetup}
+    ${listado}`;
+
+  pantalla.querySelectorAll('[data-guia]').forEach((t) => {
+    const abrir = () => pintarEditor(t.dataset.guia);
+    t.addEventListener('click', abrir);
+    t.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(); }
+    });
+  });
+
+  const boton = document.getElementById('crear');
+  if (!boton) return;
+
+  boton.addEventListener('click', async () => {
+    boton.disabled = true;
+    boton.textContent = 'Creando…';
+    try {
+      const pasos = await crearEstructura();
+      avisar(pasos.length ? pasos.join(' · ') : 'Ya estaba todo creado');
+      await pintarGuias();
+    } catch (error) {
+      avisar(error.message, true);
+      boton.disabled = false;
+      boton.textContent = 'Crear lo que falta';
     }
   });
 }

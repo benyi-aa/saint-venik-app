@@ -5,7 +5,7 @@
  * color es la etiqueta: el producto lleva `oro` o `acero-inox`, y la entrada
  * guarda esa misma etiqueta en el campo `etiqueta`.
  */
-import { gql, comprobarErrores } from './api.js?v=202609160520';
+import { gql, comprobarErrores } from './api.js?v=202609160610';
 
 const CONSULTA_COLORES = `
   query Colores {
