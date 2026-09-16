@@ -26,9 +26,9 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161410';
-import { asegurarConfig, existeConfig } from './config.js?v=202609161410';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161410';
+import { gql, comprobarErrores } from './api.js?v=202609161510';
+import { asegurarConfig, existeConfig } from './config.js?v=202609161510';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161510';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
@@ -36,9 +36,9 @@ export const TIPOS = ['texto', 'html', 'imagen', 'video', 'pdf'];
 export const TIPO_GUIA = 'guia_de_tallas';
 
 export const GUIAS_INICIALES = [
-  { handle: 'anillos', nombre: 'Anillos' },
-  { handle: 'cadenas-y-colgantes', nombre: 'Cadenas y colgantes' },
-  { handle: 'pulseras', nombre: 'Pulseras' },
+  { handle: 'anillos', nombre: 'Anillos', palabras: 'anillo, ring' },
+  { handle: 'cadenas-y-colgantes', nombre: 'Cadenas y colgantes', palabras: 'cadena, collar, chain, colgante, pendant, dije' },
+  { handle: 'pulseras', nombre: 'Pulseras', palabras: 'pulsera, bracelet' },
 ];
 
 const DEFINICIONES = `
@@ -123,6 +123,7 @@ const CAMPOS_BLOQUE = [
 const CAMPOS_GUIA = [
   { key: 'nombre', name: 'Nombre en español', type: 'single_line_text_field', required: true },
   { key: 'nombre_en', name: 'Nombre en inglés', type: 'single_line_text_field' },
+  { key: 'palabras_clave', name: 'Palabras clave', type: 'single_line_text_field' },
   /* Sin la validación que lo ata a bloque_guia, Shopify rechaza el campo. La
    * definición del bloque no se conoce hasta ejecutar, así que se completa
    * justo antes de crearlo. */
@@ -219,6 +220,7 @@ export async function crearEstructura() {
         fieldDefinitions: [
           { key: 'nombre', name: 'Nombre en español', type: 'single_line_text_field', required: true },
           { key: 'nombre_en', name: 'Nombre en inglés', type: 'single_line_text_field' },
+          { key: 'palabras_clave', name: 'Palabras clave', type: 'single_line_text_field' },
           {
             key: 'bloques', name: 'Bloques', type: 'list.metaobject_reference',
             validations: [{ name: 'metaobject_definition_id', value: idBloque }],
@@ -258,14 +260,34 @@ export async function crearEstructura() {
   const idGuia = estado.guia ?? (await estadoEstructura()).guia;
   if (idGuia) await completarCampos(TIPO_GUIA, idGuia, CAMPOS_GUIA, pasos, idBloque);
 
-  const existentes = new Set((await cargarGuias()).map((g) => g.handle));
+  const yaEstan = await cargarGuias();
+
+  /* Una guía creada por una versión anterior no tiene palabras clave, y sin
+   * ellas ningún producto la encuentra. Se siembran solo si están vacías, para
+   * no pisar lo que el usuario haya escrito. */
+  for (const existente of yaEstan) {
+    if (existente.palabras) continue;
+    const inicial = GUIAS_INICIALES.find((g) => g.handle === existente.handle);
+    if (!inicial) continue;
+    await guardarGuia(existente.id, {
+      nombre: existente.nombre,
+      nombreEn: existente.nombreEn,
+      palabras: inicial.palabras,
+    });
+    pasos.push(`Palabras clave de «${existente.nombre}» rellenadas`);
+  }
+
+  const existentes = new Set(yaEstan.map((g) => g.handle));
   for (const guia of GUIAS_INICIALES) {
     if (existentes.has(guia.handle)) continue;
     const r = await gql(CREAR_ENTRADA, {
       metaobject: {
         type: TIPO_GUIA,
         handle: guia.handle,
-        fields: [{ key: 'nombre', value: guia.nombre }],
+        fields: [
+          { key: 'nombre', value: guia.nombre },
+          { key: 'palabras_clave', value: guia.palabras },
+        ],
       },
     });
     comprobarErrores(r, 'metaobjectCreate');
@@ -309,6 +331,7 @@ export async function cargarGuias() {
       handle: n.handle,
       nombre: campos.nombre?.value ?? n.handle,
       nombreEn: campos.nombre_en?.value ?? '',
+      palabras: campos.palabras_clave?.value ?? '',
       bloques: (campos.bloques?.references?.nodes ?? []).map((b) => {
         const c = Object.fromEntries(b.fields.map((f) => [f.key, f]));
         return {
@@ -440,13 +463,14 @@ export async function moverBloque(guia, id, direccion) {
 }
 
 
-export async function guardarGuia(id, { nombre, nombreEn }) {
+export async function guardarGuia(id, { nombre, nombreEn, palabras }) {
   const r = await gql(ACTUALIZAR_ENTRADA, {
     id,
     metaobject: {
       fields: [
         { key: 'nombre', value: nombre },
         { key: 'nombre_en', value: nombreEn ?? '' },
+        { key: 'palabras_clave', value: palabras ?? '' },
       ],
     },
   });
@@ -463,4 +487,58 @@ export async function guardarArchivoDeBloque(id, campo, idArchivo) {
     metaobject: { fields: [{ key: campo, value: idArchivo ?? '' }] },
   });
   return comprobarErrores(r, 'metaobjectUpdate');
+}
+
+
+/* ---------------------------------------------------------------------------
+ * A que guia pertenece un producto
+ *
+ * Se decide por palabras clave contra el tipo, el titulo y las etiquetas del
+ * producto. Es la misma regla que el tema ya usa hoy, y evita tener que asignar
+ * una guia a mano a 154 productos: un producto nuevo la encuentra solo.
+ * ------------------------------------------------------------------------- */
+
+const PRODUCTOS = `
+  query Productos($cursor: String) {
+    products(first: 100, after: $cursor) {
+      pageInfo { hasNextPage endCursor }
+      nodes { id title productType tags }
+    }
+  }
+`;
+
+export function coincide(producto, palabras) {
+  const texto = [producto.productType, producto.title, ...(producto.tags ?? [])]
+    .join(' ')
+    .toLowerCase();
+  return palabras
+    .split(',')
+    .map((p) => p.trim().toLowerCase())
+    .filter(Boolean)
+    .some((p) => texto.includes(p));
+}
+
+/* Bajo demanda, no al cargar la pantalla: recorrer el catalogo entero cuesta
+ * varias llamadas y no hace falta salvo que se quiera comprobar. */
+export async function contarCoincidencias(guias) {
+  const productos = [];
+  let cursor = null;
+  do {
+    const d = await gql(PRODUCTOS, { cursor });
+    productos.push(...d.products.nodes);
+    cursor = d.products.pageInfo.hasNextPage ? d.products.pageInfo.endCursor : null;
+  } while (cursor);
+
+  const conteo = new Map(guias.map((g) => [g.handle, 0]));
+  let sinGuia = 0;
+  let ambiguos = 0;
+
+  for (const producto of productos) {
+    const suyas = guias.filter((g) => g.palabras && coincide(producto, g.palabras));
+    if (!suyas.length) { sinGuia++; continue; }
+    if (suyas.length > 1) ambiguos++;
+    conteo.set(suyas[0].handle, conteo.get(suyas[0].handle) + 1);
+  }
+
+  return { total: productos.length, conteo, sinGuia, ambiguos };
 }

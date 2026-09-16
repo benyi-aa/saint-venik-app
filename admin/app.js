@@ -1,21 +1,22 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161410';
+import { estaEmbebida } from './api.js?v=202609161510';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609161410';
-import { leerConfig, guardarOrdenColores } from './config.js?v=202609161410';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161410';
+} from './colores.js?v=202609161510';
+import { leerConfig, guardarOrdenColores } from './config.js?v=202609161510';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161510';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
-} from './guias.js?v=202609161410';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161410';
+  contarCoincidencias,
+} from './guias.js?v=202609161510';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161510';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609161410';
+const VERSION = '202609161510';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -419,7 +420,21 @@ async function pintarEditor(handle) {
         </div>
       </div>
       <p class="ayuda">Es el encabezado de la ventana. Si dejas el inglés vacío, se usa el español.</p>
-      <div class="acciones"><button class="principal" id="guardar-titulo">Guardar título</button></div>
+
+      <div style="margin-top:16px;">
+        <label for="palabras">Productos que usan esta guía</label>
+        <input type="text" id="palabras" value="${escapar(guia.palabras)}" placeholder="anillo, ring" />
+        <p class="ayuda">
+          Palabras separadas por comas. Un producto usa esta guía si alguna aparece en su
+          tipo, su título o sus etiquetas. Así un producto nuevo la encuentra solo, sin
+          tener que asignársela a mano.
+        </p>
+      </div>
+
+      <div class="acciones">
+        <button class="principal" id="guardar-titulo">Guardar</button>
+        <button class="secundario" id="comprobar">Comprobar qué productos coinciden</button>
+      </div>
     </section>
 
     <section class="tarjeta">
@@ -474,6 +489,27 @@ async function pintarEditor(handle) {
   document.getElementById('volver').addEventListener('click', pintarGuias);
   conectarPendientes(() => pintarEditor(handle));
 
+  /* A demanda: recorrer el catálogo entero son varias llamadas, y no hace falta
+   * salvo que se quiera comprobar el reparto. */
+  document.getElementById('comprobar').addEventListener('click', async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = 'Revisando el catálogo…';
+    try {
+      const guias = await cargarGuias();
+      const r = await contarCoincidencias(guias);
+      const mias = r.conteo.get(handle) ?? 0;
+      const partes = [`${mias} de ${r.total} productos usan esta guía`];
+      if (r.sinGuia) partes.push(`${r.sinGuia} no encajan en ninguna`);
+      if (r.ambiguos) partes.push(`${r.ambiguos} encajan en más de una y se quedan con la primera`);
+      avisar(partes.join(' · '));
+    } catch (error) {
+      avisar(error.message, true);
+    } finally {
+      e.target.disabled = false;
+      e.target.textContent = 'Comprobar qué productos coinciden';
+    }
+  });
+
   document.getElementById('guardar-titulo').addEventListener('click', async (e) => {
     e.target.disabled = true;
     e.target.textContent = 'Guardando…';
@@ -481,8 +517,9 @@ async function pintarEditor(handle) {
       await guardarGuia(guia.id, {
         nombre: document.getElementById('nombre-es').value.trim(),
         nombreEn: document.getElementById('nombre-en').value.trim(),
+        palabras: document.getElementById('palabras').value.trim(),
       });
-      avisar('Título guardado');
+      avisar('Guía guardada');
       await pintarEditor(handle);
     } catch (error) {
       avisar(error.message, true);
