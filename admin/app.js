@@ -1,22 +1,23 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161810';
+import { estaEmbebida } from './api.js?v=202609161910';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609161810';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton } from './config.js?v=202609161810';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161810';
+} from './colores.js?v=202609161910';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton } from './config.js?v=202609161910';
+import { buscarProductos, vincular, desvincular, sinHermano } from './productos.js?v=202609161910';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161910';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto,
-} from './guias.js?v=202609161810';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161810';
+} from './guias.js?v=202609161910';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161910';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609161810';
+const VERSION = '202609161910';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -732,8 +733,145 @@ async function pintarApariencia() {
   });
 }
 
+let estadoProductos = { texto: '', soloSinHermano: false };
+
+function tarjetaProducto(p, etiquetasColor) {
+  const falta = sinHermano(p, etiquetasColor);
+  const hermanos = p.hermanos.length
+    ? p.hermanos.map((h) => `
+        <li>${escapar(h.titulo)}
+          <button class="secundario secundario--peligro" data-desvincular="${escapar(h.id)}">Desvincular</button>
+        </li>`).join('')
+    : '';
+
+  return `
+    <section class="tarjeta" data-producto="${escapar(p.id)}">
+      <div class="color">
+        ${p.imagen ? `<img class="producto__foto" src="${escapar(p.imagen)}" alt="" />` : '<div class="producto__foto"></div>'}
+        <div style="flex:1 1 auto;">
+          <p class="producto__titulo">${escapar(p.titulo)}${p.activo ? '' : ' <span class="ayuda">(borrador)</span>'}</p>
+          <p class="ayuda">${p.etiquetas.length ? escapar(p.etiquetas.join(', ')) : 'sin etiquetas'}</p>
+
+          ${hermanos
+            ? `<p class="ayuda" style="margin-top:8px;">Hermano de color:</p><ul class="producto__hermanos">${hermanos}</ul>`
+            : `<p class="${falta ? 'problema' : 'ayuda'}" style="margin-top:8px;">${
+                falta
+                  ? 'Tiene etiqueta de color pero no tiene hermano: en su ficha no aparecerá el selector.'
+                  : 'Sin hermano de color.'
+              }</p>`}
+
+          <div class="acciones">
+            <input type="text" data-vincular-texto placeholder="Buscar el otro color por nombre…" />
+            <button class="secundario" data-vincular-buscar>Buscar</button>
+          </div>
+          <div data-vincular-resultados></div>
+        </div>
+      </div>
+    </section>`;
+}
+
+async function pintarProductos() {
+  pantalla.innerHTML = '<p class="cargando">Buscando productos…</p>';
+
+  const [productos, config] = await Promise.all([
+    buscarProductos(estadoProductos.texto),
+    leerConfig(),
+  ]);
+
+  const visibles = estadoProductos.soloSinHermano
+    ? productos.filter((p) => sinHermano(p, config.ordenColores))
+    : productos;
+
+  pantalla.innerHTML = `
+    <h1>Productos</h1>
+    <p class="subtitulo">
+      Aquí se dice qué producto es el mismo modelo en otro color. Es lo que hace
+      aparecer el selector de color en la ficha, y se escribe siempre en los dos.
+    </p>
+
+    <section class="tarjeta">
+      <div class="acciones acciones--envolver">
+        <input type="text" id="buscar" value="${escapar(estadoProductos.texto)}" placeholder="Buscar por nombre…" />
+        <button class="principal" id="buscar-boton">Buscar</button>
+        <label class="casilla">
+          <input type="checkbox" id="solo-sin" ${estadoProductos.soloSinHermano ? 'checked' : ''} />
+          Solo los que tienen color pero no hermano
+        </label>
+      </div>
+      <p class="ayuda">Se muestran hasta 50 resultados.</p>
+    </section>
+
+    ${visibles.length
+      ? visibles.map((p) => tarjetaProducto(p, config.ordenColores)).join('')
+      : '<div class="vacio">Ningún producto coincide.</div>'}`;
+
+  const buscar = () => {
+    estadoProductos.texto = document.getElementById('buscar').value.trim();
+    estadoProductos.soloSinHermano = document.getElementById('solo-sin').checked;
+    pintarProductos();
+  };
+  document.getElementById('buscar-boton').addEventListener('click', buscar);
+  document.getElementById('buscar').addEventListener('keydown', (e) => { if (e.key === 'Enter') buscar(); });
+  document.getElementById('solo-sin').addEventListener('change', buscar);
+
+  pantalla.querySelectorAll('[data-producto]').forEach((tarjeta) => {
+    const id = tarjeta.dataset.producto;
+    const producto = productos.find((p) => p.id === id);
+
+    tarjeta.querySelectorAll('[data-desvincular]').forEach((boton) => {
+      boton.addEventListener('click', async () => {
+        boton.disabled = true;
+        try {
+          await desvincular(producto, boton.dataset.desvincular);
+          avisar('Desvinculados los dos productos');
+          await pintarProductos();
+        } catch (error) {
+          avisar(error.message, true);
+          boton.disabled = false;
+        }
+      });
+    });
+
+    const caja = tarjeta.querySelector('[data-vincular-resultados]');
+    tarjeta.querySelector('[data-vincular-buscar]').addEventListener('click', async (e) => {
+      const texto = tarjeta.querySelector('[data-vincular-texto]').value.trim();
+      if (!texto) { avisar('Escribe el nombre del otro color', true); return; }
+      e.target.disabled = true;
+      try {
+        const candidatos = (await buscarProductos(texto)).filter((c) => c.id !== id);
+        caja.innerHTML = candidatos.length
+          ? `<ul class="producto__hermanos">${candidatos.slice(0, 10).map((c) => `
+              <li>${escapar(c.titulo)}
+                <button class="secundario" data-elegir="${escapar(c.id)}">Vincular</button>
+              </li>`).join('')}</ul>`
+          : '<p class="ayuda">Ningún producto coincide.</p>';
+
+        caja.querySelectorAll('[data-elegir]').forEach((boton) => {
+          boton.addEventListener('click', async () => {
+            boton.disabled = true;
+            try {
+              const otro = candidatos.find((c) => c.id === boton.dataset.elegir);
+              await vincular(producto, otro);
+              avisar('Vinculados en los dos sentidos');
+              await pintarProductos();
+            } catch (error) {
+              avisar(error.message, true);
+              boton.disabled = false;
+            }
+          });
+        });
+      } catch (error) {
+        avisar(error.message, true);
+      } finally {
+        e.target.disabled = false;
+      }
+    });
+  });
+}
+
 const PANTALLAS = {
   colores: pintarColores,
+  productos: pintarProductos,
   guias: pintarGuias,
   apariencia: pintarApariencia,
 };

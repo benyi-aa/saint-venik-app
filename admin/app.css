@@ -308,3 +308,24 @@ textarea.codigo {
   font-size: 13px;
   line-height: 1.7;
 }
+
+.producto__foto {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #ececec;
+}
+
+.producto__titulo { margin: 0 0 2px; font-weight: 600; }
+
+.producto__hermanos {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 2;
+}
+
+.producto__hermanos li { display: list-item; }
+.producto__hermanos button { margin-left: 8px; }
