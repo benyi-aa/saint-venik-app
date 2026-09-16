@@ -1,0 +1,90 @@
+/* Saint Venik · Selector de talla */
+
+.sv-sizes {
+  margin-top: var(--sv-pt, 8px);
+  margin-bottom: var(--sv-pb, 16px);
+}
+
+.sv-sizes__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4em;
+  margin-bottom: 0.7em;
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sv-sizes__label { opacity: 0.65; }
+.sv-sizes__current { font-weight: 600; }
+
+.sv-sizes__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sv-gap, 8px);
+}
+
+.sv-sizes--al-centro .sv-sizes__list,
+.sv-sizes--al-centro .sv-sizes__heading { justify-content: center; }
+
+.sv-sizes--al-derecha .sv-sizes__list,
+.sv-sizes--al-derecha .sv-sizes__heading { justify-content: flex-end; }
+
+.sv-sizes__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.4em;
+  padding: 0.65em 0.9em;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  color: inherit;
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.sv-sizes__item:hover { border-color: var(--sv-ring, #111111); }
+
+.sv-sizes__item:focus-visible {
+  outline: 2px solid var(--sv-ring, #111111);
+  outline-offset: 3px;
+}
+
+.sv-sizes__item.is-selected {
+  background-color: var(--sv-ring, #111111);
+  border-color: var(--sv-ring, #111111);
+  color: #ffffff;
+}
+
+.sv-sizes__item.is-soldout {
+  opacity: 0.45;
+  border-style: dashed;
+}
+
+/* La diagonal marca el agotado sin depender solo del color. */
+.sv-sizes__item.is-soldout::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.5px),
+    currentColor calc(50% - 0.5px),
+    currentColor calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-sizes__item { transition: none; }
+}

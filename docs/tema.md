@@ -5,7 +5,7 @@ cualquier tema donde se quiera usar el bloque. Probado en
 **Saint Venik · bloques app (pruebas)** (id 160802897967), duplicado del tema en
 vivo *Copia de theme-export-saintvenik-cl-working-q1-…*
 
-## 1. Añadir el bloque a las plantillas de producto
+## 1. Añadir los bloques a las plantillas de producto
 
 Tres plantillas tienen productos asignados: `acero-inox` (74), `orov2` (80) e
 `ice` (9). En cada `templates/product.<nombre>.json`, dentro de la sección
@@ -14,6 +14,10 @@ Tres plantillas tienen productos asignados: `acero-inox` (74), `orov2` (80) e
 ```json
 "sv_selector_color": {
   "type": "shopify://apps/saint-venik/blocks/selector-color/01a0a760-9c51-786e-8540-94248eb04d7c",
+  "settings": {}
+},
+"sv_selector_talla": {
+  "type": "shopify://apps/saint-venik/blocks/selector-talla/01a0a760-9c51-786e-8540-94248eb04d7c",
   "settings": {}
 }
 ```
@@ -66,3 +70,15 @@ imagen pero no la etiqueta; `oro-1` y `plateado-1` llevan la etiqueta y, desde e
 15-09-2026, también la imagen. El bloque empareja por etiqueta, así que usa las
 terminadas en `-1`. Las otras dos marcan 0 referencias y se pueden borrar.
 El campo `muestra` (color plano) está vacío en las cuatro: la muestra es la imagen.
+
+## 4. Quitar el selector de talla del tema
+
+El bloque `variant_picker` del tema pinta la misma fila de tallas que el bloque
+de la app, y los dos escriben en el mismo `select[name="id"]` — pero el del tema
+no repinta su estado cuando el cambio no viene de él, así que se quedan
+discrepando a la vista del cliente. Se saca `variant_picker` de `block_order`
+en las tres plantillas.
+
+El `select[name="id"]` **no** lo pinta ese bloque sino el formulario del
+producto, así que sigue ahí y el botón de compra funciona igual. Verificado en
+`anillo-signet` tras retirarlo.

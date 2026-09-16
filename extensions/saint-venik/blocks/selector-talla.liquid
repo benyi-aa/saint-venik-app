@@ -1,0 +1,237 @@
+{% comment %}
+  Saint Venik · Selector de talla
+  ---------------------------------------------------------------------------
+  Lee las variantes reales del producto. No inventa tallas ni las saca de
+  metacampos: cada boton es una variante, con su disponibilidad.
+
+  El bloque maneja productos de UNA opcion de variante, que es como esta armado
+  el catalogo (los anillos son "Tamano" con 8 US y 10 US). Si un producto tuviera
+  dos o mas opciones, no dibuja nada y deja constancia en un comentario HTML, en
+  vez de mostrar algo a medias.
+
+  Cada boton es un enlace a ?variant=..., asi funciona sin JavaScript y el
+  enlace se puede compartir. Con JavaScript, elegir talla no recarga: se cambia
+  el input del formulario. Con una excepcion deliberada: si la talla elegida
+  cuesta distinto que la actual, se deja navegar, porque el precio que pinta el
+  tema se quedaria desactualizado.
+{% endcomment %}
+
+{%- if product != blank and product.has_only_default_variant == false -%}
+  {%- assign opciones = product.options_with_values -%}
+
+  {%- if opciones.size == 1 -%}
+    {%- liquid
+      assign opcion = opciones[0]
+      assign valores = opcion.values
+      assign lang = localization.language.iso_code | slice: 0, 2 | downcase
+
+      assign encabezado = block.settings.encabezado_es
+      if lang == 'en' and block.settings.encabezado_en != blank
+        assign encabezado = block.settings.encabezado_en
+      endif
+      if encabezado == blank
+        assign encabezado = opcion.name
+      endif
+
+      assign seleccionada = product.selected_or_first_available_variant
+    -%}
+
+    {%- assign ocultar = false -%}
+    {%- if block.settings.ocultar_opcion_unica and valores.size < 2 -%}
+      {%- assign ocultar = true -%}
+    {%- endif -%}
+
+    {%- unless ocultar -%}
+      <div
+        class="sv-sizes sv-sizes--al-{{ block.settings.alineacion }}"
+        style="--sv-gap: {{ block.settings.espacio }}px; --sv-ring: {{ block.settings.color_activo }}; --sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
+        data-sv-sizes
+        data-sv-recargar="{{ block.settings.recargar_al_elegir }}"
+        {{ block.shopify_attributes }}
+      >
+        {%- if block.settings.mostrar_encabezado -%}
+          <div class="sv-sizes__heading">
+            <span class="sv-sizes__label">{{ encabezado }}</span>
+            {%- if block.settings.mostrar_valor_actual -%}
+              <span class="sv-sizes__current" data-sv-current>{{ seleccionada.option1 }}</span>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <div class="sv-sizes__list" role="group" aria-label="{{ encabezado | escape }}">
+          {%- for valor in valores -%}
+            {%- assign variante = null -%}
+            {%- for v in product.variants -%}
+              {%- if v.option1 == valor -%}
+                {%- assign variante = v -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- if variante -%}
+              {%- liquid
+                assign agotada = false
+                unless variante.available
+                  assign agotada = true
+                endunless
+
+                assign saltar = false
+                if agotada and block.settings.mostrar_agotadas == false
+                  assign saltar = true
+                endif
+
+                assign es_actual = false
+                if seleccionada.id == variante.id
+                  assign es_actual = true
+                endif
+
+                assign nombre_accesible = valor
+                if agotada
+                  assign nombre_accesible = valor | append: ' — ' | append: 'sold_out' | t
+                endif
+              -%}
+
+              {%- unless saltar -%}
+                <a
+                  class="sv-sizes__item{% if es_actual %} is-selected{% endif %}{% if agotada %} is-soldout{% endif %}"
+                  href="{{ product.url }}?variant={{ variante.id }}"
+                  data-sv-variant="{{ variante.id }}"
+                  data-sv-precio="{{ variante.price }}"
+                  data-sv-valor="{{ valor | escape }}"
+                  aria-label="{{ nombre_accesible | escape }}"
+                  {% if es_actual %}aria-current="true"{% endif %}
+                >
+                  {{ valor }}
+                </a>
+              {%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endunless -%}
+
+  {%- else -%}
+    <!-- Saint Venik · selector de talla: este producto tiene {{ opciones.size }} opciones de variante y el bloque solo maneja una. No se dibuja nada a proposito. -->
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Selector de talla",
+  "target": "section",
+  "stylesheet": "sv-size-selector.css",
+  "javascript": "sv-size-selector.js",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Lee las variantes reales del producto. Si el producto no tiene variantes, el bloque no se muestra."
+    },
+    {
+      "type": "header",
+      "content": "Encabezado"
+    },
+    {
+      "type": "checkbox",
+      "id": "mostrar_encabezado",
+      "label": "Mostrar encabezado",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "encabezado_es",
+      "label": "Encabezado en español",
+      "default": "Talla"
+    },
+    {
+      "type": "text",
+      "id": "encabezado_en",
+      "label": "Encabezado en inglés",
+      "default": "Size"
+    },
+    {
+      "type": "checkbox",
+      "id": "mostrar_valor_actual",
+      "label": "Mostrar la talla elegida junto al encabezado",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Comportamiento"
+    },
+    {
+      "type": "checkbox",
+      "id": "mostrar_agotadas",
+      "label": "Mostrar las tallas agotadas",
+      "info": "Si lo desactivas, las tallas sin stock desaparecen en vez de mostrarse tachadas.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "ocultar_opcion_unica",
+      "label": "Ocultar el bloque cuando solo hay una talla",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "recargar_al_elegir",
+      "label": "Recargar la página al elegir talla",
+      "info": "Normalmente no hace falta. Actívalo si alguna vez las tallas del mismo producto tienen precios distintos y notas que el precio no se actualiza.",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Diseño"
+    },
+    {
+      "type": "color",
+      "id": "color_activo",
+      "label": "Color de la talla elegida",
+      "default": "#111111"
+    },
+    {
+      "type": "range",
+      "id": "espacio",
+      "label": "Separación",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "select",
+      "id": "alineacion",
+      "label": "Alineación",
+      "options": [
+        { "value": "izquierda", "label": "Izquierda" },
+        { "value": "centro", "label": "Centro" },
+        { "value": "derecha", "label": "Derecha" }
+      ],
+      "default": "izquierda"
+    },
+    {
+      "type": "range",
+      "id": "margen_superior",
+      "label": "Margen superior",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "margen_inferior",
+      "label": "Margen inferior",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    }
+  ]
+}
+{% endschema %}
