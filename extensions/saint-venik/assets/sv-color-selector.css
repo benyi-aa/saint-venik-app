@@ -74,10 +74,14 @@
   border-radius: 6px;
 }
 
+/* El anillo del color activo necesita un hueco del color del fondo. --sv-bg no
+ * lo define nadie, así que se toma el fondo del propio tema; el blanco queda
+ * solo como último recurso. En un tema oscuro, un hueco blanco se vería como un
+ * defecto. */
 .sv-colors__item.is-current .sv-colors__swatch {
   box-shadow:
     inset 0 0 0 1px rgba(0, 0, 0, 0.14),
-    0 0 0 2px var(--sv-bg, #ffffff),
+    0 0 0 2px var(--sv-bg, var(--color-background, #ffffff)),
     0 0 0 3px var(--sv-ring, #111111);
 }
 

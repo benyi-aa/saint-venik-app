@@ -26,9 +26,9 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161710';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609161710';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161710';
+import { gql, comprobarErrores } from './api.js?v=202609161810';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609161810';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161810';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
@@ -70,7 +70,8 @@ const CAMPOS_DE = `
   query CamposDe($type: String!) {
     metaobjectDefinitionByType(type: $type) {
       id
-      fieldDefinitions { key validations { name value } }
+      access { storefront }
+      fieldDefinitions { key type { name } validations { name value } }
     }
   }
 `;
@@ -137,6 +138,32 @@ async function faltanCampos(tipo, esperados) {
   return esperados.filter((c) => !presentes.has(c.key)).map((c) => c.key);
 }
 
+/* Que el campo exista no basta: si es de otro tipo, o si la definición no se
+ * puede leer desde la tienda, el panel diría que todo está bien y la ficha no
+ * mostraría nada. Es el modo de fallo que más cuesta diagnosticar, y el que
+ * puede aparecer al instalar en una tienda que ya tenía sus propios datos. */
+export async function problemasDeDefinicion(tipo, esperados) {
+  const d = await gql(CAMPOS_DE, { type: tipo });
+  const def = d.metaobjectDefinitionByType;
+  if (!def) return [];
+
+  const problemas = [];
+
+  if (def.access?.storefront !== 'PUBLIC_READ') {
+    problemas.push(`«${tipo}» no se puede leer desde la tienda, así que los bloques no mostrarán nada.`);
+  }
+
+  const porClave = new Map(def.fieldDefinitions.map((f) => [f.key, f.type?.name]));
+  for (const esperado of esperados) {
+    const real = porClave.get(esperado.key);
+    if (real && real !== esperado.type) {
+      problemas.push(`El campo «${esperado.key}» de «${tipo}» es ${real} y debería ser ${esperado.type}.`);
+    }
+  }
+
+  return problemas;
+}
+
 async function faltanOpcionesDeTipo() {
   const d = await gql(CAMPOS_DE, { type: TIPO_BLOQUE });
   const campo = d.metaobjectDefinitionByType?.fieldDefinitions.find((f) => f.key === 'tipo');
@@ -178,6 +205,10 @@ export async function revisarEstructura() {
   /* Los colores también son estructura. En saintvenik.com existen porque se
    * crearon a mano, pero la app tiene que poder montarlos en cualquier tienda. */
   pendientes.push(...(await faltaEstructuraColor()));
+
+  for (const [tipo, esperados] of [[TIPO_BLOQUE, CAMPOS_BLOQUE], [TIPO_GUIA, CAMPOS_GUIA]]) {
+    pendientes.push(...(await problemasDeDefinicion(tipo, esperados)));
+  }
 
   if (estado.bloque) {
     const faltan = await faltanOpcionesDeTipo();
@@ -327,6 +358,9 @@ async function completarCampos(tipo, id, esperados, pasos, idBloque = null) {
   pasos.push(`Campos añadidos a ${tipo}: ${faltan.map((c) => c.key).join(', ')}`);
 }
 
+export const TOPE_GUIAS = 20;
+export const TOPE_BLOQUES = 50;
+
 export async function cargarGuias() {
   const datos = await gql(GUIAS);
   return datos.metaobjects.nodes.map((n) => {
@@ -354,6 +388,9 @@ export async function cargarGuias() {
           orden: Number(c.orden?.value ?? 0),
         };
       }).sort((a, b2) => a.orden - b2.orden),
+      /* Si se llega al tope pudo quedarse algo fuera, y perder bloques en
+       * silencio sería peor que decirlo. */
+      puedeFaltarBloque: (campos.bloques?.references?.nodes ?? []).length >= TOPE_BLOQUES,
     };
   });
 }

@@ -1,32 +1,44 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161710';
+import { estaEmbebida } from './api.js?v=202609161810';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609161710';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton } from './config.js?v=202609161710';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161710';
+} from './colores.js?v=202609161810';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton } from './config.js?v=202609161810';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161810';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto,
-} from './guias.js?v=202609161710';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161710';
+} from './guias.js?v=202609161810';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161810';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609161710';
+const VERSION = '202609161810';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
 let temporizadorAviso = null;
 
+/* Los avisos de éxito se van solos; los errores NO. Un error que desaparece a
+ * los cuatro segundos deja a la persona sin saber qué pasó ni qué copiar. */
 function avisar(texto, esError = false) {
   aviso.textContent = texto;
   aviso.classList.toggle('is-error', esError);
   aviso.hidden = false;
   clearTimeout(temporizadorAviso);
+
+  if (esError) {
+    aviso.setAttribute('role', 'alert');
+    aviso.title = 'Pulsa para cerrar';
+    aviso.onclick = () => { aviso.hidden = true; };
+    return;
+  }
+
+  aviso.removeAttribute('role');
+  aviso.onclick = null;
   temporizadorAviso = setTimeout(() => { aviso.hidden = true; }, 4000);
 }
 
@@ -446,6 +458,8 @@ async function pintarEditor(handle) {
         <button class="principal" id="anadir">Añadir</button>
       </div>
     </section>
+
+    ${guia.puedeFaltarBloque ? '<p class="problema">Esta guía tiene 50 bloques o más y el panel muestra como máximo 50: puede que falte alguno. Conviene dividirla.</p>' : ''}
 
     <section class="tarjeta" id="informe" hidden></section>
 
