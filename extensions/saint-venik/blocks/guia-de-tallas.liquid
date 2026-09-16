@@ -1,0 +1,206 @@
+{% comment %}
+  Saint Venik · Guia de tallas
+  ---------------------------------------------------------------------------
+  Dibuja un enlace que abre una ventana con la guia que corresponde al producto.
+
+  Que guia le toca lo decide el campo `palabras_clave` de cada guia: si alguna de
+  sus palabras aparece en el tipo, el titulo o las etiquetas del producto, esa es
+  su guia. Asi un producto nuevo encuentra su guia sin que nadie se la asigne.
+
+  El contenido y el texto del boton se editan en el panel de la app, no aqui.
+  El bloque solo se coloca una vez y ya.
+
+  Si el producto no encaja en ninguna guia, o la guia no tiene bloques visibles
+  en el idioma actual, no se dibuja nada: mas vale sin boton que con un boton
+  que abre una ventana vacia.
+{% endcomment %}
+
+{%- if product != blank -%}
+  {%- liquid
+    assign lang = localization.language.iso_code | slice: 0, 2 | downcase
+
+    assign etiquetas = product.tags | join: ' '
+    assign donde_buscar = product.type | append: ' ' | append: product.title | append: ' ' | append: etiquetas | downcase
+
+    assign guia = null
+    for entrada in shop.metaobjects.guia_de_tallas.values
+      assign palabras = entrada.palabras_clave.value | downcase | split: ','
+      for palabra_cruda in palabras
+        assign palabra = palabra_cruda | strip
+        if palabra != blank and donde_buscar contains palabra
+          assign guia = entrada
+          break
+        endif
+      endfor
+      if guia != null
+        break
+      endif
+    endfor
+  -%}
+
+  {%- if guia != null -%}
+    {%- liquid
+      assign bloques = guia.bloques.value
+
+      comment
+        Cuantos bloques saldrian en este idioma. Se cuenta antes de dibujar nada
+        para no acabar con un boton que abre una ventana vacia.
+      endcomment
+      assign visibles = 0
+      assign tope = 0
+      for bloque in bloques
+        if lang == 'en'
+          assign se_muestra = bloque.mostrar_en.value
+        else
+          assign se_muestra = bloque.mostrar_es.value
+        endif
+        if se_muestra
+          assign visibles = visibles | plus: 1
+        endif
+        assign pos = bloque.orden.value | default: 0
+        if pos > tope
+          assign tope = pos
+        endif
+      endfor
+    -%}
+
+    {%- if visibles > 0 -%}
+      {%- liquid
+        assign config = shop.metaobjects.sv_configuracion.values.first
+
+        if lang == 'en'
+          assign rotulo = config.boton_guia_en.value
+          if rotulo == blank
+            assign rotulo = block.settings.texto_boton_en
+          endif
+          assign titulo = guia.nombre_en.value
+          if titulo == blank
+            assign titulo = guia.nombre.value
+          endif
+        else
+          assign rotulo = config.boton_guia_es.value
+          if rotulo == blank
+            assign rotulo = block.settings.texto_boton_es
+          endif
+          assign titulo = guia.nombre.value
+        endif
+
+        if rotulo == blank
+          assign rotulo = 'guia_de_tallas' | t
+        endif
+
+        assign id_dialogo = 'sv-guia-' | append: block.id
+      -%}
+
+      <div class="sv-guia-abrir sv-guia-abrir--{{ block.settings.alineacion }}"
+        style="--sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
+        {{ block.shopify_attributes }}>
+        <button type="button" class="sv-guia-abrir__boton" data-sv-abre-guia="{{ id_dialogo }}">
+          {%- if block.settings.mostrar_icono -%}
+            <svg class="sv-guia-abrir__icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M3 8.5 8.5 3 21 15.5 15.5 21 3 8.5Z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M7 8.5 8.7 6.8M10 11.5l1.7-1.7M13 14.5l1.7-1.7" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+          {%- endif -%}
+          <span>{{ rotulo }}</span>
+        </button>
+      </div>
+
+      <dialog class="sv-guia-dialogo" id="{{ id_dialogo }}" aria-label="{{ titulo | escape }}">
+        <div class="sv-guia-dialogo__caja">
+          <div class="sv-guia-dialogo__cabecera">
+            <p class="sv-guia-dialogo__titulo">{{ titulo }}</p>
+            <button type="button" class="sv-guia-dialogo__cerrar" data-sv-cierra-guia
+              aria-label="{{ 'cerrar' | t }}">&times;</button>
+          </div>
+
+          <div class="sv-guia-dialogo__cuerpo">
+            <div class="sv-guia">
+              {%- comment -%}
+                Se recorre por posicion en vez de fiarse del orden de la lista,
+                que Shopify no garantiza. Son pocos bloques, asi que el coste de
+                recorrerlos varias veces no se nota.
+              {%- endcomment -%}
+              {%- for i in (1..tope) -%}
+                {%- for bloque in bloques -%}
+                  {%- if bloque.orden.value == i -%}
+                    {%- render 'sv-guia-bloque', bloque: bloque, lang: lang -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endfor -%}
+
+              {%- comment -%} Los que no tengan posicion van al final, no se pierden. {%- endcomment -%}
+              {%- for bloque in bloques -%}
+                {%- assign pos = bloque.orden.value | default: 0 -%}
+                {%- if pos < 1 -%}
+                  {%- render 'sv-guia-bloque', bloque: bloque, lang: lang -%}
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        </div>
+      </dialog>
+    {%- endif -%}
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Guía de tallas",
+  "target": "section",
+  "stylesheet": "sv-size-guide.css",
+  "javascript": "sv-size-guide.js",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "El contenido de las guías y el texto del botón se editan en la app, en Guías de tallas. Aquí solo se coloca el bloque."
+    },
+    {
+      "type": "checkbox",
+      "id": "mostrar_icono",
+      "label": "Mostrar el icono de regla",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "texto_boton_es",
+      "label": "Texto del botón en español",
+      "info": "Solo se usa si en la app no hay uno puesto.",
+      "default": "Guía de tallas"
+    },
+    {
+      "type": "text",
+      "id": "texto_boton_en",
+      "label": "Texto del botón en inglés",
+      "info": "Solo se usa si en la app no hay uno puesto.",
+      "default": "Size guide"
+    },
+    {
+      "type": "select",
+      "id": "alineacion",
+      "label": "Alineación",
+      "options": [
+        { "value": "izquierda", "label": "Izquierda" },
+        { "value": "centro", "label": "Centro" },
+        { "value": "derecha", "label": "Derecha" }
+      ],
+      "default": "izquierda"
+    },
+    {
+      "type": "range",
+      "id": "margen_superior",
+      "label": "Margen superior",
+      "min": 0, "max": 48, "step": 2, "unit": "px", "default": 8
+    },
+    {
+      "type": "range",
+      "id": "margen_inferior",
+      "label": "Margen inferior",
+      "min": 0, "max": 48, "step": 2, "unit": "px", "default": 16
+    }
+  ]
+}
+{% endschema %}

@@ -26,9 +26,9 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161610';
-import { asegurarConfig, existeConfig } from './config.js?v=202609161610';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161610';
+import { gql, comprobarErrores } from './api.js?v=202609161710';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609161710';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161710';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
@@ -168,7 +168,12 @@ export async function revisarEstructura() {
     if (faltan.length) pendientes.push(`Campos que faltan en las guías: ${faltan.join(', ')}.`);
   }
 
-  if (!(await existeConfig())) pendientes.push('El sitio donde se guarda la configuración.');
+  if (!(await existeConfig())) {
+    pendientes.push('El sitio donde se guarda la configuración.');
+  } else {
+    const faltan = await faltanCamposConfig();
+    if (faltan.length) pendientes.push(`Campos de configuración que faltan: ${faltan.join(', ')}.`);
+  }
 
   /* Los colores también son estructura. En saintvenik.com existen porque se
    * crearon a mano, pero la app tiene que poder montarlos en cualquier tienda. */

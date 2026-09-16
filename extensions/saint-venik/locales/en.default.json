@@ -1,5 +1,8 @@
 {
   "color": "Color",
   "sold_out": "Sold out",
-  "size": "Size"
+  "size": "Size",
+  "descargar_guia": "Download the guide",
+  "guia_de_tallas": "Size guide",
+  "cerrar": "Close"
 }

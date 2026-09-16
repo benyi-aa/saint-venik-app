@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161610';
+import { gql, comprobarErrores } from './api.js?v=202609161710';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
@@ -17,11 +17,22 @@ export const ORDEN_POR_DEFECTO = ['acero-inox', 'oro'];
 
 const CAMPOS_CONFIG = [
   { key: 'orden_colores', name: 'Orden de los colores', type: 'single_line_text_field' },
+  { key: 'boton_guia_es', name: 'Texto del botón de guía (español)', type: 'single_line_text_field' },
+  { key: 'boton_guia_en', name: 'Texto del botón de guía (inglés)', type: 'single_line_text_field' },
 ];
 
 const DEFINICION = `
   query DefinicionConfig {
     metaobjectDefinitionByType(type: "${TIPO_CONFIG}") { id fieldDefinitions { key } }
+  }
+`;
+
+const ACTUALIZAR_DEFINICION = `
+  mutation ActualizarDefinicionConfig($id: ID!, $definition: MetaobjectDefinitionUpdateInput!) {
+    metaobjectDefinitionUpdate(id: $id, definition: $definition) {
+      metaobjectDefinition { id }
+      userErrors { field message code }
+    }
   }
 `;
 
@@ -56,6 +67,14 @@ export async function existeConfig() {
   return Boolean(d.metaobjectDefinitionByType);
 }
 
+/* La definición pudo crearse con una versión anterior, sin todos los campos. */
+export async function faltanCamposConfig() {
+  const d = await gql(DEFINICION);
+  if (!d.metaobjectDefinitionByType) return [];
+  const presentes = new Set(d.metaobjectDefinitionByType.fieldDefinitions.map((f) => f.key));
+  return CAMPOS_CONFIG.filter((c) => !presentes.has(c.key)).map((c) => c.key);
+}
+
 export async function asegurarConfig(pasos = []) {
   const d = await gql(DEFINICION);
   if (!d.metaobjectDefinitionByType) {
@@ -69,6 +88,20 @@ export async function asegurarConfig(pasos = []) {
     });
     comprobarErrores(r, 'metaobjectDefinitionCreate');
     pasos.push('Configuración creada');
+  }
+
+  const d2 = await gql(DEFINICION);
+  if (d2.metaobjectDefinitionByType) {
+    const presentes = new Set(d2.metaobjectDefinitionByType.fieldDefinitions.map((f) => f.key));
+    const faltan = CAMPOS_CONFIG.filter((c) => !presentes.has(c.key));
+    if (faltan.length) {
+      const r = await gql(ACTUALIZAR_DEFINICION, {
+        id: d2.metaobjectDefinitionByType.id,
+        definition: { fieldDefinitions: faltan.map((c) => ({ create: c })) },
+      });
+      comprobarErrores(r, 'metaobjectDefinitionUpdate');
+      pasos.push(`Campos de configuración añadidos: ${faltan.map((c) => c.key).join(', ')}`);
+    }
   }
 
   /* Si no hay entrada, el Liquid cae al ajuste del tema y el panel a su
@@ -93,7 +126,22 @@ export async function leerConfig() {
   return {
     id: nodo?.id ?? null,
     ordenColores: crudo.length ? crudo : ORDEN_POR_DEFECTO,
+    botonGuiaEs: campos.boton_guia_es ?? '',
+    botonGuiaEn: campos.boton_guia_en ?? '',
   };
+}
+
+export async function guardarTextosBoton({ es, en }) {
+  const r = await gql(GUARDAR, {
+    handle: { type: TIPO_CONFIG, handle: HANDLE },
+    metaobject: {
+      fields: [
+        { key: 'boton_guia_es', value: es ?? '' },
+        { key: 'boton_guia_en', value: en ?? '' },
+      ],
+    },
+  });
+  return comprobarErrores(r, 'metaobjectUpsert');
 }
 
 export async function guardarOrdenColores(etiquetas) {

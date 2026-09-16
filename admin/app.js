@@ -1,22 +1,22 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161610';
+import { estaEmbebida } from './api.js?v=202609161710';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609161610';
-import { leerConfig, guardarOrdenColores } from './config.js?v=202609161610';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161610';
+} from './colores.js?v=202609161710';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton } from './config.js?v=202609161710';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161710';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto,
-} from './guias.js?v=202609161610';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161610';
+} from './guias.js?v=202609161710';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161710';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609161610';
+const VERSION = '202609161710';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -671,12 +671,57 @@ async function pintarEditor(handle) {
   });
 }
 
+async function pintarApariencia() {
+  pantalla.innerHTML = '<p class="cargando">Cargando…</p>';
+
+  const [config, revision] = await Promise.all([leerConfig(), revisarEstructura()]);
+
+  pantalla.innerHTML = `
+    <h1>Apariencia</h1>
+    <p class="subtitulo">Lo que se edita aquí manda sobre los ajustes del bloque en el editor de temas.</p>
+
+    ${tarjetaPendientes(revision.pendientes)}
+
+    <section class="tarjeta">
+      <p class="previa__titulo">Botón de la guía de tallas</p>
+      <div class="bloque__idiomas">
+        <div>
+          <label for="boton-es">Texto en español</label>
+          <input type="text" id="boton-es" value="${escapar(config.botonGuiaEs)}" placeholder="Guía de tallas" />
+        </div>
+        <div>
+          <label for="boton-en">Texto en inglés</label>
+          <input type="text" id="boton-en" value="${escapar(config.botonGuiaEn)}" placeholder="Size guide" />
+        </div>
+      </div>
+      <p class="ayuda">Es el enlace que abre la ventana en la ficha de producto. Si lo dejas vacío se usa el texto por defecto en cada idioma.</p>
+      <div class="acciones"><button class="principal" id="guardar-boton">Guardar</button></div>
+    </section>`;
+
+  conectarPendientes(pintarApariencia);
+
+  document.getElementById('guardar-boton').addEventListener('click', async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = 'Guardando…';
+    try {
+      await guardarTextosBoton({
+        es: document.getElementById('boton-es').value.trim(),
+        en: document.getElementById('boton-en').value.trim(),
+      });
+      avisar('Guardado');
+    } catch (error) {
+      avisar(error.message, true);
+    } finally {
+      e.target.disabled = false;
+      e.target.textContent = 'Guardar';
+    }
+  });
+}
+
 const PANTALLAS = {
   colores: pintarColores,
   guias: pintarGuias,
-  apariencia: async () => {
-    pantalla.innerHTML = '<h1>Apariencia</h1><div class="vacio">En construcción.</div>';
-  },
+  apariencia: pintarApariencia,
 };
 
 async function ir(nombre) {

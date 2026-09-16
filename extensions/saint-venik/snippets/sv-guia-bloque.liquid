@@ -1,0 +1,90 @@
+{% comment %}
+  Saint Venik · Un bloque de la guia de tallas.
+
+  Parametros:
+    bloque  (metaobject bloque_guia)
+    lang    (string) 'es' o 'en'
+{% endcomment %}
+
+{%- liquid
+  assign sv_tipo = bloque.tipo.value | default: 'texto'
+
+  if lang == 'en'
+    assign sv_texto = bloque.texto_en.value
+    assign sv_mostrar = bloque.mostrar_en.value
+  else
+    assign sv_texto = bloque.texto_es.value
+    assign sv_mostrar = bloque.mostrar_es.value
+  endif
+-%}
+
+{%- if sv_mostrar -%}
+  {%- case sv_tipo -%}
+
+    {%- when 'html' -%}
+      {%- if sv_texto != blank -%}
+        <div class="sv-guia__bloque sv-guia__bloque--html">{{ sv_texto }}</div>
+      {%- endif -%}
+
+    {%- when 'imagen' -%}
+      {%- assign sv_img = bloque.imagen.value -%}
+      {%- if sv_img != blank -%}
+        <div class="sv-guia__bloque">
+          {%- comment -%}
+            width y height con las medidas reales: el navegador reserva el hueco
+            antes de descargar la imagen y la ventana no da un salto al abrirse.
+          {%- endcomment -%}
+          <img class="sv-guia__imagen" src="{{ sv_img | image_url: width: 1200 }}"
+            alt="{{ sv_texto | escape }}" loading="lazy"
+            width="{{ sv_img.width }}" height="{{ sv_img.height }}">
+        </div>
+      {%- endif -%}
+
+    {%- when 'video' -%}
+      {%- assign sv_url = bloque.video_url.value -%}
+      {%- if sv_url != blank -%}
+        {%- comment -%}
+          Se extrae el identificador de YouTube a mano: Liquid no tiene expresiones
+          regulares, y split es suficiente para las dos formas de URL que existen.
+        {%- endcomment -%}
+        {%- assign sv_id = '' -%}
+        {%- if sv_url contains 'youtu.be/' -%}
+          {%- assign sv_id = sv_url | split: 'youtu.be/' | last | split: '?' | first | split: '&' | first -%}
+        {%- elsif sv_url contains 'v=' -%}
+          {%- assign sv_id = sv_url | split: 'v=' | last | split: '&' | first -%}
+        {%- elsif sv_url contains '/embed/' -%}
+          {%- assign sv_id = sv_url | split: '/embed/' | last | split: '?' | first -%}
+        {%- endif -%}
+
+        <div class="sv-guia__bloque sv-guia__bloque--video">
+          {%- if sv_id != blank -%}
+            <div class="sv-guia__media">
+              <iframe src="https://www.youtube-nocookie.com/embed/{{ sv_id }}"
+                title="{{ sv_texto | default: 'Video' | escape }}"
+                loading="lazy" allowfullscreen></iframe>
+            </div>
+          {%- else -%}
+            <a class="sv-guia__enlace" href="{{ sv_url }}" target="_blank" rel="noopener">
+              {{ sv_texto | default: sv_url }}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+    {%- when 'pdf' -%}
+      {%- assign sv_pdf = bloque.pdf.value -%}
+      {%- if sv_pdf != blank -%}
+        <div class="sv-guia__bloque sv-guia__bloque--pdf">
+          <a class="sv-guia__enlace" href="{{ sv_pdf.url }}" target="_blank" rel="noopener">
+            {%- if sv_texto != blank -%}{{ sv_texto }}{%- else -%}{{ 'descargar_guia' | t }}{%- endif -%}
+          </a>
+        </div>
+      {%- endif -%}
+
+    {%- else -%}
+      {%- if sv_texto != blank -%}
+        <div class="sv-guia__bloque"><p class="sv-guia__texto">{{ sv_texto }}</p></div>
+      {%- endif -%}
+
+  {%- endcase -%}
+{%- endif -%}
