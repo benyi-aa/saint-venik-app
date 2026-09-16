@@ -1,59 +1,64 @@
-# Saint Venik · App de tienda
+# Saint Venik · Color & Size Picker
 
-App **extension-only**: no hay servidor ni base de datos. Todo ocurre en el
-storefront con Liquid, y los datos viven en metacampos y metaobjetos nativos
-de Shopify que ya existen en la tienda.
+App de Shopify para saintvenik.com. Sustituye a OPTIS Color Swatch y a Kiwi Size
+Chart por algo propio, editable desde un panel y sin depender del soporte de
+nadie.
 
-Tienda: saintvenik.com · Tema: Impulse 7.5.1 · Idiomas: español (por defecto) e inglés (`/en/`)
+Tienda: saintvenik.com · Tema: Impulse 7.5.1 · Idiomas: español e inglés (`/en/`)
 
-## Estructura
+## Cómo está armada
 
-```
-shopify.app.toml                 configuración de la app (sin scopes, install flow legacy)
-extensions/saint-venik/
-  shopify.extension.toml         la theme app extension
-  blocks/selector-color.liquid   BLOQUE 1 · selector de color entre hermanos
-  snippets/sv-color-swatch.liquid una muestra de color
-  assets/sv-color-selector.css   estilos del bloque 1
-  locales/                       textos de la extensión (es / en)
-```
+No hay servidor, ni base de datos, ni tokens guardados en ninguna parte. Las tres
+piezas:
 
-## Datos que consume
-
-| Dato | Dónde vive | Uso |
+| Pieza | Dónde vive | Qué hace |
 |---|---|---|
-| `custom.hermano_de_color` | metacampo de producto, lista de referencias a producto | qué productos son el mismo modelo en otro color |
-| metaobjeto `color` | entradas ORO y PLATEADO | `nombre`, `muestra`, `imagen_muestra`, `etiqueta` |
-| etiquetas de producto | `oro`, `acero-inox` | unen cada producto con su entrada de color |
+| Panel | `admin/`, publicado en GitHub Pages | Donde se edita todo. Habla con la Admin API desde el navegador. |
+| Bloques | `extensions/saint-venik/` | Lo que ve el cliente. Liquid puro, sin JavaScript para lo esencial. |
+| Datos | Metaobjetos y metacampos de Shopify | La fuente de verdad. Ni el panel ni los bloques guardan nada propio. |
 
-El bloque 1 empareja producto ↔ color comparando las etiquetas del producto con
-el campo `etiqueta` del metaobjeto. El orden de las muestras es el orden de las
-entradas del metaobjeto, así que es idéntico en todas las fichas. Los enlaces
-usan `product.url`, que ya trae el prefijo `/en/` cuando el visitante navega en
-inglés, y los nombres de color salen ya traducidos porque Shopify devuelve el
-metaobjeto en el idioma activo.
+Lo que hace posible el panel sin servidor es el acceso directo a la Admin API:
+App Bridge autentica cada petición con la sesión del usuario que está mirando la
+página. Por eso el panel **solo funciona dentro del admin** — abierto suelto no
+tiene con qué autenticarse, y lo dice en vez de fallar raro.
 
-## Puesta en marcha
+Los archivos del panel son estáticos y sin paso de compilación, a propósito:
+se abren, se leen y se despliegan copiándolos.
+
+## Los bloques
+
+| Bloque | Estado | Lee |
+|---|---|---|
+| Selector de color | funcionando | `custom.hermano_de_color` + metaobjeto `color` |
+| Selector de talla | funcionando | las variantes reales del producto |
+| Guía de tallas | pendiente | — |
+
+Los colores no son variantes: son productos separados que se apuntan entre sí.
+Un producto se asocia a su color por la etiqueta (`oro`, `acero-inox`), que es lo
+que guarda el campo `etiqueta` del metaobjeto.
+
+## Trabajar en esto
 
 ```bash
 npm install
-npm run link      # crea o enlaza la app y escribe client_id en shopify.app.toml
-npm run deploy    # publica la extensión
+npm run deploy      # publica los bloques
+git push            # publica el panel (GitHub Pages)
 ```
 
-Después, en el editor de temas: **Producto → Añadir bloque → Apps → Selector de color**.
-
-Para probar en vivo sin publicar, `npm run dev` levanta una vista previa del tema
-con la extensión conectada.
-
-## Comprobar el Liquid sin desplegar
+Comprobar el Liquid sin desplegar:
 
 ```bash
 npx shopify theme check --path extensions/saint-venik -C theme-check:theme-app-extension
 ```
 
-## Pendiente
+Los pasos manuales sobre el tema están en [docs/tema.md](docs/tema.md).
 
-- Bloque 2 · selector de talla leyendo las variantes reales, con estado agotado.
-- Bloque 3 · guía de tallas (anillos, cadenas y colgantes, pulseras) con bloques
-  bilingües y casillas independientes de visibilidad por idioma.
+## Cosas que cuesta redescubrir
+
+- El UUID que va en la referencia de un bloque es el `uuid` de registro de
+  `.shopify/deploy-bundle/manifest.json`, **no** el `uid` de
+  `shopify.extension.toml`. Se parecen. Con el equivocado el bloque no se dibuja
+  y no da ningún error.
+- `use_legacy_install_flow = true` impide instalar una app sin servidor: ese modo
+  usa el OAuth antiguo y necesita un backend que atienda el callback.
+- Shopify no instala una app con `scopes = ""`; hace falta al menos un permiso.
