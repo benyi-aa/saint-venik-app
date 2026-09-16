@@ -266,3 +266,15 @@ select {
 }
 
 .previa__nota { margin-top: 12px; text-align: center; }
+
+.acciones--envolver { flex-wrap: wrap; }
+
+/* Un <label> disfrazado de botón: el input de archivo va oculto dentro, que es
+ * la única forma de estilar el selector de archivos del navegador. */
+.como-boton {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  font-weight: 400;
+  cursor: pointer;
+}

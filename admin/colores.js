@@ -5,7 +5,7 @@
  * color es la etiqueta: el producto lleva `oro` o `acero-inox`, y la entrada
  * guarda esa misma etiqueta en el campo `etiqueta`.
  */
-import { gql, comprobarErrores } from './api.js?v=202609160710';
+import { gql, comprobarErrores } from './api.js?v=202609160810';
 
 const CONSULTA_COLORES = `
   query Colores {
@@ -120,4 +120,15 @@ export function problemasDe(color) {
   if (!color.etiqueta) problemas.push('Sin etiqueta: ningún producto puede emparejarse con este color.');
   if (!color.imagen && !color.muestra) problemas.push('Sin imagen ni color: la muestra saldrá en blanco.');
   return problemas;
+}
+
+
+/* La imagen de la muestra se guarda como referencia al archivo de la tienda.
+ * Un valor vacio la quita. */
+export async function guardarImagenColor(id, idArchivo) {
+  const r = await gql(ACTUALIZAR, {
+    id,
+    fields: [{ key: 'imagen_muestra', value: idArchivo ?? '' }],
+  });
+  return comprobarErrores(r, 'metaobjectUpdate');
 }

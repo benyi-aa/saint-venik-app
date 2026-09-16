@@ -1,15 +1,17 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609160710';
+import { estaEmbebida } from './api.js?v=202609160810';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
-} from './colores.js?v=202609160710';
-import { leerConfig, guardarOrdenColores } from './config.js?v=202609160710';
+  guardarImagenColor,
+} from './colores.js?v=202609160810';
+import { leerConfig, guardarOrdenColores } from './config.js?v=202609160810';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609160810';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, NOMBRE_TIPO,
-} from './guias.js?v=202609160710';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609160710';
+} from './guias.js?v=202609160810';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609160810';
 
 /* La version sale de la URL con la que se cargo este archivo, no de una
  * constante escrita a mano: asi lo que se muestra es siempre lo que el navegador
@@ -61,6 +63,17 @@ function tarjetaColor(color, i, total) {
             <label>Color de la muestra</label>
             <input type="color" data-campo="muestra" value="${escapar(color.muestra || '#cccccc')}" />
             <p class="ayuda">${color.imagen ? 'Hay una imagen, y la imagen manda sobre el color.' : 'Se usa si no hay imagen.'}</p>
+          </div>
+          <div>
+            <label>Imagen de la muestra</label>
+            <div class="acciones acciones--envolver">
+              <label class="secundario como-boton">
+                Subir…<input type="file" accept="image/*" data-subir hidden />
+              </label>
+              ${hayBiblioteca() ? '<button class="secundario" data-biblioteca>Elegir de la biblioteca</button>' : ''}
+              ${color.imagen ? '<button class="secundario secundario--peligro" data-quitar-imagen>Quitar</button>' : ''}
+            </div>
+            <p class="ayuda" data-estado-imagen>${color.imagen ? 'Manda sobre el color.' : 'Opcional.'}</p>
           </div>
         </div>
       </div>
@@ -146,6 +159,43 @@ async function pintarColores() {
           boton.disabled = false;
         }
       });
+    });
+
+    const estado = tarjeta.querySelector('[data-estado-imagen]');
+    const decir = (t) => { if (estado) estado.textContent = t; };
+
+    async function aplicarImagen(promesa) {
+      try {
+        const archivo = await promesa;
+        if (!archivo) { decir('Cancelado.'); return; }
+        await guardarImagenColor(id, archivo.id);
+        avisar('Imagen guardada');
+        await pintarColores();
+      } catch (error) {
+        decir('');
+        avisar(error.message, true);
+      }
+    }
+
+    tarjeta.querySelector('[data-subir]')?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      aplicarImagen(subirArchivo(file, { onPaso: decir }));
+    });
+
+    tarjeta.querySelector('[data-biblioteca]')?.addEventListener('click', () => {
+      decir('Abriendo la biblioteca…');
+      aplicarImagen(elegirDeBiblioteca({ tipo: 'MediaImage' }));
+    });
+
+    tarjeta.querySelector('[data-quitar-imagen]')?.addEventListener('click', async () => {
+      try {
+        await guardarImagenColor(id, '');
+        avisar('Imagen quitada');
+        await pintarColores();
+      } catch (error) {
+        avisar(error.message, true);
+      }
     });
 
     tarjeta.querySelector('[data-borrar]')?.addEventListener('click', async () => {
