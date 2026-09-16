@@ -26,9 +26,9 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores } from './api.js?v=202609161110';
-import { asegurarConfig, existeConfig } from './config.js?v=202609161110';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161110';
+import { gql, comprobarErrores } from './api.js?v=202609161210';
+import { asegurarConfig, existeConfig } from './config.js?v=202609161210';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609161210';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 export const TIPO_GUIA = 'guia_de_tallas';
@@ -270,6 +270,10 @@ export async function cargarGuias() {
         return {
           id: b.id,
           tipo: c.tipo?.value ?? 'texto',
+          imagenId: c.imagen?.value ?? '',
+          imagenUrl: c.imagen?.reference?.image?.url ?? '',
+          pdfId: c.pdf?.value ?? '',
+          pdfUrl: c.pdf?.reference?.url ?? '',
           textoEs: c.texto_es?.value ?? '',
           textoEn: c.texto_en?.value ?? '',
           videoUrl: c.video_url?.value ?? '',
@@ -400,6 +404,18 @@ export async function guardarGuia(id, { nombre, nombreEn }) {
         { key: 'nombre_en', value: nombreEn ?? '' },
       ],
     },
+  });
+  return comprobarErrores(r, 'metaobjectUpdate');
+}
+
+
+/* Los campos de archivo se guardan aparte del resto: el archivo se sube (o se
+ * elige) primero y aqui solo se anota su referencia. Un valor vacio lo quita. */
+export async function guardarArchivoDeBloque(id, campo, idArchivo) {
+  if (campo !== 'imagen' && campo !== 'pdf') throw new Error(`Campo de archivo desconocido: ${campo}`);
+  const r = await gql(ACTUALIZAR_ENTRADA, {
+    id,
+    metaobject: { fields: [{ key: campo, value: idArchivo ?? '' }] },
   });
   return comprobarErrores(r, 'metaobjectUpdate');
 }

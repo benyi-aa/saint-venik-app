@@ -1,27 +1,22 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609161110';
+import { estaEmbebida } from './api.js?v=202609161210';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor,
-} from './colores.js?v=202609161110';
-import { leerConfig, guardarOrdenColores } from './config.js?v=202609161110';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161110';
+} from './colores.js?v=202609161210';
+import { leerConfig, guardarOrdenColores } from './config.js?v=202609161210';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609161210';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
-  crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, NOMBRE_TIPO,
-} from './guias.js?v=202609161110';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161110';
+  crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
+} from './guias.js?v=202609161210';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609161210';
 
 /* La version sale de la URL con la que se cargo este archivo, no de una
  * constante escrita a mano: asi lo que se muestra es siempre lo que el navegador
  * tiene de verdad, aunque haya servido algo de cache. */
 const VERSION = new URL(import.meta.url).searchParams.get('v') ?? 'local';
-
-/* Imagen y PDF existen en el modelo de datos pero todavía no tienen campos en el
- * editor. Ofrecerlos en el desplegable solo consigue que alguien cree un bloque
- * que no puede rellenar y que la guía quede con un hueco. */
-const TIPOS_EDITABLES = ['texto', 'video'];
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -328,6 +323,31 @@ async function pintarGuias() {
   conectarPendientes(pintarGuias);
 }
 
+/* Un bloque de imagen o de PDF necesita su archivo. Misma mecánica que en
+ * Colores: subir desde aquí, o elegir de la biblioteca del admin. */
+function controlesArchivo(b) {
+  const esPdf = b.tipo === 'pdf';
+  const url = esPdf ? b.pdfUrl : b.imagenUrl;
+  const acepta = esPdf ? 'application/pdf' : 'image/*';
+
+  return `
+    <div class="bloque__archivo">
+      ${url && !esPdf ? `<img class="bloque__vista" src="${escapar(url)}" alt="" />` : ''}
+      ${url && esPdf ? `<a class="sv-guia__enlace" href="${escapar(url)}" target="_blank" rel="noopener">Ver el PDF actual</a>` : ''}
+      <div class="acciones acciones--envolver">
+        <label class="secundario como-boton">
+          ${url ? 'Reemplazar…' : 'Subir…'}<input type="file" accept="${acepta}" data-subir-archivo hidden />
+        </label>
+        ${hayBiblioteca() ? '<button class="secundario" data-biblioteca-archivo>Elegir de la biblioteca</button>' : ''}
+        ${url ? '<button class="secundario secundario--peligro" data-quitar-archivo>Quitar</button>' : ''}
+      </div>
+      <p class="ayuda" data-estado-archivo>${
+        url ? '' : (esPdf ? 'Sin PDF, este bloque no se mostrará.' : 'Sin imagen, este bloque no se mostrará.')
+      }</p>
+      ${esPdf ? '<p class="ayuda">El texto de abajo es la etiqueta del enlace.</p>' : ''}
+    </div>`;
+}
+
 function tarjetaBloque(b, i, total) {
   const esVideo = b.tipo === 'video';
   const esArchivo = b.tipo === 'imagen' || b.tipo === 'pdf';
@@ -342,7 +362,7 @@ function tarjetaBloque(b, i, total) {
         </div>
       </div>
 
-      ${esArchivo ? `<p class="problema">Los bloques de ${escapar(NOMBRE_TIPO[b.tipo])} todavía no se pueden editar aquí. Siguiente paso.</p>` : ''}
+      ${esArchivo ? controlesArchivo(b) : ''}
 
       ${esVideo ? `
         <div style="margin-bottom:12px;">
@@ -402,9 +422,7 @@ async function pintarEditor(handle) {
       <label for="nuevo-tipo">Añadir un bloque</label>
       <div class="acciones">
         <select id="nuevo-tipo">
-          ${Object.entries(NOMBRE_TIPO)
-            .filter(([v]) => TIPOS_EDITABLES.includes(v))
-            .map(([v, n]) => `<option value="${v}">${escapar(n)}</option>`).join('')}
+          ${Object.entries(NOMBRE_TIPO).map(([v, n]) => `<option value="${v}">${escapar(n)}</option>`).join('')}
         </select>
         <button class="principal" id="anadir">Añadir</button>
       </div>
@@ -514,6 +532,46 @@ async function pintarEditor(handle) {
       } finally {
         e.target.disabled = false;
         e.target.textContent = 'Guardar bloque';
+      }
+    });
+
+    const bloque = guia.bloques.find((b) => b.id === id);
+    const campoArchivo = bloque?.tipo === 'pdf' ? 'pdf' : 'imagen';
+    const estadoArchivo = tarjeta.querySelector('[data-estado-archivo]');
+    const decirArchivo = (t) => { if (estadoArchivo) estadoArchivo.textContent = t; };
+
+    async function aplicarArchivo(promesa) {
+      try {
+        const archivo = await promesa;
+        if (!archivo) { decirArchivo('Cancelado.'); return; }
+        await guardarArchivoDeBloque(id, campoArchivo, archivo.id);
+        avisar('Archivo guardado');
+        await pintarEditor(handle);
+      } catch (error) {
+        decirArchivo('');
+        avisar(error.message, true);
+      }
+    }
+
+    tarjeta.querySelector('[data-subir-archivo]')?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      e.target.value = '';
+      if (!file) return;
+      aplicarArchivo(subirArchivo(file, { onPaso: decirArchivo }));
+    });
+
+    tarjeta.querySelector('[data-biblioteca-archivo]')?.addEventListener('click', () => {
+      decirArchivo('Abriendo la biblioteca…');
+      aplicarArchivo(elegirDeBiblioteca({ tipo: campoArchivo === 'pdf' ? 'GenericFile' : 'MediaImage' }));
+    });
+
+    tarjeta.querySelector('[data-quitar-archivo]')?.addEventListener('click', async () => {
+      try {
+        await guardarArchivoDeBloque(id, campoArchivo, '');
+        avisar('Archivo quitado');
+        await pintarEditor(handle);
+      } catch (error) {
+        avisar(error.message, true);
       }
     });
 

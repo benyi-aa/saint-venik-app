@@ -278,3 +278,18 @@ select {
   font-weight: 400;
   cursor: pointer;
 }
+
+.bloque__archivo {
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px dashed var(--borde);
+  border-radius: 8px;
+}
+
+.bloque__vista {
+  display: block;
+  max-width: 220px;
+  max-height: 140px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}

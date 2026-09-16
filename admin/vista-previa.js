@@ -33,17 +33,29 @@ function bloqueHtml(b, idioma) {
     case 'video':
       return `<div class="sv-guia__bloque sv-guia__bloque--video">${incrustarVideo(b.videoUrl)}</div>`;
     case 'imagen':
-      return `<div class="sv-guia__bloque"><p class="sv-guia__vacio">Imagen — pendiente de poder subirse desde el panel.</p></div>`;
+      return `<div class="sv-guia__bloque">${
+        b.imagenUrl
+          ? `<img class="sv-guia__imagen" src="${escapar(b.imagenUrl)}" alt="${escapar(texto)}" loading="lazy" />`
+          : '<p class="sv-guia__vacio">Este bloque de imagen todavía no tiene archivo.</p>'
+      }</div>`;
     case 'pdf':
+      /* El texto del bloque es la etiqueta del enlace, como en la guía actual
+       * («Documento Guía de Tallas - Anillos»). Sin texto, un rótulo por defecto. */
       return `<div class="sv-guia__bloque sv-guia__bloque--pdf">${
-        texto
-          ? `<a class="sv-guia__enlace" href="#">${escapar(texto)}</a>`
-          : '<p class="sv-guia__vacio">PDF — pendiente de poder subirse desde el panel.</p>'
+        b.pdfUrl
+          ? `<a class="sv-guia__enlace" href="${escapar(b.pdfUrl)}" target="_blank" rel="noopener">${
+              escapar(texto || (idioma === 'en' ? 'Download the guide' : 'Descargar la guía'))
+            }</a>`
+          : '<p class="sv-guia__vacio">Este bloque de PDF todavía no tiene archivo.</p>'
       }</div>`;
     default:
+      /* Si la casilla dice que se muestra, se muestra: devolver cadena vacía
+       * haría que el recuento de bloques visibles no cuadrara con lo dibujado. */
       return texto
         ? `<div class="sv-guia__bloque"><p class="sv-guia__texto">${escapar(texto)}</p></div>`
-        : '';
+        : `<div class="sv-guia__bloque"><p class="sv-guia__vacio">Este bloque no tiene texto en ${
+            idioma === 'en' ? 'inglés' : 'español'
+          }.</p></div>`;
   }
 }
 
