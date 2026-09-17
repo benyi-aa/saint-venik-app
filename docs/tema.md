@@ -110,3 +110,33 @@ Las cinco respuestas optimistas tenían un error material. Lo que quedó:
   requisito (contenido que existe en un idioma y no en el otro, oculto por
   idioma de forma independiente), y para metaobjetos de una app tienen un fallo
   abierto y no se autotraducen en masa.
+
+## Título del producto como en saintvenik.cl (17 sep 2026)
+
+saintvenik.cl fija el título de la ficha con **CSS personalizado** en la sección
+principal del producto. saintvenik.com no lo tenía (tampoco el tema anterior), y
+el título salía a 20,4 px en vez de 18.
+
+Se añadió la misma regla, como `custom_css` de la sección `main`, en las tres
+plantillas que usan los productos de .com — `product.orov2.json` (66),
+`product.acero-inox.json` (70) y `product.ice.json` (9):
+
+```css
+.product-single__title, .product-card__title,
+h1.product-single__title, h2.product-single__title {
+  font-size: 18px !important;
+  line-height: 1.2em !important;
+  padding: 0px !important;
+  margin: 0px !important;
+}
+```
+
+Comprobado en las tres: 18 px, línea de 21,6 px, y 25 px del título al precio,
+igual que en .cl. Si se duplica el tema o se crea otra plantilla de producto,
+hay que volver a ponerla (editor de temas → sección del producto → CSS
+personalizado).
+
+**Pendiente:** 9 productos usan la plantilla de producto por defecto
+(`product.json`), que este tema no tiene, y por eso dan 404 aunque están
+publicados: los cuatro sets de cadena con colgante, `cuban-set`,
+`pulsera-geneva`, `acero`, `brillantes` y `new-packaging`.
