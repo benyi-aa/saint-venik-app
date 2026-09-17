@@ -26,19 +26,27 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202609170202';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609170202';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609170202';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202609170206';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609170206';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609170206';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
 export const TIPOS = ['texto', 'html', 'imagen', 'video', 'pdf'];
 export const TIPO_GUIA = 'guia_de_tallas';
 
+/* Las de saintvenik.com, ya afinadas: "cuff" hizo falta para los brazaletes en
+ * ingles ("Amsterdam Cuff"), y "set"/"conjunto" para los conjuntos de cadena. */
 export const GUIAS_INICIALES = [
-  { handle: 'anillos', nombre: 'Anillos', palabras: 'anillo, ring' },
-  { handle: 'cadenas-y-colgantes', nombre: 'Cadenas y colgantes', palabras: 'cadena, collar, chain, colgante, pendant, dije' },
-  { handle: 'pulseras', nombre: 'Pulseras', palabras: 'pulsera, bracelet' },
+  { handle: 'anillos', nombre: 'Anillos', nombreEn: 'Rings', palabras: 'anillo, ring' },
+  {
+    handle: 'cadenas-y-colgantes', nombre: 'Cadenas y colgantes', nombreEn: 'Chains & Pendants',
+    palabras: 'cadena, collar, chain, colgante, pendant, dije, set, conjunto',
+  },
+  {
+    handle: 'pulseras', nombre: 'Pulseras', nombreEn: 'Bracelets',
+    palabras: 'pulsera, bracelet, brazalete, bangle, cuff',
+  },
 ];
 
 const DEFINICIONES = `
@@ -322,6 +330,7 @@ export async function crearEstructura() {
         handle: guia.handle,
         fields: [
           { key: 'nombre', value: guia.nombre },
+          { key: 'nombre_en', value: guia.nombreEn },
           { key: 'palabras_clave', value: guia.palabras },
         ],
       },

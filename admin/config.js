@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202609170202';
+import { gql, comprobarErrores } from './api.js?v=202609170206';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
@@ -24,6 +24,10 @@ export const APARIENCIA_POR_DEFECTO = {
   tamanoMuestra: 34,
   escala: 'normal',
 };
+
+/* Los de saintvenik.cl y .com. Vacios, el bloque usaria la traduccion ("Guia de
+ * tallas", con t minuscula), que no es lo que muestran las tiendas. */
+export const TEXTOS_BOTON_POR_DEFECTO = { es: 'Guía de Tallas', en: 'Size guide' };
 
 const CAMPOS_CONFIG = [
   { key: 'orden_colores', name: 'Orden de los colores', type: 'single_line_text_field' },
@@ -126,7 +130,35 @@ export async function asegurarConfig(pasos = []) {
     pasos.push('Orden de colores inicializado');
   }
 
+  /* Y con todos sus valores, no solo el orden. Un campo vacio hace que el
+   * bloque use su respaldo, y el del tamano de muestra (36) no es el de la app
+   * (34): en una tienda nueva las muestras salian mas grandes que en la
+   * referencia. Solo se rellena lo vacio, para no pisar lo que alguien eligio. */
+  const crudo = await leerCrudo();
+  const semillas = {
+    alineacion: APARIENCIA_POR_DEFECTO.alineacion,
+    tamano_muestra: String(APARIENCIA_POR_DEFECTO.tamanoMuestra),
+    escala: APARIENCIA_POR_DEFECTO.escala,
+    boton_guia_es: TEXTOS_BOTON_POR_DEFECTO.es,
+    boton_guia_en: TEXTOS_BOTON_POR_DEFECTO.en,
+  };
+  const vacios = Object.entries(semillas).filter(([k]) => !String(crudo[k] ?? '').trim());
+  if (vacios.length) {
+    const r = await gql(GUARDAR, {
+      handle: { type: TIPO_CONFIG, handle: HANDLE },
+      metaobject: { fields: vacios.map(([key, value]) => ({ key, value })) },
+    });
+    comprobarErrores(r, 'metaobjectUpsert');
+    pasos.push(`Configuración inicial: ${vacios.map(([k]) => k).join(', ')}`);
+  }
+
   return pasos;
+}
+
+async function leerCrudo() {
+  const d = await gql(LEER);
+  const nodo = d.metaobjects.nodes[0];
+  return Object.fromEntries((nodo?.fields ?? []).map((f) => [f.key, f.value]));
 }
 
 export async function leerConfig() {
