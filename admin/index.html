@@ -4,8 +4,34 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Color &amp; Size Picker · Saint Venik</title>
-    <!-- App Bridge. El client id de una app es publico. -->
-    <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" data-api-key="feb92266442449d38f005beb90710f05"></script>
+    <!-- Un panel, dos apps. saintvenik.com y saintvenik.cl usan la misma app, pero
+         registrada dos veces: Shopify no deja instalar una app personalizada en
+         dos tiendas que no esten en la misma organizacion Plus. Cada registro
+         tiene su client id, y App Bridge necesita el de la tienda que abre el
+         panel. Shopify pasa esa tienda en ?shop=, asi que se elige aqui, antes
+         de cargar App Bridge, que lo lee de <meta name="shopify-api-key">.
+         Los client id son publicos. -->
+    <script>
+      (function () {
+        var CLAVES = {
+          'vd9tn0-et.myshopify.com': 'feb92266442449d38f005beb90710f05',   // saintvenik.com
+          'saint-venik.myshopify.com': '84461ac8cf7dfba116de1681402b6371'  // saintvenik.cl
+        };
+        var q = new URLSearchParams(location.search);
+        var tienda = q.get('shop') || '';
+        if (!tienda && q.get('host')) {
+          try {
+            var m = atob(q.get('host')).match(/\/store\/([^/?]+)/);
+            if (m) tienda = m[1] + '.myshopify.com';
+          } catch (e) { /* host ilegible: se usa la de .com */ }
+        }
+        var meta = document.createElement('meta');
+        meta.name = 'shopify-api-key';
+        meta.content = CLAVES[tienda] || CLAVES['vd9tn0-et.myshopify.com'];
+        document.head.appendChild(meta);
+      })();
+    </script>
+    <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
 
     <!-- Las URLs se calculan aquí, al cargar, y no se escriben en el archivo.
          GitHub Pages sirve este index con cache-control: max-age=600, así que un

@@ -1,0 +1,36 @@
+# Configuracion de la app para saintvenik.cl (tienda "Saint Venik").
+#
+# Es LA MISMA app que shopify.app.toml: mismo codigo, mismo panel, mismos
+# bloques. Existe como segunda app porque Shopify solo deja instalar una app de
+# distribucion personalizada en una tienda, salvo que las tiendas esten en la
+# misma organizacion Plus, y saintvenik.cl esta en el plan Advanced.
+#
+# Publicar aqui siempre con --config cl:
+#   npx shopify app deploy --config cl --allow-updates
+#
+# Lo unico que cambia respecto de .com es el client_id, el nombre y el handle.
+# El panel elige el client_id segun la tienda que lo abre (admin/index.html).
+
+name = "Color & Size Picker CL"
+handle = "color-size-picker-cl"
+application_url = "https://benyi-aa.github.io/saint-venik-app/admin/"
+embedded = true
+client_id = "84461ac8cf7dfba116de1681402b6371"
+
+[access.admin]
+direct_api_mode = "online"
+embedded_app_direct_api_access = true
+
+[access_scopes]
+# Los mismos que en .com; ver shopify.app.toml.
+scopes = "write_products, write_metaobjects, write_metaobject_definitions, write_files"
+use_legacy_install_flow = false
+
+[auth]
+redirect_urls = [ "https://benyi-aa.github.io/saint-venik-app/admin/" ]
+
+[webhooks]
+api_version = "2026-10"
+
+[build]
+automatically_update_urls_on_dev = true

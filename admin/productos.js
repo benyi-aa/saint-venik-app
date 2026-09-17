@@ -9,7 +9,7 @@
  * selector apareciendo en una ficha y no en la otra, que es un fallo molesto de
  * encontrar porque cada ficha por separado parece correcta.
  */
-import { gql, comprobarErrores } from './api.js?v=202609170133';
+import { gql, comprobarErrores } from './api.js?v=202609170155';
 
 const NAMESPACE = 'custom';
 const CLAVE = 'hermano_de_color';

@@ -7,11 +7,13 @@
   "scripts": {
     "link": "shopify app config link",
     "dev": "shopify app dev",
-    "deploy": "shopify app deploy",
+    "deploy": "shopify app deploy --config shopify.app.toml",
     "info": "shopify app info",
     "version": "node scripts/version.mjs",
     "revisar": "node scripts/revisar.mjs",
-    "publicar": "node scripts/version.mjs && node scripts/revisar.mjs"
+    "publicar": "node scripts/version.mjs && node scripts/revisar.mjs",
+    "deploy:com": "shopify app deploy --config shopify.app.toml --allow-updates",
+    "deploy:cl": "shopify app deploy --config shopify.app.cl.toml --allow-updates"
   },
   "devDependencies": {
     "@shopify/cli": "^4.8.0",
