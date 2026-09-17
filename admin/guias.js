@@ -26,9 +26,9 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202609170155';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609170155';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609170155';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202609170202';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609170202';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609170202';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 

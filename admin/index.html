@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Color &amp; Size Picker · Saint Venik</title>
     <!-- Un panel, dos apps. saintvenik.com y saintvenik.cl usan la misma app, pero
-         registrada dos veces: Shopify no deja instalar una app personalizada en
-         dos tiendas que no esten en la misma organizacion Plus. Cada registro
+         registrada dos veces, una en la organizacion de cada tienda: una app del
+         Dev Dashboard solo se instala en tiendas de su organizacion. Cada registro
          tiene su client id, y App Bridge necesita el de la tienda que abre el
          panel. Shopify pasa esa tienda en ?shop=, asi que se elige aqui, antes
          de cargar App Bridge, que lo lee de <meta name="shopify-api-key">.
@@ -15,7 +15,7 @@
       (function () {
         var CLAVES = {
           'vd9tn0-et.myshopify.com': 'feb92266442449d38f005beb90710f05',   // saintvenik.com
-          'saint-venik.myshopify.com': '84461ac8cf7dfba116de1681402b6371'  // saintvenik.cl
+          'saint-venik.myshopify.com': '493ca49722d9f418e7001aa8a8ec9256'  // saintvenik.cl
         };
         var q = new URLSearchParams(location.search);
         var tienda = q.get('shop') || '';
