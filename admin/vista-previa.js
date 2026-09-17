@@ -111,9 +111,10 @@ export function coloresHtml(colores, apariencia = {}) {
   }
 
   return `<div class="sv-colors sv-colors--circulo sv-colors--al-${alineacion} sv-colors--${escala}"
-      style="--sv-size:${tamano}px;--sv-gap:12px;--sv-ring:#111111;--sv-pt:0px;--sv-pb:0px;">
+      style="--sv-size:${tamano}px;--sv-gap:8px;--sv-ring:#111111;--sv-pt:0px;--sv-pb:0px;">
     <div class="sv-colors__heading">
       <span class="sv-colors__label">Color</span>
+      <span class="sv-colors__sep" aria-hidden="true">-</span>
       <span class="sv-colors__current">${escapar(pintables[0].nombre)}</span>
     </div>
     <div class="sv-colors__list">

@@ -23,7 +23,13 @@
 
 /* Igual que en el selector de color: titulo en negrita, valor suave. */
 .sv-sizes__label { font-weight: 600; }
+/* En saintvenik.cl el titulo dice "Tamaño", no "TAMAÑO": va tal cual se
+ * escribe. El valor si sigue en mayusculas, porque "50cm" no debe salir asi. */
+.sv-sizes__label { text-transform: none; }
+.sv-sizes__current { text-transform: uppercase; }
 .sv-sizes__current { opacity: 0.65; }
+/* "Tamaño - 50CM", con el guion de saintvenik.cl. Va en el tono del valor. */
+.sv-sizes__sep { font-weight: 400; opacity: 0.65; }
 
 .sv-sizes__list {
   display: flex;

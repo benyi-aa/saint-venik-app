@@ -111,6 +111,7 @@
               <div class="sv-sizes__heading">
                 <span class="sv-sizes__label">{{ encabezado }}</span>
                 {%- if block.settings.mostrar_valor_actual -%}
+                  <span class="sv-sizes__sep" aria-hidden="true">-</span>
                   <span class="sv-sizes__current" data-sv-current>{{ seleccionada.options[idx] }}</span>
                 {%- endif -%}
               </div>
@@ -249,7 +250,8 @@
       "type": "text",
       "id": "encabezado_es",
       "label": "Encabezado en español",
-      "default": "Talla"
+      "info": "Se escribe tal cual, sin pasar a mayúsculas: en saintvenik.cl dice «Tamaño».",
+      "default": "Tamaño"
     },
     {
       "type": "text",

@@ -92,6 +92,8 @@
       <div class="sv-colors__heading">
         <span class="sv-colors__label">{{ encabezado }}</span>
         {%- if block.settings.mostrar_nombre_actual and nombre_actual != blank -%}
+          {%- comment -%} El guion es solo visual, como en saintvenik.cl: un lector de pantalla lee "Color Oro". {%- endcomment -%}
+          <span class="sv-colors__sep" aria-hidden="true">-</span>
           <span class="sv-colors__current">{{ nombre_actual }}</span>
         {%- endif -%}
       </div>

@@ -20,6 +20,8 @@
  * suave: se lee primero que se elige un color y despues cual es. */
 .sv-colors__label { font-weight: 600; }
 .sv-colors__current { opacity: 0.65; }
+/* "COLOR - ORO", con el guion de saintvenik.cl. Va en el tono del valor. */
+.sv-colors__sep { font-weight: 400; opacity: 0.65; }
 
 .sv-colors__list {
   display: flex;
