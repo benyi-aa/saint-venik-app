@@ -1,0 +1,97 @@
+{
+  "origen": "saintvenik.com",
+  "descripcion": "Contenido de las guias de tallas de saintvenik.com, extraido de la tienda el 17 sep 2026.",
+  "guias": [
+    {
+      "handle": "anillos",
+      "nombre": "Anillos",
+      "nombreEn": "Rings",
+      "palabras": "anillo, ring",
+      "bloques": [
+        {
+          "tipo": "texto",
+          "textoEs": "Talla",
+          "textoEn": "Size",
+          "mostrarEs": true,
+          "mostrarEn": true
+        },
+        {
+          "tipo": "video",
+          "videoUrl": "https://www.youtube.com/watch?v=3xFZSHpHIpo",
+          "textoEs": "",
+          "textoEn": "",
+          "mostrarEs": true,
+          "mostrarEn": false
+        },
+        {
+          "tipo": "html",
+          "textoEs": "<p style=\"font-size: 18px; text-align: center;\"><a href=\"https://drive.google.com/file/d/1Fiszsrp2-ZY6AYCM7u9IpranaAa6BWt1/view?usp=drive_link\" target=\"_blank\" rel=\"noopener\" style=\"color: #433CE8; font-weight: bold;\">Documento Guía de Tallas - Anillos</a><br><br>Si aún tienes dudas, nuestro equipo de atención al cliente estará encantado de ayudarte a elegir la medida correcta.&nbsp;</p>",
+          "textoEn": "<p style=\"font-size: 18px; text-align: center;\"><a href=\"https://drive.google.com/file/d/1YfSR7TvvczhMOFHnC2mloR1PkJSnZfBA/view?usp=drive_link\" target=\"_blank\" rel=\"noopener\" style=\"color: #433CE8; font-weight: bold;\">Ring Size Guide Document</a><br><br>If you still have questions, our customer service team will be happy to help you find the right size.&nbsp;</p>",
+          "mostrarEs": true,
+          "mostrarEn": true
+        }
+      ]
+    },
+    {
+      "handle": "cadenas-y-colgantes",
+      "nombre": "Cadenas y colgantes",
+      "nombreEn": "Chains & Pendants",
+      "palabras": "cadena, collar, chain, colgante, pendant, dije, set, conjunto",
+      "bloques": [
+        {
+          "tipo": "video",
+          "videoUrl": "https://www.youtube.com/watch?v=CHW8yG48rc4&t=1s",
+          "textoEs": "",
+          "textoEn": "",
+          "mostrarEs": true,
+          "mostrarEn": false
+        },
+        {
+          "tipo": "html",
+          "textoEs": "<img src=\"https://cdn.shopify.com/s/files/1/0773/8218/9103/files/c.png?v=1789162796\" alt=\"Guía de tallas de cadenas\" style=\"width:100%; height:auto; display:block; margin:0 auto;\">",
+          "textoEn": "<img src=\"https://cdn.shopify.com/s/files/1/0773/8218/9103/files/size-guide-chains-en-inches.png?v=1789163007\" alt=\"Chain size guide\" style=\"width:100%; height:auto; display:block; margin:0 auto;\">",
+          "mostrarEs": true,
+          "mostrarEn": true
+        },
+        {
+          "tipo": "imagen",
+          "imagenUrl": "https://saintvenik.com/cdn/shop/files/Captura_de_pantalla_2026-09-16_a_las_12.59.29_p.m..png?v=1789574385",
+          "textoEs": "",
+          "textoEn": "",
+          "mostrarEs": true,
+          "mostrarEn": true
+        },
+        {
+          "tipo": "html",
+          "textoEs": "<p style=\"text-align: center;\"><span style=\"font-size: 18px;\">La medida correcta&nbsp;para&nbsp;el largo de tu cadena depende de tu estilo personal. Con esta guía podrás escoger cómo prefieres que te quede.</span></p>",
+          "textoEn": "<p style=\"text-align: center;\"><span style=\"font-size: 18px;\">The right chain length depends on your personal style. This guide will help you choose how you want it to sit.</span></p>",
+          "mostrarEs": true,
+          "mostrarEn": true
+        }
+      ]
+    },
+    {
+      "handle": "pulseras",
+      "nombre": "Pulseras",
+      "nombreEn": "Bracelets",
+      "palabras": "pulsera, bracelet, brazalete, bangle, cuff",
+      "bloques": [
+        {
+          "tipo": "video",
+          "videoUrl": "https://www.youtube.com/watch?v=4GDeMy1NTzQ",
+          "textoEs": "",
+          "textoEn": "",
+          "mostrarEs": true,
+          "mostrarEn": false
+        },
+        {
+          "tipo": "html",
+          "textoEs": "<p style=\"font-size: 18px; text-align: center;\"><a href=\"https://drive.google.com/file/d/1T74ae4hf6kS3Y1tuyXJxwgj2srWB-pex/view?usp=drive_link\" target=\"_blank\" rel=\"noopener\" style=\"color: #433CE8; font-weight: bold;\">Documento Guía de Tallas - Pulseras</a><br><br>Si aún tienes dudas, nuestro equipo de atención al cliente estará encantado de ayudarte a elegir la medida correcta.&nbsp;</p>",
+          "textoEn": "<p style=\"font-size: 18px; text-align: center;\"><a href=\"https://drive.google.com/file/d/14OD_VoeOx-8ogbCs9wZtARfdnHTWbZyE/view\" target=\"_blank\" rel=\"noopener\" style=\"color: #433CE8; font-weight: bold;\">Bracelet Size Guide Document</a><br><br>If you still have questions, our customer service team will be happy to help you find the right size.&nbsp;</p>",
+          "mostrarEs": true,
+          "mostrarEn": true
+        }
+      ]
+    }
+  ]
+}

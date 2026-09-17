@@ -1,25 +1,25 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609170206';
+import { estaEmbebida } from './api.js?v=202609170212';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202609170206';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202609170206';
+} from './colores.js?v=202609170212';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202609170212';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202609170206';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609170206';
+} from './productos.js?v=202609170212';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609170212';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
-  revisarReparto, crearGuia, TOPE_GUIAS,
-} from './guias.js?v=202609170206';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609170206';
+  revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
+} from './guias.js?v=202609170212';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609170212';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609170206';
+const VERSION = '202609170212';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -361,12 +361,46 @@ async function pintarGuias() {
       </section>`
     : `<p class="ayuda">Hay ${TOPE_GUIAS} guías, que es lo máximo que lee el panel.</p>`;
 
+  /* En una tienda recien instalada las guias nacen vacias. Si hay una semilla
+   * con el contenido de otra tienda, se ofrece copiarla. Solo cuando TODAS estan
+   * vacias: asi no puede duplicar nada ni aparecer en la tienda de origen. */
+  const semilla = hayDefiniciones && guias.length && guias.every((g) => !g.bloques.length)
+    ? await cargarSemilla()
+    : null;
+  const totalSemilla = semilla ? semilla.guias.reduce((n, g) => n + g.bloques.length, 0) : 0;
+  const copiar = semilla ? `
+      <section class="tarjeta" id="tarjeta-copiar">
+        <p><strong>Tus guías están vacías.</strong> Se puede copiar el contenido de ${escapar(semilla.origen)}:
+          ${totalSemilla} bloques en ${semilla.guias.length} guías, con su orden y sus idiomas.</p>
+        <p class="ayuda">Las imágenes se copian a esta tienda. Los enlaces a los PDF y los vídeos quedan como
+          están. Después puedes cambiar cualquier bloque en el editor.</p>
+        <div class="acciones"><button class="principal" id="copiar-guias">Copiar las guías de ${escapar(semilla.origen)}</button></div>
+        <p class="ayuda" id="copiar-estado"></p>
+      </section>` : '';
+
   pantalla.innerHTML = `
     <h1>Guías de tallas</h1>
     <p class="subtitulo">Cada guía se compone de bloques. Un bloque puede existir solo en un idioma.</p>
     ${tarjetaPendientes(porHacer)}
+    ${copiar}
     ${listado}
     ${nueva}`;
+
+  document.getElementById('copiar-guias')?.addEventListener('click', async (e) => {
+    const estado = document.getElementById('copiar-estado');
+    e.target.disabled = true;
+    e.target.textContent = 'Copiando…';
+    try {
+      const informe = await importarGuias(semilla, { onPaso: (t) => { estado.textContent = t; } });
+      avisar(informe.join(' · '));
+      await pintarGuias();
+    } catch (error) {
+      avisar(error.message, true);
+      estado.textContent = 'Se detuvo. Lo que alcanzó a copiarse está en cada guía; revisa antes de repetir.';
+      e.target.disabled = false;
+      e.target.textContent = 'Reintentar';
+    }
+  });
 
   pantalla.querySelectorAll('[data-guia]').forEach((t) => {
     const abrir = () => pintarEditor(t.dataset.guia);
@@ -402,6 +436,17 @@ async function pintarGuias() {
   });
 
   conectarPendientes(pintarGuias);
+}
+
+async function cargarSemilla() {
+  try {
+    const r = await fetch(`./semillas/guias-saintvenik-com.json?v=${VERSION}`);
+    if (!r.ok) return null;
+    const s = await r.json();
+    return Array.isArray(s?.guias) && s.guias.length ? s : null;
+  } catch {
+    return null;
+  }
 }
 
 /* Un bloque de imagen o de PDF necesita su archivo. Misma mecánica que en

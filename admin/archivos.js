@@ -10,7 +10,7 @@
  * Por eso se comprueba el host ANTES de intentarlo y, si no es de los conocidos,
  * se explica que paso en vez de dejar un error mudo.
  */
-import { gql, comprobarErrores } from './api.js?v=202609170206';
+import { gql, comprobarErrores } from './api.js?v=202609170212';
 
 const HOSTS_CON_CORS = /(storage\.googleapis\.com|s3\.amazonaws\.com)$/;
 
@@ -138,5 +138,25 @@ export async function elegirDeBiblioteca({ tipo = 'MediaImage' } = {}) {
   if (!id) return null;
 
   const listo = await esperarListo(id);
+  return { id: listo.id, url: listo.image?.url ?? listo.url ?? null };
+}
+
+/* Copia a esta tienda un archivo que ya esta publicado en otra URL, por ejemplo
+ * en la otra tienda. Lo descarga Shopify, no el navegador: no hay CORS y no
+ * hace falta tener el archivo a mano. */
+export async function copiarArchivo(url, { imagen = true } = {}) {
+  const absoluta = url.startsWith('//') ? `https:${url}` : url;
+  const nombre = decodeURIComponent(new URL(absoluta).pathname.split('/').pop() || 'archivo');
+
+  const d = await gql(REGISTRAR, {
+    files: [{
+      originalSource: absoluta,
+      contentType: imagen ? 'IMAGE' : 'FILE',
+      filename: nombre,
+      alt: nombre,
+    }],
+  });
+  const creado = comprobarErrores(d, 'fileCreate').files[0];
+  const listo = await esperarListo(creado.id);
   return { id: listo.id, url: listo.image?.url ?? listo.url ?? null };
 }

@@ -14,6 +14,7 @@ import * as walk from 'acorn-walk';
 
 const GLOBALES = new Set([
   'window', 'document', 'console', 'fetch', 'URL', 'URLSearchParams', 'FormData',
+  'encodeURIComponent', 'decodeURIComponent',
   'JSON', 'Math', 'Object', 'Array', 'String', 'Number', 'Boolean', 'Promise',
   'Error', 'TypeError', 'Set', 'Map', 'Date', 'RegExp', 'Symbol', 'BigInt',
   'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'queueMicrotask',

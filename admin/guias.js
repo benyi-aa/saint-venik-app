@@ -26,9 +26,10 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202609170206';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609170206';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609170206';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202609170212';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609170212';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609170212';
+import { copiarArchivo } from './archivos.js?v=202609170212';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
@@ -537,6 +538,102 @@ export async function crearGuia({ nombre, nombreEn, palabras }) {
 
   const r = await gql(CREAR_ENTRADA, { metaobject });
   return comprobarErrores(r, 'metaobjectCreate').metaobject;
+}
+
+/* ---------------------------------------------------------------------------
+ * Copiar guias de otra tienda
+ *
+ * saintvenik.com y saintvenik.cl son tiendas separadas, y cada una guarda sus
+ * propios metaobjetos. Para no rehacer a mano las guias en una tienda nueva, el
+ * panel trae una semilla (admin/semillas/*.json) con el contenido de otra, y
+ * esto la carga: crea los bloques con su orden e idiomas, y copia a ESTA tienda
+ * las imagenes, tanto las de los bloques de imagen como las que van dentro del
+ * HTML. Asi la tienda nueva no depende de los archivos de la otra.
+ *
+ * Nunca duplica: una guia que ya tiene bloques no se toca.
+ * ------------------------------------------------------------------------- */
+
+const IMG_EN_HTML = /(<img\b[^>]*\bsrc=")([^"]+)(")/gi;
+
+export async function importarGuias(semilla, { onPaso = () => {} } = {}) {
+  const copias = new Map();
+  const copiar = async (url) => {
+    if (!copias.has(url)) copias.set(url, await copiarArchivo(url));
+    return copias.get(url);
+  };
+
+  const esDeOrigen = (url) => {
+    try {
+      const u = new URL(url.startsWith('//') ? `https:${url}` : url);
+      return u.host === 'cdn.shopify.com' || u.host.endsWith(semilla.origen);
+    } catch { return false; }
+  };
+
+  const conImagenesPropias = async (html) => {
+    let salida = html;
+    for (const [, , url] of [...html.matchAll(IMG_EN_HTML)]) {
+      if (!esDeOrigen(url)) continue;
+      const nueva = (await copiar(url)).url;
+      if (nueva) salida = salida.split(url).join(nueva);
+    }
+    return salida;
+  };
+
+  const capacidades = await capacidadActiva(TIPO_BLOQUE);
+  const informe = [];
+  let actuales = await cargarGuias();
+
+  for (const g of semilla.guias) {
+    let guia = actuales.find((x) => x.handle === g.handle)
+      ?? actuales.find((x) => x.nombre.trim().toLowerCase() === g.nombre.trim().toLowerCase());
+
+    if (!guia) {
+      onPaso(`Creando la guía «${g.nombre}»…`);
+      await crearGuia({ nombre: g.nombre, nombreEn: g.nombreEn, palabras: g.palabras });
+      actuales = await cargarGuias();
+      guia = actuales.find((x) => x.nombre.trim().toLowerCase() === g.nombre.trim().toLowerCase());
+      if (!guia) throw new Error(`No se encontró la guía «${g.nombre}» después de crearla.`);
+    }
+
+    if (guia.bloques.length) {
+      informe.push(`«${guia.nombre}» ya tenía ${guia.bloques.length} bloques: no se tocó.`);
+      continue;
+    }
+
+    const ids = [];
+    for (const [i, b] of g.bloques.entries()) {
+      onPaso(`«${guia.nombre}»: bloque ${i + 1} de ${g.bloques.length}…`);
+
+      const campos = [
+        { key: 'tipo', value: b.tipo },
+        { key: 'orden', value: String(i + 1) },
+        { key: 'mostrar_es', value: String(Boolean(b.mostrarEs)) },
+        { key: 'mostrar_en', value: String(Boolean(b.mostrarEn)) },
+      ];
+      const textoEs = b.tipo === 'html' ? await conImagenesPropias(b.textoEs ?? '') : (b.textoEs ?? '');
+      const textoEn = b.tipo === 'html' ? await conImagenesPropias(b.textoEn ?? '') : (b.textoEn ?? '');
+      if (textoEs) campos.push({ key: 'texto_es', value: textoEs });
+      if (textoEn) campos.push({ key: 'texto_en', value: textoEn });
+      if (b.tipo === 'video' && b.videoUrl) campos.push({ key: 'video_url', value: b.videoUrl });
+      if (b.tipo === 'imagen' && b.imagenUrl) {
+        onPaso(`«${guia.nombre}»: copiando la imagen del bloque ${i + 1}…`);
+        campos.push({ key: 'imagen', value: (await copiar(b.imagenUrl)).id });
+      }
+
+      const metaobject = { type: TIPO_BLOQUE, fields: campos };
+      if (capacidades) metaobject.capabilities = capacidades;
+      const r = await gql(CREAR_ENTRADA, { metaobject });
+      ids.push(comprobarErrores(r, 'metaobjectCreate').metaobject.id);
+
+      /* Se enlaza despues de cada bloque: si algo falla a mitad, lo creado queda
+       * dentro de la guia y se ve en el editor, en vez de quedar huerfano. */
+      await escribirLista(guia, ids);
+    }
+    informe.push(`«${guia.nombre}»: ${ids.length} bloques copiados.`);
+  }
+
+  if (copias.size) informe.push(`${copias.size} imágenes copiadas a esta tienda.`);
+  return informe;
 }
 
 export async function guardarGuia(id, { nombre, nombreEn, palabras }) {
