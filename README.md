@@ -37,13 +37,37 @@ Los colores no son variantes: son productos separados que se apuntan entre sí.
 Un producto se asocia a su color por la etiqueta (`oro`, `acero-inox`), que es lo
 que guarda el campo `etiqueta` del metaobjeto.
 
+## Dos tiendas, dos registros de la misma app
+
+saintvenik.com y saintvenik.cl están en **organizaciones de Shopify distintas**,
+y una app del Dev Dashboard solo se instala en tiendas de su propia
+organización. Por eso el mismo código está registrado dos veces:
+
+| Tienda | Organización | App en el Dev Dashboard | Configuración |
+|---|---|---|---|
+| saintvenik.com (`vd9tn0-et`) | Saint Venik World (224321345) | Color & Size Picker | `shopify.app.toml` |
+| saintvenik.cl (`saint-venik`) | Saint Venik (73555994) | Color & Size Picker | `shopify.app.cl.toml` |
+
+El panel es uno solo: `admin/index.html` elige el client id según la tienda que
+lo abre. Los bloques de cada tienda llevan el uuid de su propio registro, así
+que **las plantillas de un tema no se pueden copiar tal cual de una tienda a
+otra**: hay que cambiar el uuid (ver `docs/tema.md`).
+
 ## Trabajar en esto
 
 ```bash
 npm install
-npm run deploy      # publica los bloques
-git push            # publica el panel (GitHub Pages)
+npm run deploy:com  # publica los bloques en saintvenik.com
+npm run deploy:cl   # publica los bloques en saintvenik.cl
+git push            # publica el panel para las dos (GitHub Pages)
 ```
+
+Todo cambio en los bloques se publica **en las dos**. Un `shopify app deploy` sin
+`--config` usa la configuración activa del CLI, que puede ser cualquiera de las
+dos: usar siempre los scripts.
+
+Para llevar las guías a una tienda nueva, el panel ofrece copiarlas desde
+`admin/semillas/guias-saintvenik-com.json` cuando todas sus guías están vacías.
 
 Comprobar el Liquid sin desplegar:
 
@@ -62,3 +86,12 @@ Los pasos manuales sobre el tema están en [docs/tema.md](docs/tema.md).
 - `use_legacy_install_flow = true` impide instalar una app sin servidor: ese modo
   usa el OAuth antiguo y necesita un backend que atienda el callback.
 - Shopify no instala una app con `scopes = ""`; hace falta al menos un permiso.
+- «No se puede usar este enlace de instalación… la app no está disponible para
+  esta tienda» quiere decir, casi siempre, que la tienda es de otra
+  organización. El admin de cada tienda lo dice: su enlace «Desarrollar apps en
+  Dev Dashboard» lleva al id de su organización.
+- `shopify app execute` no sirve con tiendas reales, solo con tiendas de
+  desarrollo: responde «Could not find store … in organization».
+- `shopify.app.cl.toml` se enlazó con `app config link`, que la dejó como
+  configuración activa del CLI. Se volvió a `shopify.app.toml` con
+  `shopify app config use shopify.app.toml`.

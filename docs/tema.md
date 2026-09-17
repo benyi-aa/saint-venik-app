@@ -140,3 +140,27 @@ personalizado).
 (`product.json`), que este tema no tiene, y por eso dan 404 aunque están
 publicados: los cuatro sets de cadena con colgante, `cuban-set`,
 `pulsera-geneva`, `acero`, `brillantes` y `new-packaging`.
+
+## saintvenik.cl (17 sep 2026)
+
+Tema de pruebas: **«Saint Venik · bloques app (pruebas)»** (188341289263), copia
+de «Working | Q1 2026 || NEW» (184209015087, el que está en vivo).
+
+Cambios sobre la copia, y nada más:
+
+- Plantillas `product.acero-inoxidable`, `.aceroinox-sinstock`, `.brillantes`,
+  `product.json`, `.lentes-de-sol`, `.oro`, `.oro-sinstock`: los tres bloques de
+  la app en el sitio del selector de variantes del tema, que queda
+  **desactivado** (no borrado). En `.oro` también se desactiva el bloque de
+  OPTIS. El bloque «META DE PRODUCTO» (reseñas y stock) queda justo debajo, como
+  estaba.
+- `settings_data.json`: desactivados los app embeds de OPTIS
+  (`optis-color-swatch/bss-se-script`) y de **Avada Size Chart**
+  (`size-chart/app-embed`), que es quien pinta la «Guía de Tallas» en .cl (no
+  Kiwi).
+
+Los bloques de .cl usan el uuid de su propio registro:
+`shopify://apps/color-size-picker/blocks/<bloque>/01a0ad1a-1990-7459-b850-45f32c50d143`.
+Los de .com usan `01a0a760-9c51-786e-8540-94248eb04d7c`.
+
+.cl ya tenía la regla del título a 18 px en su CSS personalizado.
