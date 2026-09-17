@@ -69,7 +69,13 @@
   letter-spacing: 0.032em;
 }
 
-.sv-sizes--normal .sv-sizes__label { font-weight: 700; }
+/* 600 y no 700, por la misma razon que en el selector de color: saintvenik.cl
+ * no carga Assistant 700 y lo pinta a 600. */
+.sv-sizes--normal .sv-sizes__label { font-weight: 600; }
+
+.sv-sizes--normal .sv-sizes__heading { gap: 5px; }
+.sv-sizes--normal .sv-sizes__current,
+.sv-sizes--normal .sv-sizes__sep { opacity: 1; }
 
 .sv-sizes--normal .sv-sizes__item {
   min-width: 0;

@@ -119,6 +119,10 @@
  * letra del bloque del tema, que en Impulse son 18 px: mas grande que todo lo
  * demas. */
 .sv-guia-abrir--normal .sv-guia-abrir__boton { font-size: 0.875rem; }
+/* La caja hereda 18 px del bloque de Impulse y su linea bajaba el enlace 1,5 px
+ * respecto a saintvenik.cl. Con la misma letra y altura de linea que el enlace,
+ * la separacion con los botones es la de alli. */
+.sv-guia-abrir--normal { font-size: 0.875rem; line-height: 1.4; }
 
 /* --- La ventana --- */
 

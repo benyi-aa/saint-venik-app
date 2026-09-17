@@ -135,7 +135,17 @@
   letter-spacing: 0.032em;
 }
 
-.sv-colors--normal .sv-colors__label { font-weight: 700; }
+/* Grosor 600 y no 700 a proposito. saintvenik.cl pide 700, pero su tema no
+ * carga el archivo de Assistant 700, solo el 400 y el 600, asi que el navegador
+ * lo pinta a 600. Este tema si carga el 700: pedir 700 aqui se veia mas grueso
+ * que alli. Lo que tiene que coincidir es lo que se ve. */
+.sv-colors--normal .sv-colors__label { font-weight: 600; }
+
+/* En saintvenik.cl el valor y el guion van en negro pleno, y el guion lleva
+ * 5 px a cada lado. */
+.sv-colors--normal .sv-colors__heading { gap: 5px; }
+.sv-colors--normal .sv-colors__current,
+.sv-colors--normal .sv-colors__sep { opacity: 1; }
 
 .sv-colors--normal .sv-colors__swatch {
   box-sizing: content-box;
