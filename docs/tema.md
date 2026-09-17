@@ -164,3 +164,17 @@ Los bloques de .cl usan el uuid de su propio registro:
 Los de .com usan `01a0a760-9c51-786e-8540-94248eb04d7c`.
 
 .cl ya tenía la regla del título a 18 px en su CSS personalizado.
+
+### Publicado (17 sep 2026)
+
+- «Saint Venik · bloques app (pruebas)» (188341289263) es el tema en vivo de
+  saintvenik.cl. Vuelta atrás: publicar «Working | Q1 2026 || NEW»
+  (184209015087), que quedó intacto.
+- Antes de publicar se comprobó que el tema en vivo no había cambiado desde la
+  copia, y se barrieron las 179 fichas en español e inglés: 134 con color
+  (las que tienen hermano), 82 con talla (todas las que tienen talla), 168 con
+  guía, los 9 sets con sus 2 o 3 filas, y ni rastro de OPTIS ni de Avada.
+  Elegir talla cambia la variante del carrito sin recargar.
+- Desinstaladas en .cl: **OPTIS Color Swatch** ($49,90/mes + uso) y **MP Size
+  Chart** ($6,95/mes), que es la app de Avada que pintaba «Guía de Tallas».
+  En saintvenik.com, OPTIS y Kiwi las desinstala Diego a mano.
