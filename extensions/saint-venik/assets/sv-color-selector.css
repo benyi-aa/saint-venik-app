@@ -121,6 +121,39 @@
 
 .sv-colors__item.is-soldout .sv-colors__name { opacity: 0.55; }
 
+/* Normal: calcado de saintvenik.cl, medido en la tienda a 1512 px de ancho.
+ * Alli cada muestra es una caja de 40 px: un circulo de 34, un hueco de 2 y un
+ * aro de 1 px, gris en las demas y negro en la elegida. Aqui el circulo lo
+ * sigue marcando el tamano de la app (--sv-size) y el aro se suma alrededor,
+ * dentro de la caja, igual que alli: asi la muestra ocupa lo que se ve y la
+ * primera no se sale del borde izquierdo. */
+.sv-colors--normal .sv-colors__heading {
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.032em;
+}
+
+.sv-colors--normal .sv-colors__label { font-weight: 700; }
+
+.sv-colors--normal .sv-colors__swatch {
+  box-sizing: content-box;
+  padding: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  background-clip: content-box;
+  background-origin: content-box;
+  box-shadow: none;
+}
+
+.sv-colors--normal .sv-colors__item.is-current .sv-colors__swatch {
+  border-color: var(--sv-ring, #111111);
+  box-shadow: none;
+}
+
+.sv-colors--normal .sv-colors__item:not(.is-current):hover .sv-colors__swatch {
+  border-color: var(--sv-ring, #111111);
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sv-colors__swatch { transition: none; }
   .sv-colors__item:hover .sv-colors__swatch { transform: none; }

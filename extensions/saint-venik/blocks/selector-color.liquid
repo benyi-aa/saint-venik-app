@@ -57,7 +57,7 @@
       break
     endfor
     assign sv_alin = config.alineacion.value | default: block.settings.alineacion
-    assign sv_escala = config.escala.value | default: 'compacto'
+    assign sv_escala = config.escala.value | default: 'normal'
     assign sv_tam = config.tamano_muestra.value | default: block.settings.tamano
     assign orden_crudo = config.orden_colores.value
     if orden_crudo == blank
@@ -277,11 +277,12 @@
       "type": "range",
       "id": "espacio",
       "label": "Separación",
+      "info": "8 px es la separación de saintvenik.cl.",
       "min": 4,
       "max": 32,
       "step": 2,
       "unit": "px",
-      "default": 12
+      "default": 8
     },
     {
       "type": "color",

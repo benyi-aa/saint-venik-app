@@ -115,6 +115,11 @@
 .sv-guia-abrir--compacto .sv-guia-abrir__boton { font-size: 0.85rem; }
 .sv-guia-abrir--compacto .sv-guia-abrir__icono { width: 0.95em; height: 0.95em; }
 
+/* Normal: el enlace de saintvenik.cl va a 14 px. Sin esta regla heredaba la
+ * letra del bloque del tema, que en Impulse son 18 px: mas grande que todo lo
+ * demas. */
+.sv-guia-abrir--normal .sv-guia-abrir__boton { font-size: 0.875rem; }
+
 /* --- La ventana --- */
 
 .sv-guia-dialogo {

@@ -54,6 +54,28 @@
   font-size: 0.75rem;
 }
 
+/* Normal: calcado de saintvenik.cl, medido en la tienda a 1512 px de ancho.
+ * Alli el titulo va a 14 px y cada boton mide 65 x 39: relleno de 12 x 16,
+ * letra de 13, esquina de 8 y borde gris medio. */
+.sv-sizes--normal .sv-sizes__heading {
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.032em;
+}
+
+.sv-sizes--normal .sv-sizes__label { font-weight: 700; }
+
+.sv-sizes--normal .sv-sizes__item {
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  border-color: rgba(0, 0, 0, 0.46);
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.035em;
+}
+
+.sv-sizes--normal .sv-sizes__grupo + .sv-sizes__grupo { margin-top: 0.625rem; }
+
 .sv-sizes__item {
   position: relative;
   display: inline-flex;

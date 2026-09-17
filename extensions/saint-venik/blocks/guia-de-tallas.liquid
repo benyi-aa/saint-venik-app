@@ -79,7 +79,7 @@
           break
         endfor
         assign sv_alin = config.alineacion.value | default: block.settings.alineacion
-        assign sv_escala = config.escala.value | default: 'compacto'
+        assign sv_escala = config.escala.value | default: 'normal'
 
         if lang == 'en'
           assign rotulo = config.boton_guia_en.value

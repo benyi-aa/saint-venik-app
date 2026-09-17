@@ -102,7 +102,7 @@ export function guiaHtml(guia, idioma) {
  * ficha no tiene. */
 export function coloresHtml(colores, apariencia = {}) {
   const alineacion = apariencia.alineacion ?? 'izquierda';
-  const escala = apariencia.escala ?? 'compacto';
+  const escala = apariencia.escala ?? 'normal';
   const tamano = apariencia.tamano ?? 34;
   const pintables = colores.filter((c) => c.etiqueta);
 

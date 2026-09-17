@@ -57,7 +57,7 @@
       break
     endfor
     assign sv_alin = sv_cfg.alineacion.value | default: block.settings.alineacion
-    assign sv_escala = sv_cfg.escala.value | default: 'compacto'
+    assign sv_escala = sv_cfg.escala.value | default: 'normal'
 
     assign varias = false
     if opciones.size > 1

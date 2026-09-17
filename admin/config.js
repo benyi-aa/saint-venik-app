@@ -8,19 +8,21 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202609162214';
+import { gql, comprobarErrores } from './api.js?v=202609170125';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
 
 export const ORDEN_POR_DEFECTO = ['acero-inox', 'oro'];
 
-/* Por defecto, lo más discreto: alineado a la izquierda y compacto. Un bloque de
- * app que llega gritando obliga a que la primera tarea sea apagarlo. */
+/* Por defecto, alineado a la izquierda y a la escala de saintvenik.cl, que es
+ * la referencia de la marca: "normal" esta calcado de alli. "compacto" queda
+ * como opcion mas pequena. Antes el defecto era compacto, y junto al enlace de
+ * la guia los botones de talla se veian diminutos. */
 export const APARIENCIA_POR_DEFECTO = {
   alineacion: 'izquierda',
   tamanoMuestra: 34,
-  escala: 'compacto',
+  escala: 'normal',
 };
 
 const CAMPOS_CONFIG = [

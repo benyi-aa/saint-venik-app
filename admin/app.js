@@ -1,25 +1,25 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609162214';
+import { estaEmbebida } from './api.js?v=202609170125';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202609162214';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202609162214';
+} from './colores.js?v=202609170125';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202609170125';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202609162214';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609162214';
+} from './productos.js?v=202609170125';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609170125';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS,
-} from './guias.js?v=202609162214';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609162214';
+} from './guias.js?v=202609170125';
+import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609170125';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609162214';
+const VERSION = '202609170125';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -783,8 +783,8 @@ async function pintarApariencia() {
         <div>
           <label for="escala">Tamaño</label>
           <select id="escala">
-            ${opcion('compacto', config.escala, 'Compacto')}
-            ${opcion('normal', config.escala, 'Normal')}
+            ${opcion('normal', config.escala, 'Normal — como saintvenik.cl')}
+            ${opcion('compacto', config.escala, 'Compacto — más pequeño')}
           </select>
         </div>
         <div>
