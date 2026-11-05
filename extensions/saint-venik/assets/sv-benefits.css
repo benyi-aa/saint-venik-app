@@ -1,0 +1,88 @@
+/* Saint Venik · Beneficios del producto */
+
+.sv-benef {
+  margin-top: var(--sv-pt, 12px);
+  margin-bottom: var(--sv-pb, 10px);
+}
+
+.sv-benef__titulo {
+  margin: 0 0 0.6em;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.032em;
+}
+
+.sv-benef__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sv-benef--columna .sv-benef__lista {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sv-benef__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--sv-benef-texto, #111111);
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  /* El tema pone viñetas y sangría a cualquier li; aquí estorban las dos. */
+  list-style: none;
+  text-indent: 0;
+}
+
+.sv-benef__item::before,
+.sv-benef__item::marker { content: none; }
+
+/* El icono tiene que seguir al texto cuando el tema cambia el tamaño de letra,
+ * pero sin encogerse si el texto ocupa dos líneas. */
+.sv-benef__icono {
+  flex: 0 0 auto;
+  width: 1.2em;
+  height: 1.2em;
+  /* El trazo se declara en el SVG; aquí solo se le quita el relleno heredado
+   * por si el tema pinta los svg de la ficha. */
+  fill: none;
+}
+
+/* Píldora: el contenedor blanco de la referencia. Sobre una ficha blanca el
+ * borde es lo único que lo delimita, así que no es decorativo. */
+.sv-benef--pildora .sv-benef__item {
+  padding: 7px 12px;
+  border: 1px solid var(--sv-benef-borde, #E4DFD7);
+  border-radius: var(--sv-benef-radio, 8px);
+  background: var(--sv-benef-fondo, #FFFFFF);
+}
+
+/* Plano: sin contenedor, como la columna derecha de la referencia. */
+.sv-benef--plano .sv-benef__lista { gap: 10px 20px; }
+.sv-benef--plano .sv-benef__item { padding: 0; }
+
+/* Compacto: todo un punto más pequeño, igual que el resto de los bloques.
+ * Las dos clases van en el MISMO elemento, así que van pegadas: con un espacio
+ * en medio la regla pide un descendiente y no casa nunca. */
+.sv-benef--compacto .sv-benef__item { font-size: 0.75rem; }
+.sv-benef--compacto.sv-benef--pildora .sv-benef__item { padding: 5px 10px; }
+
+/* Normal: la escala de saintvenik.cl, que es la que usan las dos tiendas. */
+.sv-benef--normal .sv-benef__item { font-size: 0.8125rem; }
+
+/* En móvil una fila de tres píldoras no cabe: que cada una ocupe lo suyo y
+ * salten de línea en vez de encogerse hasta partir la palabra.
+ *
+ * Llevan `.sv-benef` delante para igualar la especificidad de las reglas de
+ * escala de arriba, que si no ganan ellas: el bloque siempre pone una de las
+ * dos clases, así que una regla suelta de `.sv-benef__item` aquí no haría nada. */
+@media (max-width: 749px) {
+  .sv-benef .sv-benef__lista { gap: 6px; }
+  .sv-benef .sv-benef__item { font-size: 0.75rem; }
+  .sv-benef.sv-benef--pildora .sv-benef__item { padding: 6px 10px; }
+}

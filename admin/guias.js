@@ -26,10 +26,14 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202609170212';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202609170212';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202609170212';
-import { copiarArchivo } from './archivos.js?v=202609170212';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051530';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611051530';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611051530';
+import { copiarArchivo } from './archivos.js?v=202611051530';
+import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611051530';
+import {
+  faltaEstructuraBeneficios, asegurarEstructuraBeneficios, sembrarBeneficios,
+} from './beneficios.js?v=202611051530';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
@@ -215,6 +219,11 @@ export async function revisarEstructura() {
    * crearon a mano, pero la app tiene que poder montarlos en cualquier tienda. */
   pendientes.push(...(await faltaEstructuraColor()));
 
+  /* Las insignias y los beneficios también son estructura: una tienda nueva
+   * tiene que poder montarlos desde el mismo botón, sin tocar el admin. */
+  pendientes.push(...(await faltaEstructuraEtiquetas()));
+  pendientes.push(...(await faltaEstructuraBeneficios()));
+
   for (const [tipo, esperados] of [[TIPO_BLOQUE, CAMPOS_BLOQUE], [TIPO_GUIA, CAMPOS_GUIA]]) {
     pendientes.push(...(await problemasDeDefinicion(tipo, esperados)));
   }
@@ -279,6 +288,9 @@ export async function crearEstructura() {
 
   await asegurarConfig(pasos);
   await asegurarEstructuraColor(pasos);
+  await asegurarEstructuraEtiquetas(pasos);
+  await asegurarEstructuraBeneficios(pasos);
+  await sembrarBeneficios(pasos);
 
   /* El campo `tipo` limita sus valores con una lista de opciones. Un tipo nuevo
    * no basta con soportarlo en el panel: hay que ampliar esa lista o Shopify

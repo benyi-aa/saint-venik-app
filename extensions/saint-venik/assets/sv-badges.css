@@ -1,0 +1,54 @@
+/* Saint Venik · Insignias sobre los productos */
+
+.sv-tags {
+  position: absolute;
+  top: var(--sv-tags-top, 8px);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* La tarjeta entera es un enlace: la insignia no debe comerse el clic. */
+  pointer-events: none;
+}
+
+/* Sin tope de ancho, una insignia con texto largo se sale de la foto: el
+ * contenedor es absoluto y crece con el contenido, y el recorte del .sv-tag
+ * no tiene contra qué medir. */
+.sv-tags--izquierda,
+.sv-tags--derecha {
+  max-width: calc(100% - 2 * var(--sv-tags-lado, 8px));
+}
+
+.sv-tags--izquierda {
+  left: var(--sv-tags-lado, 8px);
+  align-items: flex-start;
+}
+
+.sv-tags--derecha {
+  right: var(--sv-tags-lado, 8px);
+  align-items: flex-end;
+}
+
+.sv-tag {
+  display: inline-block;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: var(--sv-tags-radio, 0px);
+  font-size: var(--sv-tags-letra, 11px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* En movil la tarjeta mide la mitad: una insignia con el mismo tamano de letra
+ * que en escritorio se come la foto. */
+@media (max-width: 749px) {
+  .sv-tags--tarjeta .sv-tag {
+    padding: 3px 6px;
+    font-size: calc(var(--sv-tags-letra, 11px) - 1px);
+  }
+}

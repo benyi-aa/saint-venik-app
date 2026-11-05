@@ -11,7 +11,8 @@
     "info": "shopify app info",
     "version": "node scripts/version.mjs",
     "revisar": "node scripts/revisar.mjs",
-    "publicar": "node scripts/version.mjs && node scripts/revisar.mjs",
+    "iconos": "node scripts/iconos.mjs",
+    "publicar": "node scripts/iconos.mjs && node scripts/version.mjs && node scripts/revisar.mjs",
     "deploy:com": "shopify app deploy --config shopify.app.toml --allow-updates",
     "deploy:cl": "shopify app deploy --config shopify.app.cl.toml --allow-updates"
   },

@@ -348,3 +348,104 @@ textarea.codigo {
 
 .producto__hermanos li { display: list-item; }
 .producto__hermanos button { margin-left: 8px; }
+
+/* La muestra de la insignia o del beneficio va arriba de su tarjeta, con las
+ * flechas de orden al otro lado: lo que se está editando y dónde está en la
+ * fila, de un vistazo. */
+.cabecera-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* Asignación: a qué productos alcanza una insignia o un beneficio. Dos
+ * columnas, productos sueltos y colecciones enteras, con lo ya elegido en
+ * fichas para poder quitarlo de un clic. */
+.asigna {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--linea, #e3e3e3);
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 8px; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px 3px 9px;
+  border: 1px solid var(--linea, #e3e3e3);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 12px;
+}
+
+.chip__x {
+  border: 0;
+  background: none;
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--tinta-suave);
+  cursor: pointer;
+}
+
+.chip__x:hover { color: var(--peligro); }
+
+.resultados {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+/* Con borde se ve que es una lista para elegir y no texto suelto debajo del
+ * campo. Solo cuando hay algo: un recuadro vacío es ruido. */
+.resultados:not([hidden]) {
+  padding: 4px;
+  border: 1px solid var(--linea, #e3e3e3);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.resultado {
+  border: 0;
+  background: none;
+  padding: 5px 8px;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.resultado:hover { background: rgba(0, 0, 0, 0.05); }
+
+/* El icono elegido se ve al lado del desplegable: doce nombres sin dibujo son
+ * doce adivinanzas. */
+.icono-elige { display: flex; align-items: center; gap: 8px; }
+.icono-elige__previa { display: inline-flex; width: 22px; height: 22px; }
+.icono-elige__previa svg { width: 100%; height: 100%; }
+
+.previa__tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.asigna input[type="search"] {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Cuántos productos tiene una colección. Es el dato que decide si asignarla o
+ * no, así que va pegado al nombre y no escondido. */
+.chip__n,
+.resultado__n {
+  color: var(--tinta-suave);
+  font-size: 11px;
+}
+
+.resultado__n { float: right; }

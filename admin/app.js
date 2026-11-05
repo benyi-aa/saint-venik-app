@@ -1,25 +1,36 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202609170212';
+import { estaEmbebida } from './api.js?v=202611051530';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202609170212';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202609170212';
+} from './colores.js?v=202611051530';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202611051530';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202609170212';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202609170212';
+} from './productos.js?v=202611051530';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051530';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202609170212';
-import { guiaHtml, coloresHtml, visible } from './vista-previa.js?v=202609170212';
+} from './guias.js?v=202611051530';
+import { guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml } from './vista-previa.js?v=202611051530';
+import { cargarColecciones, TOPE_REFERENCIAS } from './asignacion.js?v=202611051530';
+import {
+  cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
+  sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta,
+  FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
+} from './etiquetas.js?v=202611051530';
+import {
+  cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
+  sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
+} from './beneficios.js?v=202611051530';
+import { ICONOS, svgIcono } from './iconos.js?v=202611051530';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202609170212';
+const VERSION = '202611051530';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1084,9 +1095,617 @@ async function pintarProductos() {
   });
 }
 
+
+/* ---------------------------------------------------------------------------
+ * Insignias y beneficios
+ *
+ * Dos pantallas que por dentro son lo mismo: una lista de entradas y, en cada
+ * una, a qué productos alcanza. Lo que cambia es el adorno — la insignia tiene
+ * dos colores, el beneficio tiene icono — así que el editor de asignación está
+ * escrito una sola vez aquí y las dos lo usan.
+ *
+ * Todo lo que se toca se ve al momento: el texto y los colores repintan la
+ * muestra mientras se escribe, buscar un producto no necesita pulsar ningún
+ * botón, y guardar no recarga la pantalla. Es una pantalla para trastear, no
+ * un formulario para rellenar.
+ * ------------------------------------------------------------------------- */
+
+const ESPERA_BUSQUEDA = 280;
+
+function chipsHtml(lista, vacio) {
+  if (!lista.length) return `<p class="ayuda">${escapar(vacio)}</p>`;
+  return lista.map((x) => `
+    <span class="chip">${escapar(x.titulo)}${x.cuantos === undefined ? '' : ` <span class="chip__n">${x.cuantos}</span>`}<button
+      type="button" class="chip__x" data-quitar="${escapar(x.id)}"
+      aria-label="Quitar ${escapar(x.titulo)}">&times;</button></span>
+  `).join('');
+}
+
+/* Las dos columnas se usan igual: escribes y aparece lo que coincide. Un
+ * desplegable de colecciones y un buscador de productos serían dos cosas
+ * distintas que hacen lo mismo, y habría que aprender las dos. */
+function asignacionHtml(estado) {
+  return `
+    <div class="asigna">
+      <div class="asigna__col">
+        <label>Productos sueltos</label>
+        <div class="chips" data-chips="productos">${chipsHtml(estado.productos, 'Ninguno.')}</div>
+        <input type="search" data-buscar="productos" placeholder="Escribe para buscar un producto…" />
+        <div class="resultados" data-resultados="productos" hidden></div>
+      </div>
+      <div class="asigna__col">
+        <label>Colecciones enteras</label>
+        <div class="chips" data-chips="colecciones">${chipsHtml(estado.colecciones, 'Ninguna.')}</div>
+        <input type="search" data-buscar="colecciones" placeholder="Escribe para buscar una colección…" />
+        <div class="resultados" data-resultados="colecciones" hidden></div>
+      </div>
+    </div>
+    <p class="ayuda" data-alcance></p>
+  `;
+}
+
+/* Una colección puede traer 80 productos y otra 3: sumar las cuentas da una
+ * idea del tamaño sin tener que preguntarle a Shopify en cada tecla. Es una
+ * estimación y se dice que lo es, porque un producto en dos colecciones se
+ * cuenta dos veces. */
+function alcanceEstimado(estado) {
+  const deColecciones = estado.colecciones.reduce((n, c) => n + (c.cuantos ?? 0), 0);
+  return estado.productos.length + deColecciones;
+}
+
+function textoAlcance(estado, guardado) {
+  if (!estado.sucio) {
+    if (!guardado) return 'Todavía no alcanza a ningún producto: elige productos o colecciones.';
+    return `Alcanza a ${guardado} producto${guardado === 1 ? '' : 's'}.`;
+  }
+  const n = alcanceEstimado(estado);
+  if (!n) return 'Sin nada elegido no se muestra en ninguna ficha. Pulsa Guardar para aplicarlo.';
+  return `Alcanzará a unos ${n} productos. Pulsa Guardar para calcularlo exacto y aplicarlo.`;
+}
+
+/* El estado vive en memoria mientras se edita la tarjeta y solo baja a Shopify
+ * al pulsar Guardar. Guardar en cada clic sería más simple de escribir, pero
+ * añadir cinco productos serían cinco escrituras y cinco esperas. */
+function conectarAsignacion(tarjeta, estado, colecciones, guardado) {
+  const repintar = () => {
+    tarjeta.querySelector('[data-chips="productos"]').innerHTML = chipsHtml(estado.productos, 'Ninguno.');
+    tarjeta.querySelector('[data-chips="colecciones"]').innerHTML = chipsHtml(estado.colecciones, 'Ninguna.');
+    tarjeta.querySelector('[data-alcance]').textContent = textoAlcance(estado, guardado);
+  };
+
+  const anadir = (donde, item) => {
+    if (estado[donde].some((x) => x.id === item.id)) return;
+    if (estado[donde].length >= TOPE_REFERENCIAS) {
+      avisar(`Shopify no deja guardar más de ${TOPE_REFERENCIAS} en esa lista. Usa una colección en vez de productos sueltos.`, true);
+      return;
+    }
+    estado[donde].push(item);
+    estado.sucio = true;
+    repintar();
+  };
+
+  tarjeta.addEventListener('click', (e) => {
+    const x = e.target.closest('[data-quitar]');
+    if (!x || !tarjeta.contains(x)) return;
+    const id = x.dataset.quitar;
+    estado.productos = estado.productos.filter((p) => p.id !== id);
+    estado.colecciones = estado.colecciones.filter((c) => c.id !== id);
+    estado.sucio = true;
+    repintar();
+  });
+
+  /* Las dos búsquedas comparten todo menos de dónde sacan los candidatos: las
+   * colecciones ya están en memoria y los productos hay que pedirlos. */
+  function conectarBuscador(donde, buscador) {
+    const campo = tarjeta.querySelector(`[data-buscar="${donde}"]`);
+    const caja = tarjeta.querySelector(`[data-resultados="${donde}"]`);
+    let temporizador = null;
+    let vuelta = 0;
+
+    const pintar = (encontrados) => {
+      caja.hidden = false;
+      caja.innerHTML = encontrados.length
+        ? encontrados.map((x) => `
+            <button type="button" class="resultado" data-anadir="${escapar(x.id)}">
+              ${escapar(x.titulo)}${x.cuantos === undefined ? '' : ` <span class="resultado__n">${x.cuantos}</span>`}
+            </button>`).join('')
+        : '<p class="ayuda">Nada con ese nombre.</p>';
+
+      caja.querySelectorAll('[data-anadir]').forEach((boton) => {
+        boton.addEventListener('click', () => {
+          const x = encontrados.find((y) => y.id === boton.dataset.anadir);
+          if (!x) return;
+          anadir(donde, x);
+          campo.value = '';
+          caja.hidden = true;
+        });
+      });
+    };
+
+    const lanzar = async () => {
+      const texto = campo.value.trim();
+      if (!texto) { caja.hidden = true; return; }
+
+      /* Cada búsqueda lleva su número. Si vuelve una vieja después de una
+       * nueva, se tira: si no, escribir deprisa deja en pantalla el resultado
+       * de lo que escribiste hace tres letras. */
+      vuelta += 1;
+      const mia = vuelta;
+      try {
+        const encontrados = await buscador(texto);
+        if (mia !== vuelta) return;
+        pintar(encontrados.slice(0, 8));
+      } catch (error) {
+        if (mia !== vuelta) return;
+        caja.hidden = false;
+        caja.innerHTML = `<p class="problema">${escapar(error.message)}</p>`;
+      }
+    };
+
+    campo.addEventListener('input', () => {
+      clearTimeout(temporizador);
+      temporizador = setTimeout(lanzar, ESPERA_BUSQUEDA);
+    });
+    campo.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      clearTimeout(temporizador);
+      lanzar();
+    });
+    campo.addEventListener('focus', () => { if (campo.value.trim()) lanzar(); });
+  }
+
+  conectarBuscador('productos', async (texto) => (await buscarProductos(texto))
+    .map((p) => ({ id: p.id, titulo: p.titulo, handle: p.handle })));
+
+  conectarBuscador('colecciones', async (texto) => {
+    const busca = texto.toLowerCase();
+    return colecciones.filter((c) => c.titulo.toLowerCase().includes(busca));
+  });
+
+  repintar();
+  return repintar;
+}
+
+/* Las colecciones cambian sin avisar a la app: entra un producto nuevo a «Oro»
+ * y la cadena de handles se queda vieja. Recalcular al abrir la pantalla es el
+ * momento natural, porque es justo cuando alguien va a mirar si está bien. */
+async function recalcular(lista, sincronizar) {
+  let cambiadas = 0;
+  const cortadas = new Set();
+  for (const item of lista) {
+    /* Se recalculan todas, no solo las que tienen colecciones. Una entrada de
+     * productos sueltos no cuesta ni una consulta (los handles ya están en
+     * memoria), y así se arregla sola si quedó a medias: un producto renombrado,
+     * o un guardado que escribió las referencias y se cayó antes de los
+     * handles. */
+    try {
+      const r = await sincronizar(item);
+      if (r.cambio) cambiadas += 1;
+      r.cortadas.forEach((c) => cortadas.add(c));
+    } catch (error) {
+      avisar(`No se pudo recalcular «${item.nombre}»: ${error.message}`, true);
+    }
+  }
+  if (cortadas.size) {
+    avisar(`Estas colecciones tienen más productos de los que la app puede leer de una vez, así que faltan algunos: ${[...cortadas].join(', ')}.`, true);
+  }
+  return cambiadas;
+}
+
+function avisoRecalculo(cambiadas) {
+  if (!cambiadas) return '';
+  return `<p class="ayuda">Se actualizaron ${cambiadas} al abrir, porque sus colecciones habían cambiado.</p>`;
+}
+
+/* Subir y bajar en vez de escribir un número: el orden se ve en la pantalla,
+ * así que moverlo tiene que hacerse donde se ve. */
+async function moverEntrada(lista, id, direccion, guardar) {
+  const i = lista.findIndex((x) => x.id === id);
+  const j = direccion === 'arriba' ? i - 1 : i + 1;
+  if (i < 0 || j < 0 || j >= lista.length) return;
+  await guardar(lista[i].id, { orden: j + 1 });
+  await guardar(lista[j].id, { orden: i + 1 });
+}
+
+/* Cargar las entradas falla mientras la estructura no existe, y eso es el
+ * estado normal de una tienda recién instalada, no un error que enseñar. Pero
+ * si la estructura SÍ existe y aun así falla (un THROTTLED, por ejemplo),
+ * callarse dejaría la pantalla diciendo que no hay nada, que es mentira. */
+async function cargarOVacio(cargar, hayEstructura) {
+  try {
+    return { lista: await cargar(), error: '' };
+  } catch (error) {
+    return { lista: [], error: hayEstructura ? error.message : '' };
+  }
+}
+
+async function pintarEtiquetas() {
+  pantalla.innerHTML = '<p class="cargando">Cargando insignias…</p>';
+
+  const [colecciones, revision] = await Promise.all([cargarColecciones(), revisarEstructura()]);
+  const faltaLoNuestro = revision.pendientes.some((p) => p.includes('insignias'));
+  const { lista: etiquetas, error } = await cargarOVacio(cargarEtiquetas, !faltaLoNuestro);
+  const cambiadas = await recalcular(etiquetas, sincronizarEtiqueta);
+
+  const muestras = () => etiquetas.filter((e) => e.activo).map(etiquetaHtml).join('')
+    || '<p class="sv-guia__vacio">Ninguna insignia activa.</p>';
+
+  pantalla.innerHTML = `
+    <h1>Insignias</h1>
+    <p class="subtitulo">Los rótulos que van sobre la foto: «Más vendido», «Novedad». Cada uno elige a qué productos alcanza, sueltos o por colección entera.</p>
+
+    ${tarjetaPendientes(revision.pendientes)}
+    ${error ? `<p class="problema">${escapar(error)}</p>` : ''}
+
+    <section class="tarjeta previa">
+      <p class="previa__titulo">Así se ven</p>
+      <div class="previa__tags" id="previa-etiquetas">${muestras()}</div>
+      <p class="ayuda previa__nota">En la tienda van sobre la foto: en la colección arriba a la izquierda, debajo de la etiqueta del tema; en la ficha, arriba a la derecha.</p>
+    </section>
+
+    ${avisoRecalculo(cambiadas)}
+
+    ${etiquetas.length ? '' : `
+      <section class="tarjeta">
+        <p>Todavía no hay ninguna insignia. Crea la primera aquí abajo: ponle el texto, elige los colores y dile a qué productos alcanza.</p>
+      </section>`}
+
+    ${etiquetas.map((e, i) => `
+      <section class="tarjeta" data-id="${escapar(e.id)}">
+        <div class="cabecera-fila">
+          <span class="sv-tag" data-previa style="background-color:${escapar(e.fondo)};color:${escapar(e.texto)}">${escapar(e.nombre || 'Sin texto')}</span>
+          <div class="bloque__acciones">
+            <button class="secundario" data-mover="arriba" ${i === 0 ? 'disabled' : ''} title="Subir">↑</button>
+            <button class="secundario" data-mover="abajo" ${i === etiquetas.length - 1 ? 'disabled' : ''} title="Bajar">↓</button>
+          </div>
+        </div>
+        <div class="color__campos">
+          <div>
+            <label>Texto en español</label>
+            <input type="text" data-campo="nombre" value="${escapar(e.nombre)}" />
+          </div>
+          <div>
+            <label>Texto en inglés</label>
+            <input type="text" data-campo="nombre_en" value="${escapar(e.nombreEn)}" placeholder="Vacío: se usa el español" />
+          </div>
+          <div>
+            <label>Fondo</label>
+            <input type="color" data-campo="fondo" value="${escapar(e.fondo)}" />
+          </div>
+          <div>
+            <label>Texto</label>
+            <input type="color" data-campo="texto" value="${escapar(e.texto)}" />
+          </div>
+          <div>
+            <label>Se muestra</label>
+            <label class="casilla"><input type="checkbox" data-campo="activo" ${e.activo ? 'checked' : ''} /> Activa en la tienda</label>
+          </div>
+        </div>
+        ${asignacionHtml(e)}
+        <div class="acciones">
+          <button class="principal" data-guardar>Guardar</button>
+          <button class="secundario secundario--peligro" data-borrar>Eliminar</button>
+        </div>
+      </section>`).join('')}
+
+    <section class="tarjeta">
+      <label>Añadir una insignia</label>
+      <div class="color__campos" style="margin-bottom:12px;">
+        <div><input type="text" id="nueva-etiqueta-nombre" placeholder="En español, p. ej. Más vendido" /></div>
+        <div><input type="text" id="nueva-etiqueta-nombre-en" placeholder="En inglés, p. ej. Best seller" /></div>
+        <div><label>Fondo</label><input type="color" id="nueva-etiqueta-fondo" value="${FONDO_POR_DEFECTO}" /></div>
+        <div><label>Texto</label><input type="color" id="nueva-etiqueta-texto" value="${TEXTO_POR_DEFECTO}" /></div>
+      </div>
+      <div class="acciones"><button class="principal" id="anadir-etiqueta">Añadir insignia</button></div>
+      <p class="ayuda">Se crea vacía: no aparece en ningún producto hasta que le digas a cuáles alcanza.</p>
+    </section>
+  `;
+
+  const refrescarMuestras = () => {
+    document.getElementById('previa-etiquetas').innerHTML = muestras();
+  };
+
+  pantalla.querySelectorAll('.tarjeta[data-id]').forEach((tarjeta) => {
+    const id = tarjeta.dataset.id;
+    const original = etiquetas.find((e) => e.id === id);
+    const estado = {
+      productos: [...original.productos],
+      colecciones: [...original.colecciones],
+      sucio: false,
+    };
+    const repintarAsignacion = conectarAsignacion(tarjeta, estado, colecciones, alcanceEtiqueta(original));
+
+    const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`)?.value.trim() ?? '';
+    const muestra = tarjeta.querySelector('[data-previa]');
+
+    /* La muestra se repinta mientras se escribe. Elegir un fondo y no ver cómo
+     * queda hasta guardar es elegir a ciegas. */
+    const refrescar = () => {
+      muestra.textContent = valor('nombre') || 'Sin texto';
+      muestra.style.backgroundColor = valor('fondo');
+      muestra.style.color = valor('texto');
+    };
+    ['nombre', 'fondo', 'texto'].forEach((campo) => {
+      tarjeta.querySelector(`[data-campo="${campo}"]`).addEventListener('input', refrescar);
+    });
+
+    tarjeta.querySelector('[data-guardar]').addEventListener('click', async (e) => {
+      e.target.disabled = true;
+      e.target.textContent = 'Guardando…';
+      try {
+        const datos = {
+          nombre: valor('nombre'),
+          nombreEn: valor('nombre_en'),
+          fondo: valor('fondo'),
+          texto: valor('texto'),
+          activo: tarjeta.querySelector('[data-campo="activo"]').checked,
+          productos: estado.productos,
+          colecciones: estado.colecciones,
+        };
+        await guardarEtiqueta(id, datos);
+        await sincronizarEtiqueta(Object.assign(original, datos));
+        estado.sucio = false;
+        repintarAsignacion();
+        refrescarMuestras();
+        avisar('Insignia guardada');
+      } catch (error2) {
+        avisar(error2.message, true);
+      } finally {
+        e.target.disabled = false;
+        e.target.textContent = 'Guardar';
+      }
+    });
+
+    tarjeta.querySelectorAll('[data-mover]').forEach((boton) => {
+      boton.addEventListener('click', async () => {
+        boton.disabled = true;
+        try {
+          await moverEntrada(etiquetas, id, boton.dataset.mover, guardarEtiqueta);
+          await ir('etiquetas');
+        } catch (error2) {
+          avisar(error2.message, true);
+          boton.disabled = false;
+        }
+      });
+    });
+
+    tarjeta.querySelector('[data-borrar]').addEventListener('click', async (e) => {
+      if (!confirm(`¿Eliminar la insignia «${original.nombre}»?`)) return;
+      e.target.disabled = true;
+      try {
+        await borrarEtiqueta(id);
+        avisar('Insignia eliminada');
+        await ir('etiquetas');
+      } catch (error2) {
+        avisar(error2.message, true);
+        e.target.disabled = false;
+      }
+    });
+  });
+
+  document.getElementById('anadir-etiqueta')?.addEventListener('click', async (e) => {
+    const nombre = document.getElementById('nueva-etiqueta-nombre').value.trim();
+    if (!nombre) { avisar('Escribe el texto de la insignia.', true); return; }
+    e.target.disabled = true;
+    try {
+      await crearEtiqueta({
+        nombre,
+        nombreEn: document.getElementById('nueva-etiqueta-nombre-en').value.trim(),
+        fondo: document.getElementById('nueva-etiqueta-fondo').value,
+        texto: document.getElementById('nueva-etiqueta-texto').value,
+        orden: etiquetas.length + 1,
+      }, etiquetas.length);
+      avisar('Insignia creada');
+      await ir('etiquetas');
+    } catch (error2) {
+      avisar(error2.message, true);
+      e.target.disabled = false;
+    }
+  });
+
+  conectarPendientes(() => ir('etiquetas'));
+}
+
+async function pintarBeneficios() {
+  pantalla.innerHTML = '<p class="cargando">Cargando beneficios…</p>';
+
+  const [colecciones, revision] = await Promise.all([cargarColecciones(), revisarEstructura()]);
+  const faltaLoNuestro = revision.pendientes.some((p) => p.includes('beneficios'));
+  const { lista: beneficios, error } = await cargarOVacio(cargarBeneficios, !faltaLoNuestro);
+  const cambiados = await recalcular(beneficios, sincronizarBeneficio);
+
+  const opcionesIcono = (elegido) => ICONOS.map((i) => `
+    <option value="${escapar(i.clave)}" ${i.clave === elegido ? 'selected' : ''}>${escapar(i.rotulo)}</option>
+  `).join('');
+
+  const muestras = () => beneficiosHtml(beneficios.filter((b) => b.activo));
+
+  pantalla.innerHTML = `
+    <h1>Beneficios</h1>
+    <p class="subtitulo">Las ventajas que salen en la ficha, bajo el botón de compra. No son las mismas para todo: los brillantes no resisten el agua, así que ese beneficio no les alcanza y en su lugar llevan «Joyería fina».</p>
+
+    ${tarjetaPendientes(revision.pendientes)}
+    ${error ? `<p class="problema">${escapar(error)}</p>` : ''}
+
+    <section class="tarjeta previa">
+      <p class="previa__titulo">Así se ven en la ficha</p>
+      <div id="previa-beneficios">${muestras()}</div>
+      <p class="ayuda previa__nota">Aquí salen todos los activos juntos. En una ficha real solo salen los que alcanzan a ese producto, y como mucho los que diga el bloque (3 de fábrica).</p>
+    </section>
+
+    ${avisoRecalculo(cambiados)}
+
+    ${beneficios.length ? '' : `
+      <section class="tarjeta">
+        <p>Todavía no hay ningún beneficio. Si acabas de instalar la app, pulsa «Crear lo que falta» y aparecerán los cuatro de siempre listos para asignar.</p>
+      </section>`}
+
+    ${beneficios.map((b, i) => `
+      <section class="tarjeta" data-id="${escapar(b.id)}">
+        <div class="cabecera-fila">
+          <div class="sv-benef sv-benef--pildora sv-benef--fila sv-benef--normal" style="--sv-pt:0px;--sv-pb:0px;">
+            <ul class="sv-benef__lista" role="list">
+              <li class="sv-benef__item" data-previa>
+                <span data-previa-icono>${svgIcono(b.icono, 'sv-benef__icono')}</span>
+                <span class="sv-benef__texto" data-previa-texto>${escapar(b.nombre || 'Sin texto')}</span>
+              </li>
+            </ul>
+          </div>
+          <div class="bloque__acciones">
+            <button class="secundario" data-mover="arriba" ${i === 0 ? 'disabled' : ''} title="Subir">↑</button>
+            <button class="secundario" data-mover="abajo" ${i === beneficios.length - 1 ? 'disabled' : ''} title="Bajar">↓</button>
+          </div>
+        </div>
+        <div class="color__campos">
+          <div>
+            <label>Texto en español</label>
+            <input type="text" data-campo="nombre" value="${escapar(b.nombre)}" />
+          </div>
+          <div>
+            <label>Texto en inglés</label>
+            <input type="text" data-campo="nombre_en" value="${escapar(b.nombreEn)}" placeholder="Vacío: se usa el español" />
+          </div>
+          <div>
+            <label>Icono</label>
+            <select data-campo="icono">
+              <option value="">Sin icono</option>
+              ${opcionesIcono(b.icono)}
+            </select>
+          </div>
+          <div>
+            <label>Se muestra</label>
+            <label class="casilla"><input type="checkbox" data-campo="activo" ${b.activo ? 'checked' : ''} /> Activo en la tienda</label>
+          </div>
+        </div>
+        ${asignacionHtml(b)}
+        <div class="acciones">
+          <button class="principal" data-guardar>Guardar</button>
+          <button class="secundario secundario--peligro" data-borrar>Eliminar</button>
+        </div>
+      </section>`).join('')}
+
+    <section class="tarjeta">
+      <label>Añadir un beneficio</label>
+      <div class="color__campos" style="margin-bottom:12px;">
+        <div><input type="text" id="nuevo-beneficio-nombre" placeholder="En español, p. ej. Envío gratis" /></div>
+        <div><input type="text" id="nuevo-beneficio-nombre-en" placeholder="En inglés, p. ej. Free shipping" /></div>
+        <div>
+          <label>Icono</label>
+          <select id="nuevo-beneficio-icono">
+            <option value="">Sin icono</option>
+            ${opcionesIcono('')}
+          </select>
+        </div>
+      </div>
+      <div class="acciones"><button class="principal" id="anadir-beneficio">Añadir beneficio</button></div>
+      <p class="ayuda">Se crea vacío: no aparece en ninguna ficha hasta que le digas a qué productos alcanza.</p>
+    </section>
+  `;
+
+  const refrescarMuestras = () => {
+    document.getElementById('previa-beneficios').innerHTML = muestras();
+  };
+
+  pantalla.querySelectorAll('.tarjeta[data-id]').forEach((tarjeta) => {
+    const id = tarjeta.dataset.id;
+    const original = beneficios.find((b) => b.id === id);
+    const estado = {
+      productos: [...original.productos],
+      colecciones: [...original.colecciones],
+      sucio: false,
+    };
+    const repintarAsignacion = conectarAsignacion(tarjeta, estado, colecciones, alcanceBeneficio(original));
+
+    const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`)?.value.trim() ?? '';
+
+    const refrescar = () => {
+      tarjeta.querySelector('[data-previa-texto]').textContent = valor('nombre') || 'Sin texto';
+      tarjeta.querySelector('[data-previa-icono]').innerHTML = svgIcono(valor('icono'), 'sv-benef__icono');
+    };
+    tarjeta.querySelector('[data-campo="nombre"]').addEventListener('input', refrescar);
+    tarjeta.querySelector('[data-campo="icono"]').addEventListener('change', refrescar);
+
+    tarjeta.querySelector('[data-guardar]').addEventListener('click', async (e) => {
+      e.target.disabled = true;
+      e.target.textContent = 'Guardando…';
+      try {
+        const datos = {
+          nombre: valor('nombre'),
+          nombreEn: valor('nombre_en'),
+          icono: valor('icono'),
+          activo: tarjeta.querySelector('[data-campo="activo"]').checked,
+          productos: estado.productos,
+          colecciones: estado.colecciones,
+        };
+        await guardarBeneficio(id, datos);
+        await sincronizarBeneficio(Object.assign(original, datos));
+        estado.sucio = false;
+        repintarAsignacion();
+        refrescarMuestras();
+        avisar('Beneficio guardado');
+      } catch (error2) {
+        avisar(error2.message, true);
+      } finally {
+        e.target.disabled = false;
+        e.target.textContent = 'Guardar';
+      }
+    });
+
+    tarjeta.querySelectorAll('[data-mover]').forEach((boton) => {
+      boton.addEventListener('click', async () => {
+        boton.disabled = true;
+        try {
+          await moverEntrada(beneficios, id, boton.dataset.mover, guardarBeneficio);
+          await ir('beneficios');
+        } catch (error2) {
+          avisar(error2.message, true);
+          boton.disabled = false;
+        }
+      });
+    });
+
+    tarjeta.querySelector('[data-borrar]').addEventListener('click', async (e) => {
+      if (!confirm(`¿Eliminar el beneficio «${original.nombre}»?`)) return;
+      e.target.disabled = true;
+      try {
+        await borrarBeneficio(id);
+        avisar('Beneficio eliminado');
+        await ir('beneficios');
+      } catch (error2) {
+        avisar(error2.message, true);
+        e.target.disabled = false;
+      }
+    });
+  });
+
+  document.getElementById('anadir-beneficio')?.addEventListener('click', async (e) => {
+    const nombre = document.getElementById('nuevo-beneficio-nombre').value.trim();
+    if (!nombre) { avisar('Escribe el texto del beneficio.', true); return; }
+    e.target.disabled = true;
+    try {
+      await crearBeneficio({
+        nombre,
+        nombreEn: document.getElementById('nuevo-beneficio-nombre-en').value.trim(),
+        icono: document.getElementById('nuevo-beneficio-icono').value,
+        orden: beneficios.length + 1,
+      }, beneficios.length);
+      avisar('Beneficio creado');
+      await ir('beneficios');
+    } catch (error2) {
+      avisar(error2.message, true);
+      e.target.disabled = false;
+    }
+  });
+
+  conectarPendientes(() => ir('beneficios'));
+}
+
 const PANTALLAS = {
   colores: pintarColores,
   productos: pintarProductos,
+  etiquetas: pintarEtiquetas,
+  beneficios: pintarBeneficios,
   guias: pintarGuias,
   apariencia: pintarApariencia,
 };

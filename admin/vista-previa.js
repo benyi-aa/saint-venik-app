@@ -6,6 +6,8 @@
  * que los pone el tema; en estructura, orden y visibilidad por idioma, no.
  */
 
+import { svgIcono } from './iconos.js?v=202611051530';
+
 const ID_YOUTUBE = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/;
 
 function escapar(t) {
@@ -125,5 +127,31 @@ export function coloresHtml(colores, apariencia = {}) {
           }"></span>
         </span>`).join('')}
     </div>
+  </div>`;
+}
+
+/* La insignia de la tienda, con el mismo `.sv-tag` del storefront. Aquí no
+ * lleva el contenedor `.sv-tags`, que es el que la posiciona sobre la foto:
+ * en el panel se enseña suelta, en línea. */
+export function etiquetaHtml(etiqueta) {
+  return `<span class="sv-tag" style="background-color:${escapar(etiqueta.fondo)};color:${escapar(etiqueta.texto)}">${
+    escapar(etiqueta.nombre || 'Sin texto')
+  }</span>`;
+}
+
+/* La fila de beneficios tal como sale bajo el botón de compra. */
+export function beneficiosHtml(beneficios) {
+  if (!beneficios.length) {
+    return '<p class="sv-guia__vacio">Ningún beneficio activo: el bloque no aparecería en ninguna ficha.</p>';
+  }
+  return `<div class="sv-benef sv-benef--pildora sv-benef--fila sv-benef--normal"
+      style="--sv-pt:0px;--sv-pb:0px;">
+    <ul class="sv-benef__lista" role="list">
+      ${beneficios.map((b) => `
+        <li class="sv-benef__item">
+          ${svgIcono(b.icono, 'sv-benef__icono')}
+          <span class="sv-benef__texto">${escapar(b.nombre || 'Sin texto')}</span>
+        </li>`).join('')}
+    </ul>
   </div>`;
 }

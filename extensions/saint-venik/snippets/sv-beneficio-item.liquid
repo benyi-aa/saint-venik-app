@@ -1,0 +1,26 @@
+{%- comment -%}
+  Saint Venik · Una linea de beneficio
+  ---------------------------------------------------------------------------
+  Separado del bloque porque se dibuja desde tres sitios distintos del bucle
+  de ordenacion, y tenerlo tres veces era pedir que se separaran.
+
+  El ingles solo gana si esta escrito. Si `nombre_en` esta vacio se usa
+  `nombre`, que es lo que Translate & Adapt ya devuelve traducido: asi un
+  beneficio traducido por ahi no se rompe por crear el campo.
+
+  Parametros: b (entrada de sv_beneficio), lang ('es' | 'en').
+{%- endcomment -%}
+
+{%- liquid
+  assign texto = b.nombre.value
+  if lang == 'en' and b.nombre_en.value != blank
+    assign texto = b.nombre_en.value
+  endif
+-%}
+
+{%- if texto != blank -%}
+  <li class="sv-benef__item">
+    {%- render 'sv-icono', nombre: b.icono.value -%}
+    <span class="sv-benef__texto">{{ texto }}</span>
+  </li>
+{%- endif -%}

@@ -27,15 +27,45 @@ se abren, se leen y se despliegan copiándolos.
 
 ## Los bloques
 
-| Bloque | Estado | Lee |
+| Bloque | Tipo | Lee |
 |---|---|---|
-| Selector de color | funcionando | `custom.hermano_de_color` + metaobjeto `color` |
-| Selector de talla | funcionando | las variantes reales del producto |
-| Guía de tallas | pendiente | — |
+| Selector de color | app block | `custom.hermano_de_color` + metaobjeto `color` |
+| Selector de talla | app block | las variantes reales del producto |
+| Guía de tallas | app block | metaobjetos `guia_de_tallas` y `bloque_guia` |
+| Beneficios | app block | metaobjeto `sv_beneficio` |
+| Insignias de producto | **app embed** | metaobjeto `sv_etiqueta` |
 
 Los colores no son variantes: son productos separados que se apuntan entre sí.
 Un producto se asocia a su color por la etiqueta (`oro`, `acero-inox`), que es lo
 que guarda el campo `etiqueta` del metaobjeto.
+
+### Insignias y beneficios
+
+Las dos cosas funcionan igual por debajo: una entrada de metaobjeto que decide a
+qué productos alcanza, eligiéndolos a mano o por colección entera.
+
+Las **insignias** son un app embed y no un app block porque una tarjeta de
+producto no es una sección ni un bloque de tema: es un snippet dentro del bucle
+del grid, y Shopify dice que los bloques `@app` no se admiten en secciones
+renderizadas estáticamente. No hay dónde enganchar un bloque por tarjeta, así
+que el embed emite los datos en Liquid y un script los coloca en el DOM.
+
+Un app embed **no se enciende solo**: en cada tienda hay que activarlo en
+Personalizar → Configuración → Incrustaciones de apps → «Insignias de
+producto». Queda guardado en el tema, no en la app: al cambiar de tema o
+publicar otro, hay que volver a encenderlo.
+
+El campo `handles` de las dos entradas es **derivado**: lo calcula el panel a
+partir de `productos` y `colecciones`, y guarda los handles entre barras
+(`|anillo-x|collar-y|`). Existe porque en Liquid un campo de lista de
+referencias solo deja leer 50 elementos por bucle, y una colección de oro pasa
+de 50. El panel lo recalcula al abrir la pantalla y al guardar; si alguien lo
+edita a mano en el admin de Shopify, el siguiente recálculo lo pisa.
+
+Los iconos de los beneficios viven en
+`extensions/saint-venik/snippets/sv-icono.liquid`, que es el original.
+`admin/iconos.js` es una copia generada con `npm run iconos` para que el panel
+pueda enseñarlos; `npm run revisar` falla si las dos listas se separan.
 
 ## Dos tiendas, dos registros de la misma app
 

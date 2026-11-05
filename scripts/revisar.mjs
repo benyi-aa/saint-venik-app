@@ -11,6 +11,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import * as acorn from 'acorn';
 import * as walk from 'acorn-walk';
+import { leerIconos } from './iconos.mjs';
 
 const GLOBALES = new Set([
   'window', 'document', 'console', 'fetch', 'URL', 'URLSearchParams', 'FormData',
@@ -26,6 +27,25 @@ const GLOBALES = new Set([
 
 const dir = 'admin';
 let problemas = 0;
+
+/* admin/iconos.js es una copia generada del snippet de la extension. Si alguien
+ * edita uno de los dos a mano, el panel ensena un icono y la ficha pinta otro,
+ * y eso no da ningun error en ninguna parte. */
+{
+  const delSnippet = leerIconos(readFileSync('extensions/saint-venik/snippets/sv-icono.liquid', 'utf8'));
+  const delPanel = readFileSync('admin/iconos.js', 'utf8');
+  for (const icono of delSnippet) {
+    if (!delPanel.includes(`clave: '${icono.clave}'`) || !delPanel.includes(icono.trazo)) {
+      console.error(`✗ admin/iconos.js no coincide con el snippet en "${icono.clave}" — ejecuta npm run iconos`);
+      problemas++;
+    }
+  }
+  const cuantos = (delPanel.match(/\n    clave: /g) ?? []).length;
+  if (cuantos !== delSnippet.length) {
+    console.error(`✗ admin/iconos.js tiene ${cuantos} iconos y el snippet ${delSnippet.length} — ejecuta npm run iconos`);
+    problemas++;
+  }
+}
 
 for (const nombre of readdirSync(dir).filter((f) => f.endsWith('.js'))) {
   const ruta = join(dir, nombre);

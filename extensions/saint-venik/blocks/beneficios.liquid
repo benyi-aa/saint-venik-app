@@ -1,0 +1,234 @@
+{%- comment -%}
+  Saint Venik · Beneficios del producto
+  ---------------------------------------------------------------------------
+  Tres ventajas cortas bajo el boton de compra: "Garantia de por vida",
+  "Resistente al agua y el sudor", "Hipoalergenico". No son las mismas para
+  todo el catalogo: los brillantes no resisten el agua, asi que ahi ese se
+  cambia por "Joyeria fina". Por eso cada beneficio decide a que productos
+  alcanza, en vez de haber una lista fija por tienda.
+
+  Cada entrada del metaobjeto `sv_beneficio` lleva:
+    nombre / nombre_en   el texto visible en cada idioma
+    icono                clave del juego de iconos (snippet sv-icono)
+    orden                posicion; manda sobre el orden de la lista
+    productos            productos elegidos a mano, para el panel
+    colecciones          colecciones elegidas, para el panel
+    handles              los handles que salen de las dos listas de arriba,
+                         ya resueltos por el panel, entre barras: |a|b|c|
+    activo               permite apagarlo sin borrarlo
+
+  El emparejamiento se hace contra `handles` y no recorriendo `productos`:
+  un campo de lista de referencias solo deja leer 50 elementos por bucle en
+  Liquid, y una coleccion de oro pasa de 50 facil. Una cadena con los handles
+  no tiene ese tope y la comprobacion es un `contains`, no un bucle. El precio
+  es que el panel tiene que recalcularla cuando cambia una coleccion, y eso
+  lo hace al abrir la pantalla.
+{%- endcomment -%}
+
+{%- if product != blank -%}
+  {%- liquid
+    assign lang = localization.language.iso_code | slice: 0, 2 | downcase
+    assign marca = product.handle | prepend: '|' | append: '|'
+
+    comment
+      Se coge con un bucle y no con `.first`: la lista que devuelve
+      shop.metaobjects.<tipo>.values dice que tiene una entrada, pero `.first`
+      sobre ella devuelve vacio. Ya nos dejo sin leer la configuracion entera.
+    endcomment
+    assign config = null
+    for sv_entrada in shop.metaobjects.sv_configuracion.values
+      assign config = sv_entrada
+      break
+    endfor
+    assign sv_escala = config.escala.value | default: 'normal'
+
+    assign todos = shop.metaobjects.sv_beneficio.values
+
+    comment
+      Cuantos saldrian, y hasta que posicion hay que contar. Se mira antes de
+      dibujar nada para no dejar un contenedor vacio ocupando margen.
+    endcomment
+    assign visibles = 0
+    assign tope = 0
+    for b in todos
+      assign hs = b.handles.value | default: ''
+      if b.activo.value != false and hs contains marca
+        assign visibles = visibles | plus: 1
+        assign pos = b.orden.value | default: 0
+        if pos > tope
+          assign tope = pos
+        endif
+      endif
+    endfor
+  -%}
+
+  {%- if visibles > 0 -%}
+    {%- liquid
+      assign titulo = block.settings.titulo_es
+      if lang == 'en' and block.settings.titulo_en != blank
+        assign titulo = block.settings.titulo_en
+      endif
+      assign maximo = block.settings.maximo
+    -%}
+
+    <div class="sv-benef sv-benef--{{ block.settings.estilo }} sv-benef--{{ block.settings.disposicion }} sv-benef--{{ sv_escala }}"
+      style="
+        --sv-benef-fondo: {{ block.settings.color_fondo }};
+        --sv-benef-texto: {{ block.settings.color_texto }};
+        --sv-benef-borde: {{ block.settings.color_borde }};
+        --sv-benef-radio: {{ block.settings.radio }}px;
+        --sv-pt: {{ block.settings.margen_superior }}px;
+        --sv-pb: {{ block.settings.margen_inferior }}px;
+      "
+      {{ block.shopify_attributes }}>
+      {%- if titulo != blank -%}
+        <p class="sv-benef__titulo">{{ titulo }}</p>
+      {%- endif -%}
+
+      <ul class="sv-benef__lista" role="list">
+        {%- assign puestos = 0 -%}
+
+        {%- comment -%}
+          Se recorre por posicion en vez de fiarse del orden de la lista, que
+          Shopify no garantiza. Son pocas entradas: el coste no se nota.
+        {%- endcomment -%}
+        {%- for i in (1..tope) -%}
+          {%- for b in todos -%}
+            {%- if puestos < maximo and b.orden.value == i -%}
+              {%- assign hs = b.handles.value | default: '' -%}
+              {%- if b.activo.value != false and hs contains marca -%}
+                {%- render 'sv-beneficio-item', b: b, lang: lang -%}
+                {%- assign puestos = puestos | plus: 1 -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endfor -%}
+
+        {%- comment -%} Los que no tengan posicion van al final, no se pierden. {%- endcomment -%}
+        {%- for b in todos -%}
+          {%- assign pos = b.orden.value | default: 0 -%}
+          {%- if puestos < maximo and pos < 1 -%}
+            {%- assign hs = b.handles.value | default: '' -%}
+            {%- if b.activo.value != false and hs contains marca -%}
+              {%- render 'sv-beneficio-item', b: b, lang: lang -%}
+              {%- assign puestos = puestos | plus: 1 -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Beneficios",
+  "target": "section",
+  "stylesheet": "sv-benefits.css",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Los beneficios y a qué productos alcanza cada uno se eligen en la app, en la pantalla «Beneficios». Si el producto no tiene ninguno, el bloque no se muestra."
+    },
+    {
+      "type": "range",
+      "id": "maximo",
+      "label": "Cuántos mostrar como mucho",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "select",
+      "id": "estilo",
+      "label": "Estilo",
+      "options": [
+        { "value": "pildora", "label": "Píldora — cada uno en su contenedor" },
+        { "value": "plano", "label": "Plano — solo icono y texto" }
+      ],
+      "default": "pildora"
+    },
+    {
+      "type": "select",
+      "id": "disposicion",
+      "label": "Disposición",
+      "options": [
+        { "value": "fila", "label": "En fila" },
+        { "value": "columna", "label": "Uno debajo de otro" }
+      ],
+      "default": "fila"
+    },
+    {
+      "type": "header",
+      "content": "Título (opcional)"
+    },
+    {
+      "type": "text",
+      "id": "titulo_es",
+      "label": "Título en español"
+    },
+    {
+      "type": "text",
+      "id": "titulo_en",
+      "label": "Título en inglés"
+    },
+    {
+      "type": "header",
+      "content": "Aspecto"
+    },
+    {
+      "type": "color",
+      "id": "color_fondo",
+      "label": "Fondo de la píldora",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "color_texto",
+      "label": "Texto e icono",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "color_borde",
+      "label": "Borde",
+      "info": "Sobre fondo blanco, sin borde la píldora no se ve.",
+      "default": "#E4DFD7"
+    },
+    {
+      "type": "range",
+      "id": "radio",
+      "label": "Redondeo",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "margen_superior",
+      "label": "Margen superior",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "margen_inferior",
+      "label": "Margen inferior",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    }
+  ]
+}
+{% endschema %}

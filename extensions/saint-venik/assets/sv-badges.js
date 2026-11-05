@@ -1,0 +1,213 @@
+/* Saint Venik · Insignias sobre los productos
+ *
+ * Los datos vienen ya resueltos en el JSON que emite el bloque: aqui no se
+ * pide nada a la red, solo se colocan nodos.
+ *
+ * Tres cosas que no son obvias y que son el motivo de casi todo el codigo:
+ *
+ *   1. El tema (Impulse) ya pone su propia insignia arriba a la izquierda
+ *      ("AHORRA 57%", "Agotado"), posicionada en .grid-product__tag. Si la
+ *      nuestra va a la misma esquina, se baja por debajo de la suya en vez de
+ *      taparla.
+ *
+ *   2. El grid se vuelve a pintar sin recargar la pagina (filtros, paginacion,
+ *      orden) con la Section Rendering API, que reemplaza el HTML entero de la
+ *      seccion. El JS de carga de pagina no se vuelve a ejecutar y no hay
+ *      ningun evento de storefront que avise. Por eso hace falta un
+ *      MutationObserver, y por eso decorar tiene que poder repetirse sin
+ *      duplicar nada.
+ *
+ *   3. En el editor de temas si hay evento (shopify:section:load) y hay que
+ *      escucharlo, o las insignias desaparecen en cuanto se toca un ajuste.
+ */
+(function () {
+  'use strict';
+
+  var fuente = document.getElementById('sv-insignias-datos');
+  if (!fuente) return;
+
+  var datos;
+  try {
+    datos = JSON.parse(fuente.textContent);
+  } catch (e) {
+    return;
+  }
+  if (!datos || !datos.etiquetas || !datos.etiquetas.length) return;
+
+  var MARCA = 'svInsignias';
+  var MAXIMO = datos.maximo || 2;
+
+  /* El handle de la ficha deberia venir del Liquid, pero un app embed no tiene
+   * garantizado el objeto `product` en todos los temas. La URL si lo tiene, y
+   * cuesta una linea: asi la insignia de la ficha no depende de eso. */
+  var FICHA = datos.ficha || (location.pathname.match(/\/products\/([^/?#]+)/) || [])[1] || null;
+
+  var etiquetas = datos.etiquetas.slice().sort(function (a, b) {
+    return (a.orden || 0) - (b.orden || 0);
+  });
+
+  /* El panel guarda los handles entre barras (|anillo|collar|) justamente para
+   * poder preguntar asi, sin partir la cadena y sin que "oro" case con
+   * "collar-oro". */
+  function alcanza(etiqueta, handle, enLaColeccion) {
+    if (handle && (etiqueta.handles || '').indexOf('|' + handle + '|') !== -1) return true;
+
+    /* Dentro del grid de una coleccion, una etiqueta asignada a esa coleccion
+     * vale para todas sus tarjetas aunque el handle no estuviera en la lista:
+     * la lista se calculo en el panel y puede haberse quedado vieja si entro
+     * un producto nuevo. Fuera del grid NO vale, porque las tarjetas de
+     * "tambien te puede gustar" o de recomendados no son de esa coleccion y se
+     * llevarian una insignia que no les toca. */
+    if (!enLaColeccion || !etiqueta.colecciones) return false;
+    return etiqueta.colecciones.indexOf(datos.coleccion) !== -1;
+  }
+
+  function paraHandle(handle, enLaColeccion) {
+    var salen = [];
+    for (var i = 0; i < etiquetas.length && salen.length < MAXIMO; i += 1) {
+      if (alcanza(etiquetas[i], handle, enLaColeccion)) salen.push(etiquetas[i]);
+    }
+    return salen;
+  }
+
+  /* El grid principal de la coleccion, que es el unico sitio donde el atajo de
+   * arriba es cierto. En Impulse la seccion se llama ...__main-collection. */
+  function enGridDeColeccion(tarjeta) {
+    if (!datos.coleccion) return false;
+    return Boolean(tarjeta.closest('[id*="main-collection"]'));
+  }
+
+  function caja(lista, esquina, tipo) {
+    var cont = document.createElement('div');
+    cont.className = 'sv-tags sv-tags--' + esquina + ' sv-tags--' + tipo;
+    for (var i = 0; i < lista.length; i += 1) {
+      var span = document.createElement('span');
+      span.className = 'sv-tag';
+      span.textContent = lista[i].texto;
+      span.style.backgroundColor = lista[i].fondo;
+      span.style.color = lista[i].color;
+      cont.appendChild(span);
+    }
+    return cont;
+  }
+
+  /* La insignia se posiciona respecto de su contenedor, asi que el contenedor
+   * tiene que estar posicionado. Casi siempre ya lo esta; se comprueba en vez
+   * de darlo por hecho porque un tema que lo deje en static manda la insignia
+   * a la esquina de la pagina, y eso se ve rarisimo y no da ningun error. */
+  function anclar(nodo) {
+    if (getComputedStyle(nodo).position === 'static') nodo.style.position = 'relative';
+    return nodo;
+  }
+
+  /* La insignia del tema mide lo mismo en todas las tarjetas, asi que se mide
+   * una vez por pasada. Medirla por tarjeta eran ochenta reflujos seguidos,
+   * intercalados con escrituras, dentro del mismo frame. */
+  var altoDelTema = null;
+
+  function altoInsigniaTema(tarjeta) {
+    if (altoDelTema !== null) return altoDelTema;
+    var suya = tarjeta.querySelector('.grid-product__tag');
+    altoDelTema = suya && suya.offsetHeight ? suya.offsetHeight : 0;
+    return altoDelTema;
+  }
+
+  function decorarTarjeta(tarjeta) {
+    if (tarjeta.dataset[MARCA]) return;
+
+    var destino = tarjeta.querySelector('.grid-product__image-mask')
+      || tarjeta.querySelector('.grid__item-image-wrapper');
+    /* Sin caja de imagen no hay donde ponerla, y tampoco se marca: si el tema
+     * termina de pintar la tarjeta despues, la siguiente pasada la coge. */
+    if (!destino) return;
+
+    tarjeta.dataset[MARCA] = '1';
+
+    var lista = paraHandle(tarjeta.dataset.productHandle, enGridDeColeccion(tarjeta));
+    if (!lista.length) return;
+
+    var cont = caja(lista, datos.esquinaTarjeta, 'tarjeta');
+
+    /* Debajo de la del tema, no encima. Se mide en vez de poner un numero fijo
+     * porque la del tema crece con el tamano de letra del tema. */
+    if (datos.esquinaTarjeta === 'izquierda') {
+      var alto = altoInsigniaTema(tarjeta);
+      if (alto) cont.style.top = 'calc(var(--sv-tags-top, 8px) + ' + (alto + 6) + 'px)';
+    }
+
+    anclar(destino).appendChild(cont);
+  }
+
+  function decorarFicha() {
+    if (!FICHA) return;
+
+    /* Solo sobre la primera foto. En escritorio el tema las enseña todas a la
+     * vez: una insignia por foto serian seis insignias iguales. */
+    var destino = document.querySelector('.product-main-slide[data-index="0"] .product-image-main')
+      || document.querySelector('.product-image-main');
+    if (!destino || destino.dataset[MARCA]) return;
+    destino.dataset[MARCA] = '1';
+
+    /* En la ficha no se usa el atajo de coleccion: lo que vale es la lista de
+     * handles, que el panel mantiene al dia. */
+    var lista = paraHandle(FICHA, false);
+    if (!lista.length) return;
+
+    anclar(destino).appendChild(caja(lista, datos.esquinaFicha, 'ficha'));
+  }
+
+  /* Se exige la clase del tema ademas del atributo. Solo con el atributo se
+   * cuelan contenedores que tambien lo llevan (la seccion de la ficha, por
+   * ejemplo) y la insignia aterriza en cualquier sitio. */
+  var TARJETAS = '.grid-product[data-product-handle], .grid__item[data-product-handle]';
+
+  function decorar(raiz) {
+    altoDelTema = null;
+    if (datos.tarjetas) {
+      var tarjetas = raiz.querySelectorAll(TARJETAS);
+      for (var i = 0; i < tarjetas.length; i += 1) decorarTarjeta(tarjetas[i]);
+    }
+    if (datos.fichas) decorarFicha();
+  }
+
+  var pendiente = false;
+  function pintarPronto(raiz) {
+    if (pendiente) return;
+    pendiente = true;
+    requestAnimationFrame(function () {
+      pendiente = false;
+      decorar(raiz || document);
+    });
+  }
+
+  function arrancar() {
+    decorar(document);
+
+    /* Los nodos que anade este mismo script se ignoran. Si no, cada insignia
+     * pintada provoca otra pasada: termina parando porque todo queda marcado,
+     * pero es una vuelta entera de mas por cada tarjeta. */
+    new MutationObserver(function (cambios) {
+      for (var i = 0; i < cambios.length; i += 1) {
+        var nuevos = cambios[i].addedNodes;
+        for (var j = 0; j < nuevos.length; j += 1) {
+          var n = nuevos[j];
+          if (n.nodeType !== 1 || n.classList.contains('sv-tags')) continue;
+          pintarPronto(document);
+          return;
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+
+    if (datos.editor) {
+      document.addEventListener('shopify:section:load', function (e) {
+        decorar(e.target || document);
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', arrancar);
+  } else {
+    arrancar();
+  }
+}());
