@@ -20,7 +20,7 @@ export const ICONOS = [
   {
     clave: 'garantia',
     rotulo: 'Medalla · garantía',
-    trazo: '<circle cx="12" cy="9.5" r="5"/><path d="m9.2 13.6-1.4 6 4.2-2.1 4.2 2.1-1.4-6"/>',
+    trazo: '<path d="M12 3.3 5.7 5.8v5.3c0 4 2.6 7.7 6.3 8.6 3.7-.9 6.3-4.6 6.3-8.6V5.8L12 3.3Z"/><path d="m9.4 11.8 1.9 2 3.4-3.7"/>',
   },
   {
     clave: 'hipoalergenico',
@@ -45,12 +45,12 @@ export const ICONOS = [
   {
     clave: 'hecho-a-mano',
     rotulo: 'Mano · hecho a mano',
-    trazo: '<path d="M9 11.6V5.9a1.35 1.35 0 0 1 2.7 0v4.9"/> <path d="M11.7 10.9V4.7a1.35 1.35 0 0 1 2.7 0v6.1"/> <path d="M14.4 11.1V7a1.35 1.35 0 0 1 2.7 0v7.3c0 3.2-2.1 5.8-5.2 5.8-2.3 0-3.8-1-4.9-2.8l-1.9-3.4a1.35 1.35 0 0 1 2.2-1.6l1.7 1.9"/>',
+    trazo: '<path d="M9 11.6V5.9a1.35 1.35 0 0 1 2.7 0v4.9"/> <path d="M11.7 10.9V4.7a1.35 1.35 0 0 1 2.7 0v6.1"/> <path d="M14.4 11.1V7a1.35 1.35 0 0 1 2.7 0v7.3c0 3.2-2.1 5.8-5.2 5.8-2.3 0-3.8-1-4.9-2.8l-1.9-3.4a1.35 1.35 0 0 1 2.2-1.6l1.7 1.9"/> {%- comment -%} Tuerca: metal, no escudo. El escudo es el de garantia, y dos escudos iguales en la misma ficha no distinguen nada. {%- endcomment -%}',
   },
   {
     clave: 'acero',
     rotulo: 'Escudo · acero inoxidable',
-    trazo: '<path d="M12 3.5 5.5 6v5.1c0 4 2.7 7.6 6.5 9.4 3.8-1.8 6.5-5.4 6.5-9.4V6L12 3.5Z"/> <path d="m9.3 11.9 1.9 1.9 3.6-3.6"/>',
+    trazo: '<path d="M12 3.4 19 7.4v8.2l-7 4-7-4V7.4l7-4Z"/> <circle cx="12" cy="11.5" r="3.1"/>',
   },
   {
     clave: 'caja',

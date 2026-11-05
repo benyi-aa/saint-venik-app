@@ -66,8 +66,7 @@
     return salen;
   }
 
-  /* El grid principal de la coleccion, que es el unico sitio donde el atajo de
-   * arriba es cierto. En Impulse la seccion se llama ...__main-collection. */
+  /* El unico sitio donde el atajo de arriba es cierto. */
   function enGridDeColeccion(tarjeta) {
     if (!datos.coleccion) return false;
     return Boolean(tarjeta.closest('[id*="main-collection"]'));
@@ -91,10 +90,8 @@
     return cont;
   }
 
-  /* La insignia se posiciona respecto de su contenedor, asi que el contenedor
-   * tiene que estar posicionado. Casi siempre ya lo esta; se comprueba en vez
-   * de darlo por hecho porque un tema que lo deje en static manda la insignia
-   * a la esquina de la pagina, y eso se ve rarisimo y no da ningun error. */
+  /* Sin contenedor posicionado, la insignia se va a la esquina de la pagina
+   * sin dar ningun error. Casi siempre ya lo esta; se comprueba igual. */
   function anclar(nodo) {
     if (getComputedStyle(nodo).position === 'static') nodo.style.position = 'relative';
     return nodo;
@@ -139,22 +136,28 @@
     anclar(destino).appendChild(cont);
   }
 
+  /* Las fotos de la galeria, en orden. La usan la insignia y los beneficios. */
+  function fotosDeLaFicha() {
+    var fotos = document.querySelectorAll('.product-main-slide[data-index] .product-image-main');
+    return fotos.length ? fotos : document.querySelectorAll('.product-image-main');
+  }
+
   function decorarFicha() {
     if (!FICHA && !FICHA_ID) return;
-
-    /* Solo sobre la primera foto. En escritorio el tema las enseña todas a la
-     * vez: una insignia por foto serian seis insignias iguales. */
-    var destino = document.querySelector('.product-main-slide[data-index="0"] .product-image-main')
-      || document.querySelector('.product-image-main');
-    if (!destino || destino.dataset[MARCA]) return;
-    destino.dataset[MARCA] = '1';
 
     /* En la ficha no se usa el atajo de coleccion: lo que vale es la lista de
      * handles, que el panel mantiene al dia. */
     var lista = paraHandle(FICHA, false, FICHA_ID);
     if (!lista.length) return;
 
-    anclar(destino).appendChild(caja(lista, datos.esquinaFicha, 'ficha'));
+    /* En TODAS las fotos: la galeria es un carrusel y solo se ve una a la
+     * vez, asi que no se repite; lo que hace es no desaparecer al pasar. */
+    var fotos = fotosDeLaFicha();
+    for (var i = 0; i < fotos.length; i += 1) {
+      if (fotos[i].dataset[MARCA]) continue;
+      fotos[i].dataset[MARCA] = '1';
+      anclar(fotos[i]).appendChild(caja(lista, datos.esquinaFicha, 'ficha'));
+    }
   }
 
   /* Se exige la clase del tema ademas del atributo. Solo con el atributo se
@@ -162,21 +165,14 @@
    * ejemplo) y la insignia aterriza en cualquier sitio. */
   var TARJETAS = '.grid-product[data-product-handle], .grid__item[data-product-handle]';
 
-  /* Un beneficio por foto, DESDE LA SEGUNDA: la primera se deja limpia, que es
-   * la que manda y la que ya lleva la insignia.
-   *
-   * Quien decide es la app, no la foto: no hay nada guardado por imagen, solo
-   * el orden de los beneficios. Asi, el dia que se cambien o se reordenen las
-   * fotos, los beneficios siguen saliendo sobre las que haya.
-   *
-   * Va por javascript porque la galeria no admite bloques de app, igual que la
-   * tarjeta de la coleccion. */
+  /* Un beneficio por foto, DESDE LA SEGUNDA: la primera se deja limpia.
+   * Quien decide es la app y no la foto, asi que reordenar las fotos en
+   * Shopify no cambia nada. Por javascript: la galeria no admite bloques. */
   function decorarFotos() {
     var lista = datos.beneficios;
     if (!lista || !lista.length) return;
 
-    var slides = document.querySelectorAll('.product-main-slide[data-index] .product-image-main');
-    if (!slides.length) slides = document.querySelectorAll('.product-image-main');
+    var slides = fotosDeLaFicha();
 
     var tope = Math.min(lista.length, datos.maxFotos || 3);
     for (var i = 0; i < tope; i += 1) {
