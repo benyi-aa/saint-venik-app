@@ -1,42 +1,42 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611051918';
+import { estaEmbebida } from './api.js?v=202611051922';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611051918';
+} from './colores.js?v=202611051922';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-} from './config.js?v=202611051918';
+} from './config.js?v=202611051922';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611051918';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051918';
+} from './productos.js?v=202611051922';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051922';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611051918';
+} from './guias.js?v=202611051922';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611051918';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051918';
+} from './vista-previa.js?v=202611051922';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051922';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611051918';
+} from './etiquetas.js?v=202611051922';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611051918';
-import { ICONOS, svgIcono } from './iconos.js?v=202611051918';
+} from './beneficios.js?v=202611051922';
+import { ICONOS, svgIcono } from './iconos.js?v=202611051922';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611051918';
+const VERSION = '202611051922';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1541,7 +1541,7 @@ async function pintarEtiquetas() {
           <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
             <s-text-field label="Texto en español" data-campo="nombre" value="${escapar(e.nombre)}"></s-text-field>
             <s-text-field label="Texto en inglés" data-campo="nombre_en" value="${escapar(e.nombreEn)}" placeholder="Vacío: se usa el español"></s-text-field>
-            <s-color-field label="Fondo" data-campo="fondo" ${hayEstilo ? 'alpha' : ''} value="${hayEstilo ? conAlfaHex(e.fondo, e.opacidad) : escapar(e.fondo)}" details="${hayEstilo ? 'Arrastra la transparencia dentro del propio color.' : ''}"></s-color-field>
+            <s-color-field label="Fondo" data-campo="fondo" ${hayEstilo ? 'alpha' : ''} value="${escapar(hayEstilo ? conAlfaHex(e.fondo, e.opacidad) : e.fondo)}"${hayEstilo ? ' details="La transparencia va dentro del propio color."' : ''}></s-color-field>
             <s-color-field label="Texto" data-campo="texto" value="${escapar(e.texto)}"></s-color-field>
             ${hayEstilo ? `
             <s-color-field label="Borde" data-campo="borde" value="${escapar(e.borde)}"></s-color-field>

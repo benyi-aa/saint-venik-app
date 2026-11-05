@@ -16,8 +16,8 @@ import {
   CAMPOS_COMUNES, aObjetoComun, cargarEntradas, camposComunes, crearEntrada,
   guardarEntrada, borrarEntrada, faltaEstructura, asegurarEstructura,
   resolverHandles, camposDeTipo, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611051918';
-import { gql } from './api.js?v=202611051918';
+} from './asignacion.js?v=202611051922';
+import { gql } from './api.js?v=202611051922';
 
 export const TIPO_BENEFICIO = 'sv_beneficio';
 export const TOPE_BENEFICIOS = TOPE_ENTRADAS;
