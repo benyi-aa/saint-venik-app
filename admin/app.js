@@ -1,42 +1,42 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611051827';
+import { estaEmbebida } from './api.js?v=202611051918';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611051827';
+} from './colores.js?v=202611051918';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-} from './config.js?v=202611051827';
+} from './config.js?v=202611051918';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611051827';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051827';
+} from './productos.js?v=202611051918';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051918';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611051827';
+} from './guias.js?v=202611051918';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611051827';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051827';
+} from './vista-previa.js?v=202611051918';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051918';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611051827';
+} from './etiquetas.js?v=202611051918';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611051827';
-import { ICONOS, svgIcono } from './iconos.js?v=202611051827';
+} from './beneficios.js?v=202611051918';
+import { ICONOS, svgIcono } from './iconos.js?v=202611051918';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611051827';
+const VERSION = '202611051918';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -315,6 +315,20 @@ function tarjetaPendientes(pendientes, alTerminar) {
       <p class="ayuda">Se puede pulsar las veces que haga falta: no duplica lo que ya existe.</p>
       <div class="acciones"><button class="principal" id="crear">Crear lo que falta</button></div>
     </section>`;
+}
+
+/* Lo mismo, para las pantallas que ya usan los componentes del admin: ahí no
+ * es una tarjeta más, es un aviso, y va arriba del todo. El botón se llama
+ * igual, así que lo conecta la misma función de abajo. */
+function bannerPendientes(pendientes) {
+  if (!pendientes.length) return '';
+  return `
+    <s-banner slot="supplemental-start" tone="warning" heading="Falta parte de la estructura en tu tienda">
+      <p>Se va a crear:</p>
+      <ul>${pendientes.map((t) => `<li>${escapar(t)}</li>`).join('')}</ul>
+      <p class="ayuda">Se puede pulsar las veces que haga falta: no duplica lo que ya existe.</p>
+      <s-button slot="secondary-actions" id="crear">Crear lo que falta</s-button>
+    </s-banner>`;
 }
 
 function conectarPendientes(alTerminar) {
@@ -1159,48 +1173,46 @@ function ponerOyentesDeCierre() {
   });
 }
 
+/* Las fichas de lo ya elegido. `s-clickable-chip` trae su propia equis y avisa
+ * con un evento `remove` que sube hasta la tarjeta, así que no hace falta un
+ * botón por ficha. Lo que el evento NO trae es a quién se quitó: por eso el
+ * identificador va en un data- del propio elemento.
+ *
+ * Una etiqueta que resta va en `color="strong"`, más oscura: el guión de
+ * «-brillantes» es un píxel y la diferencia no puede estar solo ahí. */
 function chipsHtml(lista, vacio) {
   if (!lista.length) return `<p class="ayuda">${escapar(vacio)}</p>`;
-  return lista.map((x) => `
-    <span class="chip${esResta(x.titulo) ? ' chip--resta' : ''}">${escapar(x.titulo)}${
-      x.cuantos === undefined ? '' : ` <span class="chip__n">${x.cuantos}</span>`
-    }<button
-      type="button" class="chip__x" data-quitar="${escapar(x.id)}"
-      aria-label="Quitar ${escapar(x.titulo)}">&times;</button></span>
-  `).join('');
+  return lista.map((x) => `<s-clickable-chip removable${
+    esResta(x.titulo) ? ' color="strong"' : ''
+  } data-quitar="${escapar(x.id)}" accessibilityLabel="Quitar ${escapar(x.titulo)}">${
+    escapar(x.titulo)
+  }${x.cuantos === undefined ? '' : ` (${x.cuantos})`}</s-clickable-chip>`).join('');
 }
 
-/* Las dos columnas se usan igual: escribes y aparece lo que coincide. Un
+/* Las tres columnas se usan igual: escribes y aparece lo que coincide. Un
  * desplegable de colecciones y un buscador de productos serían dos cosas
- * distintas que hacen lo mismo, y habría que aprender las dos. */
+ * distintas que hacen lo mismo, y habría que aprender las dos.
+ *
+ * La lista de resultados sigue siendo nuestra y no de Polaris: tiene que
+ * flotar sobre la tarjeta sin empujar nada, cerrarse al tocar fuera y
+ * descartar respuestas que llegan tarde. Eso ya está resuelto aquí. */
 function asignacionHtml(estado) {
+  const columna = (clave, titulo, marcador, vacio, ayuda) => `
+      <div class="asigna__col">
+        <div class="buscador">
+          <s-search-field data-buscar="${clave}" label="${titulo}" placeholder="${marcador}"></s-search-field>
+          <div class="resultados" data-resultados="${clave}" hidden></div>
+        </div>
+        <div class="chips" data-chips="${clave}">${chipsHtml(estado[clave], vacio)}</div>
+        ${ayuda ? `<p class="ayuda">${ayuda}</p>` : ''}
+      </div>`;
+
   return `
     <div class="asigna">
-      <div class="asigna__col">
-        <label>Etiquetas de producto</label>
-        <div class="chips" data-chips="etiquetas">${chipsHtml(estado.etiquetas, 'Ninguna.')}</div>
-        <div class="buscador">
-          <input type="search" data-buscar="etiquetas" placeholder="Escribe una etiqueta, p. ej. oro…" />
-          <div class="resultados" data-resultados="etiquetas" hidden></div>
-        </div>
-        <p class="ayuda">Con un guión delante, resta: <code>-brillantes</code> quita esos productos de los que ya había.</p>
-      </div>
-      <div class="asigna__col">
-        <label>Colecciones enteras</label>
-        <div class="chips" data-chips="colecciones">${chipsHtml(estado.colecciones, 'Ninguna.')}</div>
-        <div class="buscador">
-          <input type="search" data-buscar="colecciones" placeholder="Escribe para buscar una colección…" />
-          <div class="resultados" data-resultados="colecciones" hidden></div>
-        </div>
-      </div>
-      <div class="asigna__col">
-        <label>Productos sueltos</label>
-        <div class="chips" data-chips="productos">${chipsHtml(estado.productos, 'Ninguno.')}</div>
-        <div class="buscador">
-          <input type="search" data-buscar="productos" placeholder="Escribe para buscar un producto…" />
-          <div class="resultados" data-resultados="productos" hidden></div>
-        </div>
-      </div>
+      ${columna('etiquetas', 'Etiquetas de producto', 'p. ej. oro', 'Ninguna.',
+    'Con un guión delante, resta: <code>-brillantes</code> quita esos productos de los que ya había.')}
+      ${columna('colecciones', 'Colecciones enteras', 'Busca una colección…', 'Ninguna.', '')}
+      ${columna('productos', 'Productos sueltos', 'Busca un producto…', 'Ninguno.', '')}
     </div>
     <p class="ayuda" data-alcance></p>
   `;
@@ -1251,8 +1263,11 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
     repintar();
   };
 
-  tarjeta.addEventListener('click', (e) => {
-    const x = e.target.closest('[data-quitar]');
+  /* `remove` es lo que dispara la equis de la ficha; el componente no se quita
+   * solo, lo quitamos nosotros al repintar. El evento sube hasta aquí, así que
+   * basta un oyente por tarjeta aunque las fichas se rehagan cada vez. */
+  tarjeta.addEventListener('remove', (e) => {
+    const x = e.target.closest ? e.target.closest('[data-quitar]') : null;
     if (!x || !tarjeta.contains(x)) return;
     const id = x.dataset.quitar;
     estado.etiquetas = estado.etiquetas.filter((e) => e.id !== id);
@@ -1341,7 +1356,9 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
     /* Al enfocar se ofrece lo que hay, sin tener que adivinar qué escribir: las
      * colecciones y las etiquetas ya están en memoria. Los productos no, que
      * serían una consulta por cada clic en el campo. */
-    campo.addEventListener('focus', () => {
+    /* `focusin` y no `focus`: el campo es un componente y quien recibe el foco
+     * de verdad es el input de dentro. `focus` no sube; `focusin` sí. */
+    campo.addEventListener('focusin', () => {
       if (campo.value.trim() || ofreceVacio) lanzar();
     });
   }
@@ -1441,6 +1458,34 @@ async function cargarOVacio(cargar, hayEstructura) {
   }
 }
 
+/* ---------------------------------------------------------------------------
+ * Color con transparencia
+ *
+ * La tienda guarda el color por un lado (seis dígitos hex, que es lo único que
+ * admite un campo `color` de Shopify) y la opacidad por otro, en un número de
+ * 0 a 100. El campo de Polaris, en cambio, lleva la transparencia dentro del
+ * propio color: ocho dígitos, #rrggbbaa. Estas dos funciones traducen entre lo
+ * uno y lo otro para que en pantalla haya un control en vez de dos.
+ * ------------------------------------------------------------------------- */
+function conAlfaHex(color, opacidad) {
+  const o = Number.isFinite(opacidad) ? Math.max(0, Math.min(100, opacidad)) : 100;
+  const n = Math.round(o * 2.55);
+  return `${color}${n.toString(16).padStart(2, '0')}`;
+}
+
+/* Si lo escrito no es un color de seis u ocho dígitos se devuelve lo que
+ * había: así una pulsación a medias («#11») no borra el color guardado. */
+function partirAlfa(valor, porDefecto) {
+  const m = /^#?([0-9a-f]{6})([0-9a-f]{2})?$/i.exec(String(valor ?? '').trim());
+  if (!m) return { color: porDefecto.color, opacidad: porDefecto.opacidad };
+  const alfa = m[2] === undefined ? 255 : parseInt(m[2], 16);
+  return { color: `#${m[1].toLowerCase()}`, opacidad: Math.round((alfa / 255) * 100) };
+}
+
+function colorPlano(valor, porDefecto) {
+  return partirAlfa(valor, { color: porDefecto, opacidad: 100 }).color;
+}
+
 async function pintarEtiquetas() {
   /* Se captura ANTES de cargar nada: si se cambia de pantalla mientras esto
    * espera a Shopify, lo que llegue tarde no debe pintar ni avisar. */
@@ -1464,89 +1509,65 @@ async function pintarEtiquetas() {
   if (miPintado !== pintado) return;
 
   pantalla.innerHTML = `
-    <h1>Insignias</h1>
-    <p class="subtitulo">Los rótulos que van sobre la foto: «Más vendido», «Novedad». Cada uno elige a qué productos alcanza, sueltos o por colección entera.</p>
+    <s-page>
+      ${bannerPendientes(revision.pendientes)}
+      ${error ? `<s-banner slot="supplemental-start" tone="critical" heading="No se pudieron cargar las insignias">${escapar(error)}</s-banner>` : ''}
+      <s-banner slot="supplemental-start" tone="info" data-aviso-recalculo hidden></s-banner>
 
-    ${tarjetaPendientes(revision.pendientes)}
-    ${error ? `<p class="problema">${escapar(error)}</p>` : ''}
-
-    <section class="tarjeta previa">
-      <p class="previa__titulo">Así se ven</p>
-      <div class="previa__tags" id="previa-etiquetas">${muestras()}</div>
-      <p class="ayuda previa__nota">En la tienda van sobre la foto: en la colección arriba a la izquierda, debajo de la etiqueta del tema; en la ficha, arriba a la derecha.</p>
-    </section>
-
-    <p class="ayuda" data-aviso-recalculo hidden></p>
-
-    ${etiquetas.length ? '' : `
-      <section class="tarjeta">
-        <p>Todavía no hay ninguna insignia. Crea la primera aquí abajo: ponle el texto, elige los colores y dile a qué productos alcanza.</p>
-      </section>`}
-
-    ${etiquetas.map((e, i) => `
-      <section class="tarjeta" data-id="${escapar(e.id)}">
-        <div class="cabecera-fila">
-          <span class="sv-tag" data-previa style="${escapar(estiloEtiqueta(e))}">${escapar(e.nombre || 'Sin texto')}</span>
-          <div class="bloque__acciones">
-            <button class="secundario" data-mover="arriba" ${i === 0 ? 'disabled' : ''} title="Subir">↑</button>
-            <button class="secundario" data-mover="abajo" ${i === etiquetas.length - 1 ? 'disabled' : ''} title="Bajar">↓</button>
-          </div>
-        </div>
-        <div class="color__campos">
-          <div>
-            <label>Texto en español</label>
-            <input type="text" data-campo="nombre" value="${escapar(e.nombre)}" />
-          </div>
-          <div>
-            <label>Texto en inglés</label>
-            <input type="text" data-campo="nombre_en" value="${escapar(e.nombreEn)}" placeholder="Vacío: se usa el español" />
-          </div>
-          <div>
-            <label>Fondo</label>
-            <input type="color" data-campo="fondo" value="${escapar(e.fondo)}" />
-          </div>
-          <div>
-            <label>Texto</label>
-            <input type="color" data-campo="texto" value="${escapar(e.texto)}" />
-          </div>
-          ${hayEstilo ? `
-          <div>
-            <label>Borde</label>
-            <input type="color" data-campo="borde" value="${escapar(e.borde)}" />
-          </div>
-          <div>
-            <label>Grosor del borde</label>
-            <input type="number" data-campo="grosor" value="${e.grosor}" min="0" max="6" step="1" />
-            <p class="ayuda">0 = sin borde.</p>
-          </div>
-          <div>
-            <label>Opacidad</label>
-            <input type="number" data-campo="opacidad" value="${e.opacidad}" min="10" max="100" step="5" />
-            <p class="ayuda">Con poca opacidad conviene subir el grosor del borde.</p>
-          </div>` : ''}
-          <div>
-            <label>Se muestra</label>
-            <label class="casilla"><input type="checkbox" data-campo="activo" ${e.activo ? 'checked' : ''} /> Activa en la tienda</label>
-          </div>
-        </div>
-        ${asignacionHtml(e)}
-        <div class="acciones">
-          <button class="principal" data-guardar>Guardar</button>
-          <button class="secundario secundario--peligro" data-borrar>Eliminar</button>
-        </div>
-      </section>`).join('')}
-
-    <section class="tarjeta">
-      <label>Añadir una insignia</label>
-      <div class="color__campos" style="margin-bottom:12px;">
-        <div><input type="text" id="nueva-etiqueta-nombre" placeholder="En español, p. ej. Más vendido" /></div>
-        <div><input type="text" id="nueva-etiqueta-nombre-en" placeholder="En inglés, p. ej. Best seller" /></div>
-        <div><label>Fondo</label><input type="color" id="nueva-etiqueta-fondo" value="${FONDO_POR_DEFECTO}" /></div>
-        <div><label>Texto</label><input type="color" id="nueva-etiqueta-texto" value="${TEXTO_POR_DEFECTO}" /></div>
+      <div class="titular">
+        <h1>Insignias</h1>
+        <p class="subtitulo">Los rótulos que van sobre la foto: «Más vendido», «Novedad». Cada uno elige a qué productos alcanza, sueltos o por colección entera.</p>
       </div>
-      <div class="acciones"><button class="principal" id="anadir-etiqueta">Añadir insignia</button></div>
-      <p class="ayuda">Se crea vacía: no aparece en ningún producto hasta que le digas a cuáles alcanza.</p>
-    </section>
+
+      <s-section heading="Así se ven" subheading="En la colección van arriba a la izquierda, debajo de la etiqueta del tema; en la ficha, arriba a la derecha.">
+        <div class="previa__tags" id="previa-etiquetas">${muestras()}</div>
+      </s-section>
+
+      ${etiquetas.length ? '' : `
+        <s-section>
+          <s-paragraph>Todavía no hay ninguna insignia. Crea la primera aquí abajo: ponle el texto, elige los colores y dile a qué productos alcanza.</s-paragraph>
+        </s-section>`}
+
+      ${etiquetas.map((e, i) => `
+        <s-section data-id="${escapar(e.id)}" heading="${escapar(e.nombre || 'Sin texto')}">
+          <div class="cabecera-fila">
+            <span class="sv-tag" data-previa style="${escapar(estiloEtiqueta(e))}">${escapar(e.nombre || 'Sin texto')}</span>
+            <s-stack direction="inline" gap="small-300">
+              <s-button variant="tertiary" accessibilityLabel="Subir" data-mover="arriba" ${i === 0 ? 'disabled' : ''}>↑</s-button>
+              <s-button variant="tertiary" accessibilityLabel="Bajar" data-mover="abajo" ${i === etiquetas.length - 1 ? 'disabled' : ''}>↓</s-button>
+            </s-stack>
+          </div>
+
+          <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+            <s-text-field label="Texto en español" data-campo="nombre" value="${escapar(e.nombre)}"></s-text-field>
+            <s-text-field label="Texto en inglés" data-campo="nombre_en" value="${escapar(e.nombreEn)}" placeholder="Vacío: se usa el español"></s-text-field>
+            <s-color-field label="Fondo" data-campo="fondo" ${hayEstilo ? 'alpha' : ''} value="${hayEstilo ? conAlfaHex(e.fondo, e.opacidad) : escapar(e.fondo)}" details="${hayEstilo ? 'Arrastra la transparencia dentro del propio color.' : ''}"></s-color-field>
+            <s-color-field label="Texto" data-campo="texto" value="${escapar(e.texto)}"></s-color-field>
+            ${hayEstilo ? `
+            <s-color-field label="Borde" data-campo="borde" value="${escapar(e.borde)}"></s-color-field>
+            <s-number-field label="Grosor del borde" data-campo="grosor" value="${e.grosor}" min="0" max="6" step="1" details="0 = sin borde. Con poca opacidad, conviene subirlo."></s-number-field>` : ''}
+          </s-grid>
+
+          <div class="casilla-polaris">
+            <s-checkbox label="Activa en la tienda" data-campo="activo" ${e.activo ? 'checked' : ''}></s-checkbox>
+          </div>
+
+          ${asignacionHtml(e)}
+
+          <s-button slot="primary-action" variant="primary" data-guardar>Guardar</s-button>
+          <s-button slot="secondary-actions" tone="critical" data-borrar>Eliminar</s-button>
+        </s-section>`).join('')}
+
+      <s-section heading="Añadir una insignia" subheading="Se crea vacía: no aparece en ningún producto hasta que le digas a cuáles alcanza.">
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-text-field label="Texto en español" id="nueva-etiqueta-nombre" placeholder="p. ej. Más vendido"></s-text-field>
+          <s-text-field label="Texto en inglés" id="nueva-etiqueta-nombre-en" placeholder="p. ej. Best seller"></s-text-field>
+          <s-color-field label="Fondo" id="nueva-etiqueta-fondo" value="${FONDO_POR_DEFECTO}"></s-color-field>
+          <s-color-field label="Texto" id="nueva-etiqueta-texto" value="${TEXTO_POR_DEFECTO}"></s-color-field>
+        </s-grid>
+        <s-button slot="primary-action" variant="primary" id="anadir-etiqueta">Añadir insignia</s-button>
+      </s-section>
+    </s-page>
   `;
 
   const refrescarMuestras = () => {
@@ -1555,7 +1576,7 @@ async function pintarEtiquetas() {
 
   const conexiones = new Map();
 
-  pantalla.querySelectorAll('.tarjeta[data-id]').forEach((tarjeta) => {
+  pantalla.querySelectorAll('s-section[data-id]').forEach((tarjeta) => {
     const id = tarjeta.dataset.id;
     const original = etiquetas.find((e) => e.id === id);
     const estado = {
@@ -1569,44 +1590,53 @@ async function pintarEtiquetas() {
     );
     conexiones.set(id, conex);
 
-    const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`)?.value.trim() ?? '';
+    const campo = (nombre) => tarjeta.querySelector(`[data-campo="${nombre}"]`);
+    const valor = (nombre) => String(campo(nombre)?.value ?? '').trim();
     const muestra = tarjeta.querySelector('[data-previa]');
 
     /* La muestra se repinta mientras se escribe. Elegir un fondo y no ver cómo
      * queda hasta guardar es elegir a ciegas. */
-    const comoEsta = () => ({
-      nombre: valor('nombre'),
-      fondo: valor('fondo'),
-      texto: valor('texto'),
-      borde: hayEstilo ? valor('borde') : original.borde,
-      grosor: hayEstilo ? Number(valor('grosor') || 0) : original.grosor,
-      opacidad: hayEstilo ? Number(valor('opacidad') || 100) : original.opacidad,
-    });
+    const comoEsta = () => {
+      const fondo = hayEstilo
+        ? partirAlfa(valor('fondo'), { color: original.fondo, opacidad: original.opacidad })
+        : { color: colorPlano(valor('fondo'), original.fondo), opacidad: original.opacidad };
+      return {
+        nombre: valor('nombre'),
+        fondo: fondo.color,
+        opacidad: fondo.opacidad,
+        texto: colorPlano(valor('texto'), original.texto),
+        borde: hayEstilo ? colorPlano(valor('borde'), original.borde) : original.borde,
+        /* Un campo numérico devuelve texto, y vacío devuelve cadena vacía. */
+        grosor: hayEstilo ? Number(valor('grosor') || 0) : original.grosor,
+      };
+    };
 
     const refrescar = () => {
       const v = comoEsta();
       muestra.textContent = v.nombre || 'Sin texto';
       muestra.style.cssText = estiloEtiqueta(v);
+      /* El titulo de la tarjeta es el texto de la insignia: si no se mueve con
+       * lo que se escribe, la tarjeta dice una cosa y la muestra otra. */
+      tarjeta.heading = v.nombre || 'Sin texto';
     };
-    ['nombre', 'fondo', 'texto', 'borde', 'grosor', 'opacidad'].forEach((campo) => {
-      tarjeta.querySelector(`[data-campo="${campo}"]`)?.addEventListener('input', refrescar);
+    /* Un solo oyente por tarjeta: los eventos de los componentes suben hasta
+     * aquí, así que no hace falta engancharse campo por campo. */
+    tarjeta.addEventListener('input', (e) => {
+      if (e.target.closest('[data-campo]')) refrescar();
     });
 
     tarjeta.querySelector('[data-guardar]').addEventListener('click', async (e) => {
-      e.target.disabled = true;
-      e.target.textContent = 'Guardando…';
+      const boton = e.currentTarget;
+      boton.loading = true;
       try {
+        const v = comoEsta();
         const datos = {
-          nombre: valor('nombre'),
+          nombre: v.nombre,
           nombreEn: valor('nombre_en'),
-          fondo: valor('fondo'),
-          texto: valor('texto'),
-          ...(hayEstilo ? {
-            borde: valor('borde'),
-            grosor: Number(valor('grosor') || 0),
-            opacidad: Number(valor('opacidad') || 100),
-          } : {}),
-          activo: tarjeta.querySelector('[data-campo="activo"]').checked,
+          fondo: v.fondo,
+          texto: v.texto,
+          ...(hayEstilo ? { borde: v.borde, grosor: v.grosor, opacidad: v.opacidad } : {}),
+          activo: campo('activo').checked,
           etiquetas: estado.etiquetas,
           productos: estado.productos,
           colecciones: estado.colecciones,
@@ -1625,21 +1655,20 @@ async function pintarEtiquetas() {
       } catch (error2) {
         avisar(error2.message, true);
       } finally {
-        e.target.disabled = false;
-        e.target.textContent = 'Guardar';
+        boton.loading = false;
       }
     });
 
     tarjeta.querySelectorAll('[data-mover]').forEach((boton) => {
       boton.addEventListener('click', async () => {
         pase.vivo = false;
-        boton.disabled = true;
+        boton.loading = true;
         try {
           await moverEntrada(etiquetas, id, boton.dataset.mover, guardarEtiqueta);
           await ir('etiquetas');
         } catch (error2) {
           avisar(error2.message, true);
-          boton.disabled = false;
+          boton.loading = false;
         }
       });
     });
@@ -1647,35 +1676,37 @@ async function pintarEtiquetas() {
     tarjeta.querySelector('[data-borrar]').addEventListener('click', async (e) => {
       if (!confirm(`¿Eliminar la insignia «${original.nombre}»?`)) return;
       pase.vivo = false;
-      e.target.disabled = true;
+      const boton = e.currentTarget;
+      boton.loading = true;
       try {
         await borrarEtiqueta(id);
         avisar('Insignia eliminada');
         await ir('etiquetas');
       } catch (error2) {
         avisar(error2.message, true);
-        e.target.disabled = false;
+        boton.loading = false;
       }
     });
   });
 
   document.getElementById('anadir-etiqueta')?.addEventListener('click', async (e) => {
-    const nombre = document.getElementById('nueva-etiqueta-nombre').value.trim();
+    const boton = e.currentTarget;
+    const nombre = String(document.getElementById('nueva-etiqueta-nombre').value ?? '').trim();
     if (!nombre) { avisar('Escribe el texto de la insignia.', true); return; }
-    e.target.disabled = true;
+    boton.loading = true;
     try {
       await crearEtiqueta({
         nombre,
-        nombreEn: document.getElementById('nueva-etiqueta-nombre-en').value.trim(),
-        fondo: document.getElementById('nueva-etiqueta-fondo').value,
-        texto: document.getElementById('nueva-etiqueta-texto').value,
+        nombreEn: String(document.getElementById('nueva-etiqueta-nombre-en').value ?? '').trim(),
+        fondo: colorPlano(document.getElementById('nueva-etiqueta-fondo').value, FONDO_POR_DEFECTO),
+        texto: colorPlano(document.getElementById('nueva-etiqueta-texto').value, TEXTO_POR_DEFECTO),
         orden: etiquetas.length + 1,
       }, etiquetas.length);
       avisar('Insignia creada');
       await ir('etiquetas');
     } catch (error2) {
       avisar(error2.message, true);
-      e.target.disabled = false;
+      boton.loading = false;
     }
   });
 

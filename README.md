@@ -25,6 +25,39 @@ tiene con qué autenticarse, y lo dice en vez de fallar raro.
 Los archivos del panel son estáticos y sin paso de compilación, a propósito:
 se abren, se leen y se despliegan copiándolos.
 
+### Los componentes del admin (Polaris)
+
+`admin/index.html` carga `polaris-2.js` justo **después** de `app-bridge.js`
+(ese orden importa: App Bridge avisa de qué aspecto tiene el admin de esa
+tienda antes de que Polaris arranque). Son elementos a secas —`<s-section>`,
+`<s-text-field>`…—, así que funcionan con JavaScript normal, sin React y sin
+compilar nada. La pantalla de insignias ya está hecha con ellos; las demás van
+migrando.
+
+Lo que se aprendió montándolos, que no está en la documentación:
+
+- El atributo `slot` va en **guión**: `slot="primary-action"`. En camelCase el
+  elemento no se asigna a ningún slot y **desaparece sin avisar**.
+- `s-page heading` no pinta nada cuando la app va embebida en el admin: el
+  título lo ponemos nosotros con un `<h1>`.
+- Los **iconos** de Polaris (`icon="chevron-up"`, `<s-icon>`) salen vacíos
+  fuera del admin. Donde el icono es la única señal, va texto.
+- `s-section` no mete sus botones de acción en el DOM: los vuelve a pintar
+  dentro de su shadow. Los clics y las propiedades (`loading`, `disabled`)
+  igual llegan al elemento original, así que los oyentes funcionan.
+- Los eventos (`input`, `change`, `remove`) **suben**, así que se puede
+  escuchar en la tarjeta entera en vez de campo por campo. `focus` no sube:
+  para eso, `focusin`.
+- Un campo numérico devuelve **texto**, y vacío devuelve cadena vacía.
+- `s-color-field alpha` da el color con transparencia en ocho dígitos
+  (`#rrggbbaa`). La tienda lo guarda partido en color + opacidad, y
+  `partirAlfa`/`conAlfaHex` traducen entre lo uno y lo otro.
+- El CSS propio **no entra** en los componentes (shadow DOM). Sí alcanza a lo
+  nuestro: la muestra de la insignia, la lista de resultados del buscador y los
+  textos de ayuda, que es justo lo que queremos que se parezca a la tienda.
+- Para verlo sin el admin hay un banco de pruebas: una copia de `index.html`
+  con un `fetch` de mentira dentro de un iframe (el panel se cree embebido).
+
 ## Los bloques
 
 | Bloque | Tipo | Lee |

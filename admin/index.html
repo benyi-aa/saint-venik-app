@@ -33,6 +33,14 @@
     </script>
     <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
 
+    <!-- Polaris, los componentes del admin nuevo. Va DESPUES de app-bridge.js a
+         proposito: App Bridge publica que aspecto tiene el admin de esta tienda
+         antes de que Polaris arranque, y asi los componentes salen con el mismo
+         estilo que el resto del admin, claro u oscuro, nuevo o antiguo.
+         Sin version en la URL: polaris-2.js es la 2.x estable mas reciente.
+         Un solo bundle; cargar dos revienta la pagina. -->
+    <script src="https://cdn.shopify.com/shopifycloud/polaris-2.js"></script>
+
     <!-- Las URLs se calculan aquí, al cargar, y no se escriben en el archivo.
          GitHub Pages sirve este index con cache-control: max-age=600, así que un
          index con URLs fijas puede seguir apuntando diez minutos a los archivos

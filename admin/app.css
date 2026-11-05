@@ -16,7 +16,11 @@ body {
   padding: 0 16px 48px;
   background: var(--fondo);
   color: var(--tinta);
-  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* ShopifyInter es la tipografia del admin nuevo, y polaris-2.js la carga en
+   * el documento: poniendola la primera, lo que dibujamos nosotros (la muestra
+   * de la insignia, los textos de ayuda) sale con la misma letra que los
+   * componentes. Si no esta, se cae a la del sistema como siempre. */
+  font: 14px/1.5 ShopifyInter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .cabecera {
@@ -372,30 +376,8 @@ textarea.codigo {
   border-top: 1px solid var(--linea, #e3e3e3);
 }
 
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 4px 3px 9px;
-  border: 1px solid var(--linea, #e3e3e3);
-  border-radius: 999px;
-  background: #fff;
-  font-size: 12px;
-}
-
-.chip__x {
-  border: 0;
-  background: none;
-  padding: 0 4px;
-  font-size: 14px;
-  line-height: 1;
-  color: var(--tinta-suave);
-  cursor: pointer;
-}
-
-.chip__x:hover { color: var(--peligro); }
 
 /* `hidden` no oculta nada si la hoja de autor declara un display: la regla del
  * navegador, `[hidden] { display: none }`, pierde la cascada frente a esta. Por
@@ -411,7 +393,7 @@ textarea.codigo {
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  z-index: 5;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -446,27 +428,12 @@ textarea.codigo {
 
 .previa__tags { display: flex; flex-wrap: wrap; gap: 8px; }
 
-.asigna input[type="search"] {
-  width: 100%;
-  box-sizing: border-box;
-}
-
 /* Cuántos productos tiene una colección. Es el dato que decide si asignarla o
  * no, así que va pegado al nombre y no escondido. */
-.chip__n,
 .resultado__n {
+  float: right;
   color: var(--tinta-suave);
   font-size: 11px;
-}
-
-.resultado__n { float: right; }
-
-/* Una etiqueta que resta se lee de un vistazo: no es lo mismo «brillantes»
- * que «-brillantes» y la diferencia no puede estar solo en un guión. */
-.chip--resta {
-  border-color: #e0b4b4;
-  background: #fdf3f3;
-  color: #8a2b2b;
 }
 
 /* Damero detrás de la muestra: una píldora blanca al 50 % sobre el gris del
@@ -493,3 +460,38 @@ textarea.codigo {
   background-size: 18px 18px;
   background-position: 0 0, 9px 9px;
 }
+
+/* --- Componentes del admin (Polaris) ---------------------------------------
+ *
+ * Lo que dibuja Polaris vive en su propio shadow DOM y esta hoja no entra ahi:
+ * solo alcanza a lo nuestro, que es la muestra de la insignia, la lista de
+ * resultados del buscador y los textos de ayuda. Es justo lo que queremos: la
+ * muestra tiene que parecerse a la tienda, no al admin.
+ */
+
+/* Si la CDN de Shopify no responde, los componentes se quedan sin definir: son
+ * elementos en linea vacios, y la pantalla aparece como un parrafo corrido.
+ * Esto no la arregla —las etiquetas de los campos viven en atributos y no se
+ * pueden pintar—, pero deja cada bloque en su linea y se entiende que falta
+ * algo en vez de parecer que la app esta rota. */
+s-page:not(:defined),
+s-section:not(:defined),
+s-stack:not(:defined),
+s-grid:not(:defined),
+s-banner:not(:defined),
+s-paragraph:not(:defined),
+s-divider:not(:defined) { display: block; }
+
+s-text-field:not(:defined),
+s-color-field:not(:defined),
+s-number-field:not(:defined),
+s-search-field:not(:defined),
+s-checkbox:not(:defined),
+s-clickable-chip:not(:defined) { display: block; min-height: 20px; }
+
+/* La casilla no es un campo de la rejilla: va suelta debajo, con aire. */
+.casilla-polaris { margin-top: 14px; }
+
+/* El admin nuevo flota una barra sobre el pie de la ventana de la app. App
+ * Bridge dice cuanto ocupa; sin esto, el ultimo boton puede quedar debajo. */
+body { padding-bottom: calc(48px + var(--shopify-safe-area-inset-bottom, 0px)); }
