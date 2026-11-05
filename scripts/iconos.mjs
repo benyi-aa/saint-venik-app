@@ -15,13 +15,13 @@ const SALIDA = 'admin/iconos.js';
  * Va aqui y no en el Liquid porque el cliente no lee estos rotulos. */
 const ROTULOS = {
   agua: 'Gota · resistente al agua',
-  garantia: 'Medalla · garantía',
+  garantia: 'Escudo · garantía',
   hipoalergenico: 'Hoja · hipoalergénico',
   'joyeria-fina': 'Gema · joyería fina',
   cambios: 'Flechas · cambios y devoluciones',
   envio: 'Camión · envío',
   'hecho-a-mano': 'Mano · hecho a mano',
-  acero: 'Escudo · acero inoxidable',
+  acero: 'Tuerca · acero inoxidable',
   caja: 'Caja · embalaje',
   premium: 'Estrella · premium',
   oro: 'Anillo · baño de oro',

@@ -19,7 +19,7 @@ export const ICONOS = [
   },
   {
     clave: 'garantia',
-    rotulo: 'Medalla · garantía',
+    rotulo: 'Escudo · garantía',
     trazo: '<path d="M12 3.3 5.7 5.8v5.3c0 4 2.6 7.7 6.3 8.6 3.7-.9 6.3-4.6 6.3-8.6V5.8L12 3.3Z"/><path d="m9.4 11.8 1.9 2 3.4-3.7"/>',
   },
   {
@@ -49,7 +49,7 @@ export const ICONOS = [
   },
   {
     clave: 'acero',
-    rotulo: 'Escudo · acero inoxidable',
+    rotulo: 'Tuerca · acero inoxidable',
     trazo: '<path d="M12 3.4 19 7.4v8.2l-7 4-7-4V7.4l7-4Z"/> <circle cx="12" cy="11.5" r="3.1"/>',
   },
   {
