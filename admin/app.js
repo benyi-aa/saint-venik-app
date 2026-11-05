@@ -1,42 +1,42 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611051955';
+import { estaEmbebida } from './api.js?v=202611052006';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611051955';
+} from './colores.js?v=202611052006';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-} from './config.js?v=202611051955';
+} from './config.js?v=202611052006';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611051955';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051955';
+} from './productos.js?v=202611052006';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611052006';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611051955';
+} from './guias.js?v=202611052006';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611051955';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051955';
+} from './vista-previa.js?v=202611052006';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611052006';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611051955';
+} from './etiquetas.js?v=202611052006';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611051955';
-import { ICONOS, svgIcono } from './iconos.js?v=202611051955';
+} from './beneficios.js?v=202611052006';
+import { ICONOS, svgIcono } from './iconos.js?v=202611052006';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611051955';
+const VERSION = '202611052006';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1178,15 +1178,28 @@ function ponerOyentesDeCierre() {
  * botón por ficha. Lo que el evento NO trae es a quién se quitó: por eso el
  * identificador va en un data- del propio elemento.
  *
- * Una etiqueta que resta va en `color="strong"`, más oscura: el guión de
- * «-brillantes» es un píxel y la diferencia no puede estar solo ahí. */
+ * Una etiqueta que resta lo dice con palabras, «quita: brillantes». El color
+ * del componente no se puede cambiar desde fuera (vive en su shadow), y el
+ * guión de «-brillantes» es un píxel: confundirlo invierte a qué productos
+ * alcanza. Lo único nuestro que entra ahí es el texto, así que va en el texto.
+ *
+ * El `title` va en la propia ficha porque el componente recorta lo largo con
+ * puntos suspensivos y no pone ningún aviso: sin esto, dos productos de
+ * nombre parecido se ven idénticos y se quita el que no era.
+ *
+ * Sin accessibilityLabel a propósito: el componente ya tiene su botón de
+ * quitar, y poner aquí «Quitar oro» añadía una segunda parada de tabulador
+ * que prometía quitar y no quitaba nada. */
 function chipsHtml(lista, vacio) {
   if (!lista.length) return `<p class="ayuda">${escapar(vacio)}</p>`;
-  return lista.map((x) => `<s-clickable-chip removable${
-    esResta(x.titulo) ? ' color="strong"' : ''
-  } data-quitar="${escapar(x.id)}" accessibilityLabel="Quitar ${escapar(x.titulo)}">${
-    escapar(x.titulo)
-  }${x.cuantos === undefined ? '' : ` (${x.cuantos})`}</s-clickable-chip>`).join('');
+  return lista.map((x) => {
+    const resta = esResta(x.titulo);
+    const texto = (resta ? `quita: ${sinSigno(x.titulo)}` : x.titulo)
+      + (x.cuantos === undefined ? '' : ` (${x.cuantos})`);
+    return `<s-clickable-chip removable${resta ? ' color="strong"' : ''} data-quitar="${
+      escapar(x.id)
+    }" title="${escapar(texto)}">${escapar(texto)}</s-clickable-chip>`;
+  }).join('');
 }
 
 /* Las tres columnas se usan igual: escribes y aparece lo que coincide. Un
@@ -1195,15 +1208,21 @@ function chipsHtml(lista, vacio) {
  *
  * La lista de resultados sigue siendo nuestra y no de Polaris: tiene que
  * flotar sobre la tarjeta sin empujar nada, cerrarse al tocar fuera y
- * descartar respuestas que llegan tarde. Eso ya está resuelto aquí. */
+ * descartar respuestas que llegan tarde. Eso ya está resuelto aquí.
+ *
+ * Las fichas van ARRIBA y el buscador debajo. Al revés parecía más natural,
+ * pero la lista se despliega hacia abajo y tapaba las fichas: el clic que iba
+ * a una equis caía sobre un resultado y añadía lo que nadie pidió. */
 function asignacionHtml(estado) {
   const columna = (clave, titulo, marcador, vacio, ayuda) => `
       <div class="asigna__col">
+        <p class="asigna__titulo">${titulo}</p>
+        <div class="chips" data-chips="${clave}">${chipsHtml(estado[clave], vacio)}</div>
         <div class="buscador">
-          <s-search-field data-buscar="${clave}" label="${titulo}" placeholder="${marcador}"></s-search-field>
+          <s-search-field data-buscar="${clave}" label="${titulo}"
+            labelAccessibilityVisibility="exclusive" placeholder="${marcador}"></s-search-field>
           <div class="resultados" data-resultados="${clave}" hidden></div>
         </div>
-        <div class="chips" data-chips="${clave}">${chipsHtml(estado[clave], vacio)}</div>
         ${ayuda ? `<p class="ayuda">${ayuda}</p>` : ''}
       </div>`;
 
@@ -1474,12 +1493,21 @@ function conAlfaHex(color, opacidad) {
 }
 
 /* Si lo escrito no es un color de seis u ocho dígitos se devuelve lo que
- * había: así una pulsación a medias («#11») no borra el color guardado. */
+ * había: así una pulsación a medias («#11») no borra el color guardado.
+ *
+ * Y si trae seis dígitos, la opacidad NO SE TOCA. El campo es una caja de
+ * texto: escribir o pegar ahí el color de marca («#ff0000») es lo normal, y
+ * leer eso como «opacidad 100» borraba en silencio la transparencia que la
+ * insignia tenía configurada. Solo el selector, que siempre devuelve ocho
+ * dígitos, cambia la opacidad. */
 function partirAlfa(valor, porDefecto) {
   const m = /^#?([0-9a-f]{6})([0-9a-f]{2})?$/i.exec(String(valor ?? '').trim());
   if (!m) return { color: porDefecto.color, opacidad: porDefecto.opacidad };
-  const alfa = m[2] === undefined ? 255 : parseInt(m[2], 16);
-  return { color: `#${m[1].toLowerCase()}`, opacidad: Math.round((alfa / 255) * 100) };
+  const alfa = m[2] === undefined ? null : parseInt(m[2], 16);
+  return {
+    color: `#${m[1].toLowerCase()}`,
+    opacidad: alfa === null ? porDefecto.opacidad : Math.round((alfa / 255) * 100),
+  };
 }
 
 function colorPlano(valor, porDefecto) {
@@ -1623,6 +1651,18 @@ async function pintarEtiquetas() {
      * aquí, así que no hace falta engancharse campo por campo. */
     tarjeta.addEventListener('input', (e) => {
       if (e.target.closest('[data-campo]')) refrescar();
+    });
+
+    /* Al confirmar el fondo, el campo se reescribe con la opacidad dentro: si
+     * alguien pega «#ff0000», lo que ve pasa a ser «#ff0000…» con su alfa, que
+     * es exactamente lo que se va a guardar. Sin esto, lo que se lee en el
+     * campo y lo que se guarda dicen cosas distintas. */
+    tarjeta.addEventListener('change', (e) => {
+      if (!hayEstilo || !e.target.closest) return;
+      const suyo = e.target.closest('[data-campo="fondo"]');
+      if (!suyo) return;
+      const v = comoEsta();
+      suyo.value = conAlfaHex(v.fondo, v.opacidad);
     });
 
     tarjeta.querySelector('[data-guardar]').addEventListener('click', async (e) => {

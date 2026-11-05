@@ -495,3 +495,12 @@ s-clickable-chip:not(:defined) { display: block; min-height: 20px; }
 /* El admin nuevo flota una barra sobre el pie de la ventana de la app. App
  * Bridge dice cuanto ocupa; sin esto, el ultimo boton puede quedar debajo. */
 body { padding-bottom: calc(48px + var(--shopify-safe-area-inset-bottom, 0px)); }
+
+/* El rótulo de cada columna de asignación. Va suelto y no como etiqueta del
+ * buscador porque entre los dos hay fichas: la etiqueta del componente se
+ * pegaría al campo y dejaría las fichas huérfanas de título. */
+.asigna__titulo {
+  margin: 0 0 2px;
+  font-weight: 600;
+  font-size: 13px;
+}

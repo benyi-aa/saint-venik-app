@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611051955';
+import { gql, comprobarErrores } from './api.js?v=202611052006';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
@@ -61,7 +61,9 @@ const CAMPOS_CONFIG = [
  * configuración a la app no cambia nada de lo que se ve. */
 export const PILDORA_POR_DEFECTO = {
   activo: true,
-  esquina: 'arriba-derecha',
+  /* Abajo a la izquierda: arriba a la derecha es donde va la insignia, y las
+   * dos cosas en la misma esquina se pisan. */
+  esquina: 'abajo-izquierda',
   cuantas: 3,
   fondo: '#FFFFFF',
   texto: '#111111',
