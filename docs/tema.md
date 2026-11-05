@@ -178,3 +178,68 @@ Los de .com usan `01a0a760-9c51-786e-8540-94248eb04d7c`.
 - Desinstaladas en .cl: **OPTIS Color Swatch** ($49,90/mes + uso) y **MP Size
   Chart** ($6,95/mes), que es la app de Avada que pintaba «Guía de Tallas».
   En saintvenik.com, OPTIS y Kiwi las desinstala Diego a mano.
+
+## Insignias y beneficios (5 nov 2026)
+
+Dos piezas nuevas, y cada una se enciende de una manera distinta.
+
+### El bloque «Beneficios»
+
+Es un app block normal, así que va dentro de la sección `main` de cada
+plantilla de producto, como los otros tres. El sitio natural es justo debajo
+del selector de talla:
+
+```json
+"sv_beneficios": {
+  "type": "shopify://apps/saint-venik/blocks/beneficios/01a0a760-9c51-786e-8540-94248eb04d7c",
+  "settings": {}
+}
+```
+
+En .cl el uuid de registro es el suyo:
+`shopify://apps/color-size-picker/blocks/beneficios/01a0ad1a-1990-7459-b850-45f32c50d143`.
+
+Plantillas donde hay que ponerlo, las mismas que ya llevan los otros bloques:
+
+- **.com** (3): `product.acero-inox`, `product.orov2`, `product.ice`.
+- **.cl** (7): `product.acero-inoxidable`, `.aceroinox-sinstock`, `.brillantes`,
+  `product.json`, `.lentes-de-sol`, `.oro`, `.oro-sinstock`.
+
+### El app embed «Insignias de producto»
+
+No es un bloque de sección: no se añade a ninguna plantilla. Se enciende una
+vez por tienda en Personalizar → Configuración → Incrustaciones de apps. En el
+archivo eso es una entrada en `config/settings_data.json`, dentro de
+`current.blocks`:
+
+```json
+"sv_insignias": {
+  "type": "shopify://apps/saint-venik/blocks/insignias/01a0a760-9c51-786e-8540-94248eb04d7c",
+  "disabled": false,
+  "settings": {}
+}
+```
+
+Vive en el tema, no en la app: **al publicar otro tema hay que volver a
+encenderlo**, igual que pasó con los embeds de OPTIS y Avada.
+
+### Por qué las insignias no son un bloque
+
+Una tarjeta de producto no es una sección ni un bloque de tema: es el snippet
+`grid-item` dentro del bucle del grid. La documentación de Shopify dice que los
+bloques de tipo `@app` no se admiten en secciones renderizadas estáticamente,
+así que no hay ningún punto de extensión por tarjeta. La única vía es el embed
++ JavaScript.
+
+El script se apoya en el marcado de Impulse 7.5.1, que hoy es idéntico en las
+dos tiendas:
+
+- tarjeta: `.grid-product[data-product-handle]` o `.grid__item[data-product-handle]`
+- caja de la imagen: `.grid-product__image-mask` (y si no, `.grid__item-image-wrapper`)
+- insignia propia del tema: `.grid-product__tag`, en `top:8px left:8px z-index:2`
+  — la nuestra se mide y se coloca debajo, no encima
+- ficha: `.product-main-slide[data-index="0"] .product-image-main`, que es el
+  único contenedor de la cadena sin `overflow:hidden`
+- el grid de la colección se reconoce por la sección `...__main-collection`
+
+Si el tema cambia de versión hay que revisar esos cinco selectores.
