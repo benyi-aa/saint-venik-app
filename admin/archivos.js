@@ -10,7 +10,7 @@
  * Por eso se comprueba el host ANTES de intentarlo y, si no es de los conocidos,
  * se explica que paso en vez de dejar un error mudo.
  */
-import { gql, comprobarErrores } from './api.js?v=202611051805';
+import { gql, comprobarErrores } from './api.js?v=202611051807';
 
 const HOSTS_CON_CORS = /(storage\.googleapis\.com|s3\.amazonaws\.com)$/;
 
@@ -61,7 +61,11 @@ async function esperarListo(id, intentos = 25) {
 }
 
 export async function subirArchivo(file, { onPaso = () => {} } = {}) {
-  const esImagen = file.type.startsWith('image/');
+  /* Un SVG tiene mime image/svg+xml pero Shopify NO lo acepta como imagen: si
+   * se pide por la rama IMAGE, fileCreate devuelve un userError justo con el
+   * formato que mas sentido tiene para un icono. Va por la de archivo generico,
+   * como los PDF de las guias. */
+  const esImagen = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
 
   onPaso('Pidiendo destino…');
   const d1 = await gql(DESTINO, {
@@ -126,8 +130,10 @@ export function hayBiblioteca() {
 export async function elegirDeBiblioteca({ tipo = 'MediaImage' } = {}) {
   if (!hayBiblioteca()) throw new Error('Tu versión del admin no ofrece el selector de archivos.');
 
+  /* Admite una lista: un icono puede ser PNG (MediaImage) o SVG, que para
+   * Shopify es un archivo generico. */
   const actividad = await window.shopify.intents.invoke('pick:shopify/File', {
-    data: { mediaTypes: [tipo], multiSelect: false },
+    data: { mediaTypes: [].concat(tipo), multiSelect: false },
   });
   const res = await actividad.complete;
 

@@ -103,3 +103,12 @@
     font-size: calc(var(--sv-foto-letra, 12px) - 1px);
   }
 }
+
+/* Un icono subido ocupa el mismo hueco que el dibujado. `object-fit` porque la
+ * imagen puede no venir cuadrada. */
+.sv-benef-foto__img {
+  flex: 0 0 auto;
+  width: 1.15em;
+  height: 1.15em;
+  object-fit: contain;
+}

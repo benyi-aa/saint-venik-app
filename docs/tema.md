@@ -378,3 +378,53 @@ Apps → Beneficios, sin tocar código.
 Comprobado después en las dos tiendas: cero filas bajo el botón, los tres
 beneficios sobre las fotos 2, 3 y 4, la insignia sola en la primera, y el
 selector de color y la guía de tallas intactos.
+
+## Mejoras del panel (5 nov 2026)
+
+### El desplegable que no se cerraba
+
+`hidden` no ocultaba nada: `.resultados { display: flex }` es una regla de la
+hoja de autor y gana a `[hidden] { display: none }`, que viene del navegador.
+La misma trampa ya estaba parcheada para los avisos (`.aviso[hidden]`) y aquí
+faltaba. Con eso, los dos cierres que el código ya intentaba empezaron a
+funcionar. Además: cerrar vacía la lista, hay un único oyente de `pointerdown`
+en captura para cerrar al pulsar fuera, Escape cierra todos, y la lista flota
+en vez de empujar la tarjeta.
+
+### Por qué iba lento
+
+Abrir Beneficios en .cl eran **29 consultas, 27 en serie**, y unos 2.080 puntos
+de cupo contra un balde de 1.000 que se recarga a 50/s. A mitad de camino
+Shopify empezaba a responder `THROTTLED` y la espera por cupo era la mayor
+parte del tiempo, no la red.
+
+Tres causas y tres arreglos:
+
+| Causa | Arreglo |
+|---|---|
+| La misma etiqueta se resolvía una vez por entrada: 13 páginas de productos donde bastan 4 | `gql` memoriza las lecturas repetidas mientras dura una pasada (`enUnaPasada`) |
+| `revisarEstructura` encadenaba 12 consultas, 4 de ellas idénticas, y la llaman 5 de las 6 pantallas | Las comprobaciones se lanzan a la vez |
+| El recálculo corría **antes** de pintar | Ahora corre después: la pantalla aparece y los números se ponen al día solos |
+
+Las colecciones y las etiquetas de la tienda se guardan cinco minutos.
+
+### Borde, transparencia e iconos propios
+
+- **Insignias**: borde (color y grosor) y opacidad **por insignia**, porque
+  dependen de ella; su fondo y su texto ya vivían ahí.
+- **Píldoras sobre las fotos**: su aspecto pasa del editor de temas a la
+  pantalla Beneficios, con muestra en vivo sobre un damero. Los ajustes del
+  embed quedan de respaldo mientras la app no haya guardado nunca.
+- El tipo de campo `color` de Shopify es hexadecimal de seis dígitos y **no
+  admite alfa**: la opacidad es un número 0-100 aparte y el rgba se compone al
+  pintar, en Liquid con `color_modify` y en el panel con la misma cuenta.
+  Cuidado con `divided_by` entre enteros, que da cero y lo dejaría todo
+  invisible sin ningún error.
+- **Iconos propios**: campo `icono_imagen` en `sv_beneficio`. Manda sobre el
+  dibujado, igual que la imagen de la muestra manda sobre el color. Un SVG no
+  es `MediaImage` para Shopify, así que sube por la rama de archivo genérico.
+  Aviso que da la pantalla: una imagen se muestra con sus propios colores; los
+  iconos dibujados siguen al color del texto.
+
+Los controles nuevos no aparecen hasta que la tienda tiene los campos: hay que
+pulsar **«Crear lo que falta»** una vez en cada tienda después de este cambio.

@@ -1,0 +1,37 @@
+{%- comment -%}
+  Saint Venik · El icono de un beneficio
+  ---------------------------------------------------------------------------
+  Manda la imagen subida; si no hay, el icono dibujado del juego de la app.
+  Es la misma regla que la muestra de color, donde la imagen manda sobre el
+  color, y conviene que se diga igual en el panel.
+
+  La precedencia vive aqui y no dentro de sv-icono.liquid porque ese archivo es
+  el ORIGINAL del juego de iconos: scripts/iconos.mjs lo lee por texto para
+  generar admin/iconos.js, y meterle logica lo dejaria colgando de su forma.
+
+  Un aviso que hay que dar en el panel: una imagen se muestra con sus propios
+  colores. Los iconos dibujados siguen al color del texto de la pildora
+  (stroke="currentColor"); un PNG no, asi que uno negro sobre fondo oscuro
+  desaparece.
+
+  Parametros: b (entrada de sv_beneficio), clase (para el <img>).
+{%- endcomment -%}
+
+{%- liquid
+  assign sv_img = b.icono_imagen.value
+  assign sv_clase = clase | default: 'sv-benef__icono sv-benef__icono--img'
+-%}
+
+{%- if sv_img != blank -%}
+  {%- comment -%}
+    Un MediaImage se puede pedir ya escalado a la CDN; un SVG es un archivo
+    generico y viaja tal cual, asi que en el panel se pide que sea pequeno.
+  {%- endcomment -%}
+  {%- if sv_img.image -%}
+    <img class="{{ sv_clase }}" src="{{ sv_img | image_url: width: 48 }}" alt="" loading="lazy" width="24" height="24" />
+  {%- else -%}
+    <img class="{{ sv_clase }}" src="{{ sv_img.url }}" alt="" loading="lazy" width="24" height="24" />
+  {%- endif -%}
+{%- else -%}
+  {%- render 'sv-icono', nombre: b.icono.value -%}
+{%- endif -%}

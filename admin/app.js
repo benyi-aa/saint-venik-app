@@ -1,41 +1,42 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida, enUnaPasada } from './api.js?v=202611051805';
+import { estaEmbebida, enUnaPasada } from './api.js?v=202611051807';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611051805';
+} from './colores.js?v=202611051807';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-} from './config.js?v=202611051805';
+} from './config.js?v=202611051807';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611051805';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051805';
+} from './productos.js?v=202611051807';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051807';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611051805';
+} from './guias.js?v=202611051807';
 import {
-  guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa,
-} from './vista-previa.js?v=202611051805';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051805';
+  guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
+} from './vista-previa.js?v=202611051807';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051807';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611051805';
+} from './etiquetas.js?v=202611051807';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
-} from './beneficios.js?v=202611051805';
-import { ICONOS, svgIcono } from './iconos.js?v=202611051805';
+  guardarIconoImagen, camposDeBeneficio,
+} from './beneficios.js?v=202611051807';
+import { ICONOS, svgIcono } from './iconos.js?v=202611051807';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611051805';
+const VERSION = '202611051807';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1678,10 +1679,12 @@ async function pintarEtiquetas() {
 async function pintarBeneficios() {
   pantalla.innerHTML = '<p class="cargando">Cargando beneficios…</p>';
 
-  const [colecciones, etiquetasTienda, revision, config, camposConfig] = await Promise.all([
-    cargarColecciones(), cargarEtiquetasDeTienda(), revisarEstructura(), leerConfig(), camposDeConfig(),
+  const [colecciones, etiquetasTienda, revision, config, camposConfig, camposBenef] = await Promise.all([
+    cargarColecciones(), cargarEtiquetasDeTienda(), revisarEstructura(), leerConfig(),
+    camposDeConfig(), camposDeBeneficio(),
   ]);
   const hayPildora = camposConfig.has('foto_activo');
+  const haySubida = camposBenef.has('icono_imagen');
   const faltaLoNuestro = revision.pendientes.some((p) => p.includes('beneficios'));
   const pildora = config.pildora ?? PILDORA_POR_DEFECTO;
   const { lista: beneficios, error } = await cargarOVacio(cargarBeneficios, !faltaLoNuestro);
@@ -1767,7 +1770,7 @@ async function pintarBeneficios() {
           <div class="sv-benef sv-benef--pildora sv-benef--fila sv-benef--normal" style="--sv-pt:0px;--sv-pb:0px;">
             <ul class="sv-benef__lista" role="list">
               <li class="sv-benef__item" data-previa>
-                <span data-previa-icono>${svgIcono(b.icono, 'sv-benef__icono')}</span>
+                <span data-previa-icono>${iconoHtml(b)}</span>
                 <span class="sv-benef__texto" data-previa-texto>${escapar(b.nombre || 'Sin texto')}</span>
               </li>
             </ul>
@@ -1792,7 +1795,24 @@ async function pintarBeneficios() {
               <option value="">Sin icono</option>
               ${opcionesIcono(b.icono)}
             </select>
+            <p class="ayuda">${b.iconoImagenUrl
+              ? 'Hay una imagen subida, y la imagen manda sobre este icono.'
+              : 'Sigue al color del texto de la píldora.'}</p>
           </div>
+          ${haySubida ? `
+          <div>
+            <label>Icono propio</label>
+            <div class="acciones acciones--envolver">
+              <label class="secundario como-boton">
+                Subir…<input type="file" accept="image/png,image/webp,image/svg+xml" data-subir hidden />
+              </label>
+              ${hayBiblioteca() ? '<button class="secundario" data-biblioteca>Elegir de la biblioteca</button>' : ''}
+              ${b.iconoImagenUrl ? '<button class="secundario secundario--peligro" data-quitar-imagen>Quitar</button>' : ''}
+            </div>
+            <p class="ayuda" data-estado-imagen>${b.iconoImagenUrl
+              ? 'Las imágenes se muestran con sus propios colores.'
+              : 'PNG, WebP o SVG, cuadrado y pequeño (96×96, fondo transparente).'}</p>
+          </div>` : ''}
           <div>
             <label>Se muestra</label>
             <label class="casilla"><input type="checkbox" data-campo="activo" ${b.activo ? 'checked' : ''} /> Activo en la tienda</label>
@@ -1900,7 +1920,11 @@ async function pintarBeneficios() {
 
     const refrescar = () => {
       tarjeta.querySelector('[data-previa-texto]').textContent = valor('nombre') || 'Sin texto';
-      tarjeta.querySelector('[data-previa-icono]').innerHTML = svgIcono(valor('icono'), 'sv-benef__icono');
+      /* Si hay imagen subida manda ella, igual que en la tienda: cambiar el
+       * desplegable no debe dejar la muestra sin icono. */
+      tarjeta.querySelector('[data-previa-icono]').innerHTML = original.iconoImagenUrl
+        ? iconoHtml(original)
+        : svgIcono(valor('icono'), 'sv-benef__icono');
     };
     tarjeta.querySelector('[data-campo="nombre"]').addEventListener('input', refrescar);
     tarjeta.querySelector('[data-campo="icono"]').addEventListener('change', refrescar);
@@ -1943,6 +1967,46 @@ async function pintarBeneficios() {
           boton.disabled = false;
         }
       });
+    });
+
+    const estadoImagen = tarjeta.querySelector('[data-estado-imagen]');
+    const decir = (t) => { if (estadoImagen) estadoImagen.textContent = t; };
+
+    async function aplicarIcono(promesa) {
+      try {
+        const archivo = await promesa;
+        if (!archivo) { decir('Cancelado.'); return; }
+        await guardarIconoImagen(id, archivo.id);
+        avisar('Icono guardado');
+        await ir('beneficios');
+      } catch (error2) {
+        decir('');
+        avisar(error2.message, true);
+      }
+    }
+
+    tarjeta.querySelector('[data-subir]')?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      /* Se limpia enseguida: si no, reintentar con el MISMO archivo no dispara
+       * el evento y el botón parece muerto, justo después de un error. */
+      e.target.value = '';
+      if (!file) return;
+      aplicarIcono(subirArchivo(file, { onPaso: decir }));
+    });
+
+    tarjeta.querySelector('[data-biblioteca]')?.addEventListener('click', () => {
+      decir('Abriendo la biblioteca…');
+      aplicarIcono(elegirDeBiblioteca({ tipo: ['MediaImage', 'GenericFile'] }));
+    });
+
+    tarjeta.querySelector('[data-quitar-imagen]')?.addEventListener('click', async () => {
+      try {
+        await guardarIconoImagen(id, '');
+        avisar('Icono quitado');
+        await ir('beneficios');
+      } catch (error2) {
+        avisar(error2.message, true);
+      }
     });
 
     tarjeta.querySelector('[data-borrar]').addEventListener('click', async (e) => {

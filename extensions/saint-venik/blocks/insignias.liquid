@@ -178,7 +178,7 @@
                       assign texto_b = b.nombre_en.value
                     endif
                   -%}
-                  {%- capture svg_b -%}{%- render 'sv-icono', nombre: b.icono.value -%}{%- endcapture -%}
+                  {%- capture svg_b -%}{%- render 'sv-beneficio-icono', b: b, clase: 'sv-benef-foto__img' -%}{%- endcapture -%}
                   {%- unless pb -%},{%- endunless -%}{%- assign pb = false -%}
                   { "texto": {{ texto_b | json }}, "icono": {{ svg_b | strip | json }} }
                 {%- endif -%}

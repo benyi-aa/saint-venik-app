@@ -6,7 +6,7 @@
  * que los pone el tema; en estructura, orden y visibilidad por idioma, no.
  */
 
-import { svgIcono } from './iconos.js?v=202611051805';
+import { svgIcono } from './iconos.js?v=202611051807';
 
 const ID_YOUTUBE = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/;
 
@@ -160,6 +160,17 @@ export function etiquetaHtml(etiqueta) {
   }</span>`;
 }
 
+/* El icono de un beneficio, con la misma precedencia que el snippet de la
+ * tienda: manda la imagen subida y, si no hay, el dibujado. Si el panel usara
+ * solo svgIcono, una imagen subida no se vería aquí y la previa diría una cosa
+ * y la ficha otra. */
+export function iconoHtml(b, clase = 'sv-benef__icono') {
+  if (b.iconoImagenUrl) {
+    return `<img class="${escapar(clase)} sv-benef__icono--img" src="${escapar(b.iconoImagenUrl)}" alt="" width="24" height="24" />`;
+  }
+  return svgIcono(b.icono, clase);
+}
+
 /* La fila de beneficios tal como sale bajo el botón de compra. */
 export function beneficiosHtml(beneficios) {
   if (!beneficios.length) {
@@ -170,7 +181,7 @@ export function beneficiosHtml(beneficios) {
     <ul class="sv-benef__lista" role="list">
       ${beneficios.map((b) => `
         <li class="sv-benef__item">
-          ${svgIcono(b.icono, 'sv-benef__icono')}
+          ${iconoHtml(b)}
           <span class="sv-benef__texto">${escapar(b.nombre || 'Sin texto')}</span>
         </li>`).join('')}
     </ul>

@@ -20,7 +20,7 @@
 
 {%- if texto != blank -%}
   <li class="sv-benef__item">
-    {%- render 'sv-icono', nombre: b.icono.value -%}
+    {%- render 'sv-beneficio-icono', b: b -%}
     <span class="sv-benef__texto">{{ texto }}</span>
   </li>
 {%- endif -%}

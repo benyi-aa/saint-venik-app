@@ -86,3 +86,11 @@
   .sv-benef .sv-benef__item { font-size: 0.75rem; }
   .sv-benef.sv-benef--pildora .sv-benef__item { padding: 6px 10px; }
 }
+
+/* Icono subido: el mismo hueco que el dibujado. */
+.sv-benef__icono--img {
+  flex: 0 0 auto;
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: contain;
+}

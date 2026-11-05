@@ -15,8 +15,9 @@
 import {
   CAMPOS_COMUNES, aObjetoComun, cargarEntradas, camposComunes, crearEntrada,
   guardarEntrada, borrarEntrada, faltaEstructura, asegurarEstructura,
-  resolverHandles, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611051805';
+  resolverHandles, camposDeTipo, TOPE_ENTRADAS,
+} from './asignacion.js?v=202611051807';
+import { gql } from './api.js?v=202611051807';
 
 export const TIPO_BENEFICIO = 'sv_beneficio';
 export const TOPE_BENEFICIOS = TOPE_ENTRADAS;
@@ -24,7 +25,26 @@ export const TOPE_BENEFICIOS = TOPE_ENTRADAS;
 const CAMPOS_BENEFICIO = [
   ...CAMPOS_COMUNES,
   { key: 'icono', name: 'Icono', type: 'single_line_text_field' },
+  /* Un icono propio subido por el comerciante. Manda sobre el dibujado, igual
+   * que la imagen de la muestra manda sobre el color. Sin validacion de tipo,
+   * porque tiene que aceptar PNG o WebP (MediaImage) y tambien SVG, que para
+   * Shopify es un archivo generico. La clave del icono dibujado se conserva:
+   * quitar la imagen devuelve el de antes sin volver a elegirlo. */
+  { key: 'icono_imagen', name: 'Icono subido', type: 'file_reference' },
 ];
+
+/* El valor crudo de un file_reference es un GID, no una URL. La consulta que
+ * carga las entradas es compartida con las insignias y no pide `reference`
+ * para no pagar ese coste donde no hay archivos, asi que las URL se resuelven
+ * aparte y de una vez. */
+const URLS = `
+  query UrlsDeIconos($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on MediaImage { id image { url } }
+      ... on GenericFile { id url }
+    }
+  }
+`;
 
 /* Lo que vio en el video, listo para sembrar en una tienda nueva. Las dos
  * familias de material: acero y oro llevan los tres de siempre; los brillantes
@@ -38,11 +58,37 @@ export const BENEFICIOS_INICIALES = [
 
 function aBeneficio(entrada) {
   const valor = (clave) => entrada.fields.find((c) => c.key === clave)?.value ?? '';
-  return { ...aObjetoComun(entrada), icono: valor('icono') };
+  return {
+    ...aObjetoComun(entrada),
+    icono: valor('icono'),
+    iconoImagenId: valor('icono_imagen'),
+    iconoImagenUrl: null,
+  };
 }
 
 export async function cargarBeneficios() {
-  return cargarEntradas(TIPO_BENEFICIO, aBeneficio);
+  const lista = await cargarEntradas(TIPO_BENEFICIO, aBeneficio);
+
+  const ids = [...new Set(lista.map((b) => b.iconoImagenId).filter(Boolean))];
+  if (!ids.length) return lista;
+
+  const d = await gql(URLS, { ids });
+  const urls = new Map();
+  for (const n of d.nodes ?? []) {
+    if (n?.id) urls.set(n.id, n.image?.url ?? n.url ?? null);
+  }
+  for (const b of lista) b.iconoImagenUrl = urls.get(b.iconoImagenId) ?? null;
+  return lista;
+}
+
+/* Se guarda sola, como la imagen de la muestra de color: asi subir un icono no
+ * arrastra el resto de los campos a medio editar. Una cadena vacia la quita. */
+export async function guardarIconoImagen(id, idArchivo) {
+  return guardarEntrada(id, [{ key: 'icono_imagen', value: idArchivo ?? '' }]);
+}
+
+export async function camposDeBeneficio() {
+  return camposDeTipo(TIPO_BENEFICIO);
 }
 
 function camposDe(datos) {
