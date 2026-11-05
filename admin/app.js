@@ -1,36 +1,36 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611051620';
+import { estaEmbebida } from './api.js?v=202611051643';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611051620';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202611051620';
+} from './colores.js?v=202611051643';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202611051643';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611051620';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051620';
+} from './productos.js?v=202611051643';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051643';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611051620';
-import { guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml } from './vista-previa.js?v=202611051620';
-import { cargarColecciones, cargarEtiquetasDeTienda, TOPE_REFERENCIAS } from './asignacion.js?v=202611051620';
+} from './guias.js?v=202611051643';
+import { guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml } from './vista-previa.js?v=202611051643';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051643';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611051620';
+} from './etiquetas.js?v=202611051643';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
-} from './beneficios.js?v=202611051620';
-import { ICONOS, svgIcono } from './iconos.js?v=202611051620';
+} from './beneficios.js?v=202611051643';
+import { ICONOS, svgIcono } from './iconos.js?v=202611051643';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611051620';
+const VERSION = '202611051643';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1115,7 +1115,9 @@ const ESPERA_BUSQUEDA = 280;
 function chipsHtml(lista, vacio) {
   if (!lista.length) return `<p class="ayuda">${escapar(vacio)}</p>`;
   return lista.map((x) => `
-    <span class="chip">${escapar(x.titulo)}${x.cuantos === undefined ? '' : ` <span class="chip__n">${x.cuantos}</span>`}<button
+    <span class="chip${esResta(x.titulo) ? ' chip--resta' : ''}">${escapar(x.titulo)}${
+      x.cuantos === undefined ? '' : ` <span class="chip__n">${x.cuantos}</span>`
+    }<button
       type="button" class="chip__x" data-quitar="${escapar(x.id)}"
       aria-label="Quitar ${escapar(x.titulo)}">&times;</button></span>
   `).join('');
@@ -1132,6 +1134,7 @@ function asignacionHtml(estado) {
         <div class="chips" data-chips="etiquetas">${chipsHtml(estado.etiquetas, 'Ninguna.')}</div>
         <input type="search" data-buscar="etiquetas" placeholder="Escribe una etiqueta, p. ej. oro…" />
         <div class="resultados" data-resultados="etiquetas" hidden></div>
+        <p class="ayuda">Con un guión delante, resta: <code>-brillantes</code> quita esos productos de los que ya había.</p>
       </div>
       <div class="asigna__col">
         <label>Colecciones enteras</label>
@@ -1278,11 +1281,17 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
    * puede ser una etiqueta que todavía no tiene ningún producto, o una que la
    * consulta no devolvió. Es texto, no una referencia. */
   conectarBuscador('etiquetas', async (texto) => {
-    const busca = texto.toLowerCase();
+    const resta = esResta(texto);
+    const limpio = sinSigno(texto);
+    const busca = limpio.toLowerCase();
     const suyas = etiquetasTienda.filter((t) => t.toLowerCase().includes(busca));
     const exacta = etiquetasTienda.some((t) => t.toLowerCase() === busca);
-    const lista = exacta ? suyas : [texto, ...suyas];
-    return lista.map((t) => ({ id: `tag:${t}`, titulo: t }));
+    const lista = exacta ? suyas : [limpio, ...suyas];
+    /* Si lo escrito llevaba guión, todo lo que se ofrece resta. */
+    return lista
+      .filter(Boolean)
+      .map((t) => (resta ? `-${t}` : t))
+      .map((t) => ({ id: `tag:${t}`, titulo: t }));
   });
 
   repintar();

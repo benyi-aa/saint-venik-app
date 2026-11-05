@@ -19,7 +19,7 @@
  * y el storefront, en una pagina de coleccion, se fia de la coleccion y no de
  * la cadena.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051620';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051643';
 
 /* Los campos que comparten los dos tipos. Cada pantalla añade los suyos. */
 export const CAMPOS_COMUNES = [
@@ -381,8 +381,22 @@ export function cadenaDeHandles(handles) {
   return `|${limpios.join('|')}|`;
 }
 
+/* Una etiqueta que empieza por guion RESTA en vez de sumar. Hace falta para
+ * el caso real que lo motivo: "resistente al agua" alcanza a todo el oro y
+ * todo el acero MENOS a los brillantes, que no lo son. Sin restar habria que
+ * enumerar a mano las decenas de productos que si lo son, y rehacerlo cada vez
+ * que entra uno nuevo. */
+export function esResta(etiqueta) {
+  return String(etiqueta ?? '').trim().startsWith('-');
+}
+
+export function sinSigno(etiqueta) {
+  return String(etiqueta ?? '').trim().replace(/^-\s*/, '');
+}
+
 export async function resolverHandles({ productos = [], colecciones = [], etiquetas = [] }, onPaso) {
   const todos = productos.flatMap(clavesDe);
+  const fuera = new Set();
   const cortadas = [];
 
   for (const c of colecciones) {
@@ -393,13 +407,22 @@ export async function resolverHandles({ productos = [], colecciones = [], etique
   }
 
   for (const e of etiquetas) {
-    if (onPaso) onPaso(`Leyendo «${e.titulo}»…`);
-    const { handles, incompleto } = await handlesDeEtiqueta(e.titulo);
-    todos.push(...handles);
-    if (incompleto) cortadas.push(e.titulo);
+    const nombre = sinSigno(e.titulo);
+    if (!nombre) continue;
+    if (onPaso) onPaso(`Leyendo «${nombre}»…`);
+    const { handles, incompleto } = await handlesDeEtiqueta(nombre);
+    if (esResta(e.titulo)) {
+      handles.forEach((h) => fuera.add(h));
+    } else {
+      todos.push(...handles);
+    }
+    if (incompleto) cortadas.push(nombre);
   }
 
-  return { cadena: cadenaDeHandles(todos), cortadas };
+  /* La resta se aplica al final, sobre todo lo reunido: asi da igual el orden
+   * en que se escribieran las etiquetas, y tambien quita lo que hubiera
+   * entrado por coleccion o a mano. */
+  return { cadena: cadenaDeHandles(todos.filter((h) => !fuera.has(h))), cortadas };
 }
 
 /* ---------------------------------------------------------------------------

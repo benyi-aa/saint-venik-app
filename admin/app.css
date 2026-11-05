@@ -449,3 +449,11 @@ textarea.codigo {
 }
 
 .resultado__n { float: right; }
+
+/* Una etiqueta que resta se lee de un vistazo: no es lo mismo «brillantes»
+ * que «-brillantes» y la diferencia no puede estar solo en un guión. */
+.chip--resta {
+  border-color: #e0b4b4;
+  background: #fdf3f3;
+  color: #8a2b2b;
+}
