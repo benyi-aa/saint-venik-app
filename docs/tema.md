@@ -272,3 +272,51 @@ que el panel tenga datos.
 
 Vuelta atrás, si hiciera falta: quitar `sv_beneficios` de las plantillas y
 poner `"disabled": true` en la entrada de `insignias` de `settings_data.json`.
+
+## Qué quedó configurado (5 nov 2026)
+
+La asignación se hace por **etiqueta de producto**, que es la taxonomía que las
+dos tiendas ya usan (`oro`, `acero-inox`, y en .com `ice`) y la misma que mira
+el selector de color. Se comprobó antes de elegirla: en .cl las colecciones
+«plateadas» solo cubren 72 de los 101 productos de acero, así que por
+colección habría quedado mal.
+
+### Beneficios
+
+| | alcance en .cl | alcance en .com |
+|---|---|---|
+| Garantía de por vida (1) | oro, acero-inox → 179 | oro, acero-inox, ice → 150 |
+| Resistente al agua y el sudor (2) | oro, acero-inox → 179 | oro, acero-inox → 146 |
+| Hipoalergénico (3) | oro, acero-inox → 179 | oro, acero-inox, ice → 150 |
+| Joyería fina (4) | sin asignar | ice → 4 |
+
+El bloque muestra 3 como mucho y los ordena por posición, así que un producto
+de oro saca 1-2-3 y uno de brillantes saca 1-3-4: el del agua se cae solo y
+entra «Joyería fina», que es justo lo que pedía el vídeo. No hace falta
+excluir nada a mano.
+
+En .cl no hay ninguna etiqueta ni colección que marque los brillantes (ningún
+producto tiene «ice», «zirc» ni «brillante» en etiquetas o título), así que
+«Joyería fina» quedó sin asignar hasta que se decida cuáles son.
+
+### Insignias
+
+«Novedad» / «New», fondo `#111111`, texto `#FFFFFF`, posición 1, asignada a la
+etiqueta `essentials` en las dos tiendas: 34 productos en .com y 34 en .cl.
+
+### El campo `etiquetas` se añadió a mano
+
+Las definiciones ya existían cuando se añadió la asignación por etiqueta, así
+que el campo se creó desde Configuración → Metacampos y metaobjetos, en los
+dos tipos y en las dos tiendas. El nombre tiene que ser **«Etiquetas»** a
+secas: el admin deriva la clave del nombre, y «Etiquetas de producto» habría
+dado `etiquetas_de_producto`, que no es la que lee la app. Pulsar «Crear lo
+que falta» en el panel lo habría hecho igual.
+
+### El emparejamiento es por id, no por handle
+
+Primero se hizo por handle y la tienda en inglés se quedó sin nada: Shopify
+traduce los handles (`anillo-signet` es `signet-ring` en /en/). El campo
+calculado guarda ahora el **id y el handle** de cada producto, y tanto el
+Liquid como el script preguntan primero por el id. Comprobado en las dos
+tiendas y en los dos idiomas.
