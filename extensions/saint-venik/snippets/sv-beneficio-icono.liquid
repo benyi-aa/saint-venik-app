@@ -24,13 +24,16 @@
 
 {%- if sv_img != blank -%}
   {%- comment -%}
-    Un MediaImage se puede pedir ya escalado a la CDN; un SVG es un archivo
-    generico y viaja tal cual, asi que en el panel se pide que sea pequeno.
+    Se distinguen por `url`, que SOLO tiene el archivo generico (un SVG): el
+    objeto de imagen de Liquid no lo expone y hay que pedirle `image_url`, que
+    ademas lo sirve ya escalado por la CDN. Mirar `.image` no sirve: eso es la
+    forma de GraphQL, no la de Liquid, y dejaba un <img src=""> vacio en la
+    ficha justo con un PNG, que es el caso normal.
   {%- endcomment -%}
-  {%- if sv_img.image -%}
-    <img class="{{ sv_clase }}" src="{{ sv_img | image_url: width: 48 }}" alt="" loading="lazy" width="24" height="24" />
-  {%- else -%}
+  {%- if sv_img.url != blank -%}
     <img class="{{ sv_clase }}" src="{{ sv_img.url }}" alt="" loading="lazy" width="24" height="24" />
+  {%- else -%}
+    <img class="{{ sv_clase }}" src="{{ sv_img | image_url: width: 48 }}" alt="" loading="lazy" width="24" height="24" />
   {%- endif -%}
 {%- else -%}
   {%- render 'sv-icono', nombre: b.icono.value -%}

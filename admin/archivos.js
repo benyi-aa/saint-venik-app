@@ -10,7 +10,7 @@
  * Por eso se comprueba el host ANTES de intentarlo y, si no es de los conocidos,
  * se explica que paso en vez de dejar un error mudo.
  */
-import { gql, comprobarErrores } from './api.js?v=202611051807';
+import { gql, comprobarErrores } from './api.js?v=202611051827';
 
 const HOSTS_CON_CORS = /(storage\.googleapis\.com|s3\.amazonaws\.com)$/;
 
@@ -52,7 +52,8 @@ const espera = (ms) => new Promise((r) => setTimeout(r, ms));
  * tiene URL, y guardarlo asi deja una muestra en blanco. */
 async function esperarListo(id, intentos = 25) {
   for (let i = 0; i < intentos; i++) {
-    const { node } = await gql(ESTADO, { id });
+    /* Es un sondeo: la gracia es que cada vuelta vea algo distinto. */
+    const { node } = await gql(ESTADO, { id }, { sinMemoria: true });
     if (node?.fileStatus === 'READY') return node;
     if (node?.fileStatus === 'FAILED') throw new Error('Shopify no pudo procesar el archivo.');
     await espera(1000);

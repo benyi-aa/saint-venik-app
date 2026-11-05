@@ -1,42 +1,42 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida, enUnaPasada } from './api.js?v=202611051807';
+import { estaEmbebida } from './api.js?v=202611051827';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611051807';
+} from './colores.js?v=202611051827';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-} from './config.js?v=202611051807';
+} from './config.js?v=202611051827';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611051807';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051807';
+} from './productos.js?v=202611051827';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051827';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611051807';
+} from './guias.js?v=202611051827';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611051807';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051807';
+} from './vista-previa.js?v=202611051827';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051827';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611051807';
+} from './etiquetas.js?v=202611051827';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611051807';
-import { ICONOS, svgIcono } from './iconos.js?v=202611051807';
+} from './beneficios.js?v=202611051827';
+import { ICONOS, svgIcono } from './iconos.js?v=202611051827';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611051807';
+const VERSION = '202611051827';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1129,6 +1129,7 @@ let oyentesDeCierre = false;
 /* Sube con cada pintada. Lo que termina tarde (el recálculo) compara antes de
  * tocar nada: si ya no es su pantalla, se calla. */
 let pintado = 0;
+const pasesVivos = new Set();
 
 function cerrarBuscadores(menos) {
   cerradores.forEach((cerrar) => { if (cerrar !== menos) cerrar(); });
@@ -1148,6 +1149,13 @@ function ponerOyentesDeCierre() {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') cerrarBuscadores();
+  });
+
+  /* Con el tabulador no hay pointerdown: sin esto la lista se quedaba flotando
+   * sobre Guardar y el siguiente toque añadía algo que nadie pidió. */
+  document.addEventListener('focusin', (e) => {
+    const columna = e.target.closest ? e.target.closest('.asigna__col') : null;
+    cerradores.forEach((cerrar) => { if (cerrar.columna !== columna) cerrar(); });
   });
 }
 
@@ -1379,32 +1387,33 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
 /* Las colecciones cambian sin avisar a la app: entra un producto nuevo a «Oro»
  * y la cadena de handles se queda vieja. Recalcular al abrir la pantalla es el
  * momento natural, porque es justo cuando alguien va a mirar si está bien. */
-async function recalcular(lista, sincronizar) {
-  return enUnaPasada(() => recalcularTodas(lista, sincronizar));
-}
-
-/* Envuelta en enUnaPasada: los cuatro beneficios comparten las mismas tres
- * etiquetas, y sin memoria cada uno las resolvía otra vez. Eran trece páginas
- * de productos donde bastan cuatro, y eran las que agotaban el cupo de Shopify
- * y dejaban la pantalla esperando segundos a que se recargara. */
-async function recalcularTodas(lista, sincronizar) {
+/* `pase` es el testigo de la pantalla que lo lanzó: si deja de valer —porque
+ * se guardó a mano, se borró algo o se cambió de pantalla— el recálculo para.
+ * Antes seguía y pisaba los handles que el guardado acababa de escribir.
+ *
+ * El cache es de esta pasada y se pasa a mano: una memoria global tenía
+ * abierta la puerta durante segundos y hacía que lo que se leyera en ese rato
+ * (por ejemplo al pulsar «Crear lo que falta») viera datos de antes. */
+async function recalcular(lista, sincronizar, pase) {
+  const cache = new Map();
   let cambiadas = 0;
   const cortadas = new Set();
   for (const item of lista) {
+    if (pase && !pase.vivo) break;
     /* Se recalculan todas, no solo las que tienen colecciones. Una entrada de
      * productos sueltos no cuesta ni una consulta (los handles ya están en
      * memoria), y así se arregla sola si quedó a medias: un producto renombrado,
      * o un guardado que escribió las referencias y se cayó antes de los
      * handles. */
     try {
-      const r = await sincronizar(item);
+      const r = await sincronizar(item, undefined, cache);
       if (r.cambio) cambiadas += 1;
       r.cortadas.forEach((c) => cortadas.add(c));
     } catch (error) {
-      avisar(`No se pudo recalcular «${item.nombre}»: ${error.message}`, true);
+      if (!pase || pase.vivo) avisar(`No se pudo recalcular «${item.nombre}»: ${error.message}`, true);
     }
   }
-  if (cortadas.size) {
+  if (cortadas.size && (!pase || pase.vivo)) {
     avisar(`Estas colecciones tienen más productos de los que la app puede leer de una vez, así que faltan algunos: ${[...cortadas].join(', ')}.`, true);
   }
   return cambiadas;
@@ -1433,6 +1442,11 @@ async function cargarOVacio(cargar, hayEstructura) {
 }
 
 async function pintarEtiquetas() {
+  /* Se captura ANTES de cargar nada: si se cambia de pantalla mientras esto
+   * espera a Shopify, lo que llegue tarde no debe pintar ni avisar. */
+  const miPintado = pintado;
+  const pase = { vivo: true };
+  pasesVivos.add(pase);
   pantalla.innerHTML = '<p class="cargando">Cargando insignias…</p>';
 
   const [colecciones, etiquetasTienda, revision, campos] = await Promise.all([
@@ -1443,10 +1457,11 @@ async function pintarEtiquetas() {
    * ofrecerlos solo serviría para que guardar fallara. */
   const hayEstilo = campos.has('opacidad');
   const { lista: etiquetas, error } = await cargarOVacio(cargarEtiquetas, !faltaLoNuestro);
-  const miPintado = pintado;
 
   const muestras = () => etiquetas.filter((e) => e.activo).map(etiquetaHtml).join('')
     || '<p class="sv-guia__vacio">Ninguna insignia activa.</p>';
+
+  if (miPintado !== pintado) return;
 
   pantalla.innerHTML = `
     <h1>Insignias</h1>
@@ -1596,10 +1611,15 @@ async function pintarEtiquetas() {
           productos: estado.productos,
           colecciones: estado.colecciones,
         };
+        /* El recálculo en segundo plano escribiría los handles de antes
+         * encima de estos. */
+        pase.vivo = false;
         await guardarEtiqueta(id, datos);
         await sincronizarEtiqueta(Object.assign(original, datos));
         estado.sucio = false;
-        conex.repintar();
+        /* sincronizar acaba de recalcular los handles de esta entrada, así que
+         * el «alcanza a N» ya se puede poner al día de verdad. */
+        conex.alcanceAhora(alcanceEtiqueta(original));
         refrescarMuestras();
         avisar('Insignia guardada');
       } catch (error2) {
@@ -1612,6 +1632,7 @@ async function pintarEtiquetas() {
 
     tarjeta.querySelectorAll('[data-mover]').forEach((boton) => {
       boton.addEventListener('click', async () => {
+        pase.vivo = false;
         boton.disabled = true;
         try {
           await moverEntrada(etiquetas, id, boton.dataset.mover, guardarEtiqueta);
@@ -1625,6 +1646,7 @@ async function pintarEtiquetas() {
 
     tarjeta.querySelector('[data-borrar]').addEventListener('click', async (e) => {
       if (!confirm(`¿Eliminar la insignia «${original.nombre}»?`)) return;
+      pase.vivo = false;
       e.target.disabled = true;
       try {
         await borrarEtiqueta(id);
@@ -1661,8 +1683,8 @@ async function pintarEtiquetas() {
    * «Cargando…» durante todas las consultas aunque lo que se dibuja ya
    * estuviera en memoria. Ahora la pantalla aparece y los números se ponen al
    * día solos cuando llegan. */
-  recalcular(etiquetas, sincronizarEtiqueta).then((cambiadas) => {
-    if (miPintado !== pintado) return;
+  recalcular(etiquetas, sincronizarEtiqueta, pase).then((cambiadas) => {
+    if (miPintado !== pintado || !pase.vivo) return;
     etiquetas.forEach((item) => conexiones.get(item.id)?.alcanceAhora(alcanceEtiqueta(item)));
     const aviso = pantalla.querySelector('[data-aviso-recalculo]');
     if (aviso && cambiadas) {
@@ -1677,6 +1699,11 @@ async function pintarEtiquetas() {
 }
 
 async function pintarBeneficios() {
+  /* Se captura ANTES de cargar nada: si se cambia de pantalla mientras esto
+   * espera a Shopify, lo que llegue tarde no debe pintar ni avisar. */
+  const miPintado = pintado;
+  const pase = { vivo: true };
+  pasesVivos.add(pase);
   pantalla.innerHTML = '<p class="cargando">Cargando beneficios…</p>';
 
   const [colecciones, etiquetasTienda, revision, config, camposConfig, camposBenef] = await Promise.all([
@@ -1688,13 +1715,14 @@ async function pintarBeneficios() {
   const faltaLoNuestro = revision.pendientes.some((p) => p.includes('beneficios'));
   const pildora = config.pildora ?? PILDORA_POR_DEFECTO;
   const { lista: beneficios, error } = await cargarOVacio(cargarBeneficios, !faltaLoNuestro);
-  const miPintado = pintado;
 
   const opcionesIcono = (elegido) => ICONOS.map((i) => `
     <option value="${escapar(i.clave)}" ${i.clave === elegido ? 'selected' : ''}>${escapar(i.rotulo)}</option>
   `).join('');
 
   const muestras = () => beneficiosHtml(beneficios.filter((b) => b.activo));
+
+  if (miPintado !== pintado) return;
 
   pantalla.innerHTML = `
     <h1>Beneficios</h1>
@@ -1942,10 +1970,11 @@ async function pintarBeneficios() {
           productos: estado.productos,
           colecciones: estado.colecciones,
         };
+        pase.vivo = false;
         await guardarBeneficio(id, datos);
         await sincronizarBeneficio(Object.assign(original, datos));
         estado.sucio = false;
-        conex.repintar();
+        conex.alcanceAhora(alcanceBeneficio(original));
         refrescarMuestras();
         avisar('Beneficio guardado');
       } catch (error2) {
@@ -1958,6 +1987,7 @@ async function pintarBeneficios() {
 
     tarjeta.querySelectorAll('[data-mover]').forEach((boton) => {
       boton.addEventListener('click', async () => {
+        pase.vivo = false;
         boton.disabled = true;
         try {
           await moverEntrada(beneficios, id, boton.dataset.mover, guardarBeneficio);
@@ -2011,6 +2041,7 @@ async function pintarBeneficios() {
 
     tarjeta.querySelector('[data-borrar]').addEventListener('click', async (e) => {
       if (!confirm(`¿Eliminar el beneficio «${original.nombre}»?`)) return;
+      pase.vivo = false;
       e.target.disabled = true;
       try {
         await borrarBeneficio(id);
@@ -2046,8 +2077,8 @@ async function pintarBeneficios() {
    * «Cargando…» durante todas las consultas aunque lo que se dibuja ya
    * estuviera en memoria. Ahora la pantalla aparece y los números se ponen al
    * día solos cuando llegan. */
-  recalcular(beneficios, sincronizarBeneficio).then((cambiadas) => {
-    if (miPintado !== pintado) return;
+  recalcular(beneficios, sincronizarBeneficio, pase).then((cambiadas) => {
+    if (miPintado !== pintado || !pase.vivo) return;
     beneficios.forEach((item) => conexiones.get(item.id)?.alcanceAhora(alcanceBeneficio(item)));
     const aviso = pantalla.querySelector('[data-aviso-recalculo]');
     if (aviso && cambiadas) {
@@ -2072,6 +2103,8 @@ const PANTALLAS = {
 
 async function ir(nombre) {
   pintado += 1;
+  pasesVivos.forEach((p) => { p.vivo = false; });
+  pasesVivos.clear();
 
   /* La pantalla anterior se tira entera: sus cajas de resultados ya no existen
    * y sus cerradores tampoco deben seguir en la lista. */

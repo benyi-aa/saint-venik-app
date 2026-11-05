@@ -16,8 +16,8 @@ import {
   CAMPOS_COMUNES, aObjetoComun, cargarEntradas, camposComunes, crearEntrada,
   guardarEntrada, borrarEntrada, faltaEstructura, asegurarEstructura,
   resolverHandles, camposDeTipo, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611051807';
-import { gql } from './api.js?v=202611051807';
+} from './asignacion.js?v=202611051827';
+import { gql } from './api.js?v=202611051827';
 
 export const TIPO_BENEFICIO = 'sv_beneficio';
 export const TOPE_BENEFICIOS = TOPE_ENTRADAS;
@@ -72,12 +72,20 @@ export async function cargarBeneficios() {
   const ids = [...new Set(lista.map((b) => b.iconoImagenId).filter(Boolean))];
   if (!ids.length) return lista;
 
-  const d = await gql(URLS, { ids });
-  const urls = new Map();
-  for (const n of d.nodes ?? []) {
-    if (n?.id) urls.set(n.id, n.image?.url ?? n.url ?? null);
+  /* Si esto falla, los beneficios se enseñan igual y sin icono propio. Antes
+   * tumbaba la pantalla entera y parecia que no habia ningun beneficio. */
+  try {
+    const urls = new Map();
+    for (let i = 0; i < ids.length; i += 100) {
+      const d = await gql(URLS, { ids: ids.slice(i, i + 100) });
+      for (const n of d.nodes ?? []) {
+        if (n?.id) urls.set(n.id, n.image?.url ?? n.url ?? null);
+      }
+    }
+    for (const b of lista) b.iconoImagenUrl = urls.get(b.iconoImagenId) ?? null;
+  } catch (error) {
+    /* sin urls: cada beneficio cae en su icono dibujado */
   }
-  for (const b of lista) b.iconoImagenUrl = urls.get(b.iconoImagenId) ?? null;
   return lista;
 }
 
@@ -112,8 +120,8 @@ export async function borrarBeneficio(id) {
   return borrarEntrada(id);
 }
 
-export async function sincronizar(beneficio, onPaso) {
-  const { cadena, cortadas } = await resolverHandles(beneficio, onPaso);
+export async function sincronizar(beneficio, onPaso, cache) {
+  const { cadena, cortadas } = await resolverHandles(beneficio, onPaso, cache);
   if (cadena === beneficio.handles) return { cambio: false, cortadas };
   await guardarEntrada(beneficio.id, [{ key: 'handles', value: cadena }]);
   beneficio.handles = cadena;

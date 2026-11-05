@@ -46,6 +46,11 @@ function esperaPorCupo(coste) {
  * asi que la siguiente pasada vuelve a preguntar. */
 let memoria = null;
 
+/* Solo para tramos CORTOS y sin interaccion de por medio: mientras la memoria
+ * esta viva, cualquier lectura que ocurra en el mismo hueco queda memorizada,
+ * aunque no sea de este tramo. Por eso el recalculo en segundo plano NO la
+ * usa: tenia la memoria abierta durante segundos, y pulsar «Crear lo que
+ * falta» en ese rato leia la foto de antes de crear los campos. */
 export async function enUnaPasada(fn) {
   const mia = memoria === null;
   if (mia) memoria = new Map();
@@ -59,13 +64,25 @@ export async function enUnaPasada(fn) {
 /* Devuelve `data`, o lanza con el detalle util. GraphQL responde 200 aunque
  * haya fallado, y ademas cada mutacion trae sus propios userErrors, asi que hay
  * que mirar en tres sitios distintos antes de dar algo por bueno. */
-export async function gql(query, variables = {}) {
-  const sePuedeMemorizar = memoria !== null && !/\bmutation\b/.test(query);
+export async function gql(query, variables = {}, opciones = {}) {
+  /* Una escritura deja vieja cualquier lectura ya memorizada. */
+  if (/\bmutation\b/.test(query)) {
+    if (memoria) memoria.clear();
+    return pedirConReintentos(query, variables);
+  }
+
+  const sePuedeMemorizar = memoria !== null && !opciones.sinMemoria;
   const clave = sePuedeMemorizar ? `${query}|${JSON.stringify(variables)}` : null;
   if (clave && memoria.has(clave)) return memoria.get(clave);
 
   const promesa = pedirConReintentos(query, variables);
-  if (clave) memoria.set(clave, promesa);
+  if (clave) {
+    /* Una promesa rechazada no se guarda: si no, un THROTTLED pasajero tumbaria
+     * de golpe a todos los que compartan esa consulta y no habria reintento. */
+    const mapa = memoria;
+    mapa.set(clave, promesa.catch((error) => { mapa.delete(clave); throw error; }));
+    return mapa.get(clave);
+  }
   return promesa;
 }
 

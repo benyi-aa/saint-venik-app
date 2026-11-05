@@ -19,7 +19,7 @@
  * y el storefront, en una pagina de coleccion, se fia de la coleccion y no de
  * la cadena.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051807';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051827';
 
 /* Los campos que comparten los dos tipos. Cada pantalla añade los suyos. */
 export const CAMPOS_COMUNES = [
@@ -314,18 +314,19 @@ export function olvidarListas() {
 }
 
 export async function cargarEtiquetasDeTienda() {
-  return conCacheCorto('etiquetas', async () => traerEtiquetasDeTienda());
+  try {
+    return await conCacheCorto('etiquetas', traerEtiquetasDeTienda);
+  } catch (error) {
+    /* El fallo NO se guarda: si se cacheara, un THROTTLED pasajero dejaria el
+     * buscador sin sugerencias durante cinco minutos. El campo sigue sirviendo
+     * escribiendo la etiqueta a mano, que es texto. */
+    return [];
+  }
 }
 
 async function traerEtiquetasDeTienda() {
-  try {
-    const d = await gql(ETIQUETAS_TIENDA);
-    return (d.productTags?.edges ?? []).map((e) => e.node).filter(Boolean).sort();
-  } catch (error) {
-    /* Si la consulta no esta disponible, el campo sigue sirviendo escribiendo
-     * la etiqueta a mano: es texto. */
-    return [];
-  }
+  const d = await gql(ETIQUETAS_TIENDA);
+  return (d.productTags?.edges ?? []).map((e) => e.node).filter(Boolean).sort();
 }
 
 export async function handlesDeEtiqueta(etiqueta) {
@@ -421,14 +422,25 @@ export function sinSigno(etiqueta) {
   return String(etiqueta ?? '').trim().replace(/^-\s*/, '');
 }
 
-export async function resolverHandles({ productos = [], colecciones = [], etiquetas = [] }, onPaso) {
+/* Las cuatro entradas comparten las mismas etiquetas, asi que sin esto la
+ * misma consulta se repetia una vez por entrada: trece paginas de productos
+ * donde bastan cuatro, y eran las que agotaban el cupo de Shopify. El cache lo
+ * crea quien lanza la pasada y muere con ella; aqui no hay nada global, que es
+ * lo que hacia que una escritura de otra parte leyera datos viejos. */
+function conCache(cache, clave, traer) {
+  if (!cache) return traer();
+  if (!cache.has(clave)) cache.set(clave, traer().catch((error) => { cache.delete(clave); throw error; }));
+  return cache.get(clave);
+}
+
+export async function resolverHandles({ productos = [], colecciones = [], etiquetas = [] }, onPaso, cache) {
   const todos = productos.flatMap(clavesDe);
   const fuera = new Set();
   const cortadas = [];
 
   for (const c of colecciones) {
     if (onPaso) onPaso(`Leyendo «${c.titulo}»…`);
-    const { handles, incompleto } = await handlesDeColeccion(c.id);
+    const { handles, incompleto } = await conCache(cache, `col:${c.id}`, () => handlesDeColeccion(c.id));
     todos.push(...handles);
     if (incompleto) cortadas.push(c.titulo);
   }
@@ -437,7 +449,9 @@ export async function resolverHandles({ productos = [], colecciones = [], etique
     const nombre = sinSigno(e.titulo);
     if (!nombre) continue;
     if (onPaso) onPaso(`Leyendo «${nombre}»…`);
-    const { handles, incompleto } = await handlesDeEtiqueta(nombre);
+    /* La clave va sin signo: «oro» y «-oro» son la misma consulta, la resta se
+     * aplica despues. */
+    const { handles, incompleto } = await conCache(cache, `tag:${nombre}`, () => handlesDeEtiqueta(nombre));
     if (esResta(e.titulo)) {
       handles.forEach((h) => fuera.add(h));
     } else {

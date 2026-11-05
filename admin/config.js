@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611051807';
+import { gql, comprobarErrores } from './api.js?v=202611051827';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
@@ -223,7 +223,11 @@ export async function leerConfig() {
 /* Un numero que puede valer 0 no se lee con `||`. Y una entrada vieja sin el
  * campo tiene que leerse con el valor de fabrica, no con cero. */
 function numero(valor, defecto) {
-  return valor === '' || valor === undefined ? defecto : Number(valor);
+  /* null tambien: un campo creado pero nunca rellenado llega asi, y sin esto
+   * toda la pildora se leeria con ceros en vez de con sus valores de fabrica. */
+  if (valor === '' || valor === undefined || valor === null) return defecto;
+  const n = Number(valor);
+  return Number.isFinite(n) ? n : defecto;
 }
 
 function aPildora(campos) {

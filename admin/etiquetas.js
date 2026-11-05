@@ -12,7 +12,7 @@ import {
   CAMPOS_COMUNES, aObjetoComun, cargarEntradas, camposComunes, crearEntrada,
   guardarEntrada, borrarEntrada, faltaEstructura, asegurarEstructura,
   resolverHandles, camposDeTipo, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611051807';
+} from './asignacion.js?v=202611051827';
 
 export const TIPO_ETIQUETA = 'sv_etiqueta';
 export const TOPE_ETIQUETAS = TOPE_ENTRADAS;
@@ -39,7 +39,9 @@ const CAMPOS_ETIQUETA = [
 /* Un numero que puede valer 0 no se puede leer con `|| defecto`: el 0 es un
  * valor legitimo y se convertiria en el defecto. Vacio si es "sin decidir". */
 function numero(valor, defecto) {
-  return valor === '' || valor === undefined ? defecto : Number(valor);
+  if (valor === '' || valor === undefined || valor === null) return defecto;
+  const n = Number(valor);
+  return Number.isFinite(n) ? n : defecto;
 }
 
 function aEtiqueta(entrada) {
@@ -76,13 +78,13 @@ export async function crearEtiqueta(datos, cuantasHay) {
   if (cuantasHay >= TOPE_ETIQUETAS) {
     throw new Error(`No se pueden tener más de ${TOPE_ETIQUETAS} insignias.`);
   }
+  /* Sin borde ni opacidad a menos que vengan: hasta que la tienda tenga esos
+   * campos, escribirlos haria fallar la creacion entera. Sin valor se leen con
+   * el de fabrica igual. */
   return crearEntrada(TIPO_ETIQUETA, camposDe({
     activo: true,
     fondo: FONDO_POR_DEFECTO,
     texto: TEXTO_POR_DEFECTO,
-    borde: BORDE_POR_DEFECTO,
-    grosor: GROSOR_POR_DEFECTO,
-    opacidad: OPACIDAD_POR_DEFECTO,
     ...datos,
   }));
 }
@@ -94,8 +96,8 @@ export async function borrarEtiqueta(id) {
 /* Recalcula la cadena de handles de una insignia y la guarda si cambio.
  * Devuelve si cambio (para poder decir cuantas se actualizaron sin contar las
  * que no hacia falta tocar) y que colecciones se quedaron a medio leer. */
-export async function sincronizar(etiqueta, onPaso) {
-  const { cadena, cortadas } = await resolverHandles(etiqueta, onPaso);
+export async function sincronizar(etiqueta, onPaso, cache) {
+  const { cadena, cortadas } = await resolverHandles(etiqueta, onPaso, cache);
   if (cadena === etiqueta.handles) return { cambio: false, cortadas };
   await guardarEntrada(etiqueta.id, [{ key: 'handles', value: cadena }]);
   etiqueta.handles = cadena;
