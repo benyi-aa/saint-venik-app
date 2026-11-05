@@ -149,6 +149,7 @@
       "esquinaTarjeta": {{ block.settings.esquina_tarjeta | json }},
       "esquinaFicha": {{ block.settings.esquina_ficha | json }},
       "fotos": {{ block.settings.benef_en_fotos | json }},
+      "esquinaFoto": {{ block.settings.benef_esquina | json }},
       "maxFotos": {{ block.settings.benef_cuantas_fotos }},
       "maximo": {{ block.settings.maximo }},
       "editor": {{ request.design_mode | json }}
@@ -252,6 +253,17 @@
       "id": "benef_en_fotos",
       "label": "Mostrar los beneficios sobre las fotos",
       "default": true
+    },
+    {
+      "type": "select",
+      "id": "benef_esquina",
+      "label": "Esquina sobre la foto",
+      "info": "En la primera foto la insignia ya ocupa arriba a la derecha; si eliges esa esquina, el beneficio se coloca debajo.",
+      "options": [
+        { "value": "arriba-derecha", "label": "Arriba a la derecha" },
+        { "value": "abajo-izquierda", "label": "Abajo a la izquierda" }
+      ],
+      "default": "arriba-derecha"
     },
     {
       "type": "range",

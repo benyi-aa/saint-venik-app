@@ -175,7 +175,17 @@
       destino.dataset[MARCA_FOTO] = '1';
 
       var pildora = document.createElement('span');
-      pildora.className = 'sv-benef-foto';
+      var esquina = datos.esquinaFoto || 'arriba-derecha';
+      pildora.className = 'sv-benef-foto sv-benef-foto--' + esquina;
+
+      /* En la primera foto la insignia ya ocupa arriba a la derecha: la
+       * pildora se coloca debajo, no encima. */
+      if (esquina === 'arriba-derecha') {
+        var suya = destino.querySelector('.sv-tags--ficha');
+        if (suya && suya.offsetHeight) {
+          pildora.style.top = 'calc(var(--sv-foto-lado, 10px) + ' + (suya.offsetHeight + 6) + 'px)';
+        }
+      }
       /* El svg lo genero el snippet de la extension, no el comerciante: por eso
        * va por innerHTML. El texto, que si es suyo, va por textContent. */
       pildora.innerHTML = lista[i].icono || '';

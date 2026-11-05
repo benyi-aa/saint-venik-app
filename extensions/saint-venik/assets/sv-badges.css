@@ -53,13 +53,10 @@
   }
 }
 
-/* Beneficios sobre las fotos de la ficha. Van abajo a la izquierda, como en la
- * referencia, y encima del contenedor de cada foto, que es el unico eslabon de
- * la cadena sin overflow:hidden. */
+/* Beneficios sobre las fotos de la ficha, encima del contenedor de cada foto,
+ * que es el unico eslabon de la cadena sin overflow:hidden. */
 .sv-benef-foto {
   position: absolute;
-  left: var(--sv-foto-lado, 10px);
-  bottom: var(--sv-foto-lado, 10px);
   z-index: 3;
   display: inline-flex;
   align-items: center;
@@ -73,6 +70,16 @@
   line-height: 1.2;
   /* La foto se puede ampliar de un clic: la píldora no debe comérselo. */
   pointer-events: none;
+}
+
+.sv-benef-foto--arriba-derecha {
+  top: var(--sv-foto-lado, 10px);
+  right: var(--sv-foto-lado, 10px);
+}
+
+.sv-benef-foto--abajo-izquierda {
+  bottom: var(--sv-foto-lado, 10px);
+  left: var(--sv-foto-lado, 10px);
 }
 
 .sv-benef-foto svg {

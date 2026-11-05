@@ -16,7 +16,7 @@ import {
   CAMPOS_COMUNES, aObjetoComun, cargarEntradas, camposComunes, crearEntrada,
   guardarEntrada, borrarEntrada, faltaEstructura, asegurarEstructura,
   resolverHandles, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611051725';
+} from './asignacion.js?v=202611051727';
 
 export const TIPO_BENEFICIO = 'sv_beneficio';
 export const TOPE_BENEFICIOS = TOPE_ENTRADAS;
