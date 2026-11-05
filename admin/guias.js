@@ -26,14 +26,14 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051729';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611051729';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611051729';
-import { copiarArchivo } from './archivos.js?v=202611051729';
-import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611051729';
+import { gql, comprobarErrores, capacidadActiva, enUnaPasada } from './api.js?v=202611051801';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611051801';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611051801';
+import { copiarArchivo } from './archivos.js?v=202611051801';
+import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611051801';
 import {
   faltaEstructuraBeneficios, asegurarEstructuraBeneficios, sembrarBeneficios,
-} from './beneficios.js?v=202611051729';
+} from './beneficios.js?v=202611051801';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
@@ -192,48 +192,53 @@ async function faltanOpcionesDeTipo() {
 /* La estructura no son solo los tipos de contenido: son tambien sus campos.
  * Mirar solo los tipos dejaba al panel ofreciendo un campo que en la tienda no
  * existia, y el fallo aparecia al guardar, que es tarde y desconcierta. */
+/* La llaman casi todas las pantallas, asi que lo que tarde se nota en todas.
+ *
+ * Las comprobaciones son independientes: se lanzan a la vez en vez de una
+ * detras de otra, y van envueltas en enUnaPasada para que las consultas
+ * repetidas (la definicion de bloque_guia hacia falta en tres sitios, la de la
+ * configuracion en dos) se pidan una sola vez. De doce idas y vueltas en serie
+ * a media docena a la vez. */
 export async function revisarEstructura() {
-  const estado = await estadoEstructura();
-  const pendientes = [];
+  return enUnaPasada(async () => {
+    const estado = await estadoEstructura();
 
-  if (!estado.bloque) pendientes.push('El tipo de contenido de los bloques.');
-  if (!estado.guia) pendientes.push('El tipo de contenido de las guías.');
+    const [
+      faltanBloque, faltanGuia, hayConfig, faltanConfig,
+      deColor, deEtiquetas, deBeneficios, malBloque, malGuia, faltanTipos,
+    ] = await Promise.all([
+      estado.bloque ? faltanCampos(TIPO_BLOQUE, CAMPOS_BLOQUE) : [],
+      estado.guia ? faltanCampos(TIPO_GUIA, CAMPOS_GUIA) : [],
+      existeConfig(),
+      faltanCamposConfig(),
+      /* Los colores también son estructura. En saintvenik.com existen porque se
+       * crearon a mano, pero la app tiene que poder montarlos en cualquier tienda. */
+      faltaEstructuraColor(),
+      /* Las insignias y los beneficios también: una tienda nueva tiene que
+       * poder montarlos desde el mismo botón, sin tocar el admin. */
+      faltaEstructuraEtiquetas(),
+      faltaEstructuraBeneficios(),
+      problemasDeDefinicion(TIPO_BLOQUE, CAMPOS_BLOQUE),
+      problemasDeDefinicion(TIPO_GUIA, CAMPOS_GUIA),
+      estado.bloque ? faltanOpcionesDeTipo() : [],
+    ]);
 
-  if (estado.bloque) {
-    const faltan = await faltanCampos(TIPO_BLOQUE, CAMPOS_BLOQUE);
-    if (faltan.length) pendientes.push(`Campos que faltan en los bloques: ${faltan.join(', ')}.`);
-  }
-  if (estado.guia) {
-    const faltan = await faltanCampos(TIPO_GUIA, CAMPOS_GUIA);
-    if (faltan.length) pendientes.push(`Campos que faltan en las guías: ${faltan.join(', ')}.`);
-  }
+    /* El orden importa: es el que ve la persona en la tarjeta de pendientes. */
+    const pendientes = [];
+    if (!estado.bloque) pendientes.push('El tipo de contenido de los bloques.');
+    if (!estado.guia) pendientes.push('El tipo de contenido de las guías.');
+    if (faltanBloque.length) pendientes.push(`Campos que faltan en los bloques: ${faltanBloque.join(', ')}.`);
+    if (faltanGuia.length) pendientes.push(`Campos que faltan en las guías: ${faltanGuia.join(', ')}.`);
+    if (!hayConfig) {
+      pendientes.push('El sitio donde se guarda la configuración.');
+    } else if (faltanConfig.length) {
+      pendientes.push(`Campos de configuración que faltan: ${faltanConfig.join(', ')}.`);
+    }
+    pendientes.push(...deColor, ...deEtiquetas, ...deBeneficios, ...malBloque, ...malGuia);
+    if (faltanTipos.length) pendientes.push(`Tipos de bloque que faltan: ${faltanTipos.join(', ')}.`);
 
-  if (!(await existeConfig())) {
-    pendientes.push('El sitio donde se guarda la configuración.');
-  } else {
-    const faltan = await faltanCamposConfig();
-    if (faltan.length) pendientes.push(`Campos de configuración que faltan: ${faltan.join(', ')}.`);
-  }
-
-  /* Los colores también son estructura. En saintvenik.com existen porque se
-   * crearon a mano, pero la app tiene que poder montarlos en cualquier tienda. */
-  pendientes.push(...(await faltaEstructuraColor()));
-
-  /* Las insignias y los beneficios también son estructura: una tienda nueva
-   * tiene que poder montarlos desde el mismo botón, sin tocar el admin. */
-  pendientes.push(...(await faltaEstructuraEtiquetas()));
-  pendientes.push(...(await faltaEstructuraBeneficios()));
-
-  for (const [tipo, esperados] of [[TIPO_BLOQUE, CAMPOS_BLOQUE], [TIPO_GUIA, CAMPOS_GUIA]]) {
-    pendientes.push(...(await problemasDeDefinicion(tipo, esperados)));
-  }
-
-  if (estado.bloque) {
-    const faltan = await faltanOpcionesDeTipo();
-    if (faltan.length) pendientes.push(`Tipos de bloque que faltan: ${faltan.join(', ')}.`);
-  }
-
-  return { estado, pendientes };
+    return { estado, pendientes };
+  });
 }
 
 export async function estadoEstructura() {

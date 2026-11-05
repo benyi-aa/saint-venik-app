@@ -1,36 +1,36 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611051729';
+import { estaEmbebida, enUnaPasada } from './api.js?v=202611051801';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611051729';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202611051729';
+} from './colores.js?v=202611051801';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202611051801';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611051729';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051729';
+} from './productos.js?v=202611051801';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051801';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611051729';
-import { guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml } from './vista-previa.js?v=202611051729';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051729';
+} from './guias.js?v=202611051801';
+import { guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml } from './vista-previa.js?v=202611051801';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051801';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611051729';
+} from './etiquetas.js?v=202611051801';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
-} from './beneficios.js?v=202611051729';
-import { ICONOS, svgIcono } from './iconos.js?v=202611051729';
+} from './beneficios.js?v=202611051801';
+import { ICONOS, svgIcono } from './iconos.js?v=202611051801';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611051729';
+const VERSION = '202611051801';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1112,6 +1112,39 @@ async function pintarProductos() {
 
 const ESPERA_BUSQUEDA = 280;
 
+/* Cada tarjeta tiene tres buscadores y puede haber 25 tarjetas: setenta y cinco
+ * cajas de resultados. Si cada una pusiera su propio oyente en document, cada
+ * repintado dejaria setenta y cinco mas clavados. Asi que el oyente es UNO, se
+ * pone una sola vez, y lo que cambia es la lista de cerradores, que se vacia al
+ * cambiar de pantalla porque esos nodos ya no existen. */
+const cerradores = new Set();
+let oyentesDeCierre = false;
+
+/* Sube con cada pintada. Lo que termina tarde (el recálculo) compara antes de
+ * tocar nada: si ya no es su pantalla, se calla. */
+let pintado = 0;
+
+function cerrarBuscadores(menos) {
+  cerradores.forEach((cerrar) => { if (cerrar !== menos) cerrar(); });
+}
+
+function ponerOyentesDeCierre() {
+  if (oyentesDeCierre) return;
+  oyentesDeCierre = true;
+
+  /* En captura y con pointerdown: asi se cierra antes de que el clic llegue a
+   * su destino, y sigue funcionando el clic en un resultado porque ese esta
+   * dentro de su propia columna. */
+  document.addEventListener('pointerdown', (e) => {
+    const columna = e.target.closest ? e.target.closest('.asigna__col') : null;
+    cerradores.forEach((cerrar) => { if (cerrar.columna !== columna) cerrar(); });
+  }, true);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarBuscadores();
+  });
+}
+
 function chipsHtml(lista, vacio) {
   if (!lista.length) return `<p class="ayuda">${escapar(vacio)}</p>`;
   return lista.map((x) => `
@@ -1132,21 +1165,27 @@ function asignacionHtml(estado) {
       <div class="asigna__col">
         <label>Etiquetas de producto</label>
         <div class="chips" data-chips="etiquetas">${chipsHtml(estado.etiquetas, 'Ninguna.')}</div>
-        <input type="search" data-buscar="etiquetas" placeholder="Escribe una etiqueta, p. ej. oro…" />
-        <div class="resultados" data-resultados="etiquetas" hidden></div>
+        <div class="buscador">
+          <input type="search" data-buscar="etiquetas" placeholder="Escribe una etiqueta, p. ej. oro…" />
+          <div class="resultados" data-resultados="etiquetas" hidden></div>
+        </div>
         <p class="ayuda">Con un guión delante, resta: <code>-brillantes</code> quita esos productos de los que ya había.</p>
       </div>
       <div class="asigna__col">
         <label>Colecciones enteras</label>
         <div class="chips" data-chips="colecciones">${chipsHtml(estado.colecciones, 'Ninguna.')}</div>
-        <input type="search" data-buscar="colecciones" placeholder="Escribe para buscar una colección…" />
-        <div class="resultados" data-resultados="colecciones" hidden></div>
+        <div class="buscador">
+          <input type="search" data-buscar="colecciones" placeholder="Escribe para buscar una colección…" />
+          <div class="resultados" data-resultados="colecciones" hidden></div>
+        </div>
       </div>
       <div class="asigna__col">
         <label>Productos sueltos</label>
         <div class="chips" data-chips="productos">${chipsHtml(estado.productos, 'Ninguno.')}</div>
-        <input type="search" data-buscar="productos" placeholder="Escribe para buscar un producto…" />
-        <div class="resultados" data-resultados="productos" hidden></div>
+        <div class="buscador">
+          <input type="search" data-buscar="productos" placeholder="Escribe para buscar un producto…" />
+          <div class="resultados" data-resultados="productos" hidden></div>
+        </div>
       </div>
     </div>
     <p class="ayuda" data-alcance></p>
@@ -1179,11 +1218,12 @@ function textoAlcance(estado, guardado) {
  * al pulsar Guardar. Guardar en cada clic sería más simple de escribir, pero
  * añadir cinco productos serían cinco escrituras y cinco esperas. */
 function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guardado) {
+  let alcance = guardado;
   const repintar = () => {
     tarjeta.querySelector('[data-chips="etiquetas"]').innerHTML = chipsHtml(estado.etiquetas, 'Ninguna.');
     tarjeta.querySelector('[data-chips="productos"]').innerHTML = chipsHtml(estado.productos, 'Ninguno.');
     tarjeta.querySelector('[data-chips="colecciones"]').innerHTML = chipsHtml(estado.colecciones, 'Ninguna.');
-    tarjeta.querySelector('[data-alcance]').textContent = textoAlcance(estado, guardado);
+    tarjeta.querySelector('[data-alcance]').textContent = textoAlcance(estado, alcance);
   };
 
   const anadir = (donde, item) => {
@@ -1210,11 +1250,25 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
 
   /* Las dos búsquedas comparten todo menos de dónde sacan los candidatos: las
    * colecciones ya están en memoria y los productos hay que pedirlos. */
-  function conectarBuscador(donde, buscador) {
+  function conectarBuscador(donde, buscador, ofreceVacio) {
     const campo = tarjeta.querySelector(`[data-buscar="${donde}"]`);
     const caja = tarjeta.querySelector(`[data-resultados="${donde}"]`);
     let temporizador = null;
     let vuelta = 0;
+
+    /* Cerrar es tambien vaciar: dejar los botones dentro de una caja oculta
+     * guarda hasta ocho nodos por caja sin que nadie los vea, y si el CSS
+     * vuelve a fallar reaparecen. Y sube la vuelta, que es lo que invalida la
+     * respuesta que venga de camino. */
+    const cerrar = () => {
+      clearTimeout(temporizador);
+      vuelta += 1;
+      caja.hidden = true;
+      caja.innerHTML = '';
+    };
+    cerrar.columna = campo.closest('.asigna__col');
+    cerradores.add(cerrar);
+    ponerOyentesDeCierre();
 
     const pintar = (encontrados) => {
       caja.hidden = false;
@@ -1231,23 +1285,27 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
           if (!x) return;
           anadir(donde, x);
           campo.value = '';
-          caja.hidden = true;
+          cerrar();
         });
       });
     };
 
     const lanzar = async () => {
       const texto = campo.value.trim();
-      if (!texto) { caja.hidden = true; return; }
 
-      /* Cada búsqueda lleva su número. Si vuelve una vieja después de una
-       * nueva, se tira: si no, escribir deprisa deja en pantalla el resultado
-       * de lo que escribiste hace tres letras. */
+      /* Cada búsqueda lleva su número, y se sube ANTES de cualquier salida. Si
+       * vuelve una vieja después de una nueva, se tira: si no, escribir deprisa
+       * deja en pantalla el resultado de hace tres letras, y vaciar el campo no
+       * impedía que una respuesta lenta volviera a abrir la caja. */
       vuelta += 1;
       const mia = vuelta;
+
+      if (!texto && !ofreceVacio) { cerrar(); return; }
+
       try {
         const encontrados = await buscador(texto);
         if (mia !== vuelta) return;
+        cerrarBuscadores(cerrar);
         pintar(encontrados.slice(0, 8));
       } catch (error) {
         if (mia !== vuelta) return;
@@ -1266,7 +1324,12 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
       clearTimeout(temporizador);
       lanzar();
     });
-    campo.addEventListener('focus', () => { if (campo.value.trim()) lanzar(); });
+    /* Al enfocar se ofrece lo que hay, sin tener que adivinar qué escribir: las
+     * colecciones y las etiquetas ya están en memoria. Los productos no, que
+     * serían una consulta por cada clic en el campo. */
+    campo.addEventListener('focus', () => {
+      if (campo.value.trim() || ofreceVacio) lanzar();
+    });
   }
 
   conectarBuscador('productos', async (texto) => (await buscarProductos(texto))
@@ -1275,7 +1338,7 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
   conectarBuscador('colecciones', async (texto) => {
     const busca = texto.toLowerCase();
     return colecciones.filter((c) => c.titulo.toLowerCase().includes(busca));
-  });
+  }, true);
 
   /* Si lo escrito no está entre las etiquetas de la tienda se ofrece igual:
    * puede ser una etiqueta que todavía no tiene ningún producto, o una que la
@@ -1292,16 +1355,33 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
       .filter(Boolean)
       .map((t) => (resta ? `-${t}` : t))
       .map((t) => ({ id: `tag:${t}`, titulo: t }));
-  });
+  }, true);
 
   repintar();
-  return repintar;
+
+  return {
+    repintar,
+    /* El recálculo termina después de pintar: cuando llega, cada ficha pone al
+     * día su «alcanza a N», salvo que la persona ya esté editándola. */
+    alcanceAhora(n) {
+      alcance = n;
+      if (!estado.sucio) repintar();
+    },
+  };
 }
 
 /* Las colecciones cambian sin avisar a la app: entra un producto nuevo a «Oro»
  * y la cadena de handles se queda vieja. Recalcular al abrir la pantalla es el
  * momento natural, porque es justo cuando alguien va a mirar si está bien. */
 async function recalcular(lista, sincronizar) {
+  return enUnaPasada(() => recalcularTodas(lista, sincronizar));
+}
+
+/* Envuelta en enUnaPasada: los cuatro beneficios comparten las mismas tres
+ * etiquetas, y sin memoria cada uno las resolvía otra vez. Eran trece páginas
+ * de productos donde bastan cuatro, y eran las que agotaban el cupo de Shopify
+ * y dejaban la pantalla esperando segundos a que se recargara. */
+async function recalcularTodas(lista, sincronizar) {
   let cambiadas = 0;
   const cortadas = new Set();
   for (const item of lista) {
@@ -1322,11 +1402,6 @@ async function recalcular(lista, sincronizar) {
     avisar(`Estas colecciones tienen más productos de los que la app puede leer de una vez, así que faltan algunos: ${[...cortadas].join(', ')}.`, true);
   }
   return cambiadas;
-}
-
-function avisoRecalculo(cambiadas) {
-  if (!cambiadas) return '';
-  return `<p class="ayuda">Se actualizaron ${cambiadas} al abrir, porque sus colecciones habían cambiado.</p>`;
 }
 
 /* Subir y bajar en vez de escribir un número: el orden se ve en la pantalla,
@@ -1359,7 +1434,7 @@ async function pintarEtiquetas() {
   ]);
   const faltaLoNuestro = revision.pendientes.some((p) => p.includes('insignias'));
   const { lista: etiquetas, error } = await cargarOVacio(cargarEtiquetas, !faltaLoNuestro);
-  const cambiadas = await recalcular(etiquetas, sincronizarEtiqueta);
+  const miPintado = pintado;
 
   const muestras = () => etiquetas.filter((e) => e.activo).map(etiquetaHtml).join('')
     || '<p class="sv-guia__vacio">Ninguna insignia activa.</p>';
@@ -1377,7 +1452,7 @@ async function pintarEtiquetas() {
       <p class="ayuda previa__nota">En la tienda van sobre la foto: en la colección arriba a la izquierda, debajo de la etiqueta del tema; en la ficha, arriba a la derecha.</p>
     </section>
 
-    ${avisoRecalculo(cambiadas)}
+    <p class="ayuda" data-aviso-recalculo hidden></p>
 
     ${etiquetas.length ? '' : `
       <section class="tarjeta">
@@ -1439,6 +1514,8 @@ async function pintarEtiquetas() {
     document.getElementById('previa-etiquetas').innerHTML = muestras();
   };
 
+  const conexiones = new Map();
+
   pantalla.querySelectorAll('.tarjeta[data-id]').forEach((tarjeta) => {
     const id = tarjeta.dataset.id;
     const original = etiquetas.find((e) => e.id === id);
@@ -1448,9 +1525,10 @@ async function pintarEtiquetas() {
       colecciones: [...original.colecciones],
       sucio: false,
     };
-    const repintarAsignacion = conectarAsignacion(
+    const conex = conectarAsignacion(
       tarjeta, estado, colecciones, etiquetasTienda, alcanceEtiqueta(original),
     );
+    conexiones.set(id, conex);
 
     const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`)?.value.trim() ?? '';
     const muestra = tarjeta.querySelector('[data-previa]');
@@ -1483,7 +1561,7 @@ async function pintarEtiquetas() {
         await guardarEtiqueta(id, datos);
         await sincronizarEtiqueta(Object.assign(original, datos));
         estado.sucio = false;
-        repintarAsignacion();
+        conex.repintar();
         refrescarMuestras();
         avisar('Insignia guardada');
       } catch (error2) {
@@ -1541,6 +1619,22 @@ async function pintarEtiquetas() {
     }
   });
 
+  /* El recálculo va DESPUÉS de pintar. Antes iba antes, y la persona miraba
+   * «Cargando…» durante todas las consultas aunque lo que se dibuja ya
+   * estuviera en memoria. Ahora la pantalla aparece y los números se ponen al
+   * día solos cuando llegan. */
+  recalcular(etiquetas, sincronizarEtiqueta).then((cambiadas) => {
+    if (miPintado !== pintado) return;
+    etiquetas.forEach((item) => conexiones.get(item.id)?.alcanceAhora(alcanceEtiqueta(item)));
+    const aviso = pantalla.querySelector('[data-aviso-recalculo]');
+    if (aviso && cambiadas) {
+      aviso.textContent = `Se actualizaron ${cambiadas} al abrir, porque sus etiquetas o colecciones habían cambiado.`;
+      aviso.hidden = false;
+    }
+  }).catch((error2) => {
+    if (miPintado === pintado) avisar(`No se pudo recalcular: ${error2.message}`, true);
+  });
+
   conectarPendientes(() => ir('etiquetas'));
 }
 
@@ -1552,7 +1646,7 @@ async function pintarBeneficios() {
   ]);
   const faltaLoNuestro = revision.pendientes.some((p) => p.includes('beneficios'));
   const { lista: beneficios, error } = await cargarOVacio(cargarBeneficios, !faltaLoNuestro);
-  const cambiados = await recalcular(beneficios, sincronizarBeneficio);
+  const miPintado = pintado;
 
   const opcionesIcono = (elegido) => ICONOS.map((i) => `
     <option value="${escapar(i.clave)}" ${i.clave === elegido ? 'selected' : ''}>${escapar(i.rotulo)}</option>
@@ -1573,7 +1667,7 @@ async function pintarBeneficios() {
       <p class="ayuda previa__nota">Aquí salen todos los activos juntos. En una ficha real solo salen los que alcanzan a ese producto, y como mucho los que diga el bloque (3 de fábrica).</p>
     </section>
 
-    ${avisoRecalculo(cambiados)}
+    <p class="ayuda" data-aviso-recalculo hidden></p>
 
     ${beneficios.length ? '' : `
       <section class="tarjeta">
@@ -1646,6 +1740,8 @@ async function pintarBeneficios() {
     document.getElementById('previa-beneficios').innerHTML = muestras();
   };
 
+  const conexiones = new Map();
+
   pantalla.querySelectorAll('.tarjeta[data-id]').forEach((tarjeta) => {
     const id = tarjeta.dataset.id;
     const original = beneficios.find((b) => b.id === id);
@@ -1655,9 +1751,10 @@ async function pintarBeneficios() {
       colecciones: [...original.colecciones],
       sucio: false,
     };
-    const repintarAsignacion = conectarAsignacion(
+    const conex = conectarAsignacion(
       tarjeta, estado, colecciones, etiquetasTienda, alcanceBeneficio(original),
     );
+    conexiones.set(id, conex);
 
     const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`)?.value.trim() ?? '';
 
@@ -1684,7 +1781,7 @@ async function pintarBeneficios() {
         await guardarBeneficio(id, datos);
         await sincronizarBeneficio(Object.assign(original, datos));
         estado.sucio = false;
-        repintarAsignacion();
+        conex.repintar();
         refrescarMuestras();
         avisar('Beneficio guardado');
       } catch (error2) {
@@ -1741,6 +1838,22 @@ async function pintarBeneficios() {
     }
   });
 
+  /* El recálculo va DESPUÉS de pintar. Antes iba antes, y la persona miraba
+   * «Cargando…» durante todas las consultas aunque lo que se dibuja ya
+   * estuviera en memoria. Ahora la pantalla aparece y los números se ponen al
+   * día solos cuando llegan. */
+  recalcular(beneficios, sincronizarBeneficio).then((cambiadas) => {
+    if (miPintado !== pintado) return;
+    beneficios.forEach((item) => conexiones.get(item.id)?.alcanceAhora(alcanceBeneficio(item)));
+    const aviso = pantalla.querySelector('[data-aviso-recalculo]');
+    if (aviso && cambiadas) {
+      aviso.textContent = `Se actualizaron ${cambiadas} al abrir, porque sus etiquetas o colecciones habían cambiado.`;
+      aviso.hidden = false;
+    }
+  }).catch((error2) => {
+    if (miPintado === pintado) avisar(`No se pudo recalcular: ${error2.message}`, true);
+  });
+
   conectarPendientes(() => ir('beneficios'));
 }
 
@@ -1754,6 +1867,12 @@ const PANTALLAS = {
 };
 
 async function ir(nombre) {
+  pintado += 1;
+
+  /* La pantalla anterior se tira entera: sus cajas de resultados ya no existen
+   * y sus cerradores tampoco deben seguir en la lista. */
+  cerradores.clear();
+
   document.querySelectorAll('.nav__item').forEach((b) => {
     b.classList.toggle('is-active', b.dataset.pantalla === nombre);
   });

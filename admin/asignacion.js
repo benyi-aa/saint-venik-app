@@ -19,7 +19,7 @@
  * y el storefront, en una pagina de coleccion, se fia de la coleccion y no de
  * la cadena.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051729';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051801';
 
 /* Los campos que comparten los dos tipos. Cada pantalla añade los suyos. */
 export const CAMPOS_COMUNES = [
@@ -294,7 +294,30 @@ export async function borrarEntrada(id) {
 
 /* Las etiquetas que ya existen en la tienda, para poder ofrecerlas en vez de
  * obligar a escribirlas de memoria (y a acertar con el guion de acero-inox). */
+/* Las colecciones y las etiquetas de la tienda se piden en cada pantalla y
+ * cambian poco. Se guardan unos minutos: lo que se nota es volver de Guardar y
+ * que la pantalla aparezca ya, y el precio es que una coleccion creada hace un
+ * momento tarde eso en aparecer en el buscador. */
+const VIDA_CACHE = 5 * 60 * 1000;
+const cacheDeLista = new Map();
+
+async function conCacheCorto(clave, traer) {
+  const guardado = cacheDeLista.get(clave);
+  if (guardado && Date.now() - guardado.cuando < VIDA_CACHE) return guardado.datos;
+  const datos = await traer();
+  cacheDeLista.set(clave, { cuando: Date.now(), datos });
+  return datos;
+}
+
+export function olvidarListas() {
+  cacheDeLista.clear();
+}
+
 export async function cargarEtiquetasDeTienda() {
+  return conCacheCorto('etiquetas', async () => traerEtiquetasDeTienda());
+}
+
+async function traerEtiquetasDeTienda() {
   try {
     const d = await gql(ETIQUETAS_TIENDA);
     return (d.productTags?.edges ?? []).map((e) => e.node).filter(Boolean).sort();
@@ -324,6 +347,10 @@ export async function handlesDeEtiqueta(etiqueta) {
 }
 
 export async function cargarColecciones() {
+  return conCacheCorto('colecciones', async () => traerColecciones());
+}
+
+async function traerColecciones() {
   const todas = [];
   let cursor = null;
   let vueltas = 0;

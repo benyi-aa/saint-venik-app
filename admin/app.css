@@ -397,23 +397,34 @@ textarea.codigo {
 
 .chip__x:hover { color: var(--peligro); }
 
+/* `hidden` no oculta nada si la hoja de autor declara un display: la regla del
+ * navegador, `[hidden] { display: none }`, pierde la cascada frente a esta. Por
+ * eso la lista se quedaba abierta para siempre aunque el código la "ocultara".
+ * Ya pasó con los avisos (`.aviso[hidden]` más arriba); aquí va explícito. */
+.resultados[hidden] { display: none; }
+
+/* Flotante, no en el flujo: si ocupa sitio, abrir la lista empuja el texto de
+ * alcance y los botones de Guardar 180 px hacia abajo, y la tarjeta parece
+ * romperse cada vez que buscas. */
 .resultados {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 5;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-top: 6px;
   max-height: 180px;
   overflow-y: auto;
-}
-
-/* Con borde se ve que es una lista para elegir y no texto suelto debajo del
- * campo. Solo cuando hay algo: un recuadro vacío es ruido. */
-.resultados:not([hidden]) {
   padding: 4px;
   border: 1px solid var(--linea, #e3e3e3);
   border-radius: 8px;
   background: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
 }
+
+.buscador { position: relative; }
 
 .resultado {
   border: 0;

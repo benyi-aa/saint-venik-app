@@ -34,10 +34,42 @@ function esperaPorCupo(coste) {
   return Math.min(ESPERA_MAXIMA, ms);
 }
 
+/* Una misma pantalla pregunta varias veces por lo mismo: revisarEstructura
+ * pedia la definicion de bloque_guia tres veces seguidas, y recalcular resolvia
+ * la etiqueta "oro" una vez por cada beneficio. Son peticiones identicas, y en
+ * Shopify cada una cuesta cupo: trece paginas de productos agotaban el balde de
+ * 1000 puntos y a partir de ahi cada consulta volvia THROTTLED y se quedaba
+ * esperando segundos.
+ *
+ * Mientras dura una pasada, las LECTURAS repetidas comparten la promesa. Solo
+ * las lecturas: una mutacion nunca se memoriza, y la memoria muere al acabar,
+ * asi que la siguiente pasada vuelve a preguntar. */
+let memoria = null;
+
+export async function enUnaPasada(fn) {
+  const mia = memoria === null;
+  if (mia) memoria = new Map();
+  try {
+    return await fn();
+  } finally {
+    if (mia) memoria = null;
+  }
+}
+
 /* Devuelve `data`, o lanza con el detalle util. GraphQL responde 200 aunque
  * haya fallado, y ademas cada mutacion trae sus propios userErrors, asi que hay
  * que mirar en tres sitios distintos antes de dar algo por bueno. */
 export async function gql(query, variables = {}) {
+  const sePuedeMemorizar = memoria !== null && !/\bmutation\b/.test(query);
+  const clave = sePuedeMemorizar ? `${query}|${JSON.stringify(variables)}` : null;
+  if (clave && memoria.has(clave)) return memoria.get(clave);
+
+  const promesa = pedirConReintentos(query, variables);
+  if (clave) memoria.set(clave, promesa);
+  return promesa;
+}
+
+async function pedirConReintentos(query, variables) {
   for (let intento = 0; ; intento += 1) {
     const { cuerpo, frenado } = await pedir(query, variables);
     if (!frenado) return cuerpo.data;
