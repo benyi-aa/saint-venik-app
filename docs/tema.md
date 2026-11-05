@@ -243,3 +243,32 @@ dos tiendas:
 - el grid de la colección se reconoce por la sección `...__main-collection`
 
 Si el tema cambia de versión hay que revisar esos cinco selectores.
+
+### Encendido en las dos tiendas (5 nov 2026)
+
+Hecho ya, sobre los temas **en vivo** y con permiso:
+
+| | .com (vd9tn0-et, tema 160802897967) | .cl (saint-venik, tema 188341289263) |
+|---|---|---|
+| Bloque «Beneficios» | 3 plantillas | 7 plantillas |
+| App embed «Insignias» | encendido | encendido |
+| Versión de la app | `saint-venik-29` | `color-size-picker-4` |
+
+El bloque va en `block_order` justo detrás de `buy_buttons`, que es donde se
+ven en la referencia. Se puede mover desde el editor de temas sin tocar nada
+más.
+
+Ojo con el handle de la app en el `type`: en las DOS tiendas es
+`color-size-picker`, aunque el directorio de la extensión se llame
+`saint-venik` y en .com el handle de la app del TOML sea `saint-venik`. Lo que
+manda es lo que ya hay escrito en las plantillas; el script que los insertó
+copia el prefijo de un bloque que ya funcionaba en vez de escribirlo a mano.
+
+Comprobado después de empujar, en las dos: las fichas cargan sin error de
+Liquid, siguen saliendo el selector de color, el de talla y la guía, y el JS de
+las insignias se carga. Todavía no se ve nada nuevo porque no hay ninguna
+insignia creada ni ningún beneficio asignado: los dos bloques no dibujan hasta
+que el panel tenga datos.
+
+Vuelta atrás, si hiciera falta: quitar `sv_beneficios` de las plantillas y
+poner `"disabled": true` en la entrada de `insignias` de `settings_data.json`.
