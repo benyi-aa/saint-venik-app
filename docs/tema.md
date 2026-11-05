@@ -250,7 +250,7 @@ Hecho ya, sobre los temas **en vivo** y con permiso:
 
 | | .com (vd9tn0-et, tema 160802897967) | .cl (saint-venik, tema 188341289263) |
 |---|---|---|
-| Bloque «Beneficios» | 3 plantillas | 7 plantillas |
+| Bloque «Beneficios» | ~~3 plantillas~~ **quitado** (ver abajo) | ~~7 plantillas~~ **quitado** |
 | App embed «Insignias» | encendido | encendido |
 | Versión de la app | `saint-venik-29` | `color-size-picker-4` |
 
@@ -362,3 +362,19 @@ El JavaScript de la extensión tiene un tope de 10 KB que Shopify comprueba en
 cada `deploy` (`AssetSizeAppBlockJavaScript`). Se rozó al añadir esto, así que
 los comentarios largos del script se resumieron y el porqué completo quedó
 aquí.
+
+### Y el bloque de la ficha se quitó (5 nov 2026)
+
+Con los beneficios ya sobre las fotos, la fila bajo el botón quedaba repetida,
+así que el bloque «Beneficios» se sacó de las diez plantillas: las 7 de .cl y
+las 3 de .com. Se quitó exactamente lo que se había añadido —la entrada del
+bloque y su línea en `block_order`—, comprobado con un diff contra la versión
+que estaba en vivo.
+
+El bloque **sigue existiendo en la extensión**: si algún día se quiere la fila
+de vuelta, se añade desde el editor de temas en Producto → Añadir bloque →
+Apps → Beneficios, sin tocar código.
+
+Comprobado después en las dos tiendas: cero filas bajo el botón, los tres
+beneficios sobre las fotos 2, 3 y 4, la insignia sola en la primera, y el
+selector de color y la guía de tallas intactos.
