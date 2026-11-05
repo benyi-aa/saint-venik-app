@@ -1,24 +1,14 @@
-/* Saint Venik · Insignias sobre los productos
+/* Saint Venik · Insignias y beneficios sobre las fotos
  *
- * Los datos vienen ya resueltos en el JSON que emite el bloque: aqui no se
- * pide nada a la red, solo se colocan nodos.
- *
- * Tres cosas que no son obvias y que son el motivo de casi todo el codigo:
- *
- *   1. El tema (Impulse) ya pone su propia insignia arriba a la izquierda
- *      ("AHORRA 57%", "Agotado"), posicionada en .grid-product__tag. Si la
- *      nuestra va a la misma esquina, se baja por debajo de la suya en vez de
- *      taparla.
- *
- *   2. El grid se vuelve a pintar sin recargar la pagina (filtros, paginacion,
- *      orden) con la Section Rendering API, que reemplaza el HTML entero de la
- *      seccion. El JS de carga de pagina no se vuelve a ejecutar y no hay
- *      ningun evento de storefront que avise. Por eso hace falta un
- *      MutationObserver, y por eso decorar tiene que poder repetirse sin
- *      duplicar nada.
- *
- *   3. En el editor de temas si hay evento (shopify:section:load) y hay que
- *      escucharlo, o las insignias desaparecen en cuanto se toca un ajuste.
+ * Los datos vienen resueltos en el JSON que emite el bloque: aqui no se pide
+ * nada a la red, solo se colocan nodos. El porque de cada decision esta en
+ * docs/tema.md, seccion "Insignias y beneficios"; en resumen:
+ *   - el tema ya ocupa la esquina superior izquierda, asi que la nuestra se
+ *     coloca debajo de la suya en vez de taparla;
+ *   - el grid se repinta sin recargar (filtros, paginacion) y no hay evento
+ *     de storefront que avise: de ahi el MutationObserver y que decorar tenga
+ *     que poder repetirse sin duplicar nada;
+ *   - en el editor de temas si hay evento y hay que escucharlo.
  */
 (function () {
   'use strict';
@@ -32,9 +22,12 @@
   } catch (e) {
     return;
   }
-  if (!datos || !datos.etiquetas || !datos.etiquetas.length) return;
+  var hayEtiquetas = datos && datos.etiquetas && datos.etiquetas.length;
+  var hayBeneficios = datos && datos.beneficios && datos.beneficios.length;
+  if (!hayEtiquetas && !hayBeneficios) return;
 
   var MARCA = 'svInsignias';
+  var MARCA_FOTO = 'svBeneficio';
   var MAXIMO = datos.maximo || 2;
 
   /* El handle de la ficha deberia venir del Liquid, pero un app embed no tiene
@@ -43,7 +36,7 @@
   var FICHA = datos.ficha || (location.pathname.match(/\/products\/([^/?#]+)/) || [])[1] || null;
   var FICHA_ID = datos.fichaId || null;
 
-  var etiquetas = datos.etiquetas.slice().sort(function (a, b) {
+  var etiquetas = (datos.etiquetas || []).slice().sort(function (a, b) {
     return (a.orden || 0) - (b.orden || 0);
   });
 
@@ -58,12 +51,9 @@
     if (id && lista.indexOf('|' + id + '|') !== -1) return true;
     if (handle && lista.indexOf('|' + handle + '|') !== -1) return true;
 
-    /* Dentro del grid de una coleccion, una etiqueta asignada a esa coleccion
-     * vale para todas sus tarjetas aunque el handle no estuviera en la lista:
-     * la lista se calculo en el panel y puede haberse quedado vieja si entro
-     * un producto nuevo. Fuera del grid NO vale, porque las tarjetas de
-     * "tambien te puede gustar" o de recomendados no son de esa coleccion y se
-     * llevarian una insignia que no les toca. */
+    /* Dentro del grid de una coleccion vale la coleccion aunque el handle no
+     * este en la lista (puede haberse quedado vieja). Fuera del grid NO: las
+     * tarjetas de recomendados no son de esa coleccion. */
     if (!enLaColeccion || !etiqueta.colecciones) return false;
     return etiqueta.colecciones.indexOf(datos.coleccion) !== -1;
   }
@@ -106,9 +96,8 @@
     return nodo;
   }
 
-  /* La insignia del tema mide lo mismo en todas las tarjetas, asi que se mide
-   * una vez por pasada. Medirla por tarjeta eran ochenta reflujos seguidos,
-   * intercalados con escrituras, dentro del mismo frame. */
+  /* Mide lo mismo en todas las tarjetas: se mide una vez por pasada. Medirla
+   * por tarjeta eran ochenta reflujos seguidos dentro del mismo frame. */
   var altoDelTema = null;
 
   function altoInsigniaTema(tarjeta) {
@@ -169,6 +158,35 @@
    * ejemplo) y la insignia aterriza en cualquier sitio. */
   var TARJETAS = '.grid-product[data-product-handle], .grid__item[data-product-handle]';
 
+  /* Un beneficio por foto, abajo a la izquierda, en el orden de la app. Por
+   * javascript porque la galeria no admite bloques de app, igual que la
+   * tarjeta de la coleccion. */
+  function decorarFotos() {
+    var lista = datos.beneficios;
+    if (!lista || !lista.length) return;
+
+    var slides = document.querySelectorAll('.product-main-slide[data-index] .product-image-main');
+    if (!slides.length) slides = document.querySelectorAll('.product-image-main');
+
+    var tope = Math.min(slides.length, lista.length, datos.maxFotos || 3);
+    for (var i = 0; i < tope; i += 1) {
+      var destino = slides[i];
+      if (destino.dataset[MARCA_FOTO]) continue;
+      destino.dataset[MARCA_FOTO] = '1';
+
+      var pildora = document.createElement('span');
+      pildora.className = 'sv-benef-foto';
+      /* El svg lo genero el snippet de la extension, no el comerciante: por eso
+       * va por innerHTML. El texto, que si es suyo, va por textContent. */
+      pildora.innerHTML = lista[i].icono || '';
+      var texto = document.createElement('span');
+      texto.textContent = lista[i].texto;
+      pildora.appendChild(texto);
+
+      anclar(destino).appendChild(pildora);
+    }
+  }
+
   function decorar(raiz) {
     altoDelTema = null;
     if (datos.tarjetas) {
@@ -176,6 +194,7 @@
       for (var i = 0; i < tarjetas.length; i += 1) decorarTarjeta(tarjetas[i]);
     }
     if (datos.fichas) decorarFicha();
+    if (datos.fotos) decorarFotos();
   }
 
   var pendiente = false;
@@ -191,9 +210,8 @@
   function arrancar() {
     decorar(document);
 
-    /* Los nodos que anade este mismo script se ignoran. Si no, cada insignia
-     * pintada provoca otra pasada: termina parando porque todo queda marcado,
-     * pero es una vuelta entera de mas por cada tarjeta. */
+    /* Los nodos que anade este script se ignoran: si no, cada insignia pintada
+     * provoca otra pasada entera. */
     new MutationObserver(function (cambios) {
       for (var i = 0; i < cambios.length; i += 1) {
         var nuevos = cambios[i].addedNodes;

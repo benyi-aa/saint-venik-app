@@ -52,3 +52,40 @@
     font-size: calc(var(--sv-tags-letra, 11px) - 1px);
   }
 }
+
+/* Beneficios sobre las fotos de la ficha. Van abajo a la izquierda, como en la
+ * referencia, y encima del contenedor de cada foto, que es el unico eslabon de
+ * la cadena sin overflow:hidden. */
+.sv-benef-foto {
+  position: absolute;
+  left: var(--sv-foto-lado, 10px);
+  bottom: var(--sv-foto-lado, 10px);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: calc(100% - 2 * var(--sv-foto-lado, 10px));
+  padding: 6px 11px;
+  border-radius: var(--sv-foto-radio, 7px);
+  background: var(--sv-foto-fondo, #ffffff);
+  color: var(--sv-foto-texto, #111111);
+  font-size: var(--sv-foto-letra, 12px);
+  line-height: 1.2;
+  /* La foto se puede ampliar de un clic: la píldora no debe comérselo. */
+  pointer-events: none;
+}
+
+.sv-benef-foto svg {
+  flex: 0 0 auto;
+  width: 1.15em;
+  height: 1.15em;
+  fill: none;
+  stroke: currentColor;
+}
+
+@media (max-width: 749px) {
+  .sv-benef-foto {
+    padding: 5px 9px;
+    font-size: calc(var(--sv-foto-letra, 12px) - 1px);
+  }
+}

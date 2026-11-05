@@ -1,36 +1,36 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611051643';
+import { estaEmbebida } from './api.js?v=202611051725';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611051643';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202611051643';
+} from './colores.js?v=202611051725';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202611051725';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611051643';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051643';
+} from './productos.js?v=202611051725';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051725';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611051643';
-import { guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml } from './vista-previa.js?v=202611051643';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051643';
+} from './guias.js?v=202611051725';
+import { guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml } from './vista-previa.js?v=202611051725';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051725';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611051643';
+} from './etiquetas.js?v=202611051725';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
-} from './beneficios.js?v=202611051643';
-import { ICONOS, svgIcono } from './iconos.js?v=202611051643';
+} from './beneficios.js?v=202611051725';
+import { ICONOS, svgIcono } from './iconos.js?v=202611051725';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611051643';
+const VERSION = '202611051725';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');

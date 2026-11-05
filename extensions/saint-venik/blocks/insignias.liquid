@@ -38,9 +38,42 @@
       assign cuantas = cuantas | plus: 1
     endif
   endfor
+
+  comment
+    Los beneficios de ESTA ficha, para pintarlos sobre las fotos. Es el mismo
+    dato que usa el bloque de la ficha, pero aqui hay que resolverlo otra vez:
+    el bloque dibuja donde el tema le deja, y sobre una foto solo se puede
+    llegar por javascript.
+  endcomment
+  assign beneficios = shop.metaobjects.sv_beneficio.values
+  assign marca = product.id | prepend: '|' | append: '|'
+  assign marca_handle = product.handle | prepend: '|' | append: '|'
+  assign cuantos_benef = 0
+  assign tope_benef = 0
+  if product.id
+    for b in beneficios
+      assign hs = b.handles.value | default: ''
+      assign alcanza = false
+      if hs contains marca or hs contains marca_handle
+        assign alcanza = true
+      endif
+      if b.activo.value != false and alcanza
+        assign cuantos_benef = cuantos_benef | plus: 1
+        assign pos = b.orden.value | default: 0
+        if pos > tope_benef
+          assign tope_benef = pos
+        endif
+      endif
+    endfor
+  endif
+
+  assign hay_algo = false
+  if cuantas > 0 or cuantos_benef > 0
+    assign hay_algo = true
+  endif
 -%}
 
-{%- if cuantas > 0 -%}
+{%- if hay_algo -%}
   <script type="application/json" id="sv-insignias-datos">
     {
       "etiquetas": [
@@ -80,6 +113,34 @@
           {%- endif -%}
         {%- endfor -%}
       ],
+      "beneficios": [
+        {%- assign pb = true -%}
+        {%- comment -%}
+          Por posicion, igual que el bloque de la ficha: el orden de la lista
+          que devuelve Shopify no esta garantizado y aqui cada beneficio cae
+          sobre una foto distinta, asi que el orden se nota.
+        {%- endcomment -%}
+        {%- for i in (1..tope_benef) -%}
+          {%- for b in beneficios -%}
+            {%- if b.orden.value == i -%}
+              {%- assign hs = b.handles.value | default: '' -%}
+              {%- if hs contains marca or hs contains marca_handle -%}
+                {%- if b.activo.value != false -%}
+                  {%- liquid
+                    assign texto_b = b.nombre.value
+                    if lang == 'en' and b.nombre_en.value != blank
+                      assign texto_b = b.nombre_en.value
+                    endif
+                  -%}
+                  {%- capture svg_b -%}{%- render 'sv-icono', nombre: b.icono.value -%}{%- endcapture -%}
+                  {%- unless pb -%},{%- endunless -%}{%- assign pb = false -%}
+                  { "texto": {{ texto_b | json }}, "icono": {{ svg_b | strip | json }} }
+                {%- endif -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endfor -%}
+      ],
       "coleccion": {%- if collection.handle != blank %} {{ collection.handle | json }} {%- else %} null {%- endif %},
       "ficha": {%- if product.handle != blank %} {{ product.handle | json }} {%- else %} null {%- endif %},
       "fichaId": {%- if product.id %} {{ product.id | json }} {%- else %} null {%- endif %},
@@ -87,6 +148,8 @@
       "fichas": {{ block.settings.en_ficha | json }},
       "esquinaTarjeta": {{ block.settings.esquina_tarjeta | json }},
       "esquinaFicha": {{ block.settings.esquina_ficha | json }},
+      "fotos": {{ block.settings.benef_en_fotos | json }},
+      "maxFotos": {{ block.settings.benef_cuantas_fotos }},
       "maximo": {{ block.settings.maximo }},
       "editor": {{ request.design_mode | json }}
     }
@@ -98,6 +161,13 @@
       --sv-tags-letra: {{ block.settings.tamano }}px;
       --sv-tags-top: {{ block.settings.margen }}px;
       --sv-tags-lado: {{ block.settings.margen }}px;
+    }
+    .sv-benef-foto {
+      --sv-foto-fondo: {{ block.settings.benef_fondo }};
+      --sv-foto-texto: {{ block.settings.benef_texto }};
+      --sv-foto-radio: {{ block.settings.benef_radio }}px;
+      --sv-foto-letra: {{ block.settings.benef_letra }}px;
+      --sv-foto-lado: {{ block.settings.benef_margen }}px;
     }
   </style>
 {%- endif -%}
@@ -171,7 +241,72 @@
     },
     {
       "type": "header",
-      "content": "Aspecto"
+      "content": "Beneficios sobre las fotos"
+    },
+    {
+      "type": "paragraph",
+      "content": "Una ventaja sobre cada foto de la ficha, abajo a la izquierda. Los textos y a qué productos alcanzan se eligen en la app, en la pantalla «Beneficios»."
+    },
+    {
+      "type": "checkbox",
+      "id": "benef_en_fotos",
+      "label": "Mostrar los beneficios sobre las fotos",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "benef_cuantas_fotos",
+      "label": "Sobre cuántas fotos",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "color",
+      "id": "benef_fondo",
+      "label": "Fondo de la píldora",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "benef_texto",
+      "label": "Texto e icono",
+      "default": "#111111"
+    },
+    {
+      "type": "range",
+      "id": "benef_radio",
+      "label": "Redondeo",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 7
+    },
+    {
+      "type": "range",
+      "id": "benef_letra",
+      "label": "Tamaño del texto",
+      "min": 9,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "benef_margen",
+      "label": "Separación del borde",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Aspecto de las insignias"
     },
     {
       "type": "range",
