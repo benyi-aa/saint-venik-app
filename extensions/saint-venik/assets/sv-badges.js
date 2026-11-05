@@ -158,8 +158,14 @@
    * ejemplo) y la insignia aterriza en cualquier sitio. */
   var TARJETAS = '.grid-product[data-product-handle], .grid__item[data-product-handle]';
 
-  /* Un beneficio por foto, abajo a la izquierda, en el orden de la app. Por
-   * javascript porque la galeria no admite bloques de app, igual que la
+  /* Un beneficio por foto, DESDE LA SEGUNDA: la primera se deja limpia, que es
+   * la que manda y la que ya lleva la insignia.
+   *
+   * Quien decide es la app, no la foto: no hay nada guardado por imagen, solo
+   * el orden de los beneficios. Asi, el dia que se cambien o se reordenen las
+   * fotos, los beneficios siguen saliendo sobre las que haya.
+   *
+   * Va por javascript porque la galeria no admite bloques de app, igual que la
    * tarjeta de la coleccion. */
   function decorarFotos() {
     var lista = datos.beneficios;
@@ -168,24 +174,15 @@
     var slides = document.querySelectorAll('.product-main-slide[data-index] .product-image-main');
     if (!slides.length) slides = document.querySelectorAll('.product-image-main');
 
-    var tope = Math.min(slides.length, lista.length, datos.maxFotos || 3);
+    var tope = Math.min(lista.length, datos.maxFotos || 3);
     for (var i = 0; i < tope; i += 1) {
-      var destino = slides[i];
+      var destino = slides[i + 1];
+      if (!destino) break;
       if (destino.dataset[MARCA_FOTO]) continue;
       destino.dataset[MARCA_FOTO] = '1';
 
       var pildora = document.createElement('span');
-      var esquina = datos.esquinaFoto || 'arriba-derecha';
-      pildora.className = 'sv-benef-foto sv-benef-foto--' + esquina;
-
-      /* En la primera foto la insignia ya ocupa arriba a la derecha: la
-       * pildora se coloca debajo, no encima. */
-      if (esquina === 'arriba-derecha') {
-        var suya = destino.querySelector('.sv-tags--ficha');
-        if (suya && suya.offsetHeight) {
-          pildora.style.top = 'calc(var(--sv-foto-lado, 10px) + ' + (suya.offsetHeight + 6) + 'px)';
-        }
-      }
+      pildora.className = 'sv-benef-foto sv-benef-foto--' + (datos.esquinaFoto || 'arriba-derecha');
       /* El svg lo genero el snippet de la extension, no el comerciante: por eso
        * va por innerHTML. El texto, que si es suyo, va por textContent. */
       pildora.innerHTML = lista[i].icono || '';
