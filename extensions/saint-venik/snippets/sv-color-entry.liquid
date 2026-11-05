@@ -9,6 +9,9 @@
     producto_actual    (product)    el producto de esta pagina
     hermanos           (array)      custom.hermano_de_color
     etiquetas_actuales (string)     etiquetas del producto actual, entre barras
+    etiqueta_propia    (string)     de que color es el producto actual. Solo esa
+                                    muestra se marca como la actual, aunque el
+                                    producto lleve mas etiquetas de color.
     idioma             (string)     'es' o 'en'
     mostrar_etiqueta   (boolean)
     marcar_agotado     (boolean)
@@ -23,7 +26,19 @@
     assign sv_es_actual = false
     assign sv_producto = null
 
-    if etiquetas_actuales contains sv_aguja
+    comment
+      Solo la etiqueta propia hace "actual". Antes bastaba con que el producto
+      llevara la etiqueta, y uno con dos colores se quedaba las dos muestras
+      sin enlace: el selector quedaba muerto y no se podia cambiar de color.
+    endcomment
+    assign sv_propia = etiqueta_propia | downcase | strip
+    if sv_propia != blank
+      if sv_etq == sv_propia
+        assign sv_producto = producto_actual
+        assign sv_hallado = true
+        assign sv_es_actual = true
+      endif
+    elsif etiquetas_actuales contains sv_aguja
       assign sv_producto = producto_actual
       assign sv_hallado = true
       assign sv_es_actual = true

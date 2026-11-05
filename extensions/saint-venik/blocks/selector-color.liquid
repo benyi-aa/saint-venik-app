@@ -99,6 +99,38 @@
       </div>
     {%- endif -%}
 
+    {%- comment -%}
+      De que color es ESTE producto. Se decide una sola vez, antes de dibujar
+      nada, porque un producto puede llevar dos etiquetas de color por error y
+      entonces se adueñaba de las dos muestras: las dos salian marcadas como
+      "la actual", ninguna quedaba enlazada y el selector se moria. Paso de
+      verdad con una pulsera etiquetada a la vez `acero-inox` y `oro`.
+
+      Manda la primera que aparezca en el mismo orden en que se dibujan. Las
+      demas se buscan entre los hermanos, asi que siguen siendo pulsables.
+    {%- endcomment -%}
+    {%- assign etiqueta_propia = '' -%}
+    {%- for etiqueta_pedida in orden -%}
+      {%- assign etq = etiqueta_pedida | downcase | strip -%}
+      {%- if etq != blank and etiqueta_propia == blank -%}
+        {%- assign aguja_propia = etq | prepend: '|' | append: '|' -%}
+        {%- if etiquetas_actuales contains aguja_propia -%}
+          {%- assign etiqueta_propia = etq -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if etiqueta_propia == blank -%}
+      {%- for entrada in colores -%}
+        {%- assign etq = entrada.etiqueta.value | downcase | strip -%}
+        {%- if etq != blank and etiqueta_propia == blank -%}
+          {%- assign aguja_propia = etq | prepend: '|' | append: '|' -%}
+          {%- if etiquetas_actuales contains aguja_propia -%}
+            {%- assign etiqueta_propia = etq -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+
     <div class="sv-colors__list" role="group" aria-label="{{ etiqueta_grupo | escape }}">
 
       {%- comment -%} 1) En el orden que fija el ajuste. {%- endcomment -%}
@@ -114,6 +146,7 @@
                 producto_actual: product,
                 hermanos: hermanos,
                 etiquetas_actuales: etiquetas_actuales,
+                etiqueta_propia: etiqueta_propia,
                 idioma: lang,
                 mostrar_etiqueta: block.settings.mostrar_etiquetas,
                 marcar_agotado: block.settings.marcar_agotado
@@ -140,6 +173,7 @@
               producto_actual: product,
               hermanos: hermanos,
               etiquetas_actuales: etiquetas_actuales,
+              etiqueta_propia: etiqueta_propia,
               idioma: lang,
               mostrar_etiqueta: block.settings.mostrar_etiquetas,
               marcar_agotado: block.settings.marcar_agotado
