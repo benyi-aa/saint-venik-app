@@ -1,42 +1,42 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611052044';
+import { estaEmbebida } from './api.js?v=202611052047';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611052044';
+} from './colores.js?v=202611052047';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-} from './config.js?v=202611052044';
+} from './config.js?v=202611052047';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611052044';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611052044';
+} from './productos.js?v=202611052047';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611052047';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611052044';
+} from './guias.js?v=202611052047';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611052044';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611052044';
+} from './vista-previa.js?v=202611052047';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611052047';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611052044';
+} from './etiquetas.js?v=202611052047';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611052044';
-import { ICONOS, svgIcono } from './iconos.js?v=202611052044';
+} from './beneficios.js?v=202611052047';
+import { ICONOS, svgIcono } from './iconos.js?v=202611052047';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611052044';
+const VERSION = '202611052047';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -578,7 +578,7 @@ async function pintarEditor(handle) {
         </p>
       </div>
 
-      <s-section subheading="El título es el encabezado de la ventana. Si dejas el inglés vacío, se usa el español.">
+      <s-section accessibilityLabel="Datos de la guía" subheading="El título es el encabezado de la ventana. Si dejas el inglés vacío, se usa el español.">
         <s-grid gridTemplateColumns="repeat(auto-fit, minmax(220px, 1fr))" gap="base">
           <s-text-field id="nombre-es" label="Título en español" value="${escapar(guia.nombre)}"></s-text-field>
           <s-text-field id="nombre-en" label="Título en inglés" value="${escapar(guia.nombreEn)}" placeholder="${escapar(guia.nombre)}"></s-text-field>
@@ -840,7 +840,7 @@ async function pintarApariencia() {
         <p class="subtitulo">Vale para los tres bloques a la vez, y manda sobre los ajustes del editor de temas.</p>
       </div>
 
-      <s-section>
+      <s-section accessibilityLabel="Aspecto de los bloques">
         <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
           <s-select id="alineacion" label="Alineación">
             <s-option value="izquierda">Izquierda</s-option>
@@ -1024,7 +1024,7 @@ async function pintarProductos() {
         </p>
       </div>
 
-      <s-section>
+      <s-section accessibilityLabel="Buscar productos">
         <s-grid gridTemplateColumns="2fr 1fr" gap="base">
           <s-search-field id="buscar" label="Buscar por nombre"
             value="${escapar(estadoProductos.texto)}" placeholder="Buscar por nombre…"></s-search-field>
