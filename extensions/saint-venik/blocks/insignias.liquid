@@ -71,6 +71,47 @@
   if cuantas > 0 or cuantos_benef > 0
     assign hay_algo = true
   endif
+
+  comment
+    La configuracion de la app manda sobre los ajustes del tema, igual que en
+    los otros tres bloques. Se coge con un bucle y no con `.first`, que sobre
+    shop.metaobjects.<tipo>.values devuelve vacio.
+  endcomment
+  assign cfg = null
+  for sv_entrada in shop.metaobjects.sv_configuracion.values
+    assign cfg = sv_entrada
+    break
+  endfor
+
+  comment
+    Los booleanos no se pueden resolver con `default`: `false | default: true`
+    da true, asi que apagarlo desde la app no apagaria nada. Van como 'si'/'no'.
+  endcomment
+  assign p_activo = block.settings.benef_en_fotos
+  if cfg.foto_activo.value == 'si'
+    assign p_activo = true
+  elsif cfg.foto_activo.value == 'no'
+    assign p_activo = false
+  endif
+
+  assign p_esquina = cfg.foto_esquina.value | default: block.settings.benef_esquina
+  assign p_cuantas = cfg.foto_cuantas.value | default: block.settings.benef_cuantas_fotos
+  assign p_texto = cfg.foto_texto.value | default: block.settings.benef_texto | append: ''
+  assign p_borde = cfg.foto_borde.value | default: '#E4DFD7' | append: ''
+  assign p_grosor = cfg.foto_grosor.value | default: 0
+  assign p_radio = cfg.foto_radio.value | default: block.settings.benef_radio
+  assign p_letra = cfg.foto_letra.value | default: block.settings.benef_letra
+  assign p_margen = cfg.foto_margen.value | default: block.settings.benef_margen
+
+  comment
+    El tipo de campo `color` de Shopify es hexadecimal de seis digitos y no
+    admite alfa, asi que la opacidad va en su propio campo de 0 a 100 y el rgba
+    se compone aqui. Ojo con el 100.0: `80 | divided_by: 100` con dos enteros
+    da 0, y dejaria todo invisible sin dar ningun error.
+  endcomment
+  assign p_alfa = cfg.foto_opacidad.value | default: 100 | divided_by: 100.0
+  assign p_fondo = cfg.foto_fondo.value | default: block.settings.benef_fondo
+  assign p_fondo = p_fondo | color_modify: 'alpha', p_alfa | append: ''
 -%}
 
 {%- if hay_algo -%}
@@ -93,13 +134,18 @@
                 objeto Color, y `json` sobre un objeto no da "#111111". El
                 append lo pasa por to_s, que si da el hexadecimal.
               endcomment
-              assign fondo = e.color_fondo.value | default: '#111111' | append: ''
+              assign alfa = e.opacidad.value | default: 100 | divided_by: 100.0
+              assign fondo = e.color_fondo.value | default: '#111111'
+              assign fondo = fondo | color_modify: 'alpha', alfa | append: ''
               assign tinta = e.color_texto.value | default: '#FFFFFF' | append: ''
+              assign borde = e.color_borde.value | default: '#FFFFFF' | append: ''
             -%}
             {
               "texto": {{ texto | json }},
               "fondo": {{ fondo | json }},
               "color": {{ tinta | json }},
+              "borde": {{ borde | json }},
+              "grosor": {{ e.borde_grosor.value | default: 0 }},
               "orden": {{ e.orden.value | default: 0 }},
               "handles": {{ e.handles.value | default: '' | json }},
               "colecciones": [
@@ -148,9 +194,9 @@
       "fichas": {{ block.settings.en_ficha | json }},
       "esquinaTarjeta": {{ block.settings.esquina_tarjeta | json }},
       "esquinaFicha": {{ block.settings.esquina_ficha | json }},
-      "fotos": {{ block.settings.benef_en_fotos | json }},
-      "esquinaFoto": {{ block.settings.benef_esquina | json }},
-      "maxFotos": {{ block.settings.benef_cuantas_fotos }},
+      "fotos": {{ p_activo | json }},
+      "esquinaFoto": {{ p_esquina | json }},
+      "maxFotos": {{ p_cuantas }},
       "maximo": {{ block.settings.maximo }},
       "editor": {{ request.design_mode | json }}
     }
@@ -164,11 +210,13 @@
       --sv-tags-lado: {{ block.settings.margen }}px;
     }
     .sv-benef-foto {
-      --sv-foto-fondo: {{ block.settings.benef_fondo }};
-      --sv-foto-texto: {{ block.settings.benef_texto }};
-      --sv-foto-radio: {{ block.settings.benef_radio }}px;
-      --sv-foto-letra: {{ block.settings.benef_letra }}px;
-      --sv-foto-lado: {{ block.settings.benef_margen }}px;
+      --sv-foto-fondo: {{ p_fondo }};
+      --sv-foto-texto: {{ p_texto }};
+      --sv-foto-borde: {{ p_borde }};
+      --sv-foto-grosor: {{ p_grosor }}px;
+      --sv-foto-radio: {{ p_radio }}px;
+      --sv-foto-letra: {{ p_letra }}px;
+      --sv-foto-lado: {{ p_margen }}px;
     }
   </style>
 {%- endif -%}
@@ -246,7 +294,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Una ventaja sobre cada foto de la ficha, empezando por la segunda: la primera se deja limpia. El orden lo decide la app, en la pantalla «Beneficios», no la foto."
+      "content": "Una ventaja sobre cada foto de la ficha, empezando por la segunda: la primera se deja limpia. Todo esto se configura en la app, en la pantalla «Beneficios»; lo de aquí solo se usa mientras la app no lo haya guardado nunca."
     },
     {
       "type": "checkbox",

@@ -6,7 +6,7 @@
  * que los pone el tema; en estructura, orden y visibilidad por idioma, no.
  */
 
-import { svgIcono } from './iconos.js?v=202611051801';
+import { svgIcono } from './iconos.js?v=202611051805';
 
 const ID_YOUTUBE = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/;
 
@@ -130,11 +130,32 @@ export function coloresHtml(colores, apariencia = {}) {
   </div>`;
 }
 
+/* El tipo de campo `color` de Shopify no admite alfa, así que la opacidad es un
+ * número aparte y el rgba se compone al pintar: aquí igual que en el Liquid de
+ * la tienda, para que la muestra y la ficha digan lo mismo. */
+export function conAlfa(color, opacidad) {
+  const o = Number.isFinite(opacidad) ? opacidad / 100 : 1;
+  if (o >= 1) return color;
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(color).trim());
+  if (!m) return color;
+  const n = parseInt(m[1], 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${o})`;
+}
+
+export function estiloEtiqueta(e) {
+  const partes = [
+    `background-color:${conAlfa(e.fondo, e.opacidad)}`,
+    `color:${e.texto}`,
+  ];
+  if (e.grosor) partes.push(`border:${e.grosor}px solid ${e.borde}`);
+  return partes.join(';');
+}
+
 /* La insignia de la tienda, con el mismo `.sv-tag` del storefront. Aquí no
  * lleva el contenedor `.sv-tags`, que es el que la posiciona sobre la foto:
  * en el panel se enseña suelta, en línea. */
 export function etiquetaHtml(etiqueta) {
-  return `<span class="sv-tag" style="background-color:${escapar(etiqueta.fondo)};color:${escapar(etiqueta.texto)}">${
+  return `<span class="sv-tag" style="${escapar(estiloEtiqueta(etiqueta))}">${
     escapar(etiqueta.nombre || 'Sin texto')
   }</span>`;
 }

@@ -82,6 +82,10 @@
       span.textContent = lista[i].texto;
       span.style.backgroundColor = lista[i].fondo;
       span.style.color = lista[i].color;
+      if (lista[i].grosor) {
+        span.style.borderWidth = lista[i].grosor + 'px';
+        span.style.borderColor = lista[i].borde;
+      }
       cont.appendChild(span);
     }
     return cont;

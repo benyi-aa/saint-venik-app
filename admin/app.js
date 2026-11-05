@@ -1,36 +1,41 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida, enUnaPasada } from './api.js?v=202611051801';
+import { estaEmbebida, enUnaPasada } from './api.js?v=202611051805';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611051801';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202611051801';
+} from './colores.js?v=202611051805';
+import {
+  leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
+  guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
+} from './config.js?v=202611051805';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611051801';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051801';
+} from './productos.js?v=202611051805';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051805';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611051801';
-import { guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml } from './vista-previa.js?v=202611051801';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051801';
+} from './guias.js?v=202611051805';
+import {
+  guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa,
+} from './vista-previa.js?v=202611051805';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611051805';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
-  sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta,
+  sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611051801';
+} from './etiquetas.js?v=202611051805';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
-} from './beneficios.js?v=202611051801';
-import { ICONOS, svgIcono } from './iconos.js?v=202611051801';
+} from './beneficios.js?v=202611051805';
+import { ICONOS, svgIcono } from './iconos.js?v=202611051805';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611051801';
+const VERSION = '202611051805';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1429,10 +1434,13 @@ async function cargarOVacio(cargar, hayEstructura) {
 async function pintarEtiquetas() {
   pantalla.innerHTML = '<p class="cargando">Cargando insignias…</p>';
 
-  const [colecciones, etiquetasTienda, revision] = await Promise.all([
-    cargarColecciones(), cargarEtiquetasDeTienda(), revisarEstructura(),
+  const [colecciones, etiquetasTienda, revision, campos] = await Promise.all([
+    cargarColecciones(), cargarEtiquetasDeTienda(), revisarEstructura(), camposDeEtiqueta(),
   ]);
   const faltaLoNuestro = revision.pendientes.some((p) => p.includes('insignias'));
+  /* Los campos de borde y opacidad son nuevos: hasta que la tienda los tenga,
+   * ofrecerlos solo serviría para que guardar fallara. */
+  const hayEstilo = campos.has('opacidad');
   const { lista: etiquetas, error } = await cargarOVacio(cargarEtiquetas, !faltaLoNuestro);
   const miPintado = pintado;
 
@@ -1462,7 +1470,7 @@ async function pintarEtiquetas() {
     ${etiquetas.map((e, i) => `
       <section class="tarjeta" data-id="${escapar(e.id)}">
         <div class="cabecera-fila">
-          <span class="sv-tag" data-previa style="background-color:${escapar(e.fondo)};color:${escapar(e.texto)}">${escapar(e.nombre || 'Sin texto')}</span>
+          <span class="sv-tag" data-previa style="${escapar(estiloEtiqueta(e))}">${escapar(e.nombre || 'Sin texto')}</span>
           <div class="bloque__acciones">
             <button class="secundario" data-mover="arriba" ${i === 0 ? 'disabled' : ''} title="Subir">↑</button>
             <button class="secundario" data-mover="abajo" ${i === etiquetas.length - 1 ? 'disabled' : ''} title="Bajar">↓</button>
@@ -1485,6 +1493,21 @@ async function pintarEtiquetas() {
             <label>Texto</label>
             <input type="color" data-campo="texto" value="${escapar(e.texto)}" />
           </div>
+          ${hayEstilo ? `
+          <div>
+            <label>Borde</label>
+            <input type="color" data-campo="borde" value="${escapar(e.borde)}" />
+          </div>
+          <div>
+            <label>Grosor del borde</label>
+            <input type="number" data-campo="grosor" value="${e.grosor}" min="0" max="6" step="1" />
+            <p class="ayuda">0 = sin borde.</p>
+          </div>
+          <div>
+            <label>Opacidad</label>
+            <input type="number" data-campo="opacidad" value="${e.opacidad}" min="10" max="100" step="5" />
+            <p class="ayuda">Con poca opacidad conviene subir el grosor del borde.</p>
+          </div>` : ''}
           <div>
             <label>Se muestra</label>
             <label class="casilla"><input type="checkbox" data-campo="activo" ${e.activo ? 'checked' : ''} /> Activa en la tienda</label>
@@ -1535,13 +1558,22 @@ async function pintarEtiquetas() {
 
     /* La muestra se repinta mientras se escribe. Elegir un fondo y no ver cómo
      * queda hasta guardar es elegir a ciegas. */
+    const comoEsta = () => ({
+      nombre: valor('nombre'),
+      fondo: valor('fondo'),
+      texto: valor('texto'),
+      borde: hayEstilo ? valor('borde') : original.borde,
+      grosor: hayEstilo ? Number(valor('grosor') || 0) : original.grosor,
+      opacidad: hayEstilo ? Number(valor('opacidad') || 100) : original.opacidad,
+    });
+
     const refrescar = () => {
-      muestra.textContent = valor('nombre') || 'Sin texto';
-      muestra.style.backgroundColor = valor('fondo');
-      muestra.style.color = valor('texto');
+      const v = comoEsta();
+      muestra.textContent = v.nombre || 'Sin texto';
+      muestra.style.cssText = estiloEtiqueta(v);
     };
-    ['nombre', 'fondo', 'texto'].forEach((campo) => {
-      tarjeta.querySelector(`[data-campo="${campo}"]`).addEventListener('input', refrescar);
+    ['nombre', 'fondo', 'texto', 'borde', 'grosor', 'opacidad'].forEach((campo) => {
+      tarjeta.querySelector(`[data-campo="${campo}"]`)?.addEventListener('input', refrescar);
     });
 
     tarjeta.querySelector('[data-guardar]').addEventListener('click', async (e) => {
@@ -1553,6 +1585,11 @@ async function pintarEtiquetas() {
           nombreEn: valor('nombre_en'),
           fondo: valor('fondo'),
           texto: valor('texto'),
+          ...(hayEstilo ? {
+            borde: valor('borde'),
+            grosor: Number(valor('grosor') || 0),
+            opacidad: Number(valor('opacidad') || 100),
+          } : {}),
           activo: tarjeta.querySelector('[data-campo="activo"]').checked,
           etiquetas: estado.etiquetas,
           productos: estado.productos,
@@ -1641,10 +1678,12 @@ async function pintarEtiquetas() {
 async function pintarBeneficios() {
   pantalla.innerHTML = '<p class="cargando">Cargando beneficios…</p>';
 
-  const [colecciones, etiquetasTienda, revision] = await Promise.all([
-    cargarColecciones(), cargarEtiquetasDeTienda(), revisarEstructura(),
+  const [colecciones, etiquetasTienda, revision, config, camposConfig] = await Promise.all([
+    cargarColecciones(), cargarEtiquetasDeTienda(), revisarEstructura(), leerConfig(), camposDeConfig(),
   ]);
+  const hayPildora = camposConfig.has('foto_activo');
   const faltaLoNuestro = revision.pendientes.some((p) => p.includes('beneficios'));
+  const pildora = config.pildora ?? PILDORA_POR_DEFECTO;
   const { lista: beneficios, error } = await cargarOVacio(cargarBeneficios, !faltaLoNuestro);
   const miPintado = pintado;
 
@@ -1668,6 +1707,54 @@ async function pintarBeneficios() {
     </section>
 
     <p class="ayuda" data-aviso-recalculo hidden></p>
+
+    ${hayPildora ? `
+    <section class="tarjeta" id="pildora">
+      <p class="previa__titulo">Píldoras sobre las fotos</p>
+      <p class="ayuda">Así se ven sobre la foto de la ficha, de la segunda en adelante. La primera se deja limpia.</p>
+      <div class="sobre-foto">
+        <span class="sv-benef-foto sv-benef-foto--arriba-derecha" id="pildora-previa" style="position:static">
+          <svg class="sv-benef__icono" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3.2c3.1 3.4 5.2 6.1 5.2 8.7a5.2 5.2 0 1 1-10.4 0c0-2.6 2.1-5.3 5.2-8.7Z"/>
+          </svg>
+          <span>Resistente al agua y el sudor</span>
+        </span>
+      </div>
+      <div class="color__campos">
+        <div>
+          <label>Se muestran</label>
+          <label class="casilla"><input type="checkbox" id="p-activo" ${pildora.activo ? 'checked' : ''} /> Sobre las fotos de la ficha</label>
+        </div>
+        <div>
+          <label>Esquina</label>
+          <select id="p-esquina">
+            <option value="arriba-derecha" ${pildora.esquina === 'arriba-derecha' ? 'selected' : ''}>Arriba a la derecha</option>
+            <option value="abajo-izquierda" ${pildora.esquina === 'abajo-izquierda' ? 'selected' : ''}>Abajo a la izquierda</option>
+          </select>
+        </div>
+        <div>
+          <label>Cuántas fotos</label>
+          <input type="number" id="p-cuantas" value="${pildora.cuantas}" min="1" max="5" step="1" />
+        </div>
+        <div><label>Fondo</label><input type="color" id="p-fondo" value="${escapar(pildora.fondo)}" /></div>
+        <div><label>Texto e icono</label><input type="color" id="p-texto" value="${escapar(pildora.texto)}" /></div>
+        <div><label>Borde</label><input type="color" id="p-borde" value="${escapar(pildora.borde)}" /></div>
+        <div>
+          <label>Grosor del borde</label>
+          <input type="number" id="p-grosor" value="${pildora.grosor}" min="0" max="6" step="1" />
+          <p class="ayuda">0 = sin borde.</p>
+        </div>
+        <div>
+          <label>Opacidad</label>
+          <input type="number" id="p-opacidad" value="${pildora.opacidad}" min="10" max="100" step="5" />
+        </div>
+        <div><label>Redondeo</label><input type="number" id="p-radio" value="${pildora.radio}" min="0" max="20" step="1" /></div>
+        <div><label>Tamaño del texto</label><input type="number" id="p-letra" value="${pildora.letra}" min="9" max="16" step="1" /></div>
+        <div><label>Separación del borde</label><input type="number" id="p-margen" value="${pildora.margen}" min="0" max="24" step="2" /></div>
+      </div>
+      <div class="acciones"><button class="principal" id="guardar-pildora">Guardar</button></div>
+    </section>` : ''}
 
     ${beneficios.length ? '' : `
       <section class="tarjeta">
@@ -1739,6 +1826,59 @@ async function pintarBeneficios() {
   const refrescarMuestras = () => {
     document.getElementById('previa-beneficios').innerHTML = muestras();
   };
+
+  /* Los ajustes de la píldora se ven en la muestra mientras se tocan, y sobre
+   * un fondo con damero: una píldora blanca al 50 % sobre el gris del panel se
+   * ve casi igual que al 100 %, y en la tienda va sobre una foto. */
+  const comoQuedaLaPildora = () => ({
+    activo: document.getElementById('p-activo').checked,
+    esquina: document.getElementById('p-esquina').value,
+    cuantas: Number(document.getElementById('p-cuantas').value || 3),
+    fondo: document.getElementById('p-fondo').value,
+    texto: document.getElementById('p-texto').value,
+    borde: document.getElementById('p-borde').value,
+    grosor: Number(document.getElementById('p-grosor').value || 0),
+    opacidad: Number(document.getElementById('p-opacidad').value || 100),
+    radio: Number(document.getElementById('p-radio').value || 7),
+    letra: Number(document.getElementById('p-letra').value || 12),
+    margen: Number(document.getElementById('p-margen').value || 10),
+  });
+
+  const refrescarPildora = () => {
+    const v = comoQuedaLaPildora();
+    const m = document.getElementById('pildora-previa');
+    m.style.cssText = [
+      'position:static',
+      `--sv-foto-fondo:${conAlfa(v.fondo, v.opacidad)}`,
+      `--sv-foto-texto:${v.texto}`,
+      `--sv-foto-borde:${v.borde}`,
+      `--sv-foto-grosor:${v.grosor}px`,
+      `--sv-foto-radio:${v.radio}px`,
+      `--sv-foto-letra:${v.letra}px`,
+    ].join(';');
+  };
+
+  if (hayPildora) {
+    document.getElementById('pildora').querySelectorAll('input, select').forEach((c) => {
+      c.addEventListener('input', refrescarPildora);
+      c.addEventListener('change', refrescarPildora);
+    });
+    refrescarPildora();
+  }
+
+  document.getElementById('guardar-pildora')?.addEventListener('click', async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = 'Guardando…';
+    try {
+      await guardarPildora(comoQuedaLaPildora());
+      avisar('Aspecto de las píldoras guardado');
+    } catch (error2) {
+      avisar(error2.message, true);
+    } finally {
+      e.target.disabled = false;
+      e.target.textContent = 'Guardar';
+    }
+  });
 
   const conexiones = new Map();
 

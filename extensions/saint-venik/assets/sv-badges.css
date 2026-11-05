@@ -32,6 +32,11 @@
 .sv-tag {
   display: inline-block;
   max-width: 100%;
+  /* El borde se pone desde el script, por insignia. Declararlo aqui en 0 y con
+   * box-sizing evita que, en un tema sin border-box, el grosor se sume al ancho
+   * y la insignia se salga del recorte de max-width. */
+  box-sizing: border-box;
+  border: 0 solid transparent;
   padding: 4px 8px;
   border-radius: var(--sv-tags-radio, 0px);
   font-size: var(--sv-tags-letra, 11px);
@@ -58,6 +63,8 @@
 .sv-benef-foto {
   position: absolute;
   z-index: 3;
+  box-sizing: border-box;
+  border: var(--sv-foto-grosor, 0) solid var(--sv-foto-borde, transparent);
   display: inline-flex;
   align-items: center;
   gap: 7px;

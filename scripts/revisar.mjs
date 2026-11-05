@@ -17,6 +17,7 @@ const GLOBALES = new Set([
   'window', 'document', 'console', 'fetch', 'URL', 'URLSearchParams', 'FormData',
   'encodeURIComponent', 'decodeURIComponent',
   'JSON', 'Math', 'Object', 'Array', 'String', 'Number', 'Boolean', 'Promise',
+  'parseInt', 'parseFloat', 'isNaN', 'isFinite',
   'Error', 'TypeError', 'Set', 'Map', 'Date', 'RegExp', 'Symbol', 'BigInt',
   'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'queueMicrotask',
   'File', 'Blob', 'FileReader', 'Image', 'Event', 'CustomEvent', 'Node',

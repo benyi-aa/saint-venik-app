@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611051801';
+import { gql, comprobarErrores } from './api.js?v=202611051805';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
@@ -36,7 +36,42 @@ const CAMPOS_CONFIG = [
   { key: 'alineacion', name: 'Alineación de los bloques', type: 'single_line_text_field' },
   { key: 'tamano_muestra', name: 'Tamaño de las muestras de color', type: 'number_integer' },
   { key: 'escala', name: 'Tamaño de los textos y botones', type: 'single_line_text_field' },
+  /* El aspecto de las píldoras de beneficio sobre las fotos. Es global a
+   * propósito: todas las de una ficha tienen que verse iguales, y el beneficio
+   * no lleva colores propios. Vive aquí y no en los ajustes del tema porque
+   * todo se maneja desde la app.
+   *
+   * `foto_activo` va como texto 'si'/'no' y no como boolean: en Liquid el
+   * filtro `default` sustituye también el false, así que un booleano apagado
+   * aquí no podría apagar el ajuste del tema. */
+  { key: 'foto_activo', name: 'Beneficios sobre las fotos', type: 'single_line_text_field' },
+  { key: 'foto_esquina', name: 'Esquina de la píldora', type: 'single_line_text_field' },
+  { key: 'foto_cuantas', name: 'Cuántas fotos llevan beneficio', type: 'number_integer' },
+  { key: 'foto_fondo', name: 'Fondo de la píldora', type: 'color' },
+  { key: 'foto_texto', name: 'Texto e icono de la píldora', type: 'color' },
+  { key: 'foto_borde', name: 'Borde de la píldora', type: 'color' },
+  { key: 'foto_grosor', name: 'Grosor del borde de la píldora', type: 'number_integer' },
+  { key: 'foto_opacidad', name: 'Opacidad de la píldora', type: 'number_integer' },
+  { key: 'foto_radio', name: 'Redondeo de la píldora', type: 'number_integer' },
+  { key: 'foto_letra', name: 'Tamaño del texto de la píldora', type: 'number_integer' },
+  { key: 'foto_margen', name: 'Separación del borde de la foto', type: 'number_integer' },
 ];
+
+/* Lo mismo que ya pinta hoy el embed con sus ajustes de fábrica: así mover la
+ * configuración a la app no cambia nada de lo que se ve. */
+export const PILDORA_POR_DEFECTO = {
+  activo: true,
+  esquina: 'arriba-derecha',
+  cuantas: 3,
+  fondo: '#FFFFFF',
+  texto: '#111111',
+  borde: '#E4DFD7',
+  grosor: 0,
+  opacidad: 100,
+  radio: 7,
+  letra: 12,
+  margen: 10,
+};
 
 const DEFINICION = `
   query DefinicionConfig {
@@ -82,6 +117,11 @@ const GUARDAR = `
 export async function existeConfig() {
   const d = await gql(DEFINICION);
   return Boolean(d.metaobjectDefinitionByType);
+}
+
+export async function camposDeConfig() {
+  const d = await gql(DEFINICION);
+  return new Set((d.metaobjectDefinitionByType?.fieldDefinitions ?? []).map((f) => f.key));
 }
 
 /* La definición pudo crearse con una versión anterior, sin todos los campos. */
@@ -176,7 +216,53 @@ export async function leerConfig() {
     alineacion: campos.alineacion || APARIENCIA_POR_DEFECTO.alineacion,
     tamanoMuestra: Number(campos.tamano_muestra) || APARIENCIA_POR_DEFECTO.tamanoMuestra,
     escala: campos.escala || APARIENCIA_POR_DEFECTO.escala,
+    pildora: aPildora(campos),
   };
+}
+
+/* Un numero que puede valer 0 no se lee con `||`. Y una entrada vieja sin el
+ * campo tiene que leerse con el valor de fabrica, no con cero. */
+function numero(valor, defecto) {
+  return valor === '' || valor === undefined ? defecto : Number(valor);
+}
+
+function aPildora(campos) {
+  const d = PILDORA_POR_DEFECTO;
+  return {
+    activo: campos.foto_activo ? campos.foto_activo === 'si' : d.activo,
+    esquina: campos.foto_esquina || d.esquina,
+    cuantas: numero(campos.foto_cuantas, d.cuantas),
+    fondo: campos.foto_fondo || d.fondo,
+    texto: campos.foto_texto || d.texto,
+    borde: campos.foto_borde || d.borde,
+    grosor: numero(campos.foto_grosor, d.grosor),
+    opacidad: numero(campos.foto_opacidad, d.opacidad),
+    radio: numero(campos.foto_radio, d.radio),
+    letra: numero(campos.foto_letra, d.letra),
+    margen: numero(campos.foto_margen, d.margen),
+  };
+}
+
+export async function guardarPildora(p) {
+  const r = await gql(GUARDAR, {
+    handle: { type: TIPO_CONFIG, handle: HANDLE },
+    metaobject: {
+      fields: [
+        { key: 'foto_activo', value: p.activo ? 'si' : 'no' },
+        { key: 'foto_esquina', value: p.esquina },
+        { key: 'foto_cuantas', value: String(p.cuantas) },
+        { key: 'foto_fondo', value: p.fondo },
+        { key: 'foto_texto', value: p.texto },
+        { key: 'foto_borde', value: p.borde },
+        { key: 'foto_grosor', value: String(p.grosor) },
+        { key: 'foto_opacidad', value: String(p.opacidad) },
+        { key: 'foto_radio', value: String(p.radio) },
+        { key: 'foto_letra', value: String(p.letra) },
+        { key: 'foto_margen', value: String(p.margen) },
+      ],
+    },
+  });
+  return comprobarErrores(r, 'metaobjectUpsert');
 }
 
 export async function guardarApariencia({ alineacion, tamanoMuestra, escala }) {

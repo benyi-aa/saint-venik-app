@@ -468,3 +468,28 @@ textarea.codigo {
   background: #fdf3f3;
   color: #8a2b2b;
 }
+
+/* Damero detrás de la muestra: una píldora blanca al 50 % sobre el gris del
+ * panel se ve casi igual que al 100 %, y en la tienda va sobre una foto. */
+.sobre-foto {
+  margin: 10px 0 16px;
+  padding: 18px;
+  border-radius: 8px;
+  background-color: #cfcac2;
+  background-image:
+    linear-gradient(45deg, rgba(0,0,0,.08) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.08) 75%),
+    linear-gradient(45deg, rgba(0,0,0,.08) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.08) 75%);
+  background-size: 18px 18px;
+  background-position: 0 0, 9px 9px;
+}
+
+.previa__tags {
+  padding: 14px;
+  border-radius: 8px;
+  background-color: #cfcac2;
+  background-image:
+    linear-gradient(45deg, rgba(0,0,0,.08) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.08) 75%),
+    linear-gradient(45deg, rgba(0,0,0,.08) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.08) 75%);
+  background-size: 18px 18px;
+  background-position: 0 0, 9px 9px;
+}

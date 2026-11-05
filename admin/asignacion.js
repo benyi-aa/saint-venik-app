@@ -19,7 +19,7 @@
  * y el storefront, en una pagina de coleccion, se fia de la coleccion y no de
  * la cadena.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051801';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051805';
 
 /* Los campos que comparten los dos tipos. Cada pantalla añade los suyos. */
 export const CAMPOS_COMUNES = [
@@ -455,6 +455,14 @@ export async function resolverHandles({ productos = [], colecciones = [], etique
 /* ---------------------------------------------------------------------------
  * Estructura
  * ------------------------------------------------------------------------- */
+
+/* Que campos existen de verdad en la tienda. El panel no debe ofrecer un
+ * control cuyo campo todavia no esta creado: el error saldria al guardar, que
+ * es tarde. Mismo motivo que camposDeColor en colores.js. */
+export async function camposDeTipo(tipo) {
+  const d = await gql(DEFINICION, { type: tipo });
+  return new Set((d.metaobjectDefinitionByType?.fieldDefinitions ?? []).map((f) => f.key));
+}
 
 export async function faltaEstructura(tipo, campos, nombreLegible) {
   const d = await gql(DEFINICION, { type: tipo });

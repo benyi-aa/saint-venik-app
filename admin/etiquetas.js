@@ -11,20 +11,36 @@
 import {
   CAMPOS_COMUNES, aObjetoComun, cargarEntradas, camposComunes, crearEntrada,
   guardarEntrada, borrarEntrada, faltaEstructura, asegurarEstructura,
-  resolverHandles, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611051801';
+  resolverHandles, camposDeTipo, TOPE_ENTRADAS,
+} from './asignacion.js?v=202611051805';
 
 export const TIPO_ETIQUETA = 'sv_etiqueta';
 export const TOPE_ETIQUETAS = TOPE_ENTRADAS;
 
 export const FONDO_POR_DEFECTO = '#111111';
 export const TEXTO_POR_DEFECTO = '#FFFFFF';
+export const BORDE_POR_DEFECTO = '#FFFFFF';
+export const GROSOR_POR_DEFECTO = 0;
+export const OPACIDAD_POR_DEFECTO = 100;
 
 const CAMPOS_ETIQUETA = [
   ...CAMPOS_COMUNES,
   { key: 'color_fondo', name: 'Color de fondo', type: 'color' },
   { key: 'color_texto', name: 'Color del texto', type: 'color' },
+  /* El borde y la opacidad van POR INSIGNIA y no en la configuracion general
+   * porque dependen de ella: una insignia blanca sobre una foto clara necesita
+   * borde y una negra no. Su fondo y su texto ya viven aqui; partir el aspecto
+   * de una misma insignia entre dos pantallas seria peor. */
+  { key: 'color_borde', name: 'Color del borde', type: 'color' },
+  { key: 'borde_grosor', name: 'Grosor del borde', type: 'number_integer' },
+  { key: 'opacidad', name: 'Opacidad', type: 'number_integer' },
 ];
+
+/* Un numero que puede valer 0 no se puede leer con `|| defecto`: el 0 es un
+ * valor legitimo y se convertiria en el defecto. Vacio si es "sin decidir". */
+function numero(valor, defecto) {
+  return valor === '' || valor === undefined ? defecto : Number(valor);
+}
 
 function aEtiqueta(entrada) {
   const valor = (clave) => entrada.fields.find((c) => c.key === clave)?.value ?? '';
@@ -32,6 +48,9 @@ function aEtiqueta(entrada) {
     ...aObjetoComun(entrada),
     fondo: valor('color_fondo') || FONDO_POR_DEFECTO,
     texto: valor('color_texto') || TEXTO_POR_DEFECTO,
+    borde: valor('color_borde') || BORDE_POR_DEFECTO,
+    grosor: numero(valor('borde_grosor'), GROSOR_POR_DEFECTO),
+    opacidad: numero(valor('opacidad'), OPACIDAD_POR_DEFECTO),
   };
 }
 
@@ -43,6 +62,9 @@ function camposDe(datos) {
   const campos = camposComunes(datos);
   if (datos.fondo !== undefined) campos.push({ key: 'color_fondo', value: datos.fondo });
   if (datos.texto !== undefined) campos.push({ key: 'color_texto', value: datos.texto });
+  if (datos.borde !== undefined) campos.push({ key: 'color_borde', value: datos.borde });
+  if (datos.grosor !== undefined) campos.push({ key: 'borde_grosor', value: String(datos.grosor) });
+  if (datos.opacidad !== undefined) campos.push({ key: 'opacidad', value: String(datos.opacidad) });
   return campos;
 }
 
@@ -58,6 +80,9 @@ export async function crearEtiqueta(datos, cuantasHay) {
     activo: true,
     fondo: FONDO_POR_DEFECTO,
     texto: TEXTO_POR_DEFECTO,
+    borde: BORDE_POR_DEFECTO,
+    grosor: GROSOR_POR_DEFECTO,
+    opacidad: OPACIDAD_POR_DEFECTO,
     ...datos,
   }));
 }
@@ -82,6 +107,10 @@ export async function sincronizar(etiqueta, onPaso) {
 export function cuantosAlcanza(etiqueta) {
   if (!etiqueta.handles) return 0;
   return etiqueta.handles.split('|').filter((c) => /^\d+$/.test(c)).length;
+}
+
+export async function camposDeEtiqueta() {
+  return camposDeTipo(TIPO_ETIQUETA);
 }
 
 export async function faltaEstructuraEtiquetas() {
