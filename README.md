@@ -55,9 +55,16 @@ Personalizar → Configuración → Incrustaciones de apps → «Insignias de
 producto». Queda guardado en el tema, no en la app: al cambiar de tema o
 publicar otro, hay que volver a encenderlo.
 
+Se asigna por **etiqueta de producto** (`oro`, `acero-inox`, `brillantes`),
+que es la taxonomía que las tiendas ya usan y la misma que mira el selector de
+color. Una etiqueta con un guión delante resta: `oro, acero-inox, -brillantes`
+es «todo el oro y todo el acero menos los brillantes».
+
 El campo `handles` de las dos entradas es **derivado**: lo calcula el panel a
-partir de `productos` y `colecciones`, y guarda los handles entre barras
-(`|anillo-x|collar-y|`). Existe porque en Liquid un campo de lista de
+partir de `productos` y `colecciones`, y guarda el id y el handle de cada
+producto entre barras (`|8328987607087|cadena-cuban-oro-8mm|`). Van los dos
+porque Shopify traduce los handles —en inglés `anillo-signet` es
+`signet-ring`— y el id no cambia de idioma. Existe porque en Liquid un campo de lista de
 referencias solo deja leer 50 elementos por bucle, y una colección de oro pasa
 de 50. El panel lo recalcula al abrir la pantalla y al guardar; si alguien lo
 edita a mano en el admin de Shopify, el siguiente recálculo lo pisa.

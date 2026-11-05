@@ -285,19 +285,36 @@ colección habría quedado mal.
 
 | | alcance en .cl | alcance en .com |
 |---|---|---|
-| Garantía de por vida (1) | oro, acero-inox → 179 | oro, acero-inox, ice → 150 |
-| Resistente al agua y el sudor (2) | oro, acero-inox → 179 | oro, acero-inox → 146 |
-| Hipoalergénico (3) | oro, acero-inox → 179 | oro, acero-inox, ice → 150 |
-| Joyería fina (4) | sin asignar | ice → 4 |
+| Garantía de por vida (1) | `oro, acero-inox` → 179 | `oro, acero-inox, ice` → 150 |
+| Resistente al agua y el sudor (2) | `oro, acero-inox, -brillantes` → 170 | `oro, acero-inox, -brillantes` → 141 |
+| Hipoalergénico (3) | `oro, acero-inox` → 179 | `oro, acero-inox, ice` → 150 |
+| Joyería fina (4) | `brillantes` → 9 | `brillantes` → 9 |
 
 El bloque muestra 3 como mucho y los ordena por posición, así que un producto
-de oro saca 1-2-3 y uno de brillantes saca 1-3-4: el del agua se cae solo y
-entra «Joyería fina», que es justo lo que pedía el vídeo. No hace falta
-excluir nada a mano.
+de oro saca 1-2-3 y uno de brillantes saca 1-3-4: el del agua no le alcanza y
+entra «Joyería fina», que es justo lo que pedía el vídeo.
 
-En .cl no hay ninguna etiqueta ni colección que marque los brillantes (ningún
-producto tiene «ice», «zirc» ni «brillante» en etiquetas o título), así que
-«Joyería fina» quedó sin asignar hasta que se decida cuáles son.
+### La etiqueta `brillantes`
+
+Los brillantes son las mismas nueve piezas en las dos tiendas: las cinco
+tennis (`pulsera-tennis-3mm`, `pulsera-tennis-5mm`,
+`pulsera-square-tennis-5mm`, `cadena-tennis-3mm`, `cadena-tennis-5mm`) y
+`pulsera-eclissi`, `pulsera-giglio`, `pulsera-azure` y `pulsera-legacy`.
+
+No había forma de reconocerlas: en .cl no había ninguna etiqueta y en .com la
+etiqueta `ice` solo marcaba cuatro, y además es la condición de la colección
+automática «Pulseras Ice», así que ampliarla habría metido dos cadenas en una
+colección de pulseras. Se creó la etiqueta **`brillantes`** sobre las nueve en
+las dos tiendas. Los filtros de .cl son solo disponibilidad y precio, así que
+la etiqueta nueva no se le ve al cliente.
+
+### Restar con un guión
+
+«Resistente al agua» alcanza a todo el oro y todo el acero **menos** los
+brillantes. Eso no se puede decir sumando, así que una etiqueta con un guión
+delante (`-brillantes`) resta. La resta la aplica el panel al calcular, al
+final y sobre todo lo reunido, así que da igual el orden y también quita lo
+que hubiera entrado por colección o a mano.
 
 ### Insignias
 
