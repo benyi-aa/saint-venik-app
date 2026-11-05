@@ -1,42 +1,42 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611052006';
+import { estaEmbebida } from './api.js?v=202611052028';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611052006';
+} from './colores.js?v=202611052028';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-} from './config.js?v=202611052006';
+} from './config.js?v=202611052028';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611052006';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611052006';
+} from './productos.js?v=202611052028';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611052028';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611052006';
+} from './guias.js?v=202611052028';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611052006';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611052006';
+} from './vista-previa.js?v=202611052028';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611052028';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611052006';
+} from './etiquetas.js?v=202611052028';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611052006';
-import { ICONOS, svgIcono } from './iconos.js?v=202611052006';
+} from './beneficios.js?v=202611052028';
+import { ICONOS, svgIcono } from './iconos.js?v=202611052028';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611052006';
+const VERSION = '202611052028';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1510,6 +1510,15 @@ function partirAlfa(valor, porDefecto) {
   };
 }
 
+/* «Sin icono» necesita un valor propio: una opción con value="" en un
+ * desplegable del admin devuelve su texto, y eso acabaría guardado como si
+ * fuera el nombre de un icono. Se traduce al leer y al escribir. */
+const SIN_ICONO = '__sin';
+
+function sinCentinela(valor) {
+  return valor === SIN_ICONO ? '' : valor;
+}
+
 function colorPlano(valor, porDefecto) {
   return partirAlfa(valor, { color: porDefecto, opacidad: 100 }).color;
 }
@@ -1787,8 +1796,16 @@ async function pintarBeneficios() {
   const pildora = config.pildora ?? PILDORA_POR_DEFECTO;
   const { lista: beneficios, error } = await cargarOVacio(cargarBeneficios, !faltaLoNuestro);
 
-  const opcionesIcono = (elegido) => ICONOS.map((i) => `
-    <option value="${escapar(i.clave)}" ${i.clave === elegido ? 'selected' : ''}>${escapar(i.rotulo)}</option>
+  /* El valor elegido NO va aquí: un desplegable del admin no hace caso al
+   * `selected` del marcado inyectado. Se pone por propiedad después de pintar,
+   * en `ponerElegidos`.
+   *
+   * Y «sin icono» no puede valer la cadena vacía: una opción con value=""
+   * devuelve su propio texto, así que guardar habría escrito «Sin icono» como
+   * nombre de icono. Por eso viaja con un valor centinela que se traduce al
+   * leer y al escribir. */
+  const opcionesIcono = () => ICONOS.map((i) => `
+    <s-option value="${escapar(i.clave)}">${escapar(i.rotulo)}</s-option>
   `).join('');
 
   const muestras = () => beneficiosHtml(beneficios.filter((b) => b.activo));
@@ -1796,151 +1813,140 @@ async function pintarBeneficios() {
   if (miPintado !== pintado) return;
 
   pantalla.innerHTML = `
-    <h1>Beneficios</h1>
-    <p class="subtitulo">Las ventajas que salen en la ficha, bajo el botón de compra. No son las mismas para todo: los brillantes no resisten el agua, así que ese beneficio no les alcanza y en su lugar llevan «Joyería fina».</p>
+    <s-page>
+      ${bannerPendientes(revision.pendientes)}
+      ${error ? `<s-banner slot="supplemental-start" tone="critical" heading="No se pudieron cargar los beneficios">${escapar(error)}</s-banner>` : ''}
+      <s-banner slot="supplemental-start" tone="info" data-aviso-recalculo hidden></s-banner>
 
-    ${tarjetaPendientes(revision.pendientes)}
-    ${error ? `<p class="problema">${escapar(error)}</p>` : ''}
-
-    <section class="tarjeta previa">
-      <p class="previa__titulo">Así se ven en la ficha</p>
-      <div id="previa-beneficios">${muestras()}</div>
-      <p class="ayuda previa__nota">Aquí salen todos los activos juntos. En una ficha real solo salen los que alcanzan a ese producto, y como mucho los que diga el bloque (3 de fábrica).</p>
-    </section>
-
-    <p class="ayuda" data-aviso-recalculo hidden></p>
-
-    ${hayPildora ? `
-    <section class="tarjeta" id="pildora">
-      <p class="previa__titulo">Píldoras sobre las fotos</p>
-      <p class="ayuda">Así se ven sobre la foto de la ficha, de la segunda en adelante. La primera se deja limpia.</p>
-      <div class="sobre-foto">
-        <span class="sv-benef-foto sv-benef-foto--arriba-derecha" id="pildora-previa" style="position:static">
-          <svg class="sv-benef__icono" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 3.2c3.1 3.4 5.2 6.1 5.2 8.7a5.2 5.2 0 1 1-10.4 0c0-2.6 2.1-5.3 5.2-8.7Z"/>
-          </svg>
-          <span>Resistente al agua y el sudor</span>
-        </span>
+      <div class="titular">
+        <h1>Beneficios</h1>
+        <p class="subtitulo">Las ventajas que salen en la ficha, bajo el botón de compra. No son las mismas para todo: los brillantes no resisten el agua, así que ese beneficio no les alcanza y en su lugar llevan «Joyería fina».</p>
       </div>
-      <div class="color__campos">
-        <div>
-          <label>Se muestran</label>
-          <label class="casilla"><input type="checkbox" id="p-activo" ${pildora.activo ? 'checked' : ''} /> Sobre las fotos de la ficha</label>
-        </div>
-        <div>
-          <label>Esquina</label>
-          <select id="p-esquina">
-            <option value="arriba-derecha" ${pildora.esquina === 'arriba-derecha' ? 'selected' : ''}>Arriba a la derecha</option>
-            <option value="abajo-izquierda" ${pildora.esquina === 'abajo-izquierda' ? 'selected' : ''}>Abajo a la izquierda</option>
-          </select>
-        </div>
-        <div>
-          <label>Cuántas fotos</label>
-          <input type="number" id="p-cuantas" value="${pildora.cuantas}" min="1" max="5" step="1" />
-        </div>
-        <div><label>Fondo</label><input type="color" id="p-fondo" value="${escapar(pildora.fondo)}" /></div>
-        <div><label>Texto e icono</label><input type="color" id="p-texto" value="${escapar(pildora.texto)}" /></div>
-        <div><label>Borde</label><input type="color" id="p-borde" value="${escapar(pildora.borde)}" /></div>
-        <div>
-          <label>Grosor del borde</label>
-          <input type="number" id="p-grosor" value="${pildora.grosor}" min="0" max="6" step="1" />
-          <p class="ayuda">0 = sin borde.</p>
-        </div>
-        <div>
-          <label>Opacidad</label>
-          <input type="number" id="p-opacidad" value="${pildora.opacidad}" min="10" max="100" step="5" />
-        </div>
-        <div><label>Redondeo</label><input type="number" id="p-radio" value="${pildora.radio}" min="0" max="20" step="1" /></div>
-        <div><label>Tamaño del texto</label><input type="number" id="p-letra" value="${pildora.letra}" min="9" max="16" step="1" /></div>
-        <div><label>Separación del borde</label><input type="number" id="p-margen" value="${pildora.margen}" min="0" max="24" step="2" /></div>
-      </div>
-      <div class="acciones"><button class="principal" id="guardar-pildora">Guardar</button></div>
-    </section>` : ''}
 
-    ${beneficios.length ? '' : `
-      <section class="tarjeta">
-        <p>Todavía no hay ningún beneficio. Si acabas de instalar la app, pulsa «Crear lo que falta» y aparecerán los cuatro de siempre listos para asignar.</p>
-      </section>`}
+      <s-section heading="Así se ven en la ficha" subheading="Aquí salen todos los activos juntos. En una ficha real solo salen los que alcanzan a ese producto, y como mucho los que diga el bloque (3 de fábrica).">
+        <div id="previa-beneficios">${muestras()}</div>
+      </s-section>
 
-    ${beneficios.map((b, i) => `
-      <section class="tarjeta" data-id="${escapar(b.id)}">
-        <div class="cabecera-fila">
-          <div class="sv-benef sv-benef--pildora sv-benef--fila sv-benef--normal" style="--sv-pt:0px;--sv-pb:0px;">
-            <ul class="sv-benef__lista" role="list">
-              <li class="sv-benef__item" data-previa>
-                <span data-previa-icono>${iconoHtml(b)}</span>
-                <span class="sv-benef__texto" data-previa-texto>${escapar(b.nombre || 'Sin texto')}</span>
-              </li>
-            </ul>
-          </div>
-          <div class="bloque__acciones">
-            <button class="secundario" data-mover="arriba" ${i === 0 ? 'disabled' : ''} title="Subir">↑</button>
-            <button class="secundario" data-mover="abajo" ${i === beneficios.length - 1 ? 'disabled' : ''} title="Bajar">↓</button>
-          </div>
+      ${hayPildora ? `
+      <s-section id="pildora" heading="Píldoras sobre las fotos" subheading="Así se ven sobre la foto de la ficha, de la segunda en adelante. La primera se deja limpia.">
+        <div class="sobre-foto">
+          <span class="sv-benef-foto sv-benef-foto--arriba-derecha" id="pildora-previa" style="position:static">
+            <svg class="sv-benef__icono" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3.2c3.1 3.4 5.2 6.1 5.2 8.7a5.2 5.2 0 1 1-10.4 0c0-2.6 2.1-5.3 5.2-8.7Z"/>
+            </svg>
+            <span>Resistente al agua y el sudor</span>
+          </span>
         </div>
-        <div class="color__campos">
-          <div>
-            <label>Texto en español</label>
-            <input type="text" data-campo="nombre" value="${escapar(b.nombre)}" />
-          </div>
-          <div>
-            <label>Texto en inglés</label>
-            <input type="text" data-campo="nombre_en" value="${escapar(b.nombreEn)}" placeholder="Vacío: se usa el español" />
-          </div>
-          <div>
-            <label>Icono</label>
-            <select data-campo="icono">
-              <option value="">Sin icono</option>
-              ${opcionesIcono(b.icono)}
-            </select>
-            <p class="ayuda">${b.iconoImagenUrl
-              ? 'Hay una imagen subida, y la imagen manda sobre este icono.'
-              : 'Sigue al color del texto de la píldora.'}</p>
-          </div>
-          ${haySubida ? `
-          <div>
-            <label>Icono propio</label>
-            <div class="acciones acciones--envolver">
-              <label class="secundario como-boton">
-                Subir…<input type="file" accept="image/png,image/webp,image/svg+xml" data-subir hidden />
-              </label>
-              ${hayBiblioteca() ? '<button class="secundario" data-biblioteca>Elegir de la biblioteca</button>' : ''}
-              ${b.iconoImagenUrl ? '<button class="secundario secundario--peligro" data-quitar-imagen>Quitar</button>' : ''}
+        <div class="casilla-polaris">
+          <s-checkbox label="Sobre las fotos de la ficha" id="p-activo" ${pildora.activo ? 'checked' : ''}></s-checkbox>
+        </div>
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-select label="Esquina" id="p-esquina">
+            <s-option value="arriba-derecha">Arriba a la derecha</s-option>
+            <s-option value="abajo-izquierda">Abajo a la izquierda</s-option>
+          </s-select>
+          <s-number-field label="Cuántas fotos" id="p-cuantas" value="${pildora.cuantas}" min="1" max="5" step="1"></s-number-field>
+          <s-color-field label="Fondo" id="p-fondo" alpha value="${escapar(conAlfaHex(pildora.fondo, pildora.opacidad))}" details="La transparencia va dentro del propio color."></s-color-field>
+          <s-color-field label="Texto e icono" id="p-texto" value="${escapar(pildora.texto)}"></s-color-field>
+          <s-color-field label="Borde" id="p-borde" value="${escapar(pildora.borde)}"></s-color-field>
+          <s-number-field label="Grosor del borde" id="p-grosor" value="${pildora.grosor}" min="0" max="6" step="1" details="0 = sin borde."></s-number-field>
+          <s-number-field label="Redondeo" id="p-radio" value="${pildora.radio}" min="0" max="20" step="1"></s-number-field>
+          <s-number-field label="Tamaño del texto" id="p-letra" value="${pildora.letra}" min="9" max="16" step="1"></s-number-field>
+          <s-number-field label="Separación del borde" id="p-margen" value="${pildora.margen}" min="0" max="24" step="2"></s-number-field>
+        </s-grid>
+        <s-button slot="primary-action" variant="primary" id="guardar-pildora">Guardar</s-button>
+      </s-section>` : ''}
+
+      ${beneficios.length ? '' : `
+        <s-section>
+          <s-paragraph>Todavía no hay ningún beneficio. Si acabas de instalar la app, pulsa «Crear lo que falta» y aparecerán los cuatro de siempre listos para asignar.</s-paragraph>
+        </s-section>`}
+
+      ${beneficios.map((b, i) => `
+        <s-section data-id="${escapar(b.id)}" heading="${escapar(b.nombre || 'Sin texto')}">
+          <div class="cabecera-fila">
+            <div class="sv-benef sv-benef--pildora sv-benef--fila sv-benef--normal" style="--sv-pt:0px;--sv-pb:0px;">
+              <ul class="sv-benef__lista" role="list">
+                <li class="sv-benef__item" data-previa>
+                  <span data-previa-icono>${iconoHtml(b)}</span>
+                  <span class="sv-benef__texto" data-previa-texto>${escapar(b.nombre || 'Sin texto')}</span>
+                </li>
+              </ul>
             </div>
-            <p class="ayuda" data-estado-imagen>${b.iconoImagenUrl
-              ? 'Las imágenes se muestran con sus propios colores.'
-              : 'PNG, WebP o SVG, cuadrado y pequeño (96×96, fondo transparente).'}</p>
-          </div>` : ''}
-          <div>
-            <label>Se muestra</label>
-            <label class="casilla"><input type="checkbox" data-campo="activo" ${b.activo ? 'checked' : ''} /> Activo en la tienda</label>
+            <s-stack direction="inline" gap="small-300">
+              <s-button variant="tertiary" accessibilityLabel="Subir" data-mover="arriba" ${i === 0 ? 'disabled' : ''}>↑</s-button>
+              <s-button variant="tertiary" accessibilityLabel="Bajar" data-mover="abajo" ${i === beneficios.length - 1 ? 'disabled' : ''}>↓</s-button>
+            </s-stack>
           </div>
-        </div>
-        ${asignacionHtml(b)}
-        <div class="acciones">
-          <button class="principal" data-guardar>Guardar</button>
-          <button class="secundario secundario--peligro" data-borrar>Eliminar</button>
-        </div>
-      </section>`).join('')}
 
-    <section class="tarjeta">
-      <label>Añadir un beneficio</label>
-      <div class="color__campos" style="margin-bottom:12px;">
-        <div><input type="text" id="nuevo-beneficio-nombre" placeholder="En español, p. ej. Envío gratis" /></div>
-        <div><input type="text" id="nuevo-beneficio-nombre-en" placeholder="En inglés, p. ej. Free shipping" /></div>
-        <div>
-          <label>Icono</label>
-          <select id="nuevo-beneficio-icono">
-            <option value="">Sin icono</option>
-            ${opcionesIcono('')}
-          </select>
-        </div>
-      </div>
-      <div class="acciones"><button class="principal" id="anadir-beneficio">Añadir beneficio</button></div>
-      <p class="ayuda">Se crea vacío: no aparece en ninguna ficha hasta que le digas a qué productos alcanza.</p>
-    </section>
+          <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+            <s-text-field label="Texto en español" data-campo="nombre" value="${escapar(b.nombre)}"></s-text-field>
+            <s-text-field label="Texto en inglés" data-campo="nombre_en" value="${escapar(b.nombreEn)}" placeholder="Vacío: se usa el español"></s-text-field>
+            <s-select label="Icono" data-campo="icono" details="${b.iconoImagenUrl
+    ? 'Hay una imagen subida, y la imagen manda sobre este icono.'
+    : 'Sigue al color del texto de la píldora.'}">
+              <s-option value="${SIN_ICONO}">Sin icono</s-option>
+              ${opcionesIcono()}
+            </s-select>
+            ${haySubida ? `
+            <div class="icono-propio">
+              <p class="asigna__titulo">Icono propio</p>
+              <div class="acciones acciones--envolver">
+                <label class="secundario como-boton">
+                  Subir…<input type="file" accept="image/png,image/webp,image/svg+xml" data-subir hidden />
+                </label>
+                ${hayBiblioteca() ? '<button type="button" class="secundario" data-biblioteca>Elegir de la biblioteca</button>' : ''}
+                ${b.iconoImagenUrl ? '<button type="button" class="secundario secundario--peligro" data-quitar-imagen>Quitar</button>' : ''}
+              </div>
+              <p class="ayuda" data-estado-imagen>${b.iconoImagenUrl
+    ? 'Las imágenes se muestran con sus propios colores.'
+    : 'PNG, WebP o SVG, cuadrado y pequeño (96×96, fondo transparente).'}</p>
+            </div>` : ''}
+          </s-grid>
+
+          <div class="casilla-polaris">
+            <s-checkbox label="Activo en la tienda" data-campo="activo" ${b.activo ? 'checked' : ''}></s-checkbox>
+          </div>
+
+          ${asignacionHtml(b)}
+
+          <s-button slot="primary-action" variant="primary" data-guardar>Guardar</s-button>
+          <s-button slot="secondary-actions" tone="critical" data-borrar>Eliminar</s-button>
+        </s-section>`).join('')}
+
+      <s-section heading="Añadir un beneficio" subheading="Se crea vacío: no aparece en ninguna ficha hasta que le digas a qué productos alcanza.">
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-text-field label="Texto en español" id="nuevo-beneficio-nombre" placeholder="p. ej. Envío gratis"></s-text-field>
+          <s-text-field label="Texto en inglés" id="nuevo-beneficio-nombre-en" placeholder="p. ej. Free shipping"></s-text-field>
+          <s-select label="Icono" id="nuevo-beneficio-icono">
+            <s-option value="${SIN_ICONO}">Sin icono</s-option>
+            ${opcionesIcono()}
+          </s-select>
+        </s-grid>
+        <s-button slot="primary-action" variant="primary" id="anadir-beneficio">Añadir beneficio</s-button>
+      </s-section>
+    </s-page>
   `;
+
+  /* Lo elegido en cada desplegable se pone por propiedad, no en el marcado: un
+   * `selected` dentro de un innerHTML no lo respeta el componente, y el campo
+   * se quedaba siempre en la primera opción. Pasó con el icono y con la
+   * esquina, y es silencioso: guardar escribía lo que no era. */
+  function ponerElegidos() {
+    if (hayPildora) {
+      const esq = document.getElementById('p-esquina');
+      if (esq) esq.value = pildora.esquina;
+    }
+    pantalla.querySelectorAll('s-section[data-id]').forEach((tarjeta) => {
+      const b = beneficios.find((x) => x.id === tarjeta.dataset.id);
+      const sel = tarjeta.querySelector('[data-campo="icono"]');
+      if (b && sel) sel.value = b.icono || SIN_ICONO;
+    });
+    const nuevo2 = document.getElementById('nuevo-beneficio-icono');
+    if (nuevo2) nuevo2.value = SIN_ICONO;
+  }
+  ponerElegidos();
 
   const refrescarMuestras = () => {
     document.getElementById('previa-beneficios').innerHTML = muestras();
@@ -1949,19 +1955,29 @@ async function pintarBeneficios() {
   /* Los ajustes de la píldora se ven en la muestra mientras se tocan, y sobre
    * un fondo con damero: una píldora blanca al 50 % sobre el gris del panel se
    * ve casi igual que al 100 %, y en la tienda va sobre una foto. */
-  const comoQuedaLaPildora = () => ({
-    activo: document.getElementById('p-activo').checked,
-    esquina: document.getElementById('p-esquina').value,
-    cuantas: Number(document.getElementById('p-cuantas').value || 3),
-    fondo: document.getElementById('p-fondo').value,
-    texto: document.getElementById('p-texto').value,
-    borde: document.getElementById('p-borde').value,
-    grosor: Number(document.getElementById('p-grosor').value || 0),
-    opacidad: Number(document.getElementById('p-opacidad').value || 100),
-    radio: Number(document.getElementById('p-radio').value || 7),
-    letra: Number(document.getElementById('p-letra').value || 12),
-    margen: Number(document.getElementById('p-margen').value || 10),
-  });
+  const comoQuedaLaPildora = () => {
+    const n = (id, defecto) => {
+      const v = String(document.getElementById(id)?.value ?? '').trim();
+      return v === '' ? defecto : Number(v);
+    };
+    /* Igual que en las insignias: el campo de color lleva la transparencia
+     * dentro, y la tienda la guarda aparte. Sin pareja de alfa no se toca. */
+    const fondo = partirAlfa(document.getElementById('p-fondo').value,
+      { color: pildora.fondo, opacidad: pildora.opacidad });
+    return {
+      activo: document.getElementById('p-activo').checked,
+      esquina: document.getElementById('p-esquina').value,
+      cuantas: n('p-cuantas', 3),
+      fondo: fondo.color,
+      texto: colorPlano(document.getElementById('p-texto').value, pildora.texto),
+      borde: colorPlano(document.getElementById('p-borde').value, pildora.borde),
+      grosor: n('p-grosor', 0),
+      opacidad: fondo.opacidad,
+      radio: n('p-radio', 7),
+      letra: n('p-letra', 12),
+      margen: n('p-margen', 10),
+    };
+  };
 
   const refrescarPildora = () => {
     const v = comoQuedaLaPildora();
@@ -1978,30 +1994,37 @@ async function pintarBeneficios() {
   };
 
   if (hayPildora) {
-    document.getElementById('pildora').querySelectorAll('input, select').forEach((c) => {
-      c.addEventListener('input', refrescarPildora);
-      c.addEventListener('change', refrescarPildora);
+    /* Un solo oyente: los eventos de los componentes suben hasta la sección, y
+     * en el DOM ya no hay `input` ni `select` a los que engancharse. */
+    const caja = document.getElementById('pildora');
+    caja.addEventListener('input', refrescarPildora);
+    caja.addEventListener('change', (e) => {
+      refrescarPildora();
+      /* Lo que se lee en el campo tiene que ser lo que se guarda. */
+      if (e.target.id === 'p-fondo') {
+        const v = comoQuedaLaPildora();
+        e.target.value = conAlfaHex(v.fondo, v.opacidad);
+      }
     });
     refrescarPildora();
   }
 
   document.getElementById('guardar-pildora')?.addEventListener('click', async (e) => {
-    e.target.disabled = true;
-    e.target.textContent = 'Guardando…';
+    const boton = e.currentTarget;
+    boton.loading = true;
     try {
       await guardarPildora(comoQuedaLaPildora());
       avisar('Aspecto de las píldoras guardado');
     } catch (error2) {
       avisar(error2.message, true);
     } finally {
-      e.target.disabled = false;
-      e.target.textContent = 'Guardar';
+      boton.loading = false;
     }
   });
 
   const conexiones = new Map();
 
-  pantalla.querySelectorAll('.tarjeta[data-id]').forEach((tarjeta) => {
+  pantalla.querySelectorAll('s-section[data-id]').forEach((tarjeta) => {
     const id = tarjeta.dataset.id;
     const original = beneficios.find((b) => b.id === id);
     const estado = {
@@ -2015,10 +2038,13 @@ async function pintarBeneficios() {
     );
     conexiones.set(id, conex);
 
-    const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`)?.value.trim() ?? '';
+    const valor = (campo) => sinCentinela(
+      String(tarjeta.querySelector(`[data-campo="${campo}"]`)?.value ?? '').trim(),
+    );
 
     const refrescar = () => {
       tarjeta.querySelector('[data-previa-texto]').textContent = valor('nombre') || 'Sin texto';
+      tarjeta.heading = valor('nombre') || 'Sin texto';
       /* Si hay imagen subida manda ella, igual que en la tienda: cambiar el
        * desplegable no debe dejar la muestra sin icono. */
       tarjeta.querySelector('[data-previa-icono]').innerHTML = original.iconoImagenUrl
@@ -2029,8 +2055,8 @@ async function pintarBeneficios() {
     tarjeta.querySelector('[data-campo="icono"]').addEventListener('change', refrescar);
 
     tarjeta.querySelector('[data-guardar]').addEventListener('click', async (e) => {
-      e.target.disabled = true;
-      e.target.textContent = 'Guardando…';
+      const boton = e.currentTarget;
+      boton.loading = true;
       try {
         const datos = {
           nombre: valor('nombre'),
@@ -2051,21 +2077,20 @@ async function pintarBeneficios() {
       } catch (error2) {
         avisar(error2.message, true);
       } finally {
-        e.target.disabled = false;
-        e.target.textContent = 'Guardar';
+        boton.loading = false;
       }
     });
 
     tarjeta.querySelectorAll('[data-mover]').forEach((boton) => {
       boton.addEventListener('click', async () => {
         pase.vivo = false;
-        boton.disabled = true;
+        boton.loading = true;
         try {
           await moverEntrada(beneficios, id, boton.dataset.mover, guardarBeneficio);
           await ir('beneficios');
         } catch (error2) {
           avisar(error2.message, true);
-          boton.disabled = false;
+          boton.loading = false;
         }
       });
     });
@@ -2113,14 +2138,15 @@ async function pintarBeneficios() {
     tarjeta.querySelector('[data-borrar]').addEventListener('click', async (e) => {
       if (!confirm(`¿Eliminar el beneficio «${original.nombre}»?`)) return;
       pase.vivo = false;
-      e.target.disabled = true;
+      const boton = e.currentTarget;
+      boton.loading = true;
       try {
         await borrarBeneficio(id);
         avisar('Beneficio eliminado');
         await ir('beneficios');
       } catch (error2) {
         avisar(error2.message, true);
-        e.target.disabled = false;
+        boton.loading = false;
       }
     });
   });
@@ -2133,7 +2159,7 @@ async function pintarBeneficios() {
       await crearBeneficio({
         nombre,
         nombreEn: document.getElementById('nuevo-beneficio-nombre-en').value.trim(),
-        icono: document.getElementById('nuevo-beneficio-icono').value,
+        icono: sinCentinela(document.getElementById('nuevo-beneficio-icono').value),
         orden: beneficios.length + 1,
       }, beneficios.length);
       avisar('Beneficio creado');
