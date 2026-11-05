@@ -337,3 +337,28 @@ traduce los handles (`anillo-signet` es `signet-ring` en /en/). El campo
 calculado guarda ahora el **id y el handle** de cada producto, y tanto el
 Liquid como el script preguntan primero por el id. Comprobado en las dos
 tiendas y en los dos idiomas.
+
+## Los beneficios también van sobre las fotos (5 nov 2026)
+
+Además del bloque bajo el botón, los beneficios se pintan sobre las fotos de
+la ficha, que es donde estaban en la referencia. Lo hace el mismo app embed de
+las insignias, por las mismas razones: la galería del tema no admite bloques
+de app dentro.
+
+Reglas:
+
+- **La primera foto se deja limpia.** Es la que manda y la que lleva la
+  insignia. Los beneficios empiezan en la segunda.
+- Van **arriba a la derecha**, con la píldora blanca y el icono de trazo fino.
+- **El orden lo decide la app**, no la foto: no hay nada guardado por imagen.
+  El primer beneficio cae sobre la segunda foto, el segundo sobre la tercera,
+  y así. Cambiar o reordenar las fotos del producto no rompe nada.
+
+Ajustes, en Personalizar → Configuración → Incrustaciones de apps → Insignias
+de producto: encender o apagar, cuántas fotos llevan beneficio (3 de fábrica),
+esquina, fondo, color del texto, redondeo, tamaño y separación del borde.
+
+El JavaScript de la extensión tiene un tope de 10 KB que Shopify comprueba en
+cada `deploy` (`AssetSizeAppBlockJavaScript`). Se rozó al añadir esto, así que
+los comentarios largos del script se resumieron y el porqué completo quedó
+aquí.

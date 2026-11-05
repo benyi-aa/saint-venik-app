@@ -32,7 +32,7 @@ se abren, se leen y se despliegan copiándolos.
 | Selector de color | app block | `custom.hermano_de_color` + metaobjeto `color` |
 | Selector de talla | app block | las variantes reales del producto |
 | Guía de tallas | app block | metaobjetos `guia_de_tallas` y `bloque_guia` |
-| Beneficios | app block | metaobjeto `sv_beneficio` |
+| Beneficios | app block + el embed | metaobjeto `sv_beneficio` |
 | Insignias de producto | **app embed** | metaobjeto `sv_etiqueta` |
 
 Los colores no son variantes: son productos separados que se apuntan entre sí.
@@ -49,6 +49,10 @@ producto no es una sección ni un bloque de tema: es un snippet dentro del bucle
 del grid, y Shopify dice que los bloques `@app` no se admiten en secciones
 renderizadas estáticamente. No hay dónde enganchar un bloque por tarjeta, así
 que el embed emite los datos en Liquid y un script los coloca en el DOM.
+
+El embed pinta dos cosas: las insignias y, sobre las fotos de la ficha (desde
+la segunda, la primera se deja limpia), los beneficios. El bloque de
+beneficios de la ficha sigue existiendo aparte, para la fila bajo el botón.
 
 Un app embed **no se enciende solo**: en cada tienda hay que activarlo en
 Personalizar → Configuración → Incrustaciones de apps → «Insignias de
