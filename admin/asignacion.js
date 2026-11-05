@@ -19,7 +19,7 @@
  * y el storefront, en una pagina de coleccion, se fia de la coleccion y no de
  * la cadena.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051530';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611051620';
 
 /* Los campos que comparten los dos tipos. Cada pantalla añade los suyos. */
 export const CAMPOS_COMUNES = [
@@ -29,6 +29,13 @@ export const CAMPOS_COMUNES = [
   { key: 'activo', name: 'Activo', type: 'boolean' },
   { key: 'productos', name: 'Productos', type: 'list.product_reference' },
   { key: 'colecciones', name: 'Colecciones', type: 'list.collection_reference' },
+  /* Las etiquetas de producto son la taxonomia que esta tienda ya usa: cada
+   * producto lleva `oro` o `acero-inox`, que es lo mismo que mira el selector
+   * de color. Asignar por etiqueta acierta donde las colecciones se quedan
+   * cortas (en .cl las colecciones "plateadas" solo cubren 72 de los 101
+   * productos de acero). Van separadas por comas, como las palabras clave de
+   * las guias. */
+  { key: 'etiquetas', name: 'Etiquetas de producto', type: 'single_line_text_field' },
   { key: 'handles', name: 'Handles (lo calcula la app)', type: 'multi_line_text_field' },
 ];
 
@@ -118,6 +125,21 @@ const BORRAR_ENTRADA = `
   }
 `;
 
+const ETIQUETAS_TIENDA = `
+  query EtiquetasDeProducto {
+    productTags(first: 250) { edges { node } }
+  }
+`;
+
+const POR_ETIQUETA = `
+  query ProductosPorEtiqueta($consulta: String!, $cursor: String) {
+    products(first: 100, query: $consulta, after: $cursor) {
+      pageInfo { hasNextPage endCursor }
+      nodes { id handle }
+    }
+  }
+`;
+
 const COLECCIONES = `
   query Colecciones($cursor: String) {
     collections(first: 100, after: $cursor, sortKey: TITLE) {
@@ -132,7 +154,7 @@ const PRODUCTOS_DE = `
     collection(id: $id) {
       products(first: 100, after: $cursor) {
         pageInfo { hasNextPage endCursor }
-        nodes { handle }
+        nodes { id handle }
       }
     }
   }
@@ -156,6 +178,17 @@ function idsDe(campos, clave) {
   }
 }
 
+/* Las etiquetas viajan como texto separado por comas, pero en la pantalla son
+ * fichas como las colecciones, asi que llevan un id falso para poder quitarlas
+ * con el mismo codigo. */
+export function listaDeEtiquetas(texto) {
+  return String(texto ?? '')
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .map((t) => ({ id: `tag:${t}`, titulo: t }));
+}
+
 export function aObjetoComun(entrada) {
   const valor = (clave) => entrada.fields.find((c) => c.key === clave)?.value ?? '';
   return {
@@ -168,6 +201,7 @@ export function aObjetoComun(entrada) {
     activo: valor('activo') !== 'false',
     orden: Number(valor('orden') || 0),
     handles: valor('handles'),
+    etiquetas: listaDeEtiquetas(valor('etiquetas')),
     idsProductos: idsDe(entrada.fields, 'productos'),
     idsColecciones: idsDe(entrada.fields, 'colecciones'),
     productos: [],
@@ -217,7 +251,7 @@ export async function cargarEntradas(tipo, aObjeto) {
  * Escritura
  * ------------------------------------------------------------------------- */
 
-export function camposComunes({ nombre, nombreEn, orden, activo, productos, colecciones, handles }) {
+export function camposComunes({ nombre, nombreEn, orden, activo, productos, colecciones, etiquetas, handles }) {
   const campos = [];
   if (nombre !== undefined) campos.push({ key: 'nombre', value: nombre });
   if (nombreEn !== undefined) campos.push({ key: 'nombre_en', value: nombreEn });
@@ -228,6 +262,9 @@ export function camposComunes({ nombre, nombreEn, orden, activo, productos, cole
   }
   if (colecciones !== undefined) {
     campos.push({ key: 'colecciones', value: JSON.stringify(colecciones.map((c) => c.id)) });
+  }
+  if (etiquetas !== undefined) {
+    campos.push({ key: 'etiquetas', value: etiquetas.map((e) => e.titulo).join(', ') });
   }
   if (handles !== undefined) campos.push({ key: 'handles', value: handles });
   return campos;
@@ -255,6 +292,37 @@ export async function borrarEntrada(id) {
  * Colecciones y resolucion de handles
  * ------------------------------------------------------------------------- */
 
+/* Las etiquetas que ya existen en la tienda, para poder ofrecerlas en vez de
+ * obligar a escribirlas de memoria (y a acertar con el guion de acero-inox). */
+export async function cargarEtiquetasDeTienda() {
+  try {
+    const d = await gql(ETIQUETAS_TIENDA);
+    return (d.productTags?.edges ?? []).map((e) => e.node).filter(Boolean).sort();
+  } catch (error) {
+    /* Si la consulta no esta disponible, el campo sigue sirviendo escribiendo
+     * la etiqueta a mano: es texto. */
+    return [];
+  }
+}
+
+export async function handlesDeEtiqueta(etiqueta) {
+  const handles = [];
+  let cursor = null;
+  let vueltas = 0;
+  /* Entre comillas simples: una etiqueta con espacios ("summer 2024") sin
+   * comillas se parte en dos terminos y devuelve de mas. */
+  const consulta = `tag:'${String(etiqueta).replace(/'/g, "")}'`;
+  do {
+    const d = await gql(POR_ETIQUETA, { consulta, cursor });
+    const pagina = d.products;
+    if (!pagina) break;
+    handles.push(...pagina.nodes.flatMap(clavesDe));
+    cursor = pagina.pageInfo.hasNextPage ? pagina.pageInfo.endCursor : null;
+    vueltas += 1;
+  } while (cursor && vueltas < TOPE_PAGINAS_COLECCION);
+  return { handles, incompleto: Boolean(cursor) };
+}
+
 export async function cargarColecciones() {
   const todas = [];
   let cursor = null;
@@ -280,13 +348,25 @@ export async function handlesDeColeccion(id) {
     const d = await gql(PRODUCTOS_DE, { id, cursor });
     const pagina = d.collection?.products;
     if (!pagina) break;
-    handles.push(...pagina.nodes.map((n) => n.handle));
+    handles.push(...pagina.nodes.flatMap(clavesDe));
     cursor = pagina.pageInfo.hasNextPage ? pagina.pageInfo.endCursor : null;
     vueltas += 1;
   } while (cursor && vueltas < TOPE_PAGINAS_COLECCION);
   /* Si se corto por el tope quedaron productos fuera. Callarlo seria lo peor:
    * la tienda marcaria unos si y otros no sin ninguna razon visible. */
   return { handles, incompleto: Boolean(cursor) };
+}
+
+/* El numero del final del GID. El id no cambia de idioma y el handle si:
+ * en ingles "anillo-signet" se llama "signet-ring", asi que emparejar solo por
+ * handle dejaba la tienda en ingles sin insignias ni beneficios. Se guardan
+ * los dos, y la tienda pregunta primero por el id. */
+export function numeroDe(gid) {
+  return String(gid ?? '').split('/').pop();
+}
+
+export function clavesDe(producto) {
+  return [numeroDe(producto.id), producto.handle].filter(Boolean);
 }
 
 /* Las barras de los extremos no son adorno: sin ellas la tienda, al preguntar
@@ -301,15 +381,24 @@ export function cadenaDeHandles(handles) {
   return `|${limpios.join('|')}|`;
 }
 
-export async function resolverHandles({ productos = [], colecciones = [] }, onPaso) {
-  const todos = productos.map((p) => p.handle).filter(Boolean);
+export async function resolverHandles({ productos = [], colecciones = [], etiquetas = [] }, onPaso) {
+  const todos = productos.flatMap(clavesDe);
   const cortadas = [];
+
   for (const c of colecciones) {
     if (onPaso) onPaso(`Leyendo «${c.titulo}»…`);
     const { handles, incompleto } = await handlesDeColeccion(c.id);
     todos.push(...handles);
     if (incompleto) cortadas.push(c.titulo);
   }
+
+  for (const e of etiquetas) {
+    if (onPaso) onPaso(`Leyendo «${e.titulo}»…`);
+    const { handles, incompleto } = await handlesDeEtiqueta(e.titulo);
+    todos.push(...handles);
+    if (incompleto) cortadas.push(e.titulo);
+  }
+
   return { cadena: cadenaDeHandles(todos), cortadas };
 }
 

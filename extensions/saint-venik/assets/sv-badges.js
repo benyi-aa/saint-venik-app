@@ -41,6 +41,7 @@
    * garantizado el objeto `product` en todos los temas. La URL si lo tiene, y
    * cuesta una linea: asi la insignia de la ficha no depende de eso. */
   var FICHA = datos.ficha || (location.pathname.match(/\/products\/([^/?#]+)/) || [])[1] || null;
+  var FICHA_ID = datos.fichaId || null;
 
   var etiquetas = datos.etiquetas.slice().sort(function (a, b) {
     return (a.orden || 0) - (b.orden || 0);
@@ -49,8 +50,13 @@
   /* El panel guarda los handles entre barras (|anillo|collar|) justamente para
    * poder preguntar asi, sin partir la cadena y sin que "oro" case con
    * "collar-oro". */
-  function alcanza(etiqueta, handle, enLaColeccion) {
-    if (handle && (etiqueta.handles || '').indexOf('|' + handle + '|') !== -1) return true;
+  function alcanza(etiqueta, handle, enLaColeccion, id) {
+    var lista = etiqueta.handles || '';
+    /* Primero por id, que es el mismo en los dos idiomas. El handle se
+     * traduce: en ingles "anillo-signet" es "signet-ring", asi que solo con
+     * el handle la tienda en ingles se quedaba sin insignias. */
+    if (id && lista.indexOf('|' + id + '|') !== -1) return true;
+    if (handle && lista.indexOf('|' + handle + '|') !== -1) return true;
 
     /* Dentro del grid de una coleccion, una etiqueta asignada a esa coleccion
      * vale para todas sus tarjetas aunque el handle no estuviera en la lista:
@@ -62,10 +68,10 @@
     return etiqueta.colecciones.indexOf(datos.coleccion) !== -1;
   }
 
-  function paraHandle(handle, enLaColeccion) {
+  function paraHandle(handle, enLaColeccion, id) {
     var salen = [];
     for (var i = 0; i < etiquetas.length && salen.length < MAXIMO; i += 1) {
-      if (alcanza(etiquetas[i], handle, enLaColeccion)) salen.push(etiquetas[i]);
+      if (alcanza(etiquetas[i], handle, enLaColeccion, id)) salen.push(etiquetas[i]);
     }
     return salen;
   }
@@ -123,7 +129,9 @@
 
     tarjeta.dataset[MARCA] = '1';
 
-    var lista = paraHandle(tarjeta.dataset.productHandle, enGridDeColeccion(tarjeta));
+    var lista = paraHandle(
+      tarjeta.dataset.productHandle, enGridDeColeccion(tarjeta), tarjeta.dataset.productId
+    );
     if (!lista.length) return;
 
     var cont = caja(lista, datos.esquinaTarjeta, 'tarjeta');
@@ -139,7 +147,7 @@
   }
 
   function decorarFicha() {
-    if (!FICHA) return;
+    if (!FICHA && !FICHA_ID) return;
 
     /* Solo sobre la primera foto. En escritorio el tema las enseña todas a la
      * vez: una insignia por foto serian seis insignias iguales. */
@@ -150,7 +158,7 @@
 
     /* En la ficha no se usa el atajo de coleccion: lo que vale es la lista de
      * handles, que el panel mantiene al dia. */
-    var lista = paraHandle(FICHA, false);
+    var lista = paraHandle(FICHA, false, FICHA_ID);
     if (!lista.length) return;
 
     anclar(destino).appendChild(caja(lista, datos.esquinaFicha, 'ficha'));

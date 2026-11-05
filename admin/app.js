@@ -1,36 +1,36 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611051530';
+import { estaEmbebida } from './api.js?v=202611051620';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611051530';
-import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202611051530';
+} from './colores.js?v=202611051620';
+import { leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia } from './config.js?v=202611051620';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611051530';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051530';
+} from './productos.js?v=202611051620';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611051620';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611051530';
-import { guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml } from './vista-previa.js?v=202611051530';
-import { cargarColecciones, TOPE_REFERENCIAS } from './asignacion.js?v=202611051530';
+} from './guias.js?v=202611051620';
+import { guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml } from './vista-previa.js?v=202611051620';
+import { cargarColecciones, cargarEtiquetasDeTienda, TOPE_REFERENCIAS } from './asignacion.js?v=202611051620';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611051530';
+} from './etiquetas.js?v=202611051620';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
-} from './beneficios.js?v=202611051530';
-import { ICONOS, svgIcono } from './iconos.js?v=202611051530';
+} from './beneficios.js?v=202611051620';
+import { ICONOS, svgIcono } from './iconos.js?v=202611051620';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611051530';
+const VERSION = '202611051620';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1128,16 +1128,22 @@ function asignacionHtml(estado) {
   return `
     <div class="asigna">
       <div class="asigna__col">
-        <label>Productos sueltos</label>
-        <div class="chips" data-chips="productos">${chipsHtml(estado.productos, 'Ninguno.')}</div>
-        <input type="search" data-buscar="productos" placeholder="Escribe para buscar un producto…" />
-        <div class="resultados" data-resultados="productos" hidden></div>
+        <label>Etiquetas de producto</label>
+        <div class="chips" data-chips="etiquetas">${chipsHtml(estado.etiquetas, 'Ninguna.')}</div>
+        <input type="search" data-buscar="etiquetas" placeholder="Escribe una etiqueta, p. ej. oro…" />
+        <div class="resultados" data-resultados="etiquetas" hidden></div>
       </div>
       <div class="asigna__col">
         <label>Colecciones enteras</label>
         <div class="chips" data-chips="colecciones">${chipsHtml(estado.colecciones, 'Ninguna.')}</div>
         <input type="search" data-buscar="colecciones" placeholder="Escribe para buscar una colección…" />
         <div class="resultados" data-resultados="colecciones" hidden></div>
+      </div>
+      <div class="asigna__col">
+        <label>Productos sueltos</label>
+        <div class="chips" data-chips="productos">${chipsHtml(estado.productos, 'Ninguno.')}</div>
+        <input type="search" data-buscar="productos" placeholder="Escribe para buscar un producto…" />
+        <div class="resultados" data-resultados="productos" hidden></div>
       </div>
     </div>
     <p class="ayuda" data-alcance></p>
@@ -1155,9 +1161,12 @@ function alcanceEstimado(estado) {
 
 function textoAlcance(estado, guardado) {
   if (!estado.sucio) {
-    if (!guardado) return 'Todavía no alcanza a ningún producto: elige productos o colecciones.';
+    if (!guardado) return 'Todavía no alcanza a ningún producto: elige una etiqueta, una colección o productos sueltos.';
     return `Alcanza a ${guardado} producto${guardado === 1 ? '' : 's'}.`;
   }
+  /* De una etiqueta no se sabe cuántos productos lleva sin preguntárselo a
+   * Shopify, así que con etiquetas de por medio no se estima: se dice. */
+  if (estado.etiquetas.length) return 'Pulsa Guardar para calcular a cuántos alcanza y aplicarlo.';
   const n = alcanceEstimado(estado);
   if (!n) return 'Sin nada elegido no se muestra en ninguna ficha. Pulsa Guardar para aplicarlo.';
   return `Alcanzará a unos ${n} productos. Pulsa Guardar para calcularlo exacto y aplicarlo.`;
@@ -1166,8 +1175,9 @@ function textoAlcance(estado, guardado) {
 /* El estado vive en memoria mientras se edita la tarjeta y solo baja a Shopify
  * al pulsar Guardar. Guardar en cada clic sería más simple de escribir, pero
  * añadir cinco productos serían cinco escrituras y cinco esperas. */
-function conectarAsignacion(tarjeta, estado, colecciones, guardado) {
+function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guardado) {
   const repintar = () => {
+    tarjeta.querySelector('[data-chips="etiquetas"]').innerHTML = chipsHtml(estado.etiquetas, 'Ninguna.');
     tarjeta.querySelector('[data-chips="productos"]').innerHTML = chipsHtml(estado.productos, 'Ninguno.');
     tarjeta.querySelector('[data-chips="colecciones"]').innerHTML = chipsHtml(estado.colecciones, 'Ninguna.');
     tarjeta.querySelector('[data-alcance]').textContent = textoAlcance(estado, guardado);
@@ -1188,6 +1198,7 @@ function conectarAsignacion(tarjeta, estado, colecciones, guardado) {
     const x = e.target.closest('[data-quitar]');
     if (!x || !tarjeta.contains(x)) return;
     const id = x.dataset.quitar;
+    estado.etiquetas = estado.etiquetas.filter((e) => e.id !== id);
     estado.productos = estado.productos.filter((p) => p.id !== id);
     estado.colecciones = estado.colecciones.filter((c) => c.id !== id);
     estado.sucio = true;
@@ -1263,6 +1274,17 @@ function conectarAsignacion(tarjeta, estado, colecciones, guardado) {
     return colecciones.filter((c) => c.titulo.toLowerCase().includes(busca));
   });
 
+  /* Si lo escrito no está entre las etiquetas de la tienda se ofrece igual:
+   * puede ser una etiqueta que todavía no tiene ningún producto, o una que la
+   * consulta no devolvió. Es texto, no una referencia. */
+  conectarBuscador('etiquetas', async (texto) => {
+    const busca = texto.toLowerCase();
+    const suyas = etiquetasTienda.filter((t) => t.toLowerCase().includes(busca));
+    const exacta = etiquetasTienda.some((t) => t.toLowerCase() === busca);
+    const lista = exacta ? suyas : [texto, ...suyas];
+    return lista.map((t) => ({ id: `tag:${t}`, titulo: t }));
+  });
+
   repintar();
   return repintar;
 }
@@ -1323,7 +1345,9 @@ async function cargarOVacio(cargar, hayEstructura) {
 async function pintarEtiquetas() {
   pantalla.innerHTML = '<p class="cargando">Cargando insignias…</p>';
 
-  const [colecciones, revision] = await Promise.all([cargarColecciones(), revisarEstructura()]);
+  const [colecciones, etiquetasTienda, revision] = await Promise.all([
+    cargarColecciones(), cargarEtiquetasDeTienda(), revisarEstructura(),
+  ]);
   const faltaLoNuestro = revision.pendientes.some((p) => p.includes('insignias'));
   const { lista: etiquetas, error } = await cargarOVacio(cargarEtiquetas, !faltaLoNuestro);
   const cambiadas = await recalcular(etiquetas, sincronizarEtiqueta);
@@ -1410,11 +1434,14 @@ async function pintarEtiquetas() {
     const id = tarjeta.dataset.id;
     const original = etiquetas.find((e) => e.id === id);
     const estado = {
+      etiquetas: [...original.etiquetas],
       productos: [...original.productos],
       colecciones: [...original.colecciones],
       sucio: false,
     };
-    const repintarAsignacion = conectarAsignacion(tarjeta, estado, colecciones, alcanceEtiqueta(original));
+    const repintarAsignacion = conectarAsignacion(
+      tarjeta, estado, colecciones, etiquetasTienda, alcanceEtiqueta(original),
+    );
 
     const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`)?.value.trim() ?? '';
     const muestra = tarjeta.querySelector('[data-previa]');
@@ -1440,6 +1467,7 @@ async function pintarEtiquetas() {
           fondo: valor('fondo'),
           texto: valor('texto'),
           activo: tarjeta.querySelector('[data-campo="activo"]').checked,
+          etiquetas: estado.etiquetas,
           productos: estado.productos,
           colecciones: estado.colecciones,
         };
@@ -1510,7 +1538,9 @@ async function pintarEtiquetas() {
 async function pintarBeneficios() {
   pantalla.innerHTML = '<p class="cargando">Cargando beneficios…</p>';
 
-  const [colecciones, revision] = await Promise.all([cargarColecciones(), revisarEstructura()]);
+  const [colecciones, etiquetasTienda, revision] = await Promise.all([
+    cargarColecciones(), cargarEtiquetasDeTienda(), revisarEstructura(),
+  ]);
   const faltaLoNuestro = revision.pendientes.some((p) => p.includes('beneficios'));
   const { lista: beneficios, error } = await cargarOVacio(cargarBeneficios, !faltaLoNuestro);
   const cambiados = await recalcular(beneficios, sincronizarBeneficio);
@@ -1611,11 +1641,14 @@ async function pintarBeneficios() {
     const id = tarjeta.dataset.id;
     const original = beneficios.find((b) => b.id === id);
     const estado = {
+      etiquetas: [...original.etiquetas],
       productos: [...original.productos],
       colecciones: [...original.colecciones],
       sucio: false,
     };
-    const repintarAsignacion = conectarAsignacion(tarjeta, estado, colecciones, alcanceBeneficio(original));
+    const repintarAsignacion = conectarAsignacion(
+      tarjeta, estado, colecciones, etiquetasTienda, alcanceBeneficio(original),
+    );
 
     const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`)?.value.trim() ?? '';
 
@@ -1635,6 +1668,7 @@ async function pintarBeneficios() {
           nombreEn: valor('nombre_en'),
           icono: valor('icono'),
           activo: tarjeta.querySelector('[data-campo="activo"]').checked,
+          etiquetas: estado.etiquetas,
           productos: estado.productos,
           colecciones: estado.colecciones,
         };

@@ -12,7 +12,7 @@ import {
   CAMPOS_COMUNES, aObjetoComun, cargarEntradas, camposComunes, crearEntrada,
   guardarEntrada, borrarEntrada, faltaEstructura, asegurarEstructura,
   resolverHandles, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611051530';
+} from './asignacion.js?v=202611051620';
 
 export const TIPO_ETIQUETA = 'sv_etiqueta';
 export const TOPE_ETIQUETAS = TOPE_ENTRADAS;
@@ -77,9 +77,11 @@ export async function sincronizar(etiqueta, onPaso) {
   return { cambio: true, cortadas };
 }
 
+/* La cadena lleva dos claves por producto, el id y el handle, asi que contar
+ * trozos daria el doble. Se cuentan los numericos, que son los ids. */
 export function cuantosAlcanza(etiqueta) {
   if (!etiqueta.handles) return 0;
-  return etiqueta.handles.split('|').filter(Boolean).length;
+  return etiqueta.handles.split('|').filter((c) => /^\d+$/.test(c)).length;
 }
 
 export async function faltaEstructuraEtiquetas() {

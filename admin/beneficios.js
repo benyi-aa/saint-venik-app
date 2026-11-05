@@ -16,7 +16,7 @@ import {
   CAMPOS_COMUNES, aObjetoComun, cargarEntradas, camposComunes, crearEntrada,
   guardarEntrada, borrarEntrada, faltaEstructura, asegurarEstructura,
   resolverHandles, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611051530';
+} from './asignacion.js?v=202611051620';
 
 export const TIPO_BENEFICIO = 'sv_beneficio';
 export const TOPE_BENEFICIOS = TOPE_ENTRADAS;
@@ -74,9 +74,11 @@ export async function sincronizar(beneficio, onPaso) {
   return { cambio: true, cortadas };
 }
 
+/* La cadena lleva dos claves por producto, el id y el handle, asi que contar
+ * trozos daria el doble. Se cuentan los numericos, que son los ids. */
 export function cuantosAlcanza(beneficio) {
   if (!beneficio.handles) return 0;
-  return beneficio.handles.split('|').filter(Boolean).length;
+  return beneficio.handles.split('|').filter((c) => /^\d+$/.test(c)).length;
 }
 
 export async function faltaEstructuraBeneficios() {

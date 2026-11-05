@@ -82,6 +82,7 @@
       ],
       "coleccion": {%- if collection.handle != blank %} {{ collection.handle | json }} {%- else %} null {%- endif %},
       "ficha": {%- if product.handle != blank %} {{ product.handle | json }} {%- else %} null {%- endif %},
+      "fichaId": {%- if product.id %} {{ product.id | json }} {%- else %} null {%- endif %},
       "tarjetas": {{ block.settings.en_tarjetas | json }},
       "fichas": {{ block.settings.en_ficha | json }},
       "esquinaTarjeta": {{ block.settings.esquina_tarjeta | json }},
