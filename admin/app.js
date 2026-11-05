@@ -77,55 +77,50 @@ function fondoDe(color) {
 function tarjetaColor(color, i, total, hayNombreEn) {
   const problemas = problemasDe(color);
   return `
-    <section class="tarjeta" data-id="${escapar(color.id)}">
-      <div class="color">
+    <s-section data-id="${escapar(color.id)}" heading="${escapar(color.nombre || 'Sin nombre')}">
+      <div class="cabecera-fila">
         <div class="color__muestra" style="${fondoDe(color)}"></div>
-        <div class="color__campos">
-          <div>
-            <label>Nombre en español</label>
-            <input type="text" data-campo="nombre" value="${escapar(color.nombre)}" />
-            <p class="ayuda">Lo que ve el cliente en la tienda en español.</p>
+        <s-stack direction="inline" gap="small-300">
+          <s-button variant="tertiary" accessibilityLabel="${i < 0 ? 'Sin etiqueta no se puede ordenar' : 'Subir'}"
+            data-mover="arriba" ${i <= 0 ? 'disabled' : ''}>↑</s-button>
+          <s-button variant="tertiary" accessibilityLabel="${i < 0 ? 'Sin etiqueta no se puede ordenar' : 'Bajar'}"
+            data-mover="abajo" ${i < 0 || i === total - 1 ? 'disabled' : ''}>↓</s-button>
+        </s-stack>
+      </div>
+
+      <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+        <s-text-field label="Nombre en español" data-campo="nombre" value="${escapar(color.nombre)}"
+          details="Lo que ve el cliente en la tienda en español."></s-text-field>
+        ${hayNombreEn
+    ? `<s-text-field label="Nombre en inglés" data-campo="nombre_en" value="${escapar(color.nombreEn)}"
+            placeholder="Vacío: traducción automática"
+            details="Lo que se ve en /en/. Vacío, se usa la traducción de Translate &amp; Adapt."></s-text-field>`
+    : `<div>
+            <p class="asigna__titulo">Nombre en inglés</p>
+            <p class="ayuda">Todavía no existe en tu tienda: pulsa «Crear lo que falta» arriba.</p>
+          </div>`}
+        <s-text-field label="Etiqueta del producto" data-campo="etiqueta" value="${escapar(color.etiqueta)}"
+          details="Los productos con esta etiqueta se muestran en este color."></s-text-field>
+        <s-color-field label="Color de la muestra" data-campo="muestra" value="${escapar(color.muestra || '#cccccc')}"
+          details="${color.imagen ? 'Hay una imagen, y la imagen manda sobre el color.' : 'Se usa si no hay imagen.'}"></s-color-field>
+        <div class="icono-propio">
+          <p class="asigna__titulo">Imagen de la muestra</p>
+          <div class="acciones acciones--envolver">
+            <label class="secundario como-boton">
+              Subir…<input type="file" accept="image/*" data-subir hidden />
+            </label>
+            ${hayBiblioteca() ? '<button type="button" class="secundario" data-biblioteca>Elegir de la biblioteca</button>' : ''}
+            ${color.imagen ? '<button type="button" class="secundario secundario--peligro" data-quitar-imagen>Quitar</button>' : ''}
           </div>
-          <div>
-            <label>Nombre en inglés</label>
-            ${hayNombreEn
-              ? `<input type="text" data-campo="nombre_en" value="${escapar(color.nombreEn)}" placeholder="Vacío: traducción automática" />
-                 <p class="ayuda">Lo que se ve en /en/. Vacío, se usa la traducción de Translate &amp; Adapt.</p>`
-              : '<p class="ayuda">Todavía no existe en tu tienda: pulsa «Crear lo que falta» arriba.</p>'}
-          </div>
-          <div>
-            <label>Etiqueta del producto</label>
-            <input type="text" data-campo="etiqueta" value="${escapar(color.etiqueta)}" />
-            <p class="ayuda">Los productos con esta etiqueta se muestran en este color.</p>
-          </div>
-          <div>
-            <label>Color de la muestra</label>
-            <input type="color" data-campo="muestra" value="${escapar(color.muestra || '#cccccc')}" />
-            <p class="ayuda">${color.imagen ? 'Hay una imagen, y la imagen manda sobre el color.' : 'Se usa si no hay imagen.'}</p>
-          </div>
-          <div>
-            <label>Imagen de la muestra</label>
-            <div class="acciones acciones--envolver">
-              <label class="secundario como-boton">
-                Subir…<input type="file" accept="image/*" data-subir hidden />
-              </label>
-              ${hayBiblioteca() ? '<button class="secundario" data-biblioteca>Elegir de la biblioteca</button>' : ''}
-              ${color.imagen ? '<button class="secundario secundario--peligro" data-quitar-imagen>Quitar</button>' : ''}
-            </div>
-            <p class="ayuda" data-estado-imagen>${color.imagen ? 'Manda sobre el color.' : 'Opcional.'}</p>
-          </div>
+          <p class="ayuda" data-estado-imagen>${color.imagen ? 'Manda sobre el color.' : 'Opcional.'}</p>
         </div>
-      </div>
-      ${problemas.map((p) => `<p class="problema">${escapar(p)}</p>`).join('')}
-      <div class="acciones">
-        <button class="principal" data-guardar>Guardar</button>
-        <button class="secundario" data-mover="arriba" ${i <= 0 ? 'disabled' : ''}
-          title="${i < 0 ? 'Sin etiqueta no se puede ordenar' : 'Subir'}">↑</button>
-        <button class="secundario" data-mover="abajo" ${i < 0 || i === total - 1 ? 'disabled' : ''}
-          title="${i < 0 ? 'Sin etiqueta no se puede ordenar' : 'Bajar'}">↓</button>
-        <button class="secundario secundario--peligro" data-borrar>Eliminar</button>
-      </div>
-    </section>
+      </s-grid>
+
+      ${problemas.length ? `<s-banner tone="warning">${problemas.map((p) => `<p>${escapar(p)}</p>`).join('')}</s-banner>` : ''}
+
+      <s-button slot="primary-action" variant="primary" data-guardar>Guardar</s-button>
+      <s-button slot="secondary-actions" tone="critical" data-borrar>Eliminar</s-button>
+    </s-section>
   `;
 }
 
@@ -144,29 +139,31 @@ async function pintarColores() {
   const ordenables = colores.filter((c) => c.etiqueta);
 
   pantalla.innerHTML = `
-    <h1>Colores</h1>
-    <p class="subtitulo">Cada color es una muestra en la ficha de producto. Un producto se asocia a su color por la etiqueta, y el orden de aquí es el orden en que salen.</p>
+    <s-page>
+      ${bannerPendientes(revision.pendientes)}
 
-    ${tarjetaPendientes(revision.pendientes)}
-
-    <section class="tarjeta previa">
-      <p class="previa__titulo">Así se ve en la ficha de producto</p>
-      ${coloresHtml(colores)}
-      <p class="ayuda previa__nota">La tipografía y los colores del texto los pone tu tema; aquí se ven los del panel.</p>
-    </section>
-
-    ${colores.map((c) => tarjetaColor(c, ordenables.indexOf(c), ordenables.length, hayNombreEn)).join('')}
-
-    <section class="tarjeta">
-      <label>Añadir un color</label>
-      <div class="color__campos" style="margin-bottom:12px;">
-        <div><input type="text" id="nuevo-nombre" placeholder="En español, p. ej. ROSADO" /></div>
-        ${hayNombreEn ? '<div><input type="text" id="nuevo-nombre-en" placeholder="En inglés, p. ej. ROSE" /></div>' : ''}
-        <div><input type="text" id="nueva-etiqueta" placeholder="Etiqueta, p. ej. oro-rosa" /></div>
-        <div><input type="color" id="nueva-muestra" value="#cccccc" /></div>
+      <div class="titular">
+        <h1>Colores</h1>
+        <p class="subtitulo">Cada color es una muestra en la ficha de producto. Un producto se asocia a su color por la etiqueta, y el orden de aquí es el orden en que salen.</p>
       </div>
-      <div class="acciones"><button class="principal" id="anadir-color">Añadir color</button></div>
-    </section>
+
+      <s-section heading="Así se ve en la ficha de producto" subheading="La tipografía y los colores del texto los pone tu tema; aquí se ven los del panel.">
+        ${coloresHtml(colores)}
+      </s-section>
+
+      ${colores.map((c) => tarjetaColor(c, ordenables.indexOf(c), ordenables.length, hayNombreEn)).join('')}
+
+      <s-section heading="Añadir un color">
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-text-field label="Nombre en español" id="nuevo-nombre" placeholder="p. ej. ROSADO"></s-text-field>
+          ${hayNombreEn ? '<s-text-field label="Nombre en inglés" id="nuevo-nombre-en" placeholder="p. ej. ROSE"></s-text-field>' : ''}
+          <s-text-field label="Etiqueta" id="nueva-etiqueta" placeholder="p. ej. oro-rosa"></s-text-field>
+          <s-color-field label="Color de la muestra" id="nueva-muestra" value="#cccccc"></s-color-field>
+        </s-grid>
+        <s-button slot="primary-action" variant="primary" id="anadir-color">Añadir color</s-button>
+      </s-section>
+    </s-page>
+
   `;
 
   /* Reordenar escribe la lista de etiquetas en la configuración, que es lo que
@@ -185,13 +182,13 @@ async function pintarColores() {
     await guardarOrdenColores(orden);
   }
 
-  pantalla.querySelectorAll('.tarjeta[data-id]').forEach((tarjeta) => {
+  pantalla.querySelectorAll('s-section[data-id]').forEach((tarjeta) => {
     const id = tarjeta.dataset.id;
-    const valor = (campo) => tarjeta.querySelector(`[data-campo="${campo}"]`)?.value.trim() ?? '';
+    const valor = (campo) => String(tarjeta.querySelector(`[data-campo="${campo}"]`)?.value ?? '').trim();
 
     tarjeta.querySelector('[data-guardar]')?.addEventListener('click', async (e) => {
-      e.target.disabled = true;
-      e.target.textContent = 'Guardando…';
+      const boton = e.currentTarget;
+      boton.loading = true;
       try {
         const original = colores.find((c) => c.id === id);
         await guardarColor(id, {
@@ -200,27 +197,31 @@ async function pintarColores() {
            * "no existe" y no lo escribe, en vez de fallar el guardado entero. */
           nombreEn: hayNombreEn ? valor('nombre_en') : undefined,
           etiqueta: valor('etiqueta'),
-          muestra: valor('muestra'),
+          /* En minúsculas siempre. El campo de color del admin devuelve lo que
+           * se escribió, con sus mayúsculas, y guardarColor solo escribe el
+           * color «si cambió»: un #C9A227 frente a un #c9a227 guardado parecía
+           * un cambio en cada guardado y tiraba por tierra esa comprobación,
+           * que es la que impide escribir un gris que nadie eligió. */
+          muestra: colorPlano(valor('muestra'), original?.muestra || '#cccccc'),
           muestraOriginal: original?.muestra ? original.muestra : '#cccccc',
         });
         avisar('Color guardado');
         await pintarColores();
       } catch (error) {
         avisar(error.message, true);
-        e.target.disabled = false;
-        e.target.textContent = 'Guardar';
+        boton.loading = false;
       }
     });
 
     tarjeta.querySelectorAll('[data-mover]').forEach((boton) => {
       boton.addEventListener('click', async () => {
-        boton.disabled = true;
+        boton.loading = true;
         try {
           await reordenar(id, boton.dataset.mover);
           await pintarColores();
         } catch (error) {
           avisar(error.message, true);
-          boton.disabled = false;
+          boton.loading = false;
         }
       });
     });
@@ -279,21 +280,23 @@ async function pintarColores() {
   });
 
   document.getElementById('anadir-color').addEventListener('click', async (e) => {
-    const nombre = document.getElementById('nuevo-nombre').value.trim();
+    const boton = e.currentTarget;
+    const texto = (id) => String(document.getElementById(id)?.value ?? '').trim();
+    const nombre = texto('nuevo-nombre');
     if (!nombre) { avisar('Ponle un nombre al color', true); return; }
-    e.target.disabled = true;
+    boton.loading = true;
     try {
       await crearColor({
         nombre,
-        nombreEn: document.getElementById('nuevo-nombre-en')?.value.trim() ?? '',
-        etiqueta: document.getElementById('nueva-etiqueta').value.trim(),
-        muestra: document.getElementById('nueva-muestra').value,
+        nombreEn: texto('nuevo-nombre-en'),
+        etiqueta: texto('nueva-etiqueta'),
+        muestra: colorPlano(document.getElementById('nueva-muestra').value, '#cccccc'),
       });
       avisar('Color añadido');
       await pintarColores();
     } catch (error) {
       avisar(error.message, true);
-      e.target.disabled = false;
+      boton.loading = false;
     }
   });
 
