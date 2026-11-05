@@ -1,42 +1,42 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611052028';
+import { estaEmbebida } from './api.js?v=202611052044';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611052028';
+} from './colores.js?v=202611052044';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-} from './config.js?v=202611052028';
+} from './config.js?v=202611052044';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611052028';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611052028';
+} from './productos.js?v=202611052044';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611052044';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611052028';
+} from './guias.js?v=202611052044';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611052028';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611052028';
+} from './vista-previa.js?v=202611052044';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611052044';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611052028';
+} from './etiquetas.js?v=202611052044';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611052028';
-import { ICONOS, svgIcono } from './iconos.js?v=202611052028';
+} from './beneficios.js?v=202611052044';
+import { ICONOS, svgIcono } from './iconos.js?v=202611052044';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611052028';
+const VERSION = '202611052044';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -306,23 +306,12 @@ async function pintarColores() {
   conectarPendientes(pintarColores);
 }
 
-/* Se ofrece donde el usuario se topa con el problema, no solo en la pantalla de
- * inicio: si falta un campo, el error aparece al guardar, y mandar a la persona
- * a buscar otro botón en otra pantalla es una forma de perderla. */
-function tarjetaPendientes(pendientes, alTerminar) {
-  if (!pendientes.length) return '';
-  return `
-    <section class="tarjeta" id="tarjeta-pendientes">
-      <p><strong>Falta parte de la estructura en tu tienda.</strong> Se va a crear:</p>
-      <ul>${pendientes.map((t) => `<li>${escapar(t)}</li>`).join('')}</ul>
-      <p class="ayuda">Se puede pulsar las veces que haga falta: no duplica lo que ya existe.</p>
-      <div class="acciones"><button class="principal" id="crear">Crear lo que falta</button></div>
-    </section>`;
-}
-
-/* Lo mismo, para las pantallas que ya usan los componentes del admin: ahí no
- * es una tarjeta más, es un aviso, y va arriba del todo. El botón se llama
- * igual, así que lo conecta la misma función de abajo. */
+/* Se ofrece donde el usuario se topa con el problema, no solo en la pantalla
+ * de inicio: si falta un campo, el error aparece al guardar, y mandar a la
+ * persona a buscar otro botón en otra pantalla es una forma de perderla.
+ *
+ * Va como aviso del admin y arriba del todo, en el hueco que `s-page` reserva
+ * justo para esto. */
 function bannerPendientes(pendientes) {
   if (!pendientes.length) return '';
   return `
@@ -367,10 +356,15 @@ async function pintarGuias() {
 
   const listado = guias.length
     ? guias.map((g) => `
-        <section class="tarjeta tarjeta--pulsable" data-guia="${escapar(g.handle)}" role="button" tabindex="0">
-          <h2 style="margin:0 0 4px;font-size:16px;">${escapar(g.nombre)}</h2>
-          <p class="ayuda">${g.bloques.length} ${g.bloques.length === 1 ? 'bloque' : 'bloques'} · editar</p>
-        </section>`).join('')
+        <s-section data-guia="${escapar(g.handle)}">
+          <div class="guia-fila" role="button" tabindex="0" data-abrir>
+            <div>
+              <p class="guia-fila__nombre">${escapar(g.nombre)}</p>
+              <p class="ayuda">${g.bloques.length} ${g.bloques.length === 1 ? 'bloque' : 'bloques'}</p>
+            </div>
+            <s-button variant="tertiary">Editar</s-button>
+          </div>
+        </s-section>`).join('')
     : '';
 
   /* Solo se ofrece crear cuando la estructura existe: sin la definicion de
@@ -378,22 +372,21 @@ async function pintarGuias() {
   const puedeCrear = hayDefiniciones && guias.length < TOPE_GUIAS;
   const nueva = !hayDefiniciones ? '' : puedeCrear
     ? `
-      <section class="tarjeta">
-        <label>Nueva guía</label>
-        <div class="color__campos" style="margin-bottom:12px;">
-          <div><input type="text" id="guia-nombre" placeholder="Nombre en español, p. ej. Aros" /></div>
-          <div><input type="text" id="guia-nombre-en" placeholder="Nombre en inglés, p. ej. Earrings" /></div>
-          <div><input type="text" id="guia-palabras" placeholder="Palabras clave, p. ej. aro, earring" /></div>
-        </div>
+      <s-section heading="Nueva guía">
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-text-field id="guia-nombre" label="Nombre en español" placeholder="p. ej. Aros"></s-text-field>
+          <s-text-field id="guia-nombre-en" label="Nombre en inglés" placeholder="p. ej. Earrings"></s-text-field>
+          <s-text-field id="guia-palabras" label="Palabras clave" placeholder="p. ej. aro, earring"></s-text-field>
+        </s-grid>
         <p class="ayuda">
           Las palabras clave deciden qué productos la usan: basta con que una aparezca en el
           título, el tipo o las etiquetas. Pon también la palabra en inglés, que en /en/ el
           título va traducido. Nace sin bloques, así que no se ve en la tienda hasta que le
           añadas contenido.
         </p>
-        <div class="acciones"><button class="principal" id="crear-guia">Crear guía</button></div>
-      </section>`
-    : `<p class="ayuda">Hay ${TOPE_GUIAS} guías, que es lo máximo que lee el panel.</p>`;
+        <s-button slot="primary-action" variant="primary" id="crear-guia">Crear guía</s-button>
+      </s-section>`
+    : `<s-section><p class="ayuda">Hay ${TOPE_GUIAS} guías, que es lo máximo que lee el panel.</p></s-section>`;
 
   /* En una tienda recien instalada las guias nacen vacias. Si hay una semilla
    * con el contenido de otra tienda, se ofrece copiarla. Solo cuando TODAS estan
@@ -403,27 +396,31 @@ async function pintarGuias() {
     : null;
   const totalSemilla = semilla ? semilla.guias.reduce((n, g) => n + g.bloques.length, 0) : 0;
   const copiar = semilla ? `
-      <section class="tarjeta" id="tarjeta-copiar">
-        <p><strong>Tus guías están vacías.</strong> Se puede copiar el contenido de ${escapar(semilla.origen)}:
-          ${totalSemilla} bloques en ${semilla.guias.length} guías, con su orden y sus idiomas.</p>
+      <s-section id="tarjeta-copiar" heading="Tus guías están vacías">
+        <s-paragraph>Se puede copiar el contenido de ${escapar(semilla.origen)}:
+          ${totalSemilla} bloques en ${semilla.guias.length} guías, con su orden y sus idiomas.</s-paragraph>
         <p class="ayuda">Las imágenes se copian a esta tienda. Los enlaces a los PDF y los vídeos quedan como
           están. Después puedes cambiar cualquier bloque en el editor.</p>
-        <div class="acciones"><button class="principal" id="copiar-guias">Copiar las guías de ${escapar(semilla.origen)}</button></div>
         <p class="ayuda" id="copiar-estado"></p>
-      </section>` : '';
+        <s-button slot="primary-action" variant="primary" id="copiar-guias">Copiar las guías de ${escapar(semilla.origen)}</s-button>
+      </s-section>` : '';
 
   pantalla.innerHTML = `
-    <h1>Guías de tallas</h1>
-    <p class="subtitulo">Cada guía se compone de bloques. Un bloque puede existir solo en un idioma.</p>
-    ${tarjetaPendientes(porHacer)}
-    ${copiar}
-    ${listado}
-    ${nueva}`;
+    <s-page>
+      ${bannerPendientes(porHacer)}
+      <div class="titular">
+        <h1>Guías de tallas</h1>
+        <p class="subtitulo">Cada guía se compone de bloques. Un bloque puede existir solo en un idioma.</p>
+      </div>
+      ${copiar}
+      ${listado}
+      ${nueva}
+    </s-page>`;
 
   document.getElementById('copiar-guias')?.addEventListener('click', async (e) => {
     const estado = document.getElementById('copiar-estado');
-    e.target.disabled = true;
-    e.target.textContent = 'Copiando…';
+    const boton = e.currentTarget;
+    boton.loading = true;
     try {
       const informe = await importarGuias(semilla, { onPaso: (t) => { estado.textContent = t; } });
       avisar(informe.join(' · '));
@@ -431,32 +428,32 @@ async function pintarGuias() {
     } catch (error) {
       avisar(error.message, true);
       estado.textContent = 'Se detuvo. Lo que alcanzó a copiarse está en cada guía; revisa antes de repetir.';
-      e.target.disabled = false;
-      e.target.textContent = 'Reintentar';
+      boton.loading = false;
     }
   });
 
-  pantalla.querySelectorAll('[data-guia]').forEach((t) => {
-    const abrir = () => pintarEditor(t.dataset.guia);
-    t.addEventListener('click', abrir);
-    t.addEventListener('keydown', (e) => {
+  pantalla.querySelectorAll('[data-guia]').forEach((seccion) => {
+    const abrir = () => pintarEditor(seccion.dataset.guia);
+    const fila = seccion.querySelector('[data-abrir]') || seccion;
+    fila.addEventListener('click', abrir);
+    fila.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(); }
     });
   });
 
   document.getElementById('crear-guia')?.addEventListener('click', async (e) => {
-    const nombre = document.getElementById('guia-nombre').value.trim();
-    const palabras = document.getElementById('guia-palabras').value.trim();
+    const nombre = String(document.getElementById('guia-nombre').value ?? '').trim();
+    const palabras = String(document.getElementById('guia-palabras').value ?? '').trim();
     if (!nombre) { avisar('Ponle un nombre a la guía', true); return; }
     /* Sin palabras clave la guia existe pero ningun producto la encuentra. Se
      * permite, porque se pueden poner despues en el editor, pero se avisa. */
     if (!palabras && !window.confirm('Sin palabras clave ningún producto usará esta guía hasta que se las pongas. ¿Crearla igual?')) return;
-    e.target.disabled = true;
-    e.target.textContent = 'Creando…';
+    const boton = e.currentTarget;
+    boton.loading = true;
     try {
       const creada = await crearGuia({
         nombre,
-        nombreEn: document.getElementById('guia-nombre-en').value.trim(),
+        nombreEn: String(document.getElementById('guia-nombre-en').value ?? '').trim(),
         palabras,
       });
       avisar(`Guía «${nombre}» creada`);
@@ -464,8 +461,7 @@ async function pintarGuias() {
       await pintarEditor(creada.handle);
     } catch (error) {
       avisar(error.message, true);
-      e.target.disabled = false;
-      e.target.textContent = 'Crear guía';
+      boton.loading = false;
     }
   });
 
@@ -514,42 +510,52 @@ function tarjetaBloque(b, i, total) {
   const esHtml = b.tipo === 'html';
   const etiquetaEs = esHtml ? 'HTML en español' : 'Texto en español';
   const etiquetaEn = esHtml ? 'HTML en inglés' : 'Texto en inglés';
+
+  /* El HTML se edita en un área propia y no en la del admin: necesita letra de
+   * ancho fijo y alto generoso, y eso vive en nuestro CSS, que no entra en el
+   * componente. Para el texto normal sí se usa el del admin. */
+  const area = (campo, etiqueta, valor2) => (esHtml
+    ? `<div>
+          <p class="asigna__titulo">${etiqueta}</p>
+          <textarea data-campo="${campo}" rows="8" class="codigo" spellcheck="false">${escapar(valor2)}</textarea>
+        </div>`
+    : `<s-text-area label="${etiqueta}" data-campo="${campo}" rows="4" value="${escapar(valor2)}"></s-text-area>`);
+
   return `
-    <section class="tarjeta" data-bloque="${escapar(b.id)}">
-      <div class="bloque__cabecera">
+    <s-section data-bloque="${escapar(b.id)}" heading="${escapar(NOMBRE_TIPO[b.tipo] ?? b.tipo)}">
+      <div class="cabecera-fila">
         <span class="etiqueta-tipo">${escapar(NOMBRE_TIPO[b.tipo] ?? b.tipo)}</span>
-        <div class="bloque__acciones">
-          <button class="secundario" data-mover="arriba" ${i === 0 ? 'disabled' : ''} title="Subir">↑</button>
-          <button class="secundario" data-mover="abajo" ${i === total - 1 ? 'disabled' : ''} title="Bajar">↓</button>
-          <button class="secundario secundario--peligro" data-borrar title="Eliminar">Eliminar</button>
-        </div>
+        <s-stack direction="inline" gap="small-300">
+          <s-button variant="tertiary" accessibilityLabel="Subir" data-mover="arriba" ${i === 0 ? 'disabled' : ''}>↑</s-button>
+          <s-button variant="tertiary" accessibilityLabel="Bajar" data-mover="abajo" ${i === total - 1 ? 'disabled' : ''}>↓</s-button>
+        </s-stack>
       </div>
 
       ${esArchivo ? controlesArchivo(b) : ''}
 
       ${esVideo ? `
-        <div style="margin-bottom:12px;">
-          <label>URL del vídeo</label>
-          <input type="text" data-campo="videoUrl" value="${escapar(b.videoUrl)}" placeholder="https://..." />
-        </div>` : ''}
+        <s-text-field label="URL del vídeo" data-campo="videoUrl" value="${escapar(b.videoUrl)}" placeholder="https://..."></s-text-field>` : ''}
 
       ${esHtml ? '<p class="ayuda">Se publica tal cual en la ficha. Útil para tablas de medidas. Si no estás seguro, usa un bloque de Texto.</p>' : ''}
 
-      <div class="bloque__idiomas">
+      <s-grid gridTemplateColumns="repeat(auto-fit, minmax(240px, 1fr))" gap="base">
         <div>
-          <label>${etiquetaEs}</label>
-          <textarea data-campo="textoEs" rows="${esHtml ? 8 : 4}" ${esHtml ? 'class="codigo" spellcheck="false"' : ''}>${escapar(b.textoEs)}</textarea>
-          <label class="casilla"><input type="checkbox" data-campo="mostrarEs" ${b.mostrarEs ? 'checked' : ''} /> Mostrar en español</label>
+          ${area('textoEs', etiquetaEs, b.textoEs)}
+          <div class="casilla-polaris">
+            <s-checkbox label="Mostrar en español" data-campo="mostrarEs" ${b.mostrarEs ? 'checked' : ''}></s-checkbox>
+          </div>
         </div>
         <div>
-          <label>${etiquetaEn}</label>
-          <textarea data-campo="textoEn" rows="${esHtml ? 8 : 4}" ${esHtml ? 'class="codigo" spellcheck="false"' : ''}>${escapar(b.textoEn)}</textarea>
-          <label class="casilla"><input type="checkbox" data-campo="mostrarEn" ${b.mostrarEn ? 'checked' : ''} /> Mostrar en inglés</label>
+          ${area('textoEn', etiquetaEn, b.textoEn)}
+          <div class="casilla-polaris">
+            <s-checkbox label="Mostrar en inglés" data-campo="mostrarEn" ${b.mostrarEn ? 'checked' : ''}></s-checkbox>
+          </div>
         </div>
-      </div>
+      </s-grid>
 
-      <div class="acciones"><button class="principal" data-guardar-bloque>Guardar bloque</button></div>
-    </section>`;
+      <s-button slot="primary-action" variant="primary" data-guardar-bloque>Guardar bloque</s-button>
+      <s-button slot="secondary-actions" tone="critical" data-borrar>Eliminar</s-button>
+    </s-section>`;
 }
 
 async function pintarEditor(handle) {
@@ -560,72 +566,57 @@ async function pintarEditor(handle) {
   if (!guia) { await pintarGuias(); return; }
 
   pantalla.innerHTML = `
-    <button class="volver" id="volver">← Guías de tallas</button>
-    <h1>${escapar(guia.nombre)}</h1>
-    ${tarjetaPendientes(revision.pendientes)}
-    <p class="subtitulo">
-      Los bloques se muestran en la tienda en este orden. Cada uno puede existir
-      solo en un idioma: desmarca la casilla del idioma donde no quieras que aparezca.
-    </p>
+    <s-page>
+      ${bannerPendientes(revision.pendientes)}
 
-    <section class="tarjeta">
-      <div class="bloque__idiomas">
-        <div>
-          <label>Título en español</label>
-          <input type="text" id="nombre-es" value="${escapar(guia.nombre)}" />
-        </div>
-        <div>
-          <label>Título en inglés</label>
-          <input type="text" id="nombre-en" value="${escapar(guia.nombreEn)}" placeholder="${escapar(guia.nombre)}" />
-        </div>
-      </div>
-      <p class="ayuda">Es el encabezado de la ventana. Si dejas el inglés vacío, se usa el español.</p>
-
-      <div style="margin-top:16px;">
-        <label for="palabras">Productos que usan esta guía</label>
-        <input type="text" id="palabras" value="${escapar(guia.palabras)}" placeholder="anillo, ring" />
-        <p class="ayuda">
-          Palabras separadas por comas. Un producto usa esta guía si alguna aparece en su
-          tipo, su título o sus etiquetas. Así un producto nuevo la encuentra solo, sin
-          tener que asignársela a mano.
+      <div class="titular">
+        <button type="button" class="volver" id="volver">← Guías de tallas</button>
+        <h1>${escapar(guia.nombre)}</h1>
+        <p class="subtitulo">
+          Los bloques se muestran en la tienda en este orden. Cada uno puede existir
+          solo en un idioma: desmarca la casilla del idioma donde no quieras que aparezca.
         </p>
       </div>
 
-      <div class="acciones">
-        <button class="principal" id="guardar-titulo">Guardar</button>
-        <button class="secundario" id="comprobar">Comprobar qué productos coinciden</button>
-      </div>
-    </section>
+      <s-section subheading="El título es el encabezado de la ventana. Si dejas el inglés vacío, se usa el español.">
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(220px, 1fr))" gap="base">
+          <s-text-field id="nombre-es" label="Título en español" value="${escapar(guia.nombre)}"></s-text-field>
+          <s-text-field id="nombre-en" label="Título en inglés" value="${escapar(guia.nombreEn)}" placeholder="${escapar(guia.nombre)}"></s-text-field>
+        </s-grid>
+        <s-text-field id="palabras" label="Productos que usan esta guía" value="${escapar(guia.palabras)}"
+          placeholder="anillo, ring"
+          details="Palabras separadas por comas. Un producto usa esta guía si alguna aparece en su tipo, su título o sus etiquetas."></s-text-field>
+        <s-button slot="primary-action" variant="primary" id="guardar-titulo">Guardar</s-button>
+        <s-button slot="secondary-actions" id="comprobar">Comprobar qué productos coinciden</s-button>
+      </s-section>
 
-    <section class="tarjeta">
-      <label for="nuevo-tipo">Añadir un bloque</label>
-      <div class="acciones">
-        <select id="nuevo-tipo">
-          ${Object.entries(NOMBRE_TIPO).map(([v, n]) => `<option value="${v}">${escapar(n)}</option>`).join('')}
-        </select>
-        <button class="principal" id="anadir">Añadir</button>
-      </div>
-    </section>
+      <s-section heading="Añadir un bloque">
+        <s-select id="nuevo-tipo" label="Tipo de bloque">
+          ${Object.entries(NOMBRE_TIPO).map(([v, n]) => `<s-option value="${v}">${escapar(n)}</s-option>`).join('')}
+        </s-select>
+        <s-button slot="primary-action" variant="primary" id="anadir">Añadir</s-button>
+      </s-section>
 
-    ${guia.puedeFaltarBloque ? '<p class="problema">Esta guía tiene 50 bloques o más y el panel muestra como máximo 50: puede que falte alguno. Conviene dividirla.</p>' : ''}
+      ${guia.puedeFaltarBloque ? '<s-banner tone="warning">Esta guía tiene 50 bloques o más y el panel muestra como máximo 50: puede que falte alguno. Conviene dividirla.</s-banner>' : ''}
 
-    <section class="tarjeta" id="informe" hidden></section>
+      <s-section id="informe" hidden></s-section>
 
-    <section class="tarjeta previa">
-      <div class="previa__cabecera">
-        <p class="previa__titulo">Así lo ve el cliente</p>
-        <div class="previa__idiomas">
-          <button class="secundario is-activo" data-idioma="es">Español</button>
-          <button class="secundario" data-idioma="en">Inglés</button>
+      <s-section heading="Así lo ve el cliente">
+        <div class="previa__cabecera">
+          <div class="previa__idiomas">
+            <button type="button" class="secundario is-activo" data-idioma="es">Español</button>
+            <button type="button" class="secundario" data-idioma="en">Inglés</button>
+          </div>
         </div>
-      </div>
-      <div class="previa__lienzo" id="lienzo">${guiaHtml(guia, 'es')}</div>
-      <p class="ayuda previa__nota" id="previa-resumen"></p>
-    </section>
+        <div class="previa__lienzo" id="lienzo">${guiaHtml(guia, 'es')}</div>
+        <p class="ayuda previa__nota" id="previa-resumen"></p>
+      </s-section>
 
-    ${guia.bloques.length
-      ? guia.bloques.map((b, i) => tarjetaBloque(b, i, guia.bloques.length)).join('')
-      : '<div class="vacio">Esta guía todavía no tiene bloques.</div>'}`;
+      ${guia.bloques.length
+    ? guia.bloques.map((b, i) => tarjetaBloque(b, i, guia.bloques.length)).join('')
+    : '<s-section><div class="vacio">Esta guía todavía no tiene bloques.</div></s-section>'}
+    </s-page>`;
+
 
   const lienzo = document.getElementById('lienzo');
   const resumen = document.getElementById('previa-resumen');
@@ -656,8 +647,8 @@ async function pintarEditor(handle) {
   /* A demanda: recorrer el catálogo entero son varias llamadas, y no hace falta
    * salvo que se quiera comprobar el reparto. */
   document.getElementById('comprobar').addEventListener('click', async (e) => {
-    e.target.disabled = true;
-    e.target.textContent = 'Revisando el catálogo…';
+    const boton = e.currentTarget;
+    boton.loading = true;
     const informe = document.getElementById('informe');
     try {
       const guias = await cargarGuias();
@@ -696,39 +687,39 @@ async function pintarEditor(handle) {
     } catch (error) {
       avisar(error.message, true);
     } finally {
-      e.target.disabled = false;
-      e.target.textContent = 'Comprobar qué productos coinciden';
+      boton.loading = false;
     }
   });
 
   document.getElementById('guardar-titulo').addEventListener('click', async (e) => {
-    e.target.disabled = true;
-    e.target.textContent = 'Guardando…';
+    const boton = e.currentTarget;
+    const texto = (id) => String(document.getElementById(id).value ?? '').trim();
+    boton.loading = true;
     try {
       await guardarGuia(guia.id, {
-        nombre: document.getElementById('nombre-es').value.trim(),
-        nombreEn: document.getElementById('nombre-en').value.trim(),
-        palabras: document.getElementById('palabras').value.trim(),
+        nombre: texto('nombre-es'),
+        nombreEn: texto('nombre-en'),
+        palabras: texto('palabras'),
       });
       avisar('Guía guardada');
       await pintarEditor(handle);
     } catch (error) {
       avisar(error.message, true);
-      e.target.disabled = false;
-      e.target.textContent = 'Guardar título';
+      boton.loading = false;
     }
   });
 
   document.getElementById('anadir').addEventListener('click', async (e) => {
     const tipo = document.getElementById('nuevo-tipo').value;
-    e.target.disabled = true;
+    const boton = e.currentTarget;
+    boton.loading = true;
     try {
       await crearBloque(guia, tipo);
       await pintarEditor(handle);
       avisar('Bloque añadido');
     } catch (error) {
       avisar(error.message, true);
-      e.target.disabled = false;
+      boton.loading = false;
     }
   });
 
@@ -737,12 +728,13 @@ async function pintarEditor(handle) {
     const leer = (campo) => {
       const el = tarjeta.querySelector(`[data-campo="${campo}"]`);
       if (!el) return undefined;
-      return el.type === 'checkbox' ? el.checked : el.value;
+      /* Una casilla del admin no tiene `type`: se reconoce por la etiqueta. */
+      return el.type === 'checkbox' || el.tagName === 'S-CHECKBOX' ? el.checked : el.value;
     };
 
     tarjeta.querySelector('[data-guardar-bloque]')?.addEventListener('click', async (e) => {
-      e.target.disabled = true;
-      e.target.textContent = 'Guardando…';
+      const boton = e.currentTarget;
+      boton.loading = true;
       try {
         const original = guia.bloques.find((b) => b.id === id);
         const nuevos = {
@@ -762,8 +754,7 @@ async function pintarEditor(handle) {
       } catch (error) {
         avisar(error.message, true);
       } finally {
-        e.target.disabled = false;
-        e.target.textContent = 'Guardar bloque';
+        boton.loading = false;
       }
     });
 
@@ -840,60 +831,51 @@ async function pintarApariencia() {
     leerConfig(), revisarEstructura(), cargarColores(),
   ]);
 
-  const opcion = (v, actual, texto) =>
-    `<option value="${v}" ${v === actual ? 'selected' : ''}>${texto}</option>`;
-
   pantalla.innerHTML = `
-    <h1>Apariencia</h1>
-    <p class="subtitulo">Vale para los tres bloques a la vez, y manda sobre los ajustes del editor de temas.</p>
+    <s-page>
+      ${bannerPendientes(revision.pendientes)}
 
-    ${tarjetaPendientes(revision.pendientes)}
-
-    <section class="tarjeta">
-      <div class="color__campos">
-        <div>
-          <label for="alineacion">Alineación</label>
-          <select id="alineacion">
-            ${opcion('izquierda', config.alineacion, 'Izquierda')}
-            ${opcion('centro', config.alineacion, 'Centro')}
-            ${opcion('derecha', config.alineacion, 'Derecha')}
-          </select>
-        </div>
-        <div>
-          <label for="escala">Tamaño</label>
-          <select id="escala">
-            ${opcion('normal', config.escala, 'Normal — como saintvenik.cl')}
-            ${opcion('compacto', config.escala, 'Compacto — más pequeño')}
-          </select>
-        </div>
-        <div>
-          <label for="tamano">Muestras de color: <span id="tamano-valor">${config.tamanoMuestra}</span> px</label>
-          <input type="range" id="tamano" min="20" max="64" step="2" value="${config.tamanoMuestra}" />
-        </div>
+      <div class="titular">
+        <h1>Apariencia</h1>
+        <p class="subtitulo">Vale para los tres bloques a la vez, y manda sobre los ajustes del editor de temas.</p>
       </div>
-      <div class="acciones"><button class="principal" id="guardar-apariencia">Guardar</button></div>
-    </section>
 
-    <section class="tarjeta previa">
-      <p class="previa__titulo">Así se ve en la ficha</p>
-      <div id="previa-apariencia"></div>
-    </section>
+      <s-section>
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-select id="alineacion" label="Alineación">
+            <s-option value="izquierda">Izquierda</s-option>
+            <s-option value="centro">Centro</s-option>
+            <s-option value="derecha">Derecha</s-option>
+          </s-select>
+          <s-select id="escala" label="Tamaño">
+            <s-option value="normal">Normal — como saintvenik.cl</s-option>
+            <s-option value="compacto">Compacto — más pequeño</s-option>
+          </s-select>
+          <div>
+            <label for="tamano">Muestras de color: <span id="tamano-valor">${config.tamanoMuestra}</span> px</label>
+            <input type="range" id="tamano" min="20" max="64" step="2" value="${config.tamanoMuestra}" />
+          </div>
+        </s-grid>
+        <s-button slot="primary-action" variant="primary" id="guardar-apariencia">Guardar</s-button>
+      </s-section>
 
-    <section class="tarjeta">
-      <p class="previa__titulo">Botón de la guía de tallas</p>
-      <div class="bloque__idiomas">
-        <div>
-          <label for="boton-es">Texto en español</label>
-          <input type="text" id="boton-es" value="${escapar(config.botonGuiaEs)}" placeholder="Guía de tallas" />
-        </div>
-        <div>
-          <label for="boton-en">Texto en inglés</label>
-          <input type="text" id="boton-en" value="${escapar(config.botonGuiaEn)}" placeholder="Size guide" />
-        </div>
-      </div>
-      <p class="ayuda">Si lo dejas vacío se usa el texto por defecto en cada idioma.</p>
-      <div class="acciones"><button class="principal" id="guardar-boton">Guardar</button></div>
-    </section>`;
+      <s-section heading="Así se ve en la ficha">
+        <div id="previa-apariencia"></div>
+      </s-section>
+
+      <s-section heading="Botón de la guía de tallas" subheading="Si lo dejas vacío se usa el texto por defecto en cada idioma.">
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(220px, 1fr))" gap="base">
+          <s-text-field id="boton-es" label="Texto en español" value="${escapar(config.botonGuiaEs)}" placeholder="Guía de tallas"></s-text-field>
+          <s-text-field id="boton-en" label="Texto en inglés" value="${escapar(config.botonGuiaEn)}" placeholder="Size guide"></s-text-field>
+        </s-grid>
+        <s-button slot="primary-action" variant="primary" id="guardar-boton">Guardar</s-button>
+      </s-section>
+    </s-page>`;
+
+  /* Lo elegido va por propiedad: en el marcado inyectado no se respeta y los
+   * dos desplegables volvían a su primera opción, que no es la guardada. */
+  document.getElementById('alineacion').value = config.alineacion;
+  document.getElementById('escala').value = config.escala;
 
   conectarPendientes(pintarApariencia);
 
@@ -919,8 +901,8 @@ async function pintarApariencia() {
   repintar();
 
   document.getElementById('guardar-apariencia').addEventListener('click', async (e) => {
-    e.target.disabled = true;
-    e.target.textContent = 'Guardando…';
+    const boton = e.currentTarget;
+    boton.loading = true;
     try {
       await guardarApariencia({
         alineacion: document.getElementById('alineacion').value,
@@ -931,25 +913,23 @@ async function pintarApariencia() {
     } catch (error) {
       avisar(error.message, true);
     } finally {
-      e.target.disabled = false;
-      e.target.textContent = 'Guardar';
+      boton.loading = false;
     }
   });
 
   document.getElementById('guardar-boton').addEventListener('click', async (e) => {
-    e.target.disabled = true;
-    e.target.textContent = 'Guardando…';
+    const boton = e.currentTarget;
+    boton.loading = true;
     try {
       await guardarTextosBoton({
-        es: document.getElementById('boton-es').value.trim(),
-        en: document.getElementById('boton-en').value.trim(),
+        es: String(document.getElementById('boton-es').value ?? '').trim(),
+        en: String(document.getElementById('boton-en').value ?? '').trim(),
       });
       avisar('Guardado');
     } catch (error) {
       avisar(error.message, true);
     } finally {
-      e.target.disabled = false;
-      e.target.textContent = 'Guardar';
+      boton.loading = false;
     }
   });
 }
@@ -969,12 +949,12 @@ function tarjetaProducto(p, etiquetasColor) {
   const hermanos = p.hermanos.length
     ? p.hermanos.map((h) => `
         <li>${escapar(h.titulo)}
-          <button class="secundario secundario--peligro" data-desvincular="${escapar(h.id)}">Desvincular</button>
+          <button type="button" class="secundario secundario--peligro" data-desvincular="${escapar(h.id)}">Desvincular</button>
         </li>`).join('')
     : '';
 
   return `
-    <section class="tarjeta" data-producto="${escapar(p.id)}">
+    <s-section data-producto="${escapar(p.id)}">
       <div class="color">
         ${p.imagen ? `<img class="producto__foto" src="${escapar(p.imagen)}" alt="" />` : '<div class="producto__foto"></div>'}
         <div style="flex:1 1 auto;">
@@ -982,23 +962,26 @@ function tarjetaProducto(p, etiquetasColor) {
           <p class="ayuda">${p.etiquetas.length ? escapar(p.etiquetas.join(', ')) : 'sin etiquetas'}</p>
 
           ${hermanos
-            ? `<p class="ayuda" style="margin-top:8px;">Hermano de color:</p><ul class="producto__hermanos">${hermanos}</ul>`
-            : `<p class="${falta || incoloro ? 'problema' : 'ayuda'}" style="margin-top:8px;">${
-                falta
-                  ? 'Tiene etiqueta de color pero no tiene hermano: en su ficha no aparecerá el selector.'
-                  : incoloro
-                    ? `No lleva la etiqueta de ningún color (${escapar(etiquetasColor.join(', ') || 'no hay colores')}): su propia muestra no puede dibujarse.`
-                    : 'Sin hermano de color.'
-              }</p>`}
+    ? `<p class="ayuda" style="margin-top:8px;">Hermano de color:</p><ul class="producto__hermanos">${hermanos}</ul>`
+    : `<p class="${falta || incoloro ? 'problema' : 'ayuda'}" style="margin-top:8px;">${
+      falta
+        ? 'Tiene etiqueta de color pero no tiene hermano: en su ficha no aparecerá el selector.'
+        : incoloro
+          ? `No lleva la etiqueta de ningún color (${escapar(etiquetasColor.join(', ') || 'no hay colores')}): su propia muestra no puede dibujarse.`
+          : 'Sin hermano de color.'
+    }</p>`}
 
+          <div class="buscador" style="margin-top:10px;">
+            <s-search-field data-vincular-texto label="Buscar el otro color"
+              labelAccessibilityVisibility="exclusive" placeholder="Buscar el otro color por nombre…"></s-search-field>
+          </div>
           <div class="acciones">
-            <input type="text" data-vincular-texto placeholder="Buscar el otro color por nombre…" />
-            <button class="secundario" data-vincular-buscar>Buscar</button>
+            <s-button data-vincular-buscar>Buscar</s-button>
           </div>
           <div data-vincular-resultados></div>
         </div>
       </div>
-    </section>`;
+    </s-section>`;
 }
 
 async function pintarProductos() {
@@ -1032,30 +1015,40 @@ async function pintarProductos() {
     : 'Se muestran hasta 50 resultados. Elige un filtro para recorrer el catálogo entero.';
 
   pantalla.innerHTML = `
-    <h1>Productos</h1>
-    <p class="subtitulo">
-      Aquí se dice qué producto es el mismo modelo en otro color. Es lo que hace
-      aparecer el selector de color en la ficha, y se escribe siempre en los dos.
-    </p>
-
-    <section class="tarjeta">
-      <div class="acciones acciones--envolver">
-        <input type="text" id="buscar" value="${escapar(estadoProductos.texto)}" placeholder="Buscar por nombre…" />
-        <button class="principal" id="buscar-boton">Buscar</button>
-        <select id="filtro" aria-label="Filtrar productos">
-          ${Object.entries(FILTROS).map(([valor, texto]) =>
-            `<option value="${valor}" ${estadoProductos.filtro === valor ? 'selected' : ''}>${texto}</option>`).join('')}
-        </select>
+    <s-page>
+      <div class="titular">
+        <h1>Productos</h1>
+        <p class="subtitulo">
+          Aquí se dice qué producto es el mismo modelo en otro color. Es lo que hace
+          aparecer el selector de color en la ficha, y se escribe siempre en los dos.
+        </p>
       </div>
-      <p class="ayuda">${resumen}</p>
-    </section>
 
-    ${visibles.length
-      ? visibles.map((p) => tarjetaProducto(p, etiquetasColor)).join('')
-      : '<div class="vacio">Ningún producto coincide.</div>'}`;
+      <s-section>
+        <s-grid gridTemplateColumns="2fr 1fr" gap="base">
+          <s-search-field id="buscar" label="Buscar por nombre"
+            value="${escapar(estadoProductos.texto)}" placeholder="Buscar por nombre…"></s-search-field>
+          <s-select id="filtro" label="Filtrar">
+            ${Object.entries(FILTROS).map(([valor, texto]) =>
+    `<s-option value="${valor}">${texto}</s-option>`).join('')}
+          </s-select>
+        </s-grid>
+        <p class="ayuda">${resumen}</p>
+        <s-button slot="primary-action" variant="primary" id="buscar-boton">Buscar</s-button>
+      </s-section>
+
+      ${visibles.length
+    ? visibles.map((p) => tarjetaProducto(p, etiquetasColor)).join('')
+    : '<s-section><div class="vacio">Ningún producto coincide.</div></s-section>'}
+    </s-page>`;
+
+  /* Lo elegido en el desplegable se pone por propiedad: el marcado inyectado
+   * no lo respeta y el filtro volvía siempre a «Todos». */
+  document.getElementById('filtro').value = estadoProductos.filtro;
+
 
   const buscar = () => {
-    estadoProductos.texto = document.getElementById('buscar').value.trim();
+    estadoProductos.texto = String(document.getElementById('buscar').value ?? '').trim();
     estadoProductos.filtro = document.getElementById('filtro').value;
     ir('productos');
   };
@@ -1083,15 +1076,16 @@ async function pintarProductos() {
 
     const caja = tarjeta.querySelector('[data-vincular-resultados]');
     tarjeta.querySelector('[data-vincular-buscar]').addEventListener('click', async (e) => {
-      const texto = tarjeta.querySelector('[data-vincular-texto]').value.trim();
+      const texto = String(tarjeta.querySelector('[data-vincular-texto]').value ?? '').trim();
       if (!texto) { avisar('Escribe el nombre del otro color', true); return; }
-      e.target.disabled = true;
+      const boton = e.currentTarget;
+      boton.loading = true;
       try {
         const candidatos = (await buscarProductos(texto)).filter((c) => c.id !== id);
         caja.innerHTML = candidatos.length
           ? `<ul class="producto__hermanos">${candidatos.slice(0, 10).map((c) => `
               <li>${escapar(c.titulo)}
-                <button class="secundario" data-elegir="${escapar(c.id)}">Vincular</button>
+                <button type="button" class="secundario" data-elegir="${escapar(c.id)}">Vincular</button>
               </li>`).join('')}</ul>`
           : '<p class="ayuda">Ningún producto coincide.</p>';
 
@@ -1112,7 +1106,7 @@ async function pintarProductos() {
       } catch (error) {
         avisar(error.message, true);
       } finally {
-        e.target.disabled = false;
+        boton.loading = false;
       }
     });
   });
@@ -2155,13 +2149,15 @@ async function pintarBeneficios() {
   });
 
   document.getElementById('anadir-beneficio')?.addEventListener('click', async (e) => {
-    const nombre = document.getElementById('nuevo-beneficio-nombre').value.trim();
+    const boton = e.currentTarget;
+    const texto = (id) => String(document.getElementById(id).value ?? '').trim();
+    const nombre = texto('nuevo-beneficio-nombre');
     if (!nombre) { avisar('Escribe el texto del beneficio.', true); return; }
-    e.target.disabled = true;
+    boton.loading = true;
     try {
       await crearBeneficio({
         nombre,
-        nombreEn: document.getElementById('nuevo-beneficio-nombre-en').value.trim(),
+        nombreEn: texto('nuevo-beneficio-nombre-en'),
         icono: sinCentinela(document.getElementById('nuevo-beneficio-icono').value),
         orden: beneficios.length + 1,
       }, beneficios.length);
@@ -2169,7 +2165,7 @@ async function pintarBeneficios() {
       await ir('beneficios');
     } catch (error2) {
       avisar(error2.message, true);
-      e.target.disabled = false;
+      boton.loading = false;
     }
   });
 
