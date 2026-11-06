@@ -112,9 +112,64 @@
   assign p_alfa = cfg.foto_opacidad.value | default: 100 | divided_by: 100.0
   assign p_fondo = cfg.foto_fondo.value | default: block.settings.benef_fondo
   assign p_fondo = p_fondo | color_modify: 'alpha', p_alfa | append: ''
+
+  comment
+    El descuento: el porcentaje a secas, como en Lost Gen Club, en vez del
+    «AHORRA 14%» del tema. No se calcula aqui: el tema ya pone el porcentaje
+    en la tarjeta y junto al precio, y lo cambia al elegir otra variante, asi
+    que el script lo lee de ahi. Aqui solo se decide si sale, donde y como.
+
+    Tres estados en texto y no un booleano, por lo mismo que foto_activo:
+      'si'     -> lo ve todo el mundo
+      'prueba' -> solo quien abre la tienda con ?sv-vista=1 (para ensenarlo
+                  antes de encenderlo)
+      'no'     -> nada; el tema sigue con lo suyo
+  endcomment
+  assign d_modo = cfg.desc_activo.value | default: 'no' | append: ''
+  assign d_tarjetas = true
+  if cfg.desc_tarjetas.value == 'no'
+    assign d_tarjetas = false
+  endif
+  assign d_foto = true
+  if cfg.desc_foto.value == 'no'
+    assign d_foto = false
+  endif
+  assign d_precio = true
+  if cfg.desc_precio.value == 'no'
+    assign d_precio = false
+  endif
+  assign d_formato = cfg.desc_formato.value | default: 'pct' | append: ''
+  assign d_fondo = cfg.desc_fondo.value | default: '#C4161C' | append: ''
+  assign d_texto = cfg.desc_texto.value | default: '#FFFFFF' | append: ''
+  assign d_radio = cfg.desc_radio.value | default: 2
+  assign d_hay = false
+  if d_modo == 'si' or d_modo == 'prueba'
+    assign d_hay = true
+    assign hay_algo = true
+  endif
 -%}
 
+{%- if d_modo == 'si' -%}
+  {%- comment -%}
+    Lo del tema se esconde desde el servidor y no desde el script: si lo
+    escondiera el script, el «AHORRA» del tema se veria un instante en cada
+    carga. En 'prueba' lo hace el script, porque solo el sabe si hay
+    ?sv-vista=1, y ese parpadeo en una vista previa da igual.
+  {%- endcomment -%}
+  <style>
+    {%- if d_tarjetas %} .grid-product__tag--sale { display: none !important; } {% endif -%}
+    {%- if d_precio %} .product__price-savings[data-save-price] { display: none !important; } {% endif -%}
+  </style>
+{%- endif -%}
+
 {%- if hay_algo -%}
+  {%- comment -%}
+    Solo se descarga si el descuento esta encendido (o en vista previa).
+    sv-badges.js lo espera: ver el final de ese archivo.
+  {%- endcomment -%}
+  {%- if d_hay -%}
+    <script src="{{ 'sv-descuento.js' | asset_url }}" defer></script>
+  {%- endif -%}
   <script type="application/json" id="sv-insignias-datos">
     {
       "etiquetas": [
@@ -198,6 +253,16 @@
       "esquinaFoto": {{ p_esquina | json }},
       "maxFotos": {{ p_cuantas }},
       "maximo": {{ block.settings.maximo }},
+      "descuento": {%- if d_hay %} {
+        "modo": {{ d_modo | json }},
+        "tarjetas": {{ d_tarjetas | json }},
+        "foto": {{ d_foto | json }},
+        "precio": {{ d_precio | json }},
+        "formato": {{ d_formato | json }},
+        "fondo": {{ d_fondo | json }},
+        "texto": {{ d_texto | json }},
+        "radio": {{ d_radio | json }}
+      } {%- else %} null {%- endif %},
       "editor": {{ request.design_mode | json }}
     }
   </script>

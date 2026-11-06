@@ -9,7 +9,7 @@
  * selector apareciendo en una ficha y no en la otra, que es un fallo molesto de
  * encontrar porque cada ficha por separado parece correcta.
  */
-import { gql, comprobarErrores } from './api.js?v=202611052054';
+import { gql, comprobarErrores } from './api.js?v=202611061821';
 
 const NAMESPACE = 'custom';
 const CLAVE = 'hermano_de_color';
@@ -121,6 +121,37 @@ export async function desvincular(a, idHermano) {
   const otro = otros.products.nodes.map(aProducto)[0];
   if (otro) {
     await escribirHermanos(otro.id, otro.hermanos.filter((h) => h.id !== a.id).map((h) => h.id));
+  }
+}
+
+/* El color de un producto es una etiqueta (la de la entrada de color). Se
+ * pone y se quita desde la ficha del producto en la app, sin ir a Shopify.
+ * Un producto puede llevar dos (la Vienna verde lleva `oro` y `verde`): en la
+ * tienda cuenta como el primero de la lista «Orden de los colores». */
+const PONER_ETIQUETAS = `
+  mutation PonerEtiquetas($id: ID!, $tags: [String!]!) {
+    tagsAdd(id: $id, tags: $tags) { userErrors { field message } }
+  }
+`;
+
+const QUITAR_ETIQUETAS = `
+  mutation QuitarEtiquetas($id: ID!, $tags: [String!]!) {
+    tagsRemove(id: $id, tags: $tags) { userErrors { field message } }
+  }
+`;
+
+export async function ponerEtiquetaColor(producto, etiqueta, poner) {
+  const limpia = String(etiqueta ?? '').trim();
+  if (!limpia) throw new Error('Ese color no tiene etiqueta.');
+  if (poner) {
+    comprobarErrores(await gql(PONER_ETIQUETAS, { id: producto.id, tags: [limpia] }), 'tagsAdd');
+    if (!producto.etiquetas.includes(limpia)) producto.etiquetas.push(limpia);
+  } else {
+    /* Se quita tal como esta escrita en el producto, aunque varie en
+     * mayusculas: tagsRemove distingue. */
+    const suyas = producto.etiquetas.filter((e) => e.trim().toLowerCase() === limpia.toLowerCase());
+    if (suyas.length) comprobarErrores(await gql(QUITAR_ETIQUETAS, { id: producto.id, tags: suyas }), 'tagsRemove');
+    producto.etiquetas = producto.etiquetas.filter((e) => !suyas.includes(e));
   }
 }
 

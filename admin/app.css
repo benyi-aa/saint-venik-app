@@ -504,3 +504,151 @@ body { padding-bottom: calc(48px + var(--shopify-safe-area-inset-bottom, 0px)); 
   font-weight: 600;
   font-size: 13px;
 }
+
+/* El descuento, como se ve en la tienda: sobre una foto (gris claro, como las
+ * de producto) y junto a un precio. */
+.desc-previa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+.desc-previa__foto {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f1f0ee, #e3e1dd);
+}
+.desc-previa__foto .sv-tag--desc {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  font-size: 11px;
+  line-height: 1.15;
+}
+.desc-previa__precio {
+  font-size: 16px;
+  color: #111;
+}
+.desc-previa__precio s { color: #777; margin-right: 6px; }
+
+/* Previa del cambio de página: la barra se llena en bucle sobre una página
+ * de mentira que se funde, como en la tienda. */
+.trans-previa {
+  position: relative;
+  height: 90px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 1px solid #e3e1dd;
+  border-radius: 8px;
+  background: #fff;
+}
+.trans-previa__barra {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transform-origin: 0 50%;
+  animation: trans-barra 2.6s cubic-bezier(.1, .7, .15, 1) infinite;
+}
+.trans-previa__pagina {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font: 600 13px/1 var(--fuente, system-ui);
+  letter-spacing: .12em;
+  color: #111;
+  animation: trans-pagina 2.6s ease infinite;
+}
+@keyframes trans-barra {
+  0% { transform: scaleX(0); opacity: 1; }
+  60% { transform: scaleX(.85); opacity: 1; }
+  75% { transform: scaleX(1); opacity: 1; }
+  90%, 100% { transform: scaleX(1); opacity: 0; }
+}
+@keyframes trans-pagina {
+  0%, 62% { opacity: 1; }
+  70% { opacity: .15; }
+  80%, 100% { opacity: 1; }
+}
+
+/* El color de un producto en la pantalla Productos: una ficha por color. */
+.fichas-color { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.ficha-color {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border: 1px solid #c9c6c0; border-radius: 999px;
+  background: #fff; color: #303030; font: inherit; font-size: 12px; cursor: pointer;
+}
+.ficha-color .ayuda { margin: 0; font-size: 11px; }
+.ficha-color.is-on { background: #303030; border-color: #303030; color: #fff; }
+.ficha-color.is-on .ayuda { color: #ddd; }
+.ficha-color:disabled { opacity: .5; cursor: progress; }
+
+/* --- Filtros ---------------------------------------------------------------
+ * Los botones de la tienda, copiados tal cual del embed (allí van en línea):
+ * la previa tiene que verse como el teléfono. */
+.previa-filtros { margin-bottom: 16px; }
+.previa-filtros__telefono {
+  max-width: 375px;
+  margin: 12px 0 6px;
+  padding: 14px 16px;
+  border: 1px solid #e3e1dd;
+  border-radius: 18px;
+  background: #fff;
+}
+.sv-filtros__dentro { display: flex; flex-direction: column; gap: 8px; }
+.sv-filtros__fila { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 8px; }
+.sv-filtro {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 38px; padding: 6px 8px; box-sizing: border-box;
+  border: 1px solid #d9d6d1; border-radius: 999px; background: #fff; color: #111;
+  font-size: 12px; line-height: 1.15; letter-spacing: .01em; white-space: nowrap; overflow: hidden;
+}
+.sv-filtro > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.sv-filtro.is-activo { background: #111; border-color: #111; color: #fff; }
+.sv-filtro svg, .sv-filtro__icono { flex: 0 0 auto; width: 16px; height: 16px; }
+.sv-filtro__muestra {
+  flex: 0 0 auto; width: 15px; height: 15px; border-radius: 50%;
+  background-size: cover; background-position: center; box-shadow: inset 0 0 0 1px rgba(0,0,0,.14);
+}
+.sv-filtros__fila--apilada .sv-filtro {
+  flex-direction: column; gap: 5px; min-height: 62px; padding: 8px 4px; border-radius: 12px; font-size: 11.5px;
+}
+.sv-filtros__fila--apilada .sv-filtro svg { width: 21px; height: 21px; }
+
+.previa-boton {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 14px; border: 1px solid #d9d6d1; border-radius: 999px; background: #fff; font-size: 12.5px;
+}
+.previa-boton svg { width: 16px; height: 16px; }
+
+.lista-colecciones {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 4px 12px;
+  max-height: 220px; overflow: auto; padding: 8px; border: 1px solid #e3e1dd; border-radius: 8px;
+}
+.lista-colecciones__item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.lista-colecciones__item .ayuda { margin: 0 0 0 auto; }
+
+.tabla-filtros__caja { max-height: 640px; overflow: auto; border: 1px solid #e3e1dd; border-radius: 8px; }
+.tabla-filtros { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabla-filtros th {
+  position: sticky; top: 0; z-index: 1; background: #f7f6f4; text-align: left;
+  font-weight: 600; padding: 8px; border-bottom: 1px solid #e3e1dd;
+}
+.tabla-filtros td { padding: 6px 8px; border-bottom: 1px solid #f0eeea; vertical-align: middle; }
+.tabla-filtros tr.is-cambiada td { background: #fff8e6; }
+.tabla-filtros__foto { width: 44px; }
+.tabla-filtros__foto img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; display: block; }
+.tabla-filtros__titulo { min-width: 180px; }
+.tabla-filtros select { font: inherit; font-size: 13px; padding: 4px 6px; border: 1px solid #c9c6c0; border-radius: 6px; background: #fff; max-width: 150px; }
+.fichas-tipo { display: flex; flex-wrap: wrap; gap: 4px; }
+.ficha-tipo {
+  padding: 3px 9px; border: 1px solid #c9c6c0; border-radius: 999px; background: #fff;
+  color: #303030; font: inherit; font-size: 12px; cursor: pointer;
+}
+.ficha-tipo.is-on { background: #303030; border-color: #303030; color: #fff; }
+
+.pasos { margin: 0 0 8px; padding-left: 20px; line-height: 1.7; }

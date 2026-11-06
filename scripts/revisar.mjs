@@ -19,7 +19,7 @@ const GLOBALES = new Set([
   'JSON', 'Math', 'Object', 'Array', 'String', 'Number', 'Boolean', 'Promise',
   'parseInt', 'parseFloat', 'isNaN', 'isFinite',
   'Error', 'TypeError', 'Set', 'Map', 'Date', 'RegExp', 'Symbol', 'BigInt',
-  'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'queueMicrotask',
+  'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'queueMicrotask', 'requestAnimationFrame',
   'File', 'Blob', 'FileReader', 'Image', 'Event', 'CustomEvent', 'Node',
   'NodeFilter', 'globalThis', 'undefined', 'NaN', 'Infinity', 'localStorage',
   'sessionStorage', 'history', 'location', 'navigator', 'alert', 'confirm',

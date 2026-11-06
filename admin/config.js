@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611052054';
+import { gql, comprobarErrores } from './api.js?v=202611061821';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
@@ -55,6 +55,35 @@ const CAMPOS_CONFIG = [
   { key: 'foto_radio', name: 'Redondeo de la píldora', type: 'number_integer' },
   { key: 'foto_letra', name: 'Tamaño del texto de la píldora', type: 'number_integer' },
   { key: 'foto_margen', name: 'Separación del borde de la foto', type: 'number_integer' },
+  /* El descuento: el porcentaje a secas en vez del «AHORRA 14%» del tema.
+   * `desc_activo` tiene tres estados en texto: 'si', 'no' y 'prueba' (solo se
+   * ve abriendo la tienda con ?sv-vista=1). Los «donde» van como 'si'/'no' por
+   * lo mismo que foto_activo. */
+  { key: 'desc_activo', name: 'Descuento: estado', type: 'single_line_text_field' },
+  { key: 'desc_tarjetas', name: 'Descuento en las tarjetas', type: 'single_line_text_field' },
+  { key: 'desc_foto', name: 'Descuento sobre las fotos de la ficha', type: 'single_line_text_field' },
+  { key: 'desc_precio', name: 'Descuento junto al precio', type: 'single_line_text_field' },
+  { key: 'desc_formato', name: 'Descuento: cómo se escribe', type: 'single_line_text_field' },
+  { key: 'desc_fondo', name: 'Descuento: fondo', type: 'color' },
+  { key: 'desc_texto', name: 'Descuento: texto', type: 'color' },
+  { key: 'desc_radio', name: 'Descuento: redondeo', type: 'number_integer' },
+  /* Transiciones entre páginas (embed de <head>): la barra que se llena, el
+   * fundido y la precarga. Mismo esquema de tres estados que el descuento. */
+  { key: 'trans_activo', name: 'Transiciones: estado', type: 'single_line_text_field' },
+  { key: 'trans_color', name: 'Transiciones: color de la barra', type: 'color' },
+  { key: 'trans_grosor', name: 'Transiciones: grosor de la barra', type: 'number_integer' },
+  { key: 'trans_fundido', name: 'Transiciones: duración del fundido (ms)', type: 'number_integer' },
+  { key: 'trans_precarga', name: 'Transiciones: precargar al apoyar el dedo', type: 'single_line_text_field' },
+  /* Filtros de las colecciones: los botones de la página y los valores
+   * posibles de cada filtro (las listas que ofrece la pantalla Filtros al
+   * clasificar los productos). Los botones en sí son el metaobjeto
+   * sv_boton_filtro. */
+  { key: 'filtros_activo', name: 'Filtros: estado de los botones', type: 'single_line_text_field' },
+  { key: 'filtros_colores', name: 'Filtros: valores de color', type: 'single_line_text_field' },
+  { key: 'filtros_categorias', name: 'Filtros: valores de categoría', type: 'single_line_text_field' },
+  { key: 'filtros_tipos', name: 'Filtros: valores de tipo', type: 'single_line_text_field' },
+  { key: 'filtros_ordenar', name: 'Filtros: «Ordenar» dentro de Filtrar', type: 'single_line_text_field' },
+  { key: 'filtros_columnas', name: 'Filtros: botones por fila en el teléfono', type: 'number_integer' },
 ];
 
 /* Lo mismo que ya pinta hoy el embed con sus ajustes de fábrica: así mover la
@@ -74,6 +103,50 @@ export const PILDORA_POR_DEFECTO = {
   letra: 12,
   margen: 10,
 };
+
+/* Como el de Lost Gen Club: rojo, letra blanca, esquina casi viva. Apagado
+ * de fábrica: hasta que alguien lo encienda, la tienda sigue como estaba. */
+export const DESCUENTO_POR_DEFECTO = {
+  modo: 'no',
+  tarjetas: true,
+  foto: true,
+  precio: true,
+  formato: 'pct',
+  fondo: '#C4161C',
+  texto: '#FFFFFF',
+  radio: 2,
+};
+
+/* Como la de louisvuitton.com: fina y oscura, y un fundido corto. */
+export const TRANSICION_POR_DEFECTO = {
+  modo: 'no',
+  color: '#111111',
+  grosor: 2,
+  fundido: 250,
+  precarga: true,
+};
+
+/* Lo de la llamada: colores, brillantes y las categorías del menú. */
+export const FILTROS_POR_DEFECTO = {
+  modo: 'no',
+  colores: ['Dorado', 'Plateado'],
+  categorias: ['Cadenas', 'Colgantes', 'Pulseras', 'Anillos', 'Conjuntos', 'Lentes'],
+  tipos: ['Brillantes', 'Tenis', 'Perlas', 'Cubanas', 'Rope'],
+  ordenar: true,
+  columnas: 4,
+};
+
+export const FORMATOS_DESCUENTO = [
+  { valor: 'pct', rotulo: '20 %' },
+  { valor: 'menos', rotulo: '-20 %' },
+  { valor: 'off', rotulo: '20 % OFF' },
+];
+
+export function textoDescuento(n, formato) {
+  if (formato === 'menos') return `-${n}\u00a0%`;
+  if (formato === 'off') return `${n}\u00a0% OFF`;
+  return `${n}\u00a0%`;
+}
 
 const DEFINICION = `
   query DefinicionConfig {
@@ -219,7 +292,143 @@ export async function leerConfig() {
     tamanoMuestra: Number(campos.tamano_muestra) || APARIENCIA_POR_DEFECTO.tamanoMuestra,
     escala: campos.escala || APARIENCIA_POR_DEFECTO.escala,
     pildora: aPildora(campos),
+    descuento: aDescuento(campos),
+    transicion: aTransicion(campos),
+    filtros: aFiltros(campos),
   };
+}
+
+const listaDeTexto = (t, defecto) => {
+  const l = String(t ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+  return l.length ? l : [...defecto];
+};
+
+function aFiltros(campos) {
+  const d = FILTROS_POR_DEFECTO;
+  return {
+    modo: ['si', 'no', 'prueba'].includes(campos.filtros_activo) ? campos.filtros_activo : d.modo,
+    colores: listaDeTexto(campos.filtros_colores, d.colores),
+    categorias: listaDeTexto(campos.filtros_categorias, d.categorias),
+    tipos: listaDeTexto(campos.filtros_tipos, d.tipos),
+    ordenar: siNo(campos.filtros_ordenar, d.ordenar),
+    columnas: numero(campos.filtros_columnas, d.columnas),
+  };
+}
+
+export async function guardarFiltrosConfig(f) {
+  const r = await gql(GUARDAR, {
+    handle: { type: TIPO_CONFIG, handle: HANDLE },
+    metaobject: {
+      fields: [
+        { key: 'filtros_activo', value: f.modo },
+        { key: 'filtros_colores', value: f.colores.join(', ') },
+        { key: 'filtros_categorias', value: f.categorias.join(', ') },
+        { key: 'filtros_tipos', value: f.tipos.join(', ') },
+        { key: 'filtros_ordenar', value: f.ordenar ? 'si' : 'no' },
+        { key: 'filtros_columnas', value: String(f.columnas) },
+      ],
+    },
+  });
+  return comprobarErrores(r, 'metaobjectUpsert');
+}
+
+function aTransicion(campos) {
+  const d = TRANSICION_POR_DEFECTO;
+  return {
+    modo: ['si', 'no', 'prueba'].includes(campos.trans_activo) ? campos.trans_activo : d.modo,
+    color: campos.trans_color || d.color,
+    grosor: numero(campos.trans_grosor, d.grosor),
+    fundido: numero(campos.trans_fundido, d.fundido),
+    precarga: siNo(campos.trans_precarga, d.precarga),
+  };
+}
+
+export async function guardarTransicion(t) {
+  const r = await gql(GUARDAR, {
+    handle: { type: TIPO_CONFIG, handle: HANDLE },
+    metaobject: {
+      fields: [
+        { key: 'trans_activo', value: t.modo },
+        { key: 'trans_color', value: t.color },
+        { key: 'trans_grosor', value: String(t.grosor) },
+        { key: 'trans_fundido', value: String(t.fundido) },
+        { key: 'trans_precarga', value: t.precarga ? 'si' : 'no' },
+      ],
+    },
+  });
+  return comprobarErrores(r, 'metaobjectUpsert');
+}
+
+function siNo(valor, defecto) {
+  if (valor === 'si') return true;
+  if (valor === 'no') return false;
+  return defecto;
+}
+
+function aDescuento(campos) {
+  const d = DESCUENTO_POR_DEFECTO;
+  const modo = ['si', 'no', 'prueba'].includes(campos.desc_activo) ? campos.desc_activo : d.modo;
+  return {
+    modo,
+    tarjetas: siNo(campos.desc_tarjetas, d.tarjetas),
+    foto: siNo(campos.desc_foto, d.foto),
+    precio: siNo(campos.desc_precio, d.precio),
+    formato: FORMATOS_DESCUENTO.some((f) => f.valor === campos.desc_formato) ? campos.desc_formato : d.formato,
+    fondo: campos.desc_fondo || d.fondo,
+    texto: campos.desc_texto || d.texto,
+    radio: numero(campos.desc_radio, d.radio),
+  };
+}
+
+export async function guardarDescuento(d) {
+  const r = await gql(GUARDAR, {
+    handle: { type: TIPO_CONFIG, handle: HANDLE },
+    metaobject: {
+      fields: [
+        { key: 'desc_activo', value: d.modo },
+        { key: 'desc_tarjetas', value: d.tarjetas ? 'si' : 'no' },
+        { key: 'desc_foto', value: d.foto ? 'si' : 'no' },
+        { key: 'desc_precio', value: d.precio ? 'si' : 'no' },
+        { key: 'desc_formato', value: d.formato },
+        { key: 'desc_fondo', value: d.fondo },
+        { key: 'desc_texto', value: d.texto },
+        { key: 'desc_radio', value: String(d.radio) },
+      ],
+    },
+  });
+  return comprobarErrores(r, 'metaobjectUpsert');
+}
+
+/* Cuántos productos activos tienen hoy precio tachado por encima del precio:
+ * son los que van a llevar descuento. Es solo para decirlo en la pantalla. */
+const CON_DESCUENTO = `
+  query ConDescuento($cursor: String) {
+    products(first: 250, after: $cursor, query: "status:active") {
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        compareAtPriceRange { maxVariantCompareAtPrice { amount } }
+        priceRangeV2 { minVariantPrice { amount } }
+      }
+    }
+  }
+`;
+
+export async function contarConDescuento() {
+  let cursor = null;
+  let total = 0;
+  let con = 0;
+  for (let vuelta = 0; vuelta < 20; vuelta += 1) {
+    const d = await gql(CON_DESCUENTO, { cursor });
+    for (const p of d.products.nodes) {
+      total += 1;
+      const antes = Number(p.compareAtPriceRange?.maxVariantCompareAtPrice?.amount ?? 0);
+      const ahora = Number(p.priceRangeV2?.minVariantPrice?.amount ?? 0);
+      if (antes > ahora && ahora > 0) con += 1;
+    }
+    if (!d.products.pageInfo.hasNextPage) break;
+    cursor = d.products.pageInfo.endCursor;
+  }
+  return { total, con };
 }
 
 /* Un numero que puede valer 0 no se lee con `||`. Y una entrada vieja sin el

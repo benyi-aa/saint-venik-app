@@ -66,11 +66,16 @@ Lo que se aprendió montándolos, que no está en la documentación:
 | Selector de talla | app block | las variantes reales del producto |
 | Guía de tallas | app block | metaobjetos `guia_de_tallas` y `bloque_guia` |
 | Beneficios | app block + el embed | metaobjeto `sv_beneficio` |
-| Insignias de producto | **app embed** | metaobjeto `sv_etiqueta` |
+| Insignias de producto (y descuento) | **app embed** | metaobjeto `sv_etiqueta` + configuración |
+| Transiciones de página | **app embed** (head) | configuración |
+| Filtros rápidos | **app embed** | metaobjeto `sv_boton_filtro` + metacampos `custom.sv_*` |
 
 Los colores no son variantes: son productos separados que se apuntan entre sí.
 Un producto se asocia a su color por la etiqueta (`oro`, `acero-inox`), que es lo
-que guarda el campo `etiqueta` del metaobjeto.
+que guarda el campo `etiqueta` del metaobjeto. Un producto puede llevar dos
+etiquetas de color (la Vienna verde lleva `oro` y `verde`): cuenta como la que
+esté antes en «Orden de los colores», y cada hermano responde solo a la suya.
+Las etiquetas de color se ponen y quitan desde la pantalla Productos.
 
 ### Insignias y beneficios
 
@@ -110,6 +115,36 @@ Los iconos de los beneficios viven en
 `extensions/saint-venik/snippets/sv-icono.liquid`, que es el original.
 `admin/iconos.js` es una copia generada con `npm run iconos` para que el panel
 pueda enseñarlos; `npm run revisar` falla si las dos listas se separan.
+
+### Descuento, cambio de página y filtros
+
+Tres cosas más que se manejan desde el panel, las tres con el mismo interruptor
+de tres estados: **Apagado**, **Vista previa** (solo la ve quien abre la tienda
+con `?sv-vista=1`; se recuerda durante la sesión) y **Activo en la tienda**. Así
+se puede enseñar antes de encender.
+
+- **Descuento** (pantalla Insignias). El porcentaje a secas, rojo y pequeño, como
+  en Lost Gen Club, en lugar del «AHORRA 14%» del tema: en la tarjeta, sobre las
+  fotos de la ficha y junto al precio. No se calcula: se lee del tema, que ya lo
+  saca del precio tachado y lo cambia al elegir otra variante. Vive en
+  `assets/sv-descuento.js`, que el embed de insignias solo carga cuando está
+  encendido; `sv-badges.js` lo espera (evento `sv:descuento`).
+- **Cambio de página** (pantalla Apariencia, embed «Transiciones de página», de
+  `<head>`). La barra fina que se llena arriba al tocar un enlace, el fundido
+  entre páginas (`@view-transition`, del navegador) y la precarga al apoyar el
+  dedo (reglas de especulación; nunca carrito, cuenta ni pago).
+- **Filtros** (pantalla Filtros, embed «Filtros rápidos»). Los botones encima de
+  los productos («Dorado», «Plateado», «Brillantes» en todas; las categorías en
+  Best Sellers). Cada botón es una entrada de `sv_boton_filtro` y lleva a la misma
+  colección con el filtro de Shopify puesto, así que dependen de que esos filtros
+  existan en **Search & Discovery**: Color, Categoría y Tipo, que son los
+  metacampos de producto `custom.sv_color`, `custom.sv_categoria` y
+  `custom.sv_tipo`. La pantalla los propone para cada producto (etiqueta de color,
+  título, colecciones) y se corrigen a mano. El embed también mete «Ordenar»
+  dentro del menú Filtrar.
+
+Los dos embeds nuevos, como el de insignias, hay que encenderlos una vez por
+tema en Personalizar → Configuración → Incrustaciones de apps.
 
 ## Dos tiendas, dos registros de la misma app
 

@@ -1,15 +1,9 @@
 /* Saint Venik · Insignias y beneficios sobre las fotos
  *
- * Los datos vienen resueltos en el JSON que emite el bloque: aqui no se pide
- * nada a la red, solo se colocan nodos. El porque de cada decision esta en
- * docs/tema.md, seccion "Insignias y beneficios"; en resumen:
- *   - el tema ya ocupa la esquina superior izquierda, asi que la nuestra se
- *     coloca debajo de la suya en vez de taparla;
- *   - el grid se repinta sin recargar (filtros, paginacion) y no hay evento
- *     de storefront que avise: de ahi el MutationObserver y que decorar tenga
- *     que poder repetirse sin duplicar nada;
- *   - en el editor de temas si hay evento y hay que escucharlo.
- */
+ * Los datos vienen resueltos en el JSON del bloque: aqui no se pide nada a la
+ * red, solo se colocan nodos. El grid se repinta sin recargar y no hay evento
+ * que avise: de ahi el MutationObserver, y que decorar se pueda repetir sin
+ * duplicar. El porque de cada decision: docs/tema.md, «Insignias». */
 (function () {
   'use strict';
 
@@ -24,15 +18,16 @@
   }
   var hayEtiquetas = datos && datos.etiquetas && datos.etiquetas.length;
   var hayBeneficios = datos && datos.beneficios && datos.beneficios.length;
-  if (!hayEtiquetas && !hayBeneficios) return;
+
+  /* El descuento vive en sv-descuento.js, que solo se carga si esta encendido
+   * y llega despues que esto (los dos van con defer). Se le espera. */
+  var DESC = null;
 
   var MARCA = 'svInsignias';
   var MARCA_FOTO = 'svBeneficio';
   var MAXIMO = datos.maximo || 2;
 
-  /* El handle de la ficha deberia venir del Liquid, pero un app embed no tiene
-   * garantizado el objeto `product` en todos los temas. La URL si lo tiene, y
-   * cuesta una linea: asi la insignia de la ficha no depende de eso. */
+  /* Un app embed no tiene garantizado `product` en todos los temas: la URL si. */
   var FICHA = datos.ficha || (location.pathname.match(/\/products\/([^/?#]+)/) || [])[1] || null;
   var FICHA_ID = datos.fichaId || null;
 
@@ -40,20 +35,14 @@
     return (a.orden || 0) - (b.orden || 0);
   });
 
-  /* El panel guarda los handles entre barras (|anillo|collar|) justamente para
-   * poder preguntar asi, sin partir la cadena y sin que "oro" case con
-   * "collar-oro". */
+  /* Handles entre barras (|anillo|collar|): asi «oro» no casa con «collar-oro». */
   function alcanza(etiqueta, handle, enLaColeccion, id) {
     var lista = etiqueta.handles || '';
-    /* Primero por id, que es el mismo en los dos idiomas. El handle se
-     * traduce: en ingles "anillo-signet" es "signet-ring", asi que solo con
-     * el handle la tienda en ingles se quedaba sin insignias. */
+    /* Primero por id: el handle se traduce («anillo-signet» / «signet-ring»). */
     if (id && lista.indexOf('|' + id + '|') !== -1) return true;
     if (handle && lista.indexOf('|' + handle + '|') !== -1) return true;
 
-    /* Dentro del grid de una coleccion vale la coleccion aunque el handle no
-     * este en la lista (puede haberse quedado vieja). Fuera del grid NO: las
-     * tarjetas de recomendados no son de esa coleccion. */
+    /* En el grid vale la coleccion (la lista puede ir atrasada); fuera, no. */
     if (!enLaColeccion || !etiqueta.colecciones) return false;
     return etiqueta.colecciones.indexOf(datos.coleccion) !== -1;
   }
@@ -90,21 +79,30 @@
     return cont;
   }
 
-  /* Sin contenedor posicionado, la insignia se va a la esquina de la pagina
-   * sin dar ningun error. Casi siempre ya lo esta; se comprueba igual. */
+  /* Sin contenedor posicionado, la insignia se iria a la esquina de la pagina. */
   function anclar(nodo) {
     if (getComputedStyle(nodo).position === 'static') nodo.style.position = 'relative';
     return nodo;
   }
 
-  /* Mide lo mismo en todas las tarjetas: se mide una vez por pasada. Medirla
-   * por tarjeta eran ochenta reflujos seguidos dentro del mismo frame. */
+  /* Se mide una vez por pasada: por tarjeta eran ochenta reflujos seguidos. */
   var altoDelTema = null;
 
+  /* La etiqueta del tema que sigue a la vista: con el descuento encendido,
+   * la de «AHORRA» esta escondida y no cuenta. «Agotado» si. */
+  function etiquetaDelTema(tarjeta) {
+    var suyas = tarjeta.querySelectorAll('.grid-product__tag');
+    for (var i = 0; i < suyas.length; i += 1) {
+      if (DESC && DESC.tarjetas && suyas[i].classList.contains('grid-product__tag--sale')) continue;
+      return suyas[i];
+    }
+    return null;
+  }
+
   function altoInsigniaTema(tarjeta) {
-    if (altoDelTema !== null) return altoDelTema;
-    var suya = tarjeta.querySelector('.grid-product__tag');
-    altoDelTema = suya && suya.offsetHeight ? suya.offsetHeight : 0;
+    var suya = etiquetaDelTema(tarjeta);
+    if (!suya) return 0;
+    if (altoDelTema === null || altoDelTema === 0) altoDelTema = suya.offsetHeight || 0;
     return altoDelTema;
   }
 
@@ -113,27 +111,36 @@
 
     var destino = tarjeta.querySelector('.grid-product__image-mask')
       || tarjeta.querySelector('.grid__item-image-wrapper');
-    /* Sin caja de imagen no hay donde ponerla, y tampoco se marca: si el tema
-     * termina de pintar la tarjeta despues, la siguiente pasada la coge. */
+    /* Sin caja de imagen no se marca: la siguiente pasada la coge. */
     if (!destino) return;
 
     tarjeta.dataset[MARCA] = '1';
 
-    var lista = paraHandle(
+    var lista = datos.tarjetas ? paraHandle(
       tarjeta.dataset.productHandle, enGridDeColeccion(tarjeta), tarjeta.dataset.productId
-    );
-    if (!lista.length) return;
+    ) : [];
+    var pct = DESC && DESC.tarjetas ? DESC.pctTarjeta(tarjeta) : 0;
+    if (!lista.length && !pct) return;
 
-    var cont = caja(lista, datos.esquinaTarjeta, 'tarjeta');
+    var izquierda = datos.esquinaTarjeta === 'izquierda';
 
-    /* Debajo de la del tema, no encima. Se mide en vez de poner un numero fijo
-     * porque la del tema crece con el tamano de letra del tema. */
-    if (datos.esquinaTarjeta === 'izquierda') {
+    /* El descuento va primero, arriba a la izquierda, donde estaba el del
+     * tema; las insignias de la izquierda, debajo de el. */
+    var cont = caja(izquierda || pct ? (izquierda ? lista : []) : lista,
+      pct ? 'izquierda' : datos.esquinaTarjeta, 'tarjeta');
+    if (pct) cont.insertBefore(DESC.span(pct), cont.firstChild);
+
+    /* Debajo de la del tema, medida: crece con la letra del tema. */
+    if (izquierda || pct) {
       var alto = altoInsigniaTema(tarjeta);
       if (alto) cont.style.top = 'calc(var(--sv-tags-top, 8px) + ' + (alto + 6) + 'px)';
     }
 
     anclar(destino).appendChild(cont);
+
+    if (pct && !izquierda && lista.length) {
+      anclar(destino).appendChild(caja(lista, datos.esquinaTarjeta, 'tarjeta'));
+    }
   }
 
   /* Las fotos de la galeria, en orden. La usan la insignia y los beneficios. */
@@ -147,27 +154,28 @@
 
     /* En la ficha no se usa el atajo de coleccion: lo que vale es la lista de
      * handles, que el panel mantiene al dia. */
-    var lista = paraHandle(FICHA, false, FICHA_ID);
-    if (!lista.length) return;
+    var lista = datos.fichas ? paraHandle(FICHA, false, FICHA_ID) : [];
+    var conDesc = Boolean(DESC && DESC.foto);
+    if (!lista.length && !conDesc) return;
+    var pct = conDesc ? DESC.pctFicha() : 0;
 
-    /* En TODAS las fotos: la galeria es un carrusel y solo se ve una a la
-     * vez, asi que no se repite; lo que hace es no desaparecer al pasar. */
+    /* En todas las fotos: es un carrusel, asi no desaparece al pasar. */
     var fotos = fotosDeLaFicha();
     for (var i = 0; i < fotos.length; i += 1) {
       if (fotos[i].dataset[MARCA]) continue;
       fotos[i].dataset[MARCA] = '1';
-      anclar(fotos[i]).appendChild(caja(lista, datos.esquinaFicha, 'ficha'));
+      var cont = caja(lista, datos.esquinaFicha, 'ficha');
+      if (conDesc) {
+        cont.insertBefore(DESC.registrar(DESC.span(pct)), cont.firstChild);
+      }
+      anclar(fotos[i]).appendChild(cont);
     }
   }
 
-  /* Se exige la clase del tema ademas del atributo. Solo con el atributo se
-   * cuelan contenedores que tambien lo llevan (la seccion de la ficha, por
-   * ejemplo) y la insignia aterriza en cualquier sitio. */
+  /* Clase del tema y atributo: solo con el atributo se cuelan otros nodos. */
   var TARJETAS = '.grid-product[data-product-handle], .grid__item[data-product-handle]';
 
-  /* Un beneficio por foto, DESDE LA SEGUNDA: la primera se deja limpia.
-   * Quien decide es la app y no la foto, asi que reordenar las fotos en
-   * Shopify no cambia nada. Por javascript: la galeria no admite bloques. */
+  /* Un beneficio por foto, desde la segunda: la primera se deja limpia. */
   function decorarFotos() {
     var lista = datos.beneficios;
     if (!lista || !lista.length) return;
@@ -183,8 +191,7 @@
 
       var pildora = document.createElement('span');
       pildora.className = 'sv-benef-foto sv-benef-foto--' + (datos.esquinaFoto || 'arriba-derecha');
-      /* El svg lo genero el snippet de la extension, no el comerciante: por eso
-       * va por innerHTML. El texto, que si es suyo, va por textContent. */
+      /* El svg es de la extension (innerHTML); el texto, del comerciante. */
       pildora.innerHTML = lista[i].icono || '';
       var texto = document.createElement('span');
       texto.textContent = lista[i].texto;
@@ -196,11 +203,13 @@
 
   function decorar(raiz) {
     altoDelTema = null;
-    if (datos.tarjetas) {
+    if (datos.tarjetas || (DESC && DESC.tarjetas)) {
       var tarjetas = raiz.querySelectorAll(TARJETAS);
       for (var i = 0; i < tarjetas.length; i += 1) decorarTarjeta(tarjetas[i]);
     }
-    if (datos.fichas) decorarFicha();
+    if (datos.fichas || (DESC && DESC.foto)) decorarFicha();
+    if (DESC && DESC.precio) DESC.decorarPrecio();
+    if (DESC && (DESC.foto || DESC.precio)) DESC.vigilar();
     if (datos.fotos) decorarFotos();
   }
 
@@ -224,7 +233,9 @@
         var nuevos = cambios[i].addedNodes;
         for (var j = 0; j < nuevos.length; j += 1) {
           var n = nuevos[j];
-          if (n.nodeType !== 1 || n.classList.contains('sv-tags')) continue;
+          if (n.nodeType !== 1) continue;
+          if (n.classList.contains('sv-tags') || n.classList.contains('sv-desc-precio')
+            || n.classList.contains('sv-benef-foto')) continue;
           pintarPronto(document);
           return;
         }
@@ -238,9 +249,24 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', arrancar);
+  var empezado = false;
+  function empezar() {
+    if (empezado) return;
+    empezado = true;
+    DESC = window.svDescuento ? window.svDescuento(datos.descuento) : null;
+    if (!hayEtiquetas && !hayBeneficios && !DESC) return;
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', arrancar);
+    } else {
+      arrancar();
+    }
+  }
+
+  if (datos.descuento && !window.svDescuento) {
+    document.addEventListener('sv:descuento', empezar);
+    /* Si no llegara (se corta la red), las insignias salen igual. */
+    window.addEventListener('load', empezar);
   } else {
-    arrancar();
+    empezar();
   }
 }());

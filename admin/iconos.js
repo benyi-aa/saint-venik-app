@@ -45,7 +45,7 @@ export const ICONOS = [
   {
     clave: 'hecho-a-mano',
     rotulo: 'Mano · hecho a mano',
-    trazo: '<path d="M9 11.6V5.9a1.35 1.35 0 0 1 2.7 0v4.9"/> <path d="M11.7 10.9V4.7a1.35 1.35 0 0 1 2.7 0v6.1"/> <path d="M14.4 11.1V7a1.35 1.35 0 0 1 2.7 0v7.3c0 3.2-2.1 5.8-5.2 5.8-2.3 0-3.8-1-4.9-2.8l-1.9-3.4a1.35 1.35 0 0 1 2.2-1.6l1.7 1.9"/> {%- comment -%} Tuerca: metal, no escudo. El escudo es el de garantia, y dos escudos iguales en la misma ficha no distinguen nada. {%- endcomment -%}',
+    trazo: '<path d="M9 11.6V5.9a1.35 1.35 0 0 1 2.7 0v4.9"/> <path d="M11.7 10.9V4.7a1.35 1.35 0 0 1 2.7 0v6.1"/> <path d="M14.4 11.1V7a1.35 1.35 0 0 1 2.7 0v7.3c0 3.2-2.1 5.8-5.2 5.8-2.3 0-3.8-1-4.9-2.8l-1.9-3.4a1.35 1.35 0 0 1 2.2-1.6l1.7 1.9"/>',
   },
   {
     clave: 'acero',
@@ -71,6 +71,46 @@ export const ICONOS = [
     clave: 'rapido',
     rotulo: 'Reloj · envío rápido',
     trazo: '<circle cx="12" cy="12" r="8"/><path d="M12 7.6V12l3 1.8"/>',
+  },
+  {
+    clave: 'cadena',
+    rotulo: 'Eslabones · cadenas',
+    trazo: '<rect x="2.8" y="8.6" width="10.2" height="6.8" rx="3.4"/> <rect x="11" y="8.6" width="10.2" height="6.8" rx="3.4"/>',
+  },
+  {
+    clave: 'colgante',
+    rotulo: 'Colgante · colgantes',
+    trazo: '<path d="M4.2 3.6 12 11.4l7.8-7.8"/><path d="M12 11.4v1.4"/> <path d="m12 12.8 3.3 3.7-3.3 4-3.3-4 3.3-3.7Z"/>',
+  },
+  {
+    clave: 'pulsera',
+    rotulo: 'Aro · pulseras',
+    trazo: '<ellipse cx="12" cy="12" rx="8.6" ry="5.4"/> <path d="M5.6 13.6c1.6 1.2 3.9 1.8 6.4 1.8s4.8-.6 6.4-1.8"/>',
+  },
+  {
+    clave: 'anillo',
+    rotulo: 'Anillo liso · anillos',
+    trazo: '<circle cx="12" cy="13.2" r="6.6"/><circle cx="12" cy="13.2" r="4.4"/> <path d="M10.3 4.2h3.4"/>',
+  },
+  {
+    clave: 'perla',
+    rotulo: 'Perla · perlas',
+    trazo: '<circle cx="12" cy="12" r="6.8"/><path d="M8.9 10a3.6 3.6 0 0 1 3-2.5"/>',
+  },
+  {
+    clave: 'conjunto',
+    rotulo: 'Dos aros · conjuntos',
+    trazo: '<circle cx="8.6" cy="12" r="5"/><circle cx="15.4" cy="12" r="5"/>',
+  },
+  {
+    clave: 'lentes',
+    rotulo: 'Lentes · anteojos',
+    trazo: '<circle cx="7" cy="13.4" r="3.6"/><circle cx="17" cy="13.4" r="3.6"/> <path d="M10.6 13.2c.9-.7 1.9-.7 2.8 0M3.4 13 2.6 9.4M20.6 13l.8-3.6"/>',
+  },
+  {
+    clave: 'tenis',
+    rotulo: 'Rombos · tenis',
+    trazo: '<path d="m5.5 9.6 2.2 2.4-2.2 2.4L3.3 12l2.2-2.4Z"/> <path d="m12 9.6 2.2 2.4-2.2 2.4L9.8 12 12 9.6Z"/> <path d="m18.5 9.6 2.2 2.4-2.2 2.4-2.2-2.4 2.2-2.4Z"/>',
   },
 ];
 

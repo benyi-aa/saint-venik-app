@@ -1,42 +1,48 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611052054';
+import { estaEmbebida } from './api.js?v=202611061821';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611052054';
+} from './colores.js?v=202611061821';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-} from './config.js?v=202611052054';
+  guardarDescuento, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
+  guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
+} from './config.js?v=202611061821';
 import {
-  buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor,
-} from './productos.js?v=202611052054';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611052054';
+  FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
+  cargarProductosFiltro, guardarClasificacion, sugerir,
+} from './filtros.js?v=202611061821';
+import {
+  buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
+} from './productos.js?v=202611061821';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611061821';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611052054';
+} from './guias.js?v=202611061821';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611052054';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611052054';
+} from './vista-previa.js?v=202611061821';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611061821';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611052054';
+} from './etiquetas.js?v=202611061821';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611052054';
-import { ICONOS, svgIcono } from './iconos.js?v=202611052054';
+} from './beneficios.js?v=202611061821';
+import { ICONOS, svgIcono } from './iconos.js?v=202611061821';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611052054';
+const VERSION = '202611061821';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -144,7 +150,7 @@ async function pintarColores() {
 
       <div class="titular">
         <h1>Colores</h1>
-        <p class="subtitulo">Cada color es una muestra en la ficha de producto. Un producto se asocia a su color por la etiqueta, y el orden de aquí es el orden en que salen.</p>
+        <p class="subtitulo">Cada color es una muestra en la ficha de producto. Un producto se asocia a su color por la etiqueta, y el orden de aquí es el orden en que salen. Si un producto lleva dos etiquetas de color (la Vienna verde lleva <b>oro</b> y <b>verde</b>), cuenta como el que esté más arriba: por eso los colores de piedra van antes que los metales.</p>
       </div>
 
       <s-section heading="Así se ve en la ficha de producto" subheading="La tipografía y los colores del texto los pone tu tema; aquí se ven los del panel.">
@@ -827,9 +833,12 @@ async function pintarEditor(handle) {
 async function pintarApariencia() {
   pantalla.innerHTML = '<p class="cargando">Cargando…</p>';
 
-  const [config, revision, colores] = await Promise.all([
-    leerConfig(), revisarEstructura(), cargarColores(),
+  const [config, revision, colores, camposConfig] = await Promise.all([
+    leerConfig(), revisarEstructura(), cargarColores(), camposDeConfig(),
   ]);
+  const hayTransicion = camposConfig.has('trans_activo');
+  const trans = config.transicion ?? TRANSICION_POR_DEFECTO;
+  const tienda = new URLSearchParams(location.search).get('shop') || '';
 
   pantalla.innerHTML = `
     <s-page>
@@ -862,6 +871,30 @@ async function pintarApariencia() {
       <s-section heading="Así se ve en la ficha">
         <div id="previa-apariencia"></div>
       </s-section>
+
+      ${hayTransicion ? `
+      <s-section id="transicion" heading="Cambio de página" subheading="Como en louisvuitton.com: al tocar un enlace aparece arriba una barra fina que se va llenando, y la página siguiente entra con un fundido en vez de aparecer de golpe. Además, la tienda empieza a cargar la página siguiente en cuanto el cliente apoya el dedo sobre un enlace.">
+        <div class="trans-previa" id="trans-previa" aria-hidden="true">
+          <div class="trans-previa__barra" id="trans-barra"></div>
+          <div class="trans-previa__pagina">saintvenik.cl</div>
+        </div>
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-select label="Estado" id="t-modo">
+            <s-option value="no">Apagado</s-option>
+            <s-option value="prueba">Vista previa: solo con el enlace</s-option>
+            <s-option value="si">Activo en la tienda</s-option>
+          </s-select>
+          <s-color-field label="Color de la barra" id="t-color" value="${escapar(trans.color)}"></s-color-field>
+          <s-number-field label="Grosor de la barra" id="t-grosor" value="${trans.grosor}" min="1" max="6" step="1" details="En píxeles. La de Louis Vuitton es de 2."></s-number-field>
+          <s-number-field label="Duración del fundido" id="t-fundido" value="${trans.fundido}" min="0" max="800" step="50" details="En milisegundos. 0 = sin fundido, solo la barra."></s-number-field>
+        </s-grid>
+        <div class="casilla-polaris">
+          <s-checkbox label="Precargar la página siguiente al apoyar el dedo sobre un enlace" id="t-precarga" ${trans.precarga ? 'checked' : ''}></s-checkbox>
+        </div>
+        <p class="ayuda">El fundido lo hace el propio navegador: Chrome, Edge y Safari lo tienen; donde no existe, la página cambia como siempre y la barra sale igual. El carrito, la cuenta y el pago nunca se precargan.</p>
+        <p class="ayuda" id="t-enlace" hidden>Para verlo antes de encenderlo: <a target="_blank" rel="noopener" href="https://${escapar(tienda)}/?sv-vista=1">abre la tienda con este enlace</a> y navega. Solo lo ve quien entra por ahí.</p>
+        <s-button slot="primary-action" variant="primary" id="guardar-transicion">Guardar</s-button>
+      </s-section>` : ''}
 
       <s-section heading="Botón de la guía de tallas" subheading="Si lo dejas vacío se usa el texto por defecto en cada idioma.">
         <s-grid gridTemplateColumns="repeat(auto-fit, minmax(220px, 1fr))" gap="base">
@@ -917,6 +950,8 @@ async function pintarApariencia() {
     }
   });
 
+  if (hayTransicion) conectarTransicion(trans);
+
   document.getElementById('guardar-boton').addEventListener('click', async (e) => {
     const boton = e.currentTarget;
     boton.loading = true;
@@ -943,7 +978,22 @@ const FILTROS = {
   'sin-color': 'No tienen ningún color',
 };
 
-function tarjetaProducto(p, etiquetasColor) {
+/* Una ficha por color: encendida si el producto lleva su etiqueta. */
+function fichasDeColor(p, colores) {
+  const suyas = new Set(p.etiquetas.map((e) => e.trim().toLowerCase()));
+  const conEtiqueta = colores.filter((c) => c.etiqueta.trim());
+  if (!conEtiqueta.length) return '';
+  return `
+    <p class="ayuda" style="margin-top:8px;">Color de este producto (su etiqueta):</p>
+    <div class="fichas-color">${conEtiqueta.map((c) => {
+    const etq = c.etiqueta.trim();
+    const on = suyas.has(etq.toLowerCase());
+    return `<button type="button" class="ficha-color${on ? ' is-on' : ''}" data-color-etiqueta="${escapar(etq)}" aria-pressed="${on}">
+        ${escapar(c.nombre || etq)} <span class="ayuda">${escapar(etq)}</span></button>`;
+  }).join('')}</div>`;
+}
+
+function tarjetaProducto(p, etiquetasColor, colores = []) {
   const falta = sinHermano(p, etiquetasColor);
   const incoloro = sinColor(p, etiquetasColor);
   const hermanos = p.hermanos.length
@@ -960,6 +1010,7 @@ function tarjetaProducto(p, etiquetasColor) {
         <div style="flex:1 1 auto;">
           <p class="producto__titulo">${escapar(p.titulo)}${p.activo ? '' : ' <span class="ayuda">(borrador)</span>'}</p>
           <p class="ayuda">${p.etiquetas.length ? escapar(p.etiquetas.join(', ')) : 'sin etiquetas'}</p>
+          ${fichasDeColor(p, colores)}
 
           ${hermanos
     ? `<p class="ayuda" style="margin-top:8px;">Hermano de color:</p><ul class="producto__hermanos">${hermanos}</ul>`
@@ -1038,7 +1089,7 @@ async function pintarProductos() {
       </s-section>
 
       ${visibles.length
-    ? visibles.map((p) => tarjetaProducto(p, etiquetasColor)).join('')
+    ? visibles.map((p) => tarjetaProducto(p, etiquetasColor, colores)).join('')
     : '<s-section><div class="vacio">Ningún producto coincide.</div></s-section>'}
     </s-page>`;
 
@@ -1059,6 +1110,23 @@ async function pintarProductos() {
   pantalla.querySelectorAll('[data-producto]').forEach((tarjeta) => {
     const id = tarjeta.dataset.producto;
     const producto = productos.find((p) => p.id === id);
+
+    tarjeta.querySelectorAll('[data-color-etiqueta]').forEach((ficha) => {
+      ficha.addEventListener('click', async () => {
+        const poner = !ficha.classList.contains('is-on');
+        ficha.disabled = true;
+        try {
+          await ponerEtiquetaColor(producto, ficha.dataset.colorEtiqueta, poner);
+          ficha.classList.toggle('is-on', poner);
+          ficha.setAttribute('aria-pressed', String(poner));
+          avisar(poner ? `Etiqueta «${ficha.dataset.colorEtiqueta}» puesta` : `Etiqueta «${ficha.dataset.colorEtiqueta}» quitada`);
+        } catch (error) {
+          avisar(error.message, true);
+        } finally {
+          ficha.disabled = false;
+        }
+      });
+    });
 
     tarjeta.querySelectorAll('[data-desvincular]').forEach((boton) => {
       boton.addEventListener('click', async () => {
@@ -1528,10 +1596,16 @@ async function pintarEtiquetas() {
   pasesVivos.add(pase);
   pantalla.innerHTML = '<p class="cargando">Cargando insignias…</p>';
 
-  const [colecciones, etiquetasTienda, revision, campos] = await Promise.all([
+  const [colecciones, etiquetasTienda, revision, campos, config, camposConfig] = await Promise.all([
     cargarColecciones(), cargarEtiquetasDeTienda(), revisarEstructura(), camposDeEtiqueta(),
+    leerConfig(), camposDeConfig(),
   ]);
   const faltaLoNuestro = revision.pendientes.some((p) => p.includes('insignias'));
+  /* La sección del descuento solo se ofrece cuando la tienda ya tiene sus
+   * campos: antes, guardar fallaría. Si faltan, lo dice el aviso de arriba. */
+  const hayDescuento = camposConfig.has('desc_activo');
+  const descuento = config.descuento ?? DESCUENTO_POR_DEFECTO;
+  const tienda = new URLSearchParams(location.search).get('shop') || '';
   /* Los campos de borde y opacidad son nuevos: hasta que la tienda los tenga,
    * ofrecerlos solo serviría para que guardar fallara. */
   const hayEstilo = campos.has('opacidad');
@@ -1556,6 +1630,44 @@ async function pintarEtiquetas() {
       <s-section heading="Así se ven" subheading="En la colección van arriba a la izquierda, debajo de la etiqueta del tema; en la ficha, arriba a la derecha.">
         <div class="previa__tags" id="previa-etiquetas">${muestras()}</div>
       </s-section>
+
+      ${hayDescuento ? `
+      <s-section id="descuento" heading="Descuento" subheading="El porcentaje de rebaja de cada producto, a secas, en lugar del «AHORRA 14%» del tema. No se escribe a mano: sale del precio tachado de cada producto, y cambia solo al elegir otra talla.">
+        <div class="desc-previa">
+          <div class="desc-previa__foto">
+            <span class="sv-tag sv-tag--desc" id="d-previa-tag"></span>
+          </div>
+          <div class="desc-previa__precio">
+            <s>$40.990</s> <strong>$33.990</strong>
+            <span class="sv-desc-precio" id="d-previa-precio"></span>
+          </div>
+        </div>
+
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-select label="Estado" id="d-modo">
+            <s-option value="no">Apagado: se ve el del tema</s-option>
+            <s-option value="prueba">Vista previa: solo con el enlace</s-option>
+            <s-option value="si">Activo en la tienda</s-option>
+          </s-select>
+          <s-select label="Cómo se escribe" id="d-formato">
+            ${FORMATOS_DESCUENTO.map((f) => `<s-option value="${f.valor}">${escapar(f.rotulo)}</s-option>`).join('')}
+          </s-select>
+          <s-color-field label="Fondo" id="d-fondo" value="${escapar(descuento.fondo)}"></s-color-field>
+          <s-color-field label="Texto" id="d-texto" value="${escapar(descuento.texto)}"></s-color-field>
+          <s-number-field label="Redondeo" id="d-radio" value="${descuento.radio}" min="0" max="12" step="1" details="En la foto y la tarjeta. Junto al precio va siempre redondo."></s-number-field>
+        </s-grid>
+
+        <div class="casilla-polaris">
+          <s-checkbox label="En las tarjetas de las colecciones" id="d-tarjetas" ${descuento.tarjetas ? 'checked' : ''}></s-checkbox>
+          <s-checkbox label="Sobre las fotos de la ficha" id="d-foto" ${descuento.foto ? 'checked' : ''}></s-checkbox>
+          <s-checkbox label="Junto al precio en la ficha" id="d-precio" ${descuento.precio ? 'checked' : ''}></s-checkbox>
+        </div>
+
+        <p class="ayuda" id="d-cuantos">Contando los productos con precio tachado…</p>
+        <p class="ayuda" id="d-enlace" hidden>Para verlo antes de encenderlo: <a target="_blank" rel="noopener" href="https://${escapar(tienda)}/collections/all?sv-vista=1">abre la tienda con este enlace</a>. Solo lo ve quien entra por ahí.</p>
+
+        <s-button slot="primary-action" variant="primary" id="guardar-descuento">Guardar</s-button>
+      </s-section>` : ''}
 
       ${etiquetas.length ? '' : `
         <s-section>
@@ -1607,6 +1719,8 @@ async function pintarEtiquetas() {
   const refrescarMuestras = () => {
     document.getElementById('previa-etiquetas').innerHTML = muestras();
   };
+
+  if (hayDescuento) conectarDescuento(descuento, miPintado);
 
   const conexiones = new Map();
 
@@ -1773,6 +1887,117 @@ async function pintarEtiquetas() {
   });
 
   conectarPendientes(() => ir('etiquetas'));
+}
+
+/* La sección «Cambio de página» de Apariencia. La previa repite la barra en
+ * bucle con el color y el grosor elegidos. */
+function conectarTransicion(trans) {
+  const el = (id) => document.getElementById(id);
+  el('t-modo').value = trans.modo;
+
+  const comoQueda = () => {
+    const n = (id, defecto) => {
+      const v = String(el(id).value ?? '').trim();
+      return v === '' ? defecto : Number(v);
+    };
+    return {
+      modo: el('t-modo').value || 'no',
+      color: colorPlano(el('t-color').value, trans.color),
+      grosor: Math.max(1, Math.min(6, n('t-grosor', trans.grosor))),
+      fundido: Math.max(0, Math.min(800, n('t-fundido', trans.fundido))),
+      precarga: el('t-precarga').checked,
+    };
+  };
+
+  const refrescar = () => {
+    const v = comoQueda();
+    const barra = el('trans-barra');
+    barra.style.background = v.color;
+    barra.style.height = `${v.grosor}px`;
+    el('trans-previa').style.setProperty('--fundido', `${v.fundido}ms`);
+    el('t-enlace').hidden = v.modo !== 'prueba';
+  };
+  const caja = el('transicion');
+  caja.addEventListener('input', refrescar);
+  caja.addEventListener('change', refrescar);
+  refrescar();
+
+  el('guardar-transicion').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    boton.loading = true;
+    try {
+      const v = comoQueda();
+      await guardarTransicion(v);
+      Object.assign(trans, v);
+      avisar(v.modo === 'si' ? 'Cambio de página guardado y activo en la tienda'
+        : v.modo === 'prueba' ? 'Cambio de página guardado en vista previa' : 'Cambio de página guardado (apagado)');
+    } catch (error2) {
+      avisar(error2.message, true);
+    } finally {
+      boton.loading = false;
+    }
+  });
+}
+
+/* La sección «Descuento» de la pantalla de insignias. */
+function conectarDescuento(descuento, miPintado) {
+  const caja = document.getElementById('descuento');
+  const el = (id) => document.getElementById(id);
+
+  /* Los desplegables no hacen caso al `selected` del marcado: por propiedad. */
+  el('d-modo').value = descuento.modo;
+  el('d-formato').value = descuento.formato;
+
+  const comoQueda = () => {
+    const radio = String(el('d-radio').value ?? '').trim();
+    return {
+      modo: el('d-modo').value || 'no',
+      formato: el('d-formato').value || 'pct',
+      fondo: colorPlano(el('d-fondo').value, descuento.fondo),
+      texto: colorPlano(el('d-texto').value, descuento.texto),
+      radio: radio === '' ? descuento.radio : Number(radio),
+      tarjetas: el('d-tarjetas').checked,
+      foto: el('d-foto').checked,
+      precio: el('d-precio').checked,
+    };
+  };
+
+  const refrescar = () => {
+    const v = comoQueda();
+    const tag = el('d-previa-tag');
+    tag.textContent = textoDescuento(20, v.formato);
+    tag.style.cssText = `background:${v.fondo};color:${v.texto};border-radius:${v.radio}px`;
+    const pill = el('d-previa-precio');
+    pill.textContent = textoDescuento(17, v.formato);
+    pill.style.cssText = `background:${v.fondo};color:${v.texto}`;
+    el('d-enlace').hidden = v.modo !== 'prueba';
+  };
+  caja.addEventListener('input', refrescar);
+  caja.addEventListener('change', refrescar);
+  refrescar();
+
+  contarConDescuento().then(({ total, con }) => {
+    if (miPintado !== pintado) return;
+    el('d-cuantos').textContent = `Hoy ${con} de ${total} productos activos tienen precio tachado: esos son los que llevan descuento. Si un producto no tiene precio tachado, no sale nada.`;
+  }).catch(() => {
+    if (miPintado === pintado) el('d-cuantos').textContent = '';
+  });
+
+  el('guardar-descuento').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    boton.loading = true;
+    try {
+      const v = comoQueda();
+      await guardarDescuento(v);
+      Object.assign(descuento, v);
+      avisar(v.modo === 'si' ? 'Descuento guardado y activo en la tienda'
+        : v.modo === 'prueba' ? 'Descuento guardado en vista previa' : 'Descuento guardado (apagado)');
+    } catch (error2) {
+      avisar(error2.message, true);
+    } finally {
+      boton.loading = false;
+    }
+  });
 }
 
 async function pintarBeneficios() {
@@ -2188,6 +2413,536 @@ async function pintarBeneficios() {
   conectarPendientes(() => ir('beneficios'));
 }
 
+/* ---------------------------------------------------------------------------
+ * Filtros: los botones de la página y qué es cada producto
+ * ------------------------------------------------------------------------- */
+
+const NOMBRE_FILTRO = { color: 'Color', categoria: 'Categoría', tipo: 'Tipo' };
+let estadoFiltros = { texto: '', ver: 'todos', simular: '' };
+
+/* Lo que dibuja un botón en la tienda, para la previa: la muestra del color o
+ * el icono, y el texto. */
+function iconoBotonHtml(icono, colores) {
+  const ic = String(icono ?? '').trim();
+  if (ic.startsWith('color:')) {
+    const etq = ic.slice(6).trim().toLowerCase();
+    const c = colores.find((x) => x.etiqueta.trim().toLowerCase() === etq);
+    if (!c) return '';
+    const fondo = c.imagen ? `background-image:url('${escapar(c.imagen)}')` : (c.muestra ? `background-color:${escapar(c.muestra)}` : '');
+    return `<span class="sv-filtro__muestra" style="${fondo}"></span>`;
+  }
+  return svgIcono(ic, 'sv-filtro__icono');
+}
+
+function previaFiltrosHtml(botones, colores, columnas, coleccionId) {
+  const salen = botones.filter((b) => b.activo && (b.donde === 'todas'
+    || b.colecciones.some((c) => c.id === coleccionId)));
+  if (!salen.length) return '<p class="sv-guia__vacio">En esta colección no sale ningún botón.</p>';
+  const filas = [1, 2, 3].map((n) => salen.filter((b) => b.fila === n)).filter((f) => f.length);
+  return `<div class="sv-filtros"><div class="sv-filtros__dentro">${filas.map((fila) => {
+    const cols = Math.min(fila.length, columnas);
+    return `<div class="sv-filtros__fila${cols >= 4 ? ' sv-filtros__fila--apilada' : ''}" style="--cols:${cols}">${
+      fila.map((b, i) => `<span class="sv-filtro${i === 0 && fila === filas[0] ? ' is-activo' : ''}">${iconoBotonHtml(b.icono, colores)}<span>${escapar(b.nombre || 'Sin texto')}</span></span>`).join('')
+    }</div>`;
+  }).join('')}</div></div>`;
+}
+
+function opcionesIcono(colores) {
+  return [
+    '<s-option value="__sin">Sin icono</s-option>',
+    ...colores.filter((c) => c.etiqueta.trim()).map((c) => (
+      `<s-option value="color:${escapar(c.etiqueta.trim())}">Muestra de color · ${escapar(c.nombre || c.etiqueta)}</s-option>`)),
+    ...ICONOS.map((i) => `<s-option value="${escapar(i.clave)}">${escapar(i.rotulo)}</s-option>`),
+  ].join('');
+}
+
+function valoresDe(f, clave) {
+  return { color: f.colores, categoria: f.categorias, tipo: f.tipos }[clave] ?? [];
+}
+
+function opcionesValor(f, clave, actual) {
+  const lista = [...valoresDe(f, clave)];
+  if (actual && !lista.some((v) => v.toLowerCase() === actual.toLowerCase())) lista.push(actual);
+  return lista.map((v) => `<s-option value="${escapar(v)}">${escapar(v)}</s-option>`).join('');
+}
+
+function coleccionesHtml(colecciones, elegidas) {
+  const ids = new Set(elegidas.map((c) => c.id));
+  return `<div class="lista-colecciones">${colecciones.map((c) => `
+    <label class="lista-colecciones__item"><input type="checkbox" data-coleccion="${escapar(c.id)}" ${ids.has(c.id) ? 'checked' : ''} />
+      ${escapar(c.titulo)} <span class="ayuda">${c.cuantos}</span></label>`).join('')}</div>`;
+}
+
+/* Una fila de la tabla de productos. Controles nativos y no de Polaris: son
+ * cientos, y con componentes la pantalla tardaba en aparecer. */
+function filaProductoHtml(p, f) {
+  const n = p.nuevo;
+  const sel = (clave, valor) => {
+    const lista = [...valoresDe(f, clave)];
+    if (valor && !lista.includes(valor)) lista.push(valor);
+    return `<select data-campo-filtro="${clave}" aria-label="${NOMBRE_FILTRO[clave]} de ${escapar(p.titulo)}">
+      <option value="">—</option>
+      ${lista.map((v) => `<option value="${escapar(v)}" ${v === valor ? 'selected' : ''}>${escapar(v)}</option>`).join('')}
+    </select>`;
+  };
+  const tipos = [...new Set([...f.tipos, ...n.tipo])];
+  return `<tr data-fila="${escapar(p.id)}" class="${filaCambiada(p) ? 'is-cambiada' : ''}">
+    <td class="tabla-filtros__foto">${p.imagen ? `<img src="${escapar(p.imagen)}" alt="" loading="lazy" />` : ''}</td>
+    <td class="tabla-filtros__titulo">${escapar(p.titulo)}${p.activo ? '' : ' <span class="ayuda">(borrador)</span>'}</td>
+    <td>${sel('color', n.color)}</td>
+    <td>${sel('categoria', n.categoria)}</td>
+    <td><div class="fichas-tipo">${tipos.map((t) => `<button type="button" class="ficha-tipo${n.tipo.includes(t) ? ' is-on' : ''}" data-tipo="${escapar(t)}" aria-pressed="${n.tipo.includes(t)}">${escapar(t)}</button>`).join('')}</div></td>
+  </tr>`;
+}
+
+function filaCambiada(p) {
+  const a = p.nuevo;
+  return a.color !== p.color || a.categoria !== p.categoria
+    || a.tipo.length !== p.tipo.length || a.tipo.some((t, i) => t !== p.tipo[i]);
+}
+
+function sinClasificar(p) {
+  return !p.nuevo.color || !p.nuevo.categoria;
+}
+
+async function pintarFiltros() {
+  const miPintado = pintado;
+  const pase = { vivo: true };
+  pasesVivos.add(pase);
+  pantalla.innerHTML = '<p class="cargando">Cargando filtros…</p>';
+
+  const [revision, config, camposConfig, colores, colecciones] = await Promise.all([
+    revisarEstructura(), leerConfig(), camposDeConfig(), cargarColores(), cargarColecciones(),
+  ]);
+  const hayConfig = camposConfig.has('filtros_activo');
+  const faltaLoNuestro = revision.pendientes.some((p) => /filtro|metacampo/i.test(p));
+  const f = config.filtros ?? FILTROS_POR_DEFECTO;
+  const [{ lista: botones, error }, { lista: productos, error: errorProductos }] = await Promise.all([
+    cargarOVacio(cargarBotones, !faltaLoNuestro),
+    cargarOVacio(cargarProductosFiltro, true),
+  ]);
+  for (const p of productos) p.nuevo = { color: p.color, categoria: p.categoria, tipo: [...p.tipo] };
+  if (miPintado !== pintado) return;
+
+  const tienda = new URLSearchParams(location.search).get('shop') || '';
+  const handleTienda = tienda.replace('.myshopify.com', '');
+  const best = colecciones.find((c) => c.handle === 'best-sellers');
+  if (!estadoFiltros.simular) estadoFiltros.simular = best?.id ?? colecciones[0]?.id ?? '';
+
+  pantalla.innerHTML = `
+    <s-page>
+      ${bannerPendientes(revision.pendientes)}
+      ${error ? `<s-banner slot="supplemental-start" tone="critical" heading="No se pudieron cargar los botones">${escapar(error)}</s-banner>` : ''}
+      ${errorProductos ? `<s-banner slot="supplemental-start" tone="critical" heading="No se pudieron cargar los productos">${escapar(errorProductos)}</s-banner>` : ''}
+
+      <div class="titular">
+        <h1>Filtros</h1>
+        <p class="subtitulo">Los botones que salen encima de los productos en las colecciones («Dorado», «Plateado», «Brillantes», «Cadenas»…) y qué es cada producto, que es lo que esos botones y el menú «Filtrar» usan para filtrar.</p>
+      </div>
+
+      ${hayConfig ? `
+      <s-section id="f-config" heading="Botones en la página" subheading="Cada botón lleva a la misma colección con ese filtro puesto. En el teléfono van en filas fijas, sin deslizar.">
+        <div class="previa-filtros">
+          <s-select label="Ver cómo queda en" id="f-simular">
+            ${colecciones.map((c) => `<s-option value="${escapar(c.id)}">${escapar(c.titulo)}</s-option>`).join('')}
+          </s-select>
+          <div class="previa-filtros__telefono" id="f-previa">${previaFiltrosHtml(botones, colores, f.columnas, estadoFiltros.simular)}</div>
+          <p class="ayuda">En la tienda un botón solo sale si esa colección tiene productos con ese valor. El primero sale marcado para enseñar cómo se ve elegido.</p>
+        </div>
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-select label="Estado" id="f-modo">
+            <s-option value="no">Apagado</s-option>
+            <s-option value="prueba">Vista previa: solo con el enlace</s-option>
+            <s-option value="si">Activo en la tienda</s-option>
+          </s-select>
+          <s-number-field label="Botones por fila en el teléfono, como mucho" id="f-columnas" value="${f.columnas}" min="2" max="5" step="1" details="Con 4 o más, el icono va encima del texto para que quepan."></s-number-field>
+        </s-grid>
+        <div class="casilla-polaris">
+          <s-checkbox label="Poner «Ordenar» dentro del menú Filtrar, como en craftdlondon.com" id="f-ordenar" ${f.ordenar ? 'checked' : ''}></s-checkbox>
+        </div>
+        <p class="ayuda" id="f-enlace" hidden>Para verlo antes de encenderlo: <a target="_blank" rel="noopener" href="https://${escapar(tienda)}/collections/best-sellers?sv-vista=1">abre Best Sellers con este enlace</a>. Solo lo ve quien entra por ahí.</p>
+        <s-button slot="primary-action" variant="primary" id="f-guardar-config">Guardar</s-button>
+      </s-section>` : ''}
+
+      ${botones.map((b, i) => `
+        <s-section data-boton="${escapar(b.id)}" heading="${escapar(b.nombre || 'Sin texto')}">
+          <div class="cabecera-fila">
+            <span class="previa-boton" data-previa-boton>${iconoBotonHtml(b.icono, colores)}<span>${escapar(b.nombre || 'Sin texto')}</span></span>
+            <s-stack direction="inline" gap="small-300">
+              <s-button variant="tertiary" accessibilityLabel="Subir" data-mover="arriba" ${i === 0 ? 'disabled' : ''}>↑</s-button>
+              <s-button variant="tertiary" accessibilityLabel="Bajar" data-mover="abajo" ${i === botones.length - 1 ? 'disabled' : ''}>↓</s-button>
+            </s-stack>
+          </div>
+          <s-grid gridTemplateColumns="repeat(auto-fit, minmax(170px, 1fr))" gap="base">
+            <s-text-field label="Texto en español" data-campo="nombre" value="${escapar(b.nombre)}"></s-text-field>
+            <s-text-field label="Texto en inglés" data-campo="nombre_en" value="${escapar(b.nombreEn)}" placeholder="Vacío: se usa el español"></s-text-field>
+            <s-select label="Qué filtra" data-campo="filtro">
+              ${FILTROS_PRODUCTO.map((x) => `<s-option value="${x.clave}">${NOMBRE_FILTRO[x.clave]}</s-option>`).join('')}
+            </s-select>
+            <s-select label="Valor" data-campo="valor">${opcionesValor(f, b.filtro, b.valor)}</s-select>
+            <s-select label="Icono" data-campo="icono">${opcionesIcono(colores)}</s-select>
+            <s-select label="Fila" data-campo="fila">
+              <s-option value="1">Primera</s-option><s-option value="2">Segunda</s-option><s-option value="3">Tercera</s-option>
+            </s-select>
+            <s-select label="Dónde sale" data-campo="donde">
+              <s-option value="todas">En todas las colecciones</s-option>
+              <s-option value="elegidas">Solo en las colecciones elegidas</s-option>
+            </s-select>
+          </s-grid>
+          <div data-elegir-colecciones ${b.donde === 'elegidas' ? '' : 'hidden'}>
+            <p class="ayuda" style="margin-top:12px;">Colecciones donde sale:</p>
+            ${coleccionesHtml(colecciones, b.colecciones)}
+          </div>
+          <div class="casilla-polaris">
+            <s-checkbox label="Activo en la tienda" data-campo="activo" ${b.activo ? 'checked' : ''}></s-checkbox>
+          </div>
+          <s-button slot="primary-action" variant="primary" data-guardar>Guardar</s-button>
+          <s-button slot="secondary-actions" tone="critical" data-borrar>Eliminar</s-button>
+        </s-section>`).join('')}
+
+      ${hayConfig && !faltaLoNuestro ? `
+      <s-section heading="Añadir un botón" subheading="Sale en todas las colecciones, en la primera fila. Después se puede cambiar.">
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(170px, 1fr))" gap="base">
+          <s-text-field label="Texto en español" id="nuevo-boton-nombre" placeholder="p. ej. Perlas"></s-text-field>
+          <s-select label="Qué filtra" id="nuevo-boton-filtro">
+            ${FILTROS_PRODUCTO.map((x) => `<s-option value="${x.clave}">${NOMBRE_FILTRO[x.clave]}</s-option>`).join('')}
+          </s-select>
+          <s-select label="Valor" id="nuevo-boton-valor">${opcionesValor(f, 'color', '')}</s-select>
+          <s-select label="Icono" id="nuevo-boton-icono">${opcionesIcono(colores)}</s-select>
+        </s-grid>
+        <s-button slot="primary-action" variant="primary" id="anadir-boton">Añadir botón</s-button>
+      </s-section>
+
+      <s-section id="f-valores" heading="Valores de cada filtro" subheading="Lo que se puede elegir para cada producto, separado por comas. Añadir uno aquí lo ofrece en la tabla de abajo y en los botones; renombrarlo no cambia los productos que ya lo tienen.">
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(220px, 1fr))" gap="base">
+          <s-text-field label="Color" id="f-colores" value="${escapar(f.colores.join(', '))}"></s-text-field>
+          <s-text-field label="Categoría" id="f-categorias" value="${escapar(f.categorias.join(', '))}"></s-text-field>
+          <s-text-field label="Tipo (un producto puede tener varios)" id="f-tipos" value="${escapar(f.tipos.join(', '))}"></s-text-field>
+        </s-grid>
+        <s-button slot="primary-action" variant="primary" id="f-guardar-valores">Guardar</s-button>
+      </s-section>
+
+      <s-section id="f-productos" heading="Qué es cada producto" subheading="La app propone el color por la etiqueta (oro, acero-inox), la categoría por el título y las colecciones, y el tipo por el título (Tennis, Pearls, Vienna, Cuban…) y la etiqueta «brillantes». Revisa y guarda.">
+        <p class="ayuda" id="f-resumen"></p>
+        <s-grid gridTemplateColumns="2fr 1fr" gap="base">
+          <s-search-field id="f-buscar" label="Buscar por nombre" labelAccessibilityVisibility="exclusive" placeholder="Buscar por nombre…" value="${escapar(estadoFiltros.texto)}"></s-search-field>
+          <s-select id="f-ver" label="Ver" labelAccessibilityVisibility="exclusive">
+            <s-option value="todos">Todos</s-option>
+            <s-option value="sin">Sin color o sin categoría</s-option>
+            <s-option value="cambios">Con cambios sin guardar</s-option>
+          </s-select>
+        </s-grid>
+        <div class="acciones" style="margin:12px 0;">
+          <s-button id="f-proponer">Rellenar lo vacío con la propuesta</s-button>
+          <s-button id="f-deshacer" variant="tertiary">Deshacer lo no guardado</s-button>
+        </div>
+        <div class="tabla-filtros__caja">
+          <table class="tabla-filtros">
+            <thead><tr><th></th><th>Producto</th><th>Color</th><th>Categoría</th><th>Tipo</th></tr></thead>
+            <tbody id="f-filas"></tbody>
+          </table>
+        </div>
+        <s-button slot="primary-action" variant="primary" id="f-guardar-productos">Guardar cambios</s-button>
+      </s-section>
+
+      <s-section heading="Menú «Filtrar»" subheading="Lo que sale dentro del botón Filtrar lo decide Shopify Search & Discovery. Hay que añadir ahí, una vez por tienda, los tres filtros que escribe esta pantalla.">
+        <ol class="pasos">
+          <li>Abre <a href="https://admin.shopify.com/store/${escapar(handleTienda)}/apps/search-and-discovery/filters" target="_top">Search & Discovery → Filtros</a>.</li>
+          <li>«Añadir filtro» → <b>Color (filtro)</b>. Repite con <b>Categoría (filtro)</b> y <b>Tipo (filtro)</b>.</li>
+          <li>Ponlos en este orden: Color, Categoría, Tipo, Precio, Disponibilidad, y guarda.</li>
+        </ol>
+        <p class="ayuda">Hasta que estén ahí, los botones de la página no salen: son ese mismo filtro.</p>
+      </s-section>` : ''}
+    </s-page>`;
+
+  conectarPendientes(() => ir('filtros'));
+  if (faltaLoNuestro || !hayConfig) return;
+
+  const el = (id) => document.getElementById(id);
+
+  /* ---- Configuración y previa ---- */
+  el('f-modo').value = f.modo;
+  el('f-simular').value = estadoFiltros.simular;
+  const repintarPrevia = () => {
+    const cols = Number(el('f-columnas').value) || f.columnas;
+    el('f-previa').innerHTML = previaFiltrosHtml(botones, colores, cols, estadoFiltros.simular);
+    el('f-enlace').hidden = el('f-modo').value !== 'prueba';
+  };
+  el('f-simular').addEventListener('change', (e) => { estadoFiltros.simular = e.target.value; repintarPrevia(); });
+  el('f-config').addEventListener('input', repintarPrevia);
+  el('f-config').addEventListener('change', repintarPrevia);
+  repintarPrevia();
+
+  const configActual = () => ({
+    ...f,
+    modo: el('f-modo').value || 'no',
+    columnas: Math.max(2, Math.min(5, Number(el('f-columnas').value) || f.columnas)),
+    ordenar: el('f-ordenar').checked,
+  });
+  el('f-guardar-config').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    boton.loading = true;
+    try {
+      const v = configActual();
+      await guardarFiltrosConfig(v);
+      Object.assign(f, v);
+      avisar(v.modo === 'si' ? 'Botones activos en la tienda' : v.modo === 'prueba' ? 'Botones en vista previa' : 'Botones apagados');
+    } catch (error2) {
+      avisar(error2.message, true);
+    } finally {
+      boton.loading = false;
+    }
+  });
+
+  el('f-guardar-valores').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    boton.loading = true;
+    const lista = (id) => String(el(id).value ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+    try {
+      await guardarFiltrosConfig({ ...configActual(), colores: lista('f-colores'), categorias: lista('f-categorias'), tipos: lista('f-tipos') });
+      avisar('Valores guardados');
+      await ir('filtros');
+    } catch (error2) {
+      avisar(error2.message, true);
+      boton.loading = false;
+    }
+  });
+
+  /* ---- Cada botón ---- */
+  pantalla.querySelectorAll('s-section[data-boton]').forEach((tarjeta) => {
+    const id = tarjeta.dataset.boton;
+    const original = botones.find((b) => b.id === id);
+    const campo = (n) => tarjeta.querySelector(`[data-campo="${n}"]`);
+    const valor = (n) => String(campo(n)?.value ?? '').trim();
+
+    campo('filtro').value = original.filtro;
+    campo('valor').value = original.valor;
+    campo('icono').value = original.icono || '__sin';
+    campo('fila').value = String(original.fila);
+    campo('donde').value = original.donde;
+
+    const comoQueda = () => ({
+      nombre: valor('nombre'),
+      nombreEn: valor('nombre_en'),
+      filtro: valor('filtro') || 'color',
+      valor: valor('valor'),
+      icono: valor('icono') === '__sin' ? '' : valor('icono'),
+      fila: Number(valor('fila')) || 1,
+      donde: valor('donde') === 'elegidas' ? 'elegidas' : 'todas',
+      activo: campo('activo').checked,
+      colecciones: [...tarjeta.querySelectorAll('[data-coleccion]:checked')]
+        .map((x) => colecciones.find((c) => c.id === x.dataset.coleccion)).filter(Boolean),
+    });
+
+    const refrescar = () => {
+      const v = comoQueda();
+      tarjeta.querySelector('[data-previa-boton]').innerHTML = `${iconoBotonHtml(v.icono, colores)}<span>${escapar(v.nombre || 'Sin texto')}</span>`;
+      tarjeta.heading = v.nombre || 'Sin texto';
+      tarjeta.querySelector('[data-elegir-colecciones]').hidden = v.donde !== 'elegidas';
+    };
+    tarjeta.addEventListener('input', refrescar);
+    tarjeta.addEventListener('change', (e) => {
+      /* Al cambiar qué filtra, los valores posibles son otros. */
+      if (e.target === campo('filtro')) {
+        const sel = campo('valor');
+        sel.innerHTML = opcionesValor(f, campo('filtro').value, '');
+        requestAnimationFrame(() => { sel.value = valoresDe(f, campo('filtro').value)[0] ?? ''; });
+      }
+      refrescar();
+    });
+
+    tarjeta.querySelector('[data-guardar]').addEventListener('click', async (e) => {
+      const boton = e.currentTarget;
+      const v = comoQueda();
+      if (!v.nombre) { avisar('Escribe el texto del botón.', true); return; }
+      if (!v.valor) { avisar('Elige el valor que filtra.', true); return; }
+      if (v.donde === 'elegidas' && !v.colecciones.length) { avisar('Elige al menos una colección, o «En todas».', true); return; }
+      boton.loading = true;
+      try {
+        await guardarBoton(id, v);
+        Object.assign(original, v);
+        repintarPrevia();
+        avisar('Botón guardado');
+      } catch (error2) {
+        avisar(error2.message, true);
+      } finally {
+        boton.loading = false;
+      }
+    });
+
+    tarjeta.querySelectorAll('[data-mover]').forEach((boton) => {
+      boton.addEventListener('click', async () => {
+        boton.loading = true;
+        try {
+          await moverEntrada(botones, id, boton.dataset.mover, guardarBoton);
+          await ir('filtros');
+        } catch (error2) {
+          avisar(error2.message, true);
+          boton.loading = false;
+        }
+      });
+    });
+
+    tarjeta.querySelector('[data-borrar]').addEventListener('click', async (e) => {
+      if (!confirm(`¿Eliminar el botón «${original.nombre}»?`)) return;
+      const boton = e.currentTarget;
+      boton.loading = true;
+      try {
+        await borrarBoton(id);
+        avisar('Botón eliminado');
+        await ir('filtros');
+      } catch (error2) {
+        avisar(error2.message, true);
+        boton.loading = false;
+      }
+    });
+  });
+
+  /* ---- Añadir ---- */
+  el('nuevo-boton-icono').value = '__sin';
+  el('nuevo-boton-filtro').addEventListener('change', () => {
+    const sel = el('nuevo-boton-valor');
+    sel.innerHTML = opcionesValor(f, el('nuevo-boton-filtro').value, '');
+    requestAnimationFrame(() => { sel.value = valoresDe(f, el('nuevo-boton-filtro').value)[0] ?? ''; });
+  });
+  el('anadir-boton').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    const nombre = String(el('nuevo-boton-nombre').value ?? '').trim();
+    const valorNuevo = String(el('nuevo-boton-valor').value ?? '').trim();
+    if (!nombre) { avisar('Escribe el texto del botón.', true); return; }
+    if (!valorNuevo) { avisar('Elige el valor que filtra.', true); return; }
+    boton.loading = true;
+    try {
+      const icono = String(el('nuevo-boton-icono').value ?? '');
+      await crearBoton({
+        nombre, filtro: el('nuevo-boton-filtro').value || 'color', valor: valorNuevo,
+        icono: icono === '__sin' ? '' : icono, orden: botones.length + 1,
+      }, botones.length);
+      avisar('Botón creado');
+      await ir('filtros');
+    } catch (error2) {
+      avisar(error2.message, true);
+      boton.loading = false;
+    }
+  });
+
+  /* ---- Qué es cada producto ---- */
+  const cuerpo = el('f-filas');
+  el('f-ver').value = estadoFiltros.ver;
+
+  const resumen = () => {
+    const sinColor2 = productos.filter((p) => !p.nuevo.color).length;
+    const sinCat = productos.filter((p) => !p.nuevo.categoria).length;
+    const cambiados = productos.filter(filaCambiada).length;
+    el('f-resumen').textContent = `${productos.length} productos · ${sinColor2} sin color · ${sinCat} sin categoría${cambiados ? ` · ${cambiados} con cambios sin guardar` : ''}.`;
+    el('f-guardar-productos').textContent = cambiados ? `Guardar cambios (${cambiados})` : 'Guardar cambios';
+  };
+
+  const visibles = () => {
+    const t = estadoFiltros.texto.toLowerCase();
+    return productos.filter((p) => (!t || p.titulo.toLowerCase().includes(t))
+      && (estadoFiltros.ver !== 'sin' || sinClasificar(p))
+      && (estadoFiltros.ver !== 'cambios' || filaCambiada(p)));
+  };
+
+  const pintarTabla = () => {
+    const lista = visibles();
+    cuerpo.innerHTML = lista.length
+      ? lista.map((p) => filaProductoHtml(p, f)).join('')
+      : '<tr><td colspan="5" class="vacio">Ningún producto coincide.</td></tr>';
+    resumen();
+  };
+  pintarTabla();
+
+  let espera = null;
+  el('f-buscar').addEventListener('input', (e) => {
+    clearTimeout(espera);
+    espera = setTimeout(() => { estadoFiltros.texto = String(e.target.value ?? '').trim(); pintarTabla(); }, ESPERA_BUSQUEDA);
+  });
+  el('f-ver').addEventListener('change', (e) => { estadoFiltros.ver = e.target.value; pintarTabla(); });
+
+  const marcar = (fila, p) => {
+    fila.classList.toggle('is-cambiada', filaCambiada(p));
+    resumen();
+  };
+  cuerpo.addEventListener('change', (e) => {
+    const sel = e.target.closest('select[data-campo-filtro]');
+    if (!sel) return;
+    const fila = sel.closest('tr');
+    const p = productos.find((x) => x.id === fila.dataset.fila);
+    p.nuevo[sel.dataset.campoFiltro] = sel.value;
+    marcar(fila, p);
+  });
+  cuerpo.addEventListener('click', (e) => {
+    const ficha = e.target.closest('button[data-tipo]');
+    if (!ficha) return;
+    const fila = ficha.closest('tr');
+    const p = productos.find((x) => x.id === fila.dataset.fila);
+    const t = ficha.dataset.tipo;
+    const on = !p.nuevo.tipo.includes(t);
+    /* En el orden de la lista de valores, para que guardar dos veces lo mismo
+     * no parezca un cambio. */
+    const orden = [...new Set([...f.tipos, ...p.nuevo.tipo, t])];
+    p.nuevo.tipo = orden.filter((x) => (x === t ? on : p.nuevo.tipo.includes(x)));
+    ficha.classList.toggle('is-on', on);
+    ficha.setAttribute('aria-pressed', String(on));
+    marcar(fila, p);
+  });
+
+  el('f-proponer').addEventListener('click', () => {
+    let tocados = 0;
+    for (const p of productos) {
+      const s2 = sugerir(p, f);
+      let toco = false;
+      if (!p.nuevo.color && s2.color) { p.nuevo.color = s2.color; toco = true; }
+      if (!p.nuevo.categoria && s2.categoria) { p.nuevo.categoria = s2.categoria; toco = true; }
+      if (!p.nuevo.tipo.length && s2.tipo.length) { p.nuevo.tipo = s2.tipo; toco = true; }
+      if (toco) tocados += 1;
+    }
+    estadoFiltros.ver = 'cambios';
+    el('f-ver').value = 'cambios';
+    pintarTabla();
+    avisar(tocados ? `Propuesta aplicada a ${tocados} productos. Revisa y guarda.` : 'No había nada vacío que proponer.');
+  });
+
+  el('f-deshacer').addEventListener('click', () => {
+    for (const p of productos) p.nuevo = { color: p.color, categoria: p.categoria, tipo: [...p.tipo] };
+    pintarTabla();
+  });
+
+  el('f-guardar-productos').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    const cambiados = productos.filter(filaCambiada);
+    if (!cambiados.length) { avisar('No hay cambios que guardar.'); return; }
+    boton.loading = true;
+    try {
+      const cambios = cambiados.map((p) => {
+        const c = { id: p.id };
+        if (p.nuevo.color !== p.color) c.color = p.nuevo.color;
+        if (p.nuevo.categoria !== p.categoria) c.categoria = p.nuevo.categoria;
+        if (p.nuevo.tipo.join('|') !== p.tipo.join('|')) c.tipo = p.nuevo.tipo;
+        return c;
+      });
+      await guardarClasificacion(cambios, (hechos, total) => {
+        if (pase.vivo) boton.textContent = `Guardando ${hechos} de ${total}…`;
+      });
+      for (const p of cambiados) {
+        p.color = p.nuevo.color;
+        p.categoria = p.nuevo.categoria;
+        p.tipo = [...p.nuevo.tipo];
+      }
+      if (estadoFiltros.ver === 'cambios') { estadoFiltros.ver = 'todos'; el('f-ver').value = 'todos'; }
+      pintarTabla();
+      avisar(`Guardados ${cambiados.length} productos`);
+    } catch (error2) {
+      avisar(error2.message, true);
+    } finally {
+      boton.loading = false;
+      resumen();
+    }
+  });
+}
+
 const PANTALLAS = {
   colores: pintarColores,
   productos: pintarProductos,
@@ -2195,6 +2950,7 @@ const PANTALLAS = {
   beneficios: pintarBeneficios,
   guias: pintarGuias,
   apariencia: pintarApariencia,
+  filtros: pintarFiltros,
 };
 
 async function ir(nombre) {

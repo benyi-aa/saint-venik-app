@@ -1,0 +1,212 @@
+{%- comment -%}
+  Saint Venik · Transiciones entre paginas
+  ---------------------------------------------------------------------------
+  Como en louisvuitton.com: al tocar un enlace aparece arriba una barra fina
+  que se va llenando, y la pagina siguiente entra con un fundido en vez de
+  aparecer de golpe. Tres piezas, todas sin dependencias:
+
+    1. La barra. Arranca al tocar un enlace de la tienda y se queda al 85 %
+       mientras llega la pagina siguiente. La pagina nueva la recoge a esa
+       altura (sessionStorage) y la termina. Asi se lee como una sola barra
+       aunque son dos documentos.
+    2. El fundido: `@view-transition { navigation: auto }`, la transicion
+       entre documentos del propio navegador. Donde no existe (Firefox), la
+       pagina cambia como siempre y la barra sigue funcionando.
+    3. La precarga: reglas de especulacion. Al apoyar el dedo o el raton
+       sobre un enlace, el navegador ya pide esa pagina; cuando se suelta,
+       buena parte del camino esta hecho. El carrito, la cuenta y el pago
+       quedan fuera.
+
+  Es un embed de <head> porque el fundido y la barra tienen que estar antes
+  del primer pintado; si llegaran al final del <body>, la pagina nueva se
+  veria un instante sin ellos.
+
+  Todo se controla desde la app (pantalla Apariencia). Tres estados, como el
+  descuento: 'si', 'no' y 'prueba' (solo con ?sv-vista=1).
+{%- endcomment -%}
+
+{%- liquid
+  assign cfg = null
+  for sv_entrada in shop.metaobjects.sv_configuracion.values
+    assign cfg = sv_entrada
+    break
+  endfor
+
+  assign t_modo = cfg.trans_activo.value | default: 'no' | append: ''
+  assign t_color = cfg.trans_color.value | default: '#111111' | append: ''
+  assign t_grosor = cfg.trans_grosor.value | default: 2
+  assign t_fundido = cfg.trans_fundido.value | default: 250
+  assign t_precarga = true
+  if cfg.trans_precarga.value == 'no'
+    assign t_precarga = false
+  endif
+-%}
+
+{%- if t_modo == 'si' or t_modo == 'prueba' -%}
+  <style>
+    {%- if t_modo == 'si' %}
+    @view-transition { navigation: auto; }
+    {%- endif %}
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: {{ t_fundido }}ms;
+      animation-timing-function: ease;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      ::view-transition-old(root),
+      ::view-transition-new(root) { animation: none; }
+    }
+    .sv-barra {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 2147483000;
+      width: 100%;
+      height: {{ t_grosor }}px;
+      background: {{ t_color }};
+      transform: scaleX(0);
+      transform-origin: 0 50%;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 2.4s cubic-bezier(.1, .7, .15, 1), opacity .2s;
+    }
+    .sv-barra.is-cargando { opacity: 1; transform: scaleX(.85); }
+    .sv-barra.is-viene { opacity: 1; transform: scaleX(.85); transition: none; }
+    .sv-barra.is-listo {
+      opacity: 0;
+      transform: scaleX(1);
+      transition: transform .3s ease-out, opacity .3s ease .25s;
+    }
+  </style>
+  <script>
+    (function () {
+      'use strict';
+      var modo = {{ t_modo | json }};
+      var CLAVE = 'sv-barra';
+      var guardar = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* privado */ } };
+      var leer = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
+
+      if (modo === 'prueba') {
+        if (/[?&]sv-vista(=1)?(&|$)/.test(location.search)) guardar('sv-vista', '1');
+        if (leer('sv-vista') !== '1') return;
+        /* En vista previa el fundido se enciende desde aqui. */
+        var st = document.createElement('style');
+        st.textContent = '@view-transition { navigation: auto; }';
+        document.head.appendChild(st);
+      }
+
+      var barra = null;
+      function laBarra() {
+        if (barra) return barra;
+        barra = document.createElement('div');
+        barra.className = 'sv-barra';
+        barra.setAttribute('aria-hidden', 'true');
+        (document.body || document.documentElement).appendChild(barra);
+        return barra;
+      }
+
+      var tope = null;
+      function empezar() {
+        var b = laBarra();
+        b.className = 'sv-barra';
+        void b.offsetWidth; /* que arranque desde cero aunque ya estuviera */
+        b.className = 'sv-barra is-cargando';
+        guardar(CLAVE, String(Date.now()));
+        /* Si la navegacion no ocurre (la corto el usuario, o un script la
+         * cancelo), la barra no se queda colgada. */
+        clearTimeout(tope);
+        tope = setTimeout(terminar, 8000);
+      }
+
+      function terminar() {
+        clearTimeout(tope);
+        if (!barra) return;
+        barra.className = 'sv-barra is-listo';
+      }
+
+      /* Solo navegaciones de verdad a otra pagina de la tienda. */
+      function cuenta(url) {
+        try {
+          var u = new URL(url, location.href);
+          if (u.origin !== location.origin) return false;
+          if (u.pathname === location.pathname && u.search === location.search) return false;
+          return !/^\/(cart|checkout|checkouts|account)(\/|$)/.test(u.pathname.replace(/^\/[a-z]{2}(-[a-z]{2})?(?=\/)/i, ''));
+        } catch (e) {
+          return false;
+        }
+      }
+
+      if (window.navigation && window.navigation.addEventListener) {
+        /* Captura tambien las que hace un script (location.href = ...). */
+        window.navigation.addEventListener('navigate', function (e) {
+          if (e.hashChange || e.downloadRequest || (e.destination && e.destination.sameDocument)) return;
+          if (e.navigationType === 'reload' || e.navigationType === 'traverse') return;
+          if (e.destination && cuenta(e.destination.url)) empezar();
+        });
+      } else {
+        /* Al final de la burbuja: si el tema ya cancelo el clic (abre el
+         * carrito en un cajon, por ejemplo), no hay navegacion. */
+        window.addEventListener('click', function (e) {
+          if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          var a = e.target.closest && e.target.closest('a[href]');
+          if (!a || a.target && a.target !== '_self' || a.hasAttribute('download')) return;
+          if (cuenta(a.href)) empezar();
+        });
+      }
+
+      /* La pagina nueva recoge la barra donde la dejo la anterior y la acaba. */
+      var desde = Number(leer(CLAVE) || 0);
+      guardar(CLAVE, '');
+      if (desde && Date.now() - desde < 15000) {
+        var recoger = function () {
+          var b = laBarra();
+          b.className = 'sv-barra is-viene';
+          requestAnimationFrame(function () {
+            requestAnimationFrame(terminar);
+          });
+        };
+        if (document.body) recoger(); else document.addEventListener('DOMContentLoaded', recoger);
+      }
+
+      /* Volver atras restaura la pagina tal cual estaba, con la barra a medias. */
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) terminar();
+      });
+    }());
+  </script>
+
+  {%- if t_precarga -%}
+    {%- comment -%}
+      Precarga al apoyar el dedo o el raton («moderate»). Fuera: carrito,
+      cuenta, pago, apps de terceros y cualquier enlace que abra otra
+      pestana o que alguien marque con data-no-prefetch.
+    {%- endcomment -%}
+    <script type="speculationrules">
+      {
+        "prefetch": [{
+          "where": {
+            "and": [
+              { "href_matches": "/*" },
+              { "not": { "href_matches": ["/cart*", "/checkout*", "/checkouts/*", "/account*", "/*/cart*", "/*/account*", "/apps/*", "/services/*"] } },
+              { "not": { "selector_matches": "[target=_blank], [download], [data-no-prefetch], [href*='add']" } }
+            ]
+          },
+          "eagerness": "moderate"
+        }]
+      }
+    </script>
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Transiciones de página",
+  "target": "head",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "La barra de carga, el fundido entre páginas y la precarga se configuran en la app Color & Size Picker → Apariencia. Aquí solo se enciende el embed."
+    }
+  ]
+}
+{% endschema %}

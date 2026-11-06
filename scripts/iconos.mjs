@@ -26,6 +26,14 @@ const ROTULOS = {
   premium: 'Estrella · premium',
   oro: 'Anillo · baño de oro',
   rapido: 'Reloj · envío rápido',
+  cadena: 'Eslabones · cadenas',
+  colgante: 'Colgante · colgantes',
+  pulsera: 'Aro · pulseras',
+  anillo: 'Anillo liso · anillos',
+  perla: 'Perla · perlas',
+  conjunto: 'Dos aros · conjuntos',
+  lentes: 'Lentes · anteojos',
+  tenis: 'Rombos · tenis',
 };
 
 export function leerIconos(texto) {
@@ -35,6 +43,8 @@ export function leerIconos(texto) {
     const clave = trozos[i];
     const trazo = trozos[i + 1]
       .split(/\{%-\s*endcase/)[0]
+      /* Los comentarios de Liquid entre un icono y el siguiente no son trazo. */
+      .replace(/\{%-?\s*comment\s*-?%\}[\s\S]*?\{%-?\s*endcomment\s*-?%\}/g, '')
       .trim()
       .split('\n')
       .map((l) => l.trim())

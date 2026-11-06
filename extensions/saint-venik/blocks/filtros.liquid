@@ -1,0 +1,357 @@
+{%- comment -%}
+  Saint Venik · Filtros rapidos en las colecciones
+  ---------------------------------------------------------------------------
+  Las pastillas encima de los productos, como en craftdlondon.com: «Dorado»,
+  «Plateado», «Brillantes» en todas las colecciones, y en Best Sellers ademas
+  las categorias. En el telefono van en filas fijas, sin deslizar.
+
+  Cada pastilla es una entrada del metaobjeto `sv_boton_filtro` (se crean,
+  cambian y ordenan en la app, pantalla Filtros). No filtran por su cuenta:
+  son el filtro de Shopify de esa misma coleccion (?filter.p.m.custom.sv_color
+  =Dorado), asi que el menu «Filtrar», la paginacion y las pastillas dicen
+  siempre lo mismo. Por eso una pastilla solo sale si ese filtro existe en la
+  tienda (Search & Discovery) y tiene productos en esta coleccion.
+
+  POR QUE UN EMBED Y NO UN BLOQUE
+  La tienda tiene dieciocho plantillas de coleccion. Un bloque habria que
+  ponerlo a mano en cada una, y en cada plantilla nueva. El embed sale en
+  todas solo, y se coloca encima de los productos.
+
+  Ademas mete «Ordenar» dentro del menu «Filtrar», como en la referencia.
+
+  Tres estados desde la app: 'si', 'no' y 'prueba' (solo con ?sv-vista=1).
+{%- endcomment -%}
+
+{%- liquid
+  assign f_cfg = null
+  for sv_entrada in shop.metaobjects.sv_configuracion.values
+    assign f_cfg = sv_entrada
+    break
+  endfor
+
+  assign f_modo = f_cfg.filtros_activo.value | default: 'no' | append: ''
+  assign f_on = false
+  if template.name == 'collection' and collection.handle != blank
+    if f_modo == 'si' or f_modo == 'prueba'
+      assign f_on = true
+    endif
+  endif
+-%}
+
+{%- if f_on -%}
+  {%- liquid
+    assign lang = localization.language.iso_code | slice: 0, 2 | downcase
+    assign f_cols_max = f_cfg.filtros_columnas.value | default: 4
+    assign f_ordenar = true
+    if f_cfg.filtros_ordenar.value == 'no'
+      assign f_ordenar = false
+    endif
+
+    comment
+      Los tres filtros de la tienda que entienden las pastillas. Si alguno no
+      esta encendido en Search & Discovery, sus pastillas no salen.
+    endcomment
+    assign fil_color = nil
+    assign fil_categoria = nil
+    assign fil_tipo = nil
+    for f in collection.filters
+      if f.param_name == 'filter.p.m.custom.sv_color'
+        assign fil_color = f
+      elsif f.param_name == 'filter.p.m.custom.sv_categoria'
+        assign fil_categoria = f
+      elsif f.param_name == 'filter.p.m.custom.sv_tipo'
+        assign fil_tipo = f
+      endif
+    endfor
+
+    assign botones = shop.metaobjects.sv_boton_filtro.values
+    assign colores = shop.metaobjects.color.values
+    assign tope = 0
+    for b in botones
+      assign pos = b.orden.value | default: 0
+      if pos > tope
+        assign tope = pos
+      endif
+    endfor
+    assign filas = ''
+    assign hay = false
+  -%}
+
+  {%- for fila in (1..3) -%}
+    {%- assign en_fila = 0 -%}
+    {%- capture html_fila -%}
+      {%- comment -%} Por posicion: el orden de la lista de Shopify no esta garantizado. {%- endcomment -%}
+      {%- for i in (1..tope) -%}
+        {%- for b in botones -%}
+          {%- assign b_fila = b.fila.value | default: 1 -%}
+          {%- if b.orden.value == i and b.activo.value != false and b_fila == fila -%}
+            {%- liquid
+              assign sale = true
+              if b.donde.value == 'elegidas'
+                assign sale = false
+                for c in b.colecciones.value
+                  if c.id == collection.id
+                    assign sale = true
+                    break
+                  endif
+                endfor
+              endif
+
+              assign fil = nil
+              assign param = ''
+              if b.filtro.value == 'categoria'
+                assign fil = fil_categoria
+                assign param = 'filter.p.m.custom.sv_categoria'
+              elsif b.filtro.value == 'tipo'
+                assign fil = fil_tipo
+                assign param = 'filter.p.m.custom.sv_tipo'
+              else
+                assign fil = fil_color
+                assign param = 'filter.p.m.custom.sv_color'
+              endif
+
+              assign valor_b = b.valor.value | downcase | strip
+              assign v_hallado = nil
+              if sale and fil
+                for v in fil.values
+                  assign v_val = v.value | downcase | strip
+                  if v_val == valor_b
+                    assign v_hallado = v
+                    break
+                  endif
+                endfor
+              endif
+            -%}
+            {%- if v_hallado and v_hallado.count > 0 or v_hallado and v_hallado.active -%}
+              {%- liquid
+                assign en_fila = en_fila | plus: 1
+                assign texto = b.nombre.value
+                if lang == 'en' and b.nombre_en.value != blank
+                  assign texto = b.nombre_en.value
+                endif
+                assign url = v_hallado.url_to_add
+                if v_hallado.active
+                  assign url = v_hallado.url_to_remove
+                endif
+                assign ic = b.icono.value | strip
+                assign ic_pre = ic | slice: 0, 6
+              -%}
+              <a class="sv-filtro{% if v_hallado.active %} is-activo{% endif %}"
+                 href="{{ url }}"
+                 data-param="{{ param }}"
+                 data-valor="{{ v_hallado.value | escape }}"
+                 aria-pressed="{{ v_hallado.active }}"
+                 rel="nofollow">
+                {%- if ic_pre == 'color:' -%}
+                  {%- assign etq = ic | remove_first: 'color:' | downcase | strip -%}
+                  {%- for entrada in colores -%}
+                    {%- assign etq_e = entrada.etiqueta.value | downcase | strip -%}
+                    {%- if etq_e == etq -%}
+                      {%- if entrada.imagen_muestra.value != blank -%}
+                        <span class="sv-filtro__muestra" style="background-image: url({{ entrada.imagen_muestra.value | image_url: width: 48 }})"></span>
+                      {%- elsif entrada.muestra.value != blank -%}
+                        <span class="sv-filtro__muestra" style="background-color: {{ entrada.muestra.value }}"></span>
+                      {%- endif -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- elsif ic != blank -%}
+                  {%- render 'sv-icono', nombre: ic -%}
+                {%- endif -%}
+                <span>{{ texto | escape }}</span>
+              </a>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+    {%- endcapture -%}
+    {%- if en_fila > 0 -%}
+      {%- liquid
+        assign hay = true
+        assign cols = en_fila
+        if cols > f_cols_max
+          assign cols = f_cols_max
+        endif
+      -%}
+      {%- capture filas -%}{{ filas }}<div class="sv-filtros__fila{% if cols >= 4 %} sv-filtros__fila--apilada{% endif %}" style="--cols: {{ cols }}">{{ html_fila }}</div>{%- endcapture -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  <style>
+    .sv-filtros { margin: 14px 0 4px; }
+    .sv-filtros[hidden] { display: none !important; }
+    .sv-filtros__dentro { display: flex; flex-direction: column; gap: 8px; }
+    .sv-filtros__fila { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 8px; }
+    .sv-filtro {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      min-height: 38px; padding: 6px 8px; box-sizing: border-box;
+      border: 1px solid #d9d6d1; border-radius: 999px; background: #fff; color: #111;
+      font-size: 12px; line-height: 1.15; letter-spacing: .01em; text-decoration: none;
+      white-space: nowrap; overflow: hidden;
+      transition: background-color .15s, border-color .15s, color .15s;
+    }
+    .sv-filtro > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+    .sv-filtro:hover { border-color: #111; color: #111; }
+    .sv-filtro.is-activo { background: #111; border-color: #111; color: #fff; }
+    .sv-filtro svg { flex: 0 0 auto; width: 16px; height: 16px; }
+    .sv-filtro__muestra {
+      flex: 0 0 auto; width: 15px; height: 15px; border-radius: 50%;
+      background-size: cover; background-position: center;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14);
+    }
+    .sv-filtros__fila--apilada .sv-filtro {
+      flex-direction: column; gap: 5px; min-height: 62px; padding: 8px 4px;
+      border-radius: 12px; font-size: 11.5px;
+    }
+    .sv-filtros__fila--apilada .sv-filtro svg { width: 21px; height: 21px; }
+    @media (min-width: 769px) {
+      .sv-filtros__dentro { flex-direction: row; flex-wrap: wrap; }
+      .sv-filtros__fila { display: contents; }
+      .sv-filtro,
+      .sv-filtros__fila--apilada .sv-filtro {
+        flex-direction: row; gap: 7px; min-height: 38px; padding: 6px 16px;
+        border-radius: 999px; font-size: 12.5px;
+      }
+      .sv-filtros__fila--apilada .sv-filtro svg { width: 16px; height: 16px; }
+    }
+    /* «Ordenar» dentro de Filtrar: se viste como los grupos del tema. */
+    .sv-orden__boton {
+      display: flex; width: 100%; align-items: center; justify-content: space-between;
+      background: none; border: 0; cursor: pointer; text-align: left; color: inherit;
+    }
+    .sv-orden__boton svg { width: 14px; transition: transform .2s; }
+    .sv-orden__boton[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .sv-orden__lista a { text-decoration: none; color: inherit; }
+    .sv-orden__lista .tag--active .tag__text { font-weight: 700; }
+  </style>
+
+  {%- if hay or f_ordenar -%}
+    <nav id="sv-filtros" class="sv-filtros" data-modo="{{ f_modo }}"
+         aria-label="{% if lang == 'en' %}Quick filters{% else %}Filtros rápidos{% endif %}"
+         {% unless hay %}data-vacio{% endunless %} hidden>
+      <div class="sv-filtros__dentro page-width">{{ filas }}</div>
+    </nav>
+    <script>
+      (function () {
+        'use strict';
+        var nav = document.getElementById('sv-filtros');
+        if (!nav) return;
+        var EN = {{ lang | json }} === 'en';
+        var ORDENAR = {{ f_ordenar | json }};
+
+        if (nav.dataset.modo === 'prueba') {
+          var vista = false;
+          try {
+            if (/[?&]sv-vista(=1)?(&|$)/.test(location.search)) sessionStorage.setItem('sv-vista', '1');
+            vista = sessionStorage.getItem('sv-vista') === '1';
+          } catch (e) { /* privado */ }
+          if (!vista) { nav.remove(); return; }
+        }
+
+        /* Encima de los productos, fuera de lo que el tema repinta al filtrar:
+         * asi la barra no parpadea ni se pierde. Se coloca nada mas leerse,
+         * para que mueva lo menos posible lo que ya se ve. */
+        var ancla = document.querySelector('.collection-content') || document.getElementById('CollectionAjaxContent');
+        if (ancla && !nav.hasAttribute('data-vacio')) {
+          ancla.parentNode.insertBefore(nav, ancla);
+          nav.hidden = false;
+        }
+
+        var igual = function (a, b) { return String(a).toLowerCase() === String(b).toLowerCase(); };
+
+        /* Se construye la direccion desde la URL de ahora y no desde el href:
+         * el tema filtra sin recargar, y el href del servidor ya seria viejo. */
+        nav.addEventListener('click', function (e) {
+          var a = e.target.closest && e.target.closest('a[data-param]');
+          if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+          e.preventDefault();
+          var u = new URL(location.href);
+          var p = a.dataset.param;
+          var v = a.dataset.valor;
+          var antes = u.searchParams.getAll(p);
+          var estaba = false;
+          u.searchParams.delete(p);
+          antes.forEach(function (x) { if (igual(x, v)) estaba = true; else u.searchParams.append(p, x); });
+          if (!estaba) u.searchParams.append(p, v);
+          u.searchParams.delete('page');
+          location.href = u.toString();
+        });
+
+        function sincronizar() {
+          var u = new URL(location.href);
+          var as = nav.querySelectorAll('a[data-param]');
+          for (var i = 0; i < as.length; i += 1) {
+            var on = u.searchParams.getAll(as[i].dataset.param).some(function (x) { return igual(x, as[i].dataset.valor); });
+            as[i].classList.toggle('is-activo', on);
+            as[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+          }
+        }
+
+        /* El signo «menor que» de las cadenas va como \x3c: el analizador de
+         * Liquid de Shopify confunde una etiqueta dentro del script con HTML. */
+        var CHEVRON = '\x3csvg aria-hidden="true" focusable="false" viewBox="0 0 28 16">\x3cpath d="m1.57 1.59 12.76 12.77L27.1 1.59" stroke-width="2" stroke="currentColor" fill="none"/>\x3c/svg>';
+
+        /* «Ordenar» dentro del menu Filtrar, con las mismas opciones que el
+         * desplegable del tema. Se vuelve a poner si el tema repinta el menu. */
+        function ordenarEnMenu() {
+          if (!ORDENAR) return;
+          var form = document.querySelector('#FilterDrawer .filter-form') || document.querySelector('#FilterDrawer form');
+          var sel = document.querySelector('select[name="SortBy"]');
+          if (!form || !sel || form.querySelector('.sv-orden')) return;
+          var actual = new URL(location.href).searchParams.get('sort_by') || sel.getAttribute('data-default-sortby') || '';
+          var vistos = {};
+          var items = '';
+          for (var i = 0; i < sel.options.length; i += 1) {
+            var o = sel.options[i];
+            var t = o.textContent.trim();
+            if (!o.value || /^(ordenar|sort|sort by)$/i.test(t) || vistos[o.value]) continue;
+            vistos[o.value] = true;
+            if (o.value === 'manual') t = EN ? 'Featured' : 'Destacados';
+            var u = new URL(location.href);
+            u.searchParams.set('sort_by', o.value);
+            u.searchParams.delete('page');
+            var esta = o.value === actual;
+            items += '\x3cli class="tag' + (esta ? ' tag--active' : '') + '">\x3ca class="tag__checkbox-wrapper text-label" href="' + u.toString().replace(/"/g, '&quot;') + '">'
+              + '\x3cspan class="tag__checkbox">\x3c/span>\x3cspan class="tag__text">' + t.replace(/\x3c/g, '&lt;') + '\x3c/span>\x3c/a>\x3c/li>';
+          }
+          if (!items) return;
+          var grupo = document.createElement('div');
+          grupo.className = 'collection-sidebar__group sv-orden';
+          grupo.innerHTML = '\x3cbutton type="button" class="collapsible-trigger-btn tag-list__header sv-orden__boton" aria-expanded="false">'
+            + (EN ? 'Sort' : 'Ordenar') + CHEVRON + '\x3c/button>'
+            + '\x3cdiv class="sv-orden__lista" hidden>\x3cul class="no-bullets tag-list">' + items + '\x3c/ul>\x3c/div>';
+          grupo.querySelector('button').addEventListener('click', function () {
+            var abierto = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', abierto ? 'false' : 'true');
+            grupo.querySelector('.sv-orden__lista').hidden = abierto;
+          });
+          form.appendChild(grupo);
+        }
+
+        function alCambiar() {
+          sincronizar();
+          ordenarEnMenu();
+        }
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ordenarEnMenu);
+        else ordenarEnMenu();
+        window.addEventListener('popstate', sincronizar);
+        var raiz = document.querySelector('.collection-content');
+        if (raiz) new MutationObserver(alCambiar).observe(raiz, { childList: true, subtree: true });
+      }());
+    </script>
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Filtros rápidos",
+  "target": "body",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Los botones, en qué colecciones salen y cómo se ven se manejan en la app Color & Size Picker → Filtros. Aquí solo se enciende el embed."
+    }
+  ]
+}
+{% endschema %}

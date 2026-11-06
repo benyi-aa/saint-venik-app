@@ -12,6 +12,10 @@
     etiqueta_propia    (string)     de que color es el producto actual. Solo esa
                                     muestra se marca como la actual, aunque el
                                     producto lleve mas etiquetas de color.
+    propias_hermanos   (string)     de que color es cada hermano, como
+                                    «|id:etiqueta|». Un hermano solo ocupa la
+                                    muestra de SU color. Si no llega (un tema
+                                    con el snippet viejo), basta con la etiqueta.
     idioma             (string)     'es' o 'en'
     mostrar_etiqueta   (boolean)
     marcar_agotado     (boolean)
@@ -47,8 +51,16 @@
 
   {%- unless sv_hallado -%}
     {%- for sv_hermano in hermanos -%}
-      {%- assign sv_tags = sv_hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
-      {%- if sv_tags contains sv_aguja -%}
+      {%- if propias_hermanos != blank -%}
+        {%- assign sv_clave = sv_hermano.id | prepend: '|' | append: ':' | append: sv_etq | append: '|' -%}
+        {%- assign sv_es_suyo = false -%}
+        {%- if propias_hermanos contains sv_clave -%}{%- assign sv_es_suyo = true -%}{%- endif -%}
+      {%- else -%}
+        {%- assign sv_tags = sv_hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
+        {%- assign sv_es_suyo = false -%}
+        {%- if sv_tags contains sv_aguja -%}{%- assign sv_es_suyo = true -%}{%- endif -%}
+      {%- endif -%}
+      {%- if sv_es_suyo -%}
         {%- assign sv_producto = sv_hermano -%}
         {%- assign sv_hallado = true -%}
         {%- break -%}

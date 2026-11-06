@@ -68,12 +68,82 @@
     assign nombre_actual = ''
   -%}
 
-  {%- comment -%} Nombre del color de este producto, para el encabezado. {%- endcomment -%}
+  {%- comment -%}
+    De que color es ESTE producto. Se decide una sola vez, antes de dibujar
+    nada, porque un producto puede llevar dos etiquetas de color por error y
+    entonces se adueñaba de las dos muestras: las dos salian marcadas como
+    "la actual", ninguna quedaba enlazada y el selector se moria. Paso de
+    verdad con una pulsera etiquetada a la vez `acero-inox` y `oro`.
+
+    Manda la primera que aparezca en el mismo orden en que se dibujan. Las
+    demas se buscan entre los hermanos, asi que siguen siendo pulsables.
+  {%- endcomment -%}
+  {%- assign etiqueta_propia = '' -%}
+  {%- for etiqueta_pedida in orden -%}
+    {%- assign etq = etiqueta_pedida | downcase | strip -%}
+    {%- if etq != blank and etiqueta_propia == blank -%}
+      {%- assign aguja_propia = etq | prepend: '|' | append: '|' -%}
+      {%- if etiquetas_actuales contains aguja_propia -%}
+        {%- assign etiqueta_propia = etq -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if etiqueta_propia == blank -%}
+    {%- for entrada in colores -%}
+      {%- assign etq = entrada.etiqueta.value | downcase | strip -%}
+      {%- if etq != blank and etiqueta_propia == blank -%}
+        {%- assign aguja_propia = etq | prepend: '|' | append: '|' -%}
+        {%- if etiquetas_actuales contains aguja_propia -%}
+          {%- assign etiqueta_propia = etq -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+
+
+  {%- comment -%}
+    Lo mismo para cada hermano: de que color es, uno solo. Hace falta para
+    familias que se distinguen por algo que no es el metal, como la Vienna
+    Link (blanca, turquesa, verde): las tres llevan `oro` y ademas la suya.
+    Si al buscar «oro» bastara con llevar la etiqueta, cualquiera de las tres
+    se quedaba la muestra de oro. Asi, cada hermano solo responde a su color.
+    Va como «|id:etiqueta|» para poder preguntarlo con un `contains`.
+  {%- endcomment -%}
+  {%- assign propias_hermanos = '|' -%}
+  {%- for hermano in hermanos -%}
+    {%- assign etq_h = hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
+    {%- assign propia_h = '' -%}
+    {%- for etiqueta_pedida in orden -%}
+      {%- assign etq = etiqueta_pedida | downcase | strip -%}
+      {%- if etq != blank and propia_h == blank -%}
+        {%- assign aguja_h = etq | prepend: '|' | append: '|' -%}
+        {%- if etq_h contains aguja_h -%}{%- assign propia_h = etq -%}{%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if propia_h == blank -%}
+      {%- for entrada in colores -%}
+        {%- assign etq = entrada.etiqueta.value | downcase | strip -%}
+        {%- if etq != blank and propia_h == blank -%}
+          {%- assign aguja_h = etq | prepend: '|' | append: '|' -%}
+          {%- if etq_h contains aguja_h -%}{%- assign propia_h = etq -%}{%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+    {%- if propia_h != blank -%}
+      {%- assign propias_hermanos = propias_hermanos | append: hermano.id | append: ':' | append: propia_h | append: '|' -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- comment -%}
+    Nombre del color de este producto, para el encabezado: el de SU color, no
+    el de la primera etiqueta de color que lleve. Una Vienna verde se llama
+    «Verde» aunque tambien lleve `oro`.
+  {%- endcomment -%}
   {%- for entrada in colores -%}
     {%- assign etiqueta = entrada.etiqueta.value | downcase | strip -%}
     {%- if etiqueta != blank -%}
       {%- assign aguja = etiqueta | prepend: '|' | append: '|' -%}
-      {%- if etiquetas_actuales contains aguja -%}
+      {%- if etiqueta == etiqueta_propia or etiqueta_propia == blank and etiquetas_actuales contains aguja -%}
         {%- assign nombre_actual = entrada.nombre.value -%}
         {%- if lang == 'en' and entrada.nombre_en.value != blank -%}
           {%- assign nombre_actual = entrada.nombre_en.value -%}
@@ -99,38 +169,6 @@
       </div>
     {%- endif -%}
 
-    {%- comment -%}
-      De que color es ESTE producto. Se decide una sola vez, antes de dibujar
-      nada, porque un producto puede llevar dos etiquetas de color por error y
-      entonces se adueñaba de las dos muestras: las dos salian marcadas como
-      "la actual", ninguna quedaba enlazada y el selector se moria. Paso de
-      verdad con una pulsera etiquetada a la vez `acero-inox` y `oro`.
-
-      Manda la primera que aparezca en el mismo orden en que se dibujan. Las
-      demas se buscan entre los hermanos, asi que siguen siendo pulsables.
-    {%- endcomment -%}
-    {%- assign etiqueta_propia = '' -%}
-    {%- for etiqueta_pedida in orden -%}
-      {%- assign etq = etiqueta_pedida | downcase | strip -%}
-      {%- if etq != blank and etiqueta_propia == blank -%}
-        {%- assign aguja_propia = etq | prepend: '|' | append: '|' -%}
-        {%- if etiquetas_actuales contains aguja_propia -%}
-          {%- assign etiqueta_propia = etq -%}
-        {%- endif -%}
-      {%- endif -%}
-    {%- endfor -%}
-    {%- if etiqueta_propia == blank -%}
-      {%- for entrada in colores -%}
-        {%- assign etq = entrada.etiqueta.value | downcase | strip -%}
-        {%- if etq != blank and etiqueta_propia == blank -%}
-          {%- assign aguja_propia = etq | prepend: '|' | append: '|' -%}
-          {%- if etiquetas_actuales contains aguja_propia -%}
-            {%- assign etiqueta_propia = etq -%}
-          {%- endif -%}
-        {%- endif -%}
-      {%- endfor -%}
-    {%- endif -%}
-
     <div class="sv-colors__list" role="group" aria-label="{{ etiqueta_grupo | escape }}">
 
       {%- comment -%} 1) En el orden que fija el ajuste. {%- endcomment -%}
@@ -147,6 +185,7 @@
                 hermanos: hermanos,
                 etiquetas_actuales: etiquetas_actuales,
                 etiqueta_propia: etiqueta_propia,
+                propias_hermanos: propias_hermanos,
                 idioma: lang,
                 mostrar_etiqueta: block.settings.mostrar_etiquetas,
                 marcar_agotado: block.settings.marcar_agotado
@@ -174,6 +213,7 @@
               hermanos: hermanos,
               etiquetas_actuales: etiquetas_actuales,
               etiqueta_propia: etiqueta_propia,
+              propias_hermanos: propias_hermanos,
               idioma: lang,
               mostrar_etiqueta: block.settings.mostrar_etiquetas,
               marcar_agotado: block.settings.marcar_agotado
