@@ -23,11 +23,11 @@
  * filtro de Shopify puesto (?filter.p.m.custom.sv_color=Dorado). Asi los
  * botones, el menu «Filtrar» y la paginacion dicen siempre lo mismo.
  */
-import { gql, comprobarErrores } from './api.js?v=202611061821';
+import { gql, comprobarErrores } from './api.js?v=202611061826';
 import {
   aObjetoComun, cargarEntradas, crearEntrada, guardarEntrada, borrarEntrada,
   faltaEstructura, asegurarEstructura, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611061821';
+} from './asignacion.js?v=202611061826';
 
 /* ---------------------------------------------------------------------------
  * Los tres metacampos de producto
@@ -443,16 +443,24 @@ export function sugerir(p, valores) {
   for (const v of porPrioridad) {
     if (enTitulo(palabrasDe(v))) { categoria = v; break; }
   }
+  /* Si el titulo no lo dice, lo dicen sus colecciones o sus etiquetas
+   * («anteojos-de-sol», la etiqueta «lentes»). Por principio de palabra:
+   * «anteojos» empieza por «anteojo». */
   if (!categoria) {
     for (const v of valores.categorias) {
-      const raiz = singular(v);
-      const palabras = palabrasDe(v);
-      if (colecciones.some((h) => h.includes(raiz) || palabras.some((w) => h.split('-').includes(w)))) {
+      const palabras = [singular(v), ...palabrasDe(v)];
+      const casa = (texto) => texto.split(/[^a-z0-9]+/).some((t) => palabras.some((w) => t.startsWith(w)));
+      if (colecciones.some(casa) || etiquetas.some(casa)) {
         categoria = v;
         break;
       }
     }
   }
+
+  /* Sin categoria no es una joya (el empaque, la tarjeta regalo, los
+   * strips): llevan la etiqueta acero-inox por arrastre, y con color saldrian
+   * al filtrar por «Plateado». */
+  if (!categoria) color = '';
 
   /* Tipo: todos los que encajen. «Brillantes» sale tambien de la etiqueta
    * `brillantes` (y de `ice`, que es la de .com). */
