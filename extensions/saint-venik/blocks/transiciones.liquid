@@ -149,6 +149,9 @@
           var cs = getComputedStyle(barra);
           var m = /matrix\(([^,]+)/.exec(cs.transform);
           if (cs.opacity !== '0' && m) p = Number(m[1]);
+          /* Con la precarga la pagina llega antes del cuarto de segundo y la
+           * barra no salia nunca: la nueva la acaba siempre, desde un 30 %. */
+          if (p < .3) p = .3;
         }
         guardar(CLAVE, p > 0.02 ? Date.now() + ':' + p.toFixed(3) : '');
       }

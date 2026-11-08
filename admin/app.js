@@ -1,48 +1,48 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611081911';
+import { estaEmbebida } from './api.js?v=202611082022';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611081911';
+} from './colores.js?v=202611082022';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611081911';
+} from './config.js?v=202611082022';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611081911';
+} from './filtros.js?v=202611082022';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611081911';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611081911';
+} from './productos.js?v=202611082022';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611082022';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611081911';
+} from './guias.js?v=202611082022';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611081911';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611081911';
+} from './vista-previa.js?v=202611082022';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611082022';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611081911';
+} from './etiquetas.js?v=202611082022';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611081911';
-import { ICONOS, svgIcono } from './iconos.js?v=202611081911';
+} from './beneficios.js?v=202611082022';
+import { ICONOS, svgIcono } from './iconos.js?v=202611082022';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611081911';
+const VERSION = '202611082022';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1655,7 +1655,7 @@ async function pintarEtiquetas() {
           </s-select>
           <s-color-field label="Fondo" id="d-fondo" value="${escapar(descuento.fondo)}"></s-color-field>
           <s-color-field label="Texto" id="d-texto" value="${escapar(descuento.texto)}"></s-color-field>
-          <s-number-field label="Redondeo" id="d-radio" value="${descuento.radio}" min="0" max="12" step="1" details="En la foto y la tarjeta. Junto al precio va siempre redondo."></s-number-field>
+          <s-number-field label="Redondeo" id="d-radio" value="${descuento.radio}" min="0" max="12" step="1" details="En la foto y la tarjeta. Junto al precio lleva el de las píldoras de las fotos (Beneficios)."></s-number-field>
           ${hayTamanos ? `
           <s-number-field label="Precio en la ficha" id="d-precio-letra" value="${descuento.precioLetra}" min="0" max="28" step="1" details="En píxeles. El del tema es 20; más chico, el porcentaje se lee mejor. 0 = el del tema."></s-number-field>
           <s-number-field label="Porcentaje junto al precio" id="d-letra" value="${descuento.letra}" min="10" max="20" step="1" details="En píxeles."></s-number-field>` : ''}
