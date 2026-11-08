@@ -117,6 +117,11 @@
 
   if (window.navigation && window.navigation.addEventListener) {
     window.navigation.addEventListener('navigate', function (e) {
+      /* Recargar o volver atras no lleva barra: no cuenta como toque. */
+      if (e.navigationType === 'reload' || e.navigationType === 'traverse') {
+        log('(' + e.navigationType + ')');
+        return;
+      }
       medir('NAVIGATE ' + e.navigationType + (e.destination && e.destination.sameDocument ? ' misma' : ''));
     });
   }
