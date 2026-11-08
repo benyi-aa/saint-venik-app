@@ -102,8 +102,13 @@
       var guardar = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* privado */ } };
       var leer = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
 
+      if (/[?&]sv-vista(=1)?(&|$)/.test(location.search)) guardar('sv-vista', '1');
+      /* Safari sin precarga: ver docs/tema.md, «La barra en el iPhone». */
+      var hs = window.HTMLScriptElement;
+      var lento = (leer('sv-lento') === '1' || !(hs && hs.supports && hs.supports('speculationrules'))) && leer('sv-vista') === '1';
+      var prog = 0, paso = null;
+
       if (modo === 'prueba') {
-        if (/[?&]sv-vista(=1)?(&|$)/.test(location.search)) guardar('sv-vista', '1');
         if (leer('sv-vista') !== '1') return;
         /* En vista previa el fundido se enciende desde aqui. */
         var st = document.createElement('style');
@@ -128,7 +133,18 @@
         b.style.transform = '';
         b.className = 'sv-barra';
         void b.offsetWidth; /* que arranque desde cero aunque ya estuviera */
-        b.className = 'sv-barra is-cargando';
+        clearTimeout(paso);
+        if (lento) {
+          var t0 = Date.now();
+          b.className = 'sv-barra is-viene';
+          (function avanzar() {
+            prog = .9 - .82 * Math.exp((t0 - Date.now()) / 5000);
+            b.style.transform = 'scaleX(' + prog + ')';
+            paso = setTimeout(avanzar, 60);
+          })();
+        } else {
+          b.className = 'sv-barra is-cargando';
+        }
         /* Si la navegacion no ocurre (la corto el usuario, o un script la
          * cancelo), la barra no se queda colgada. */
         clearTimeout(tope);
@@ -137,6 +153,8 @@
 
       function terminar() {
         clearTimeout(tope);
+        clearTimeout(paso);
+        paso = null;
         if (!barra) return;
         barra.style.transform = '';
         barra.className = 'sv-barra is-listo';
@@ -152,6 +170,8 @@
           /* Con la precarga la pagina llega antes del cuarto de segundo y la
            * barra no salia nunca: la nueva la acaba siempre, desde un 30 %. */
           if (p < .3) p = .3;
+        } else if (paso) {
+          p = Math.max(prog, .3);
         }
         guardar(CLAVE, p > 0.02 ? Date.now() + ':' + p.toFixed(3) : '');
       }

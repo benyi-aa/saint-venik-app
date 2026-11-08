@@ -428,3 +428,27 @@ Las colecciones y las etiquetas de la tienda se guardan cinco minutos.
 
 Los controles nuevos no aparecen hasta que la tienda tiene los campos: hay que
 pulsar **«Crear lo que falta»** una vez en cada tienda después de este cambio.
+
+## La barra en el iPhone (8 nov 2026)
+
+En el computador la barra de carga se veía; en el iPhone, no. Dos razones:
+
+- **Safari congela las animaciones CSS de la página que se deja** en cuanto
+  se toca un enlace. La barra era una transición CSS que arrancaba con el
+  toque, así que en el iPhone se quedaba quieta e invisible mientras cargaba
+  la página siguiente.
+- **Safari no tiene reglas de especulación**, así que no precarga nada: cada
+  cambio de página carga de verdad, y por eso se siente más lento que en
+  Chrome, donde la página ya viene precargada.
+
+Arreglo (`transiciones.liquid`): en los navegadores sin reglas de
+especulación (`HTMLScriptElement.supports('speculationrules')` falso), la
+barra sale al instante con el toque, sin el cuarto de segundo de espera, y
+avanza a pasos de 60 ms desde JavaScript (`setTimeout`, no CSS): ~20 % al
+segundo, ~35 % a los dos, tope 90 %. Al irse pasa su avance real (mínimo
+30 %) y la página nueva la termina como siempre. Chrome sigue igual.
+
+Mientras se prueba en un iPhone de verdad va **solo en vista previa**:
+abrir la tienda con `?sv-vista=1`. Para probar ese camino en Chrome, poner
+`sessionStorage['sv-lento'] = '1'` en la pestaña. Cuando se confirme, se
+quita la condición de `sv-vista` en `lento` y queda para todos.
