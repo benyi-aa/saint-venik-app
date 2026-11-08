@@ -1,48 +1,48 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611061826';
+import { estaEmbebida } from './api.js?v=202611081911';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611061826';
+} from './colores.js?v=202611081911';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611061826';
+} from './config.js?v=202611081911';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611061826';
+} from './filtros.js?v=202611081911';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611061826';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611061826';
+} from './productos.js?v=202611081911';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611081911';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611061826';
+} from './guias.js?v=202611081911';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611061826';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611061826';
+} from './vista-previa.js?v=202611081911';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611081911';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611061826';
+} from './etiquetas.js?v=202611081911';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611061826';
-import { ICONOS, svgIcono } from './iconos.js?v=202611061826';
+} from './beneficios.js?v=202611081911';
+import { ICONOS, svgIcono } from './iconos.js?v=202611081911';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611061826';
+const VERSION = '202611081911';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -873,7 +873,7 @@ async function pintarApariencia() {
       </s-section>
 
       ${hayTransicion ? `
-      <s-section id="transicion" heading="Cambio de página" subheading="Como en louisvuitton.com: al tocar un enlace aparece arriba una barra fina que se va llenando, y la página siguiente entra con un fundido en vez de aparecer de golpe. Además, la tienda empieza a cargar la página siguiente en cuanto el cliente apoya el dedo sobre un enlace.">
+      <s-section id="transicion" heading="Cambio de página" subheading="Como en louisvuitton.com: al tocar un enlace aparece arriba una barra gris muy fina que se llena lento y parejo, la cuenta regresiva y el encabezado se quedan quietos, y lo de abajo entra con un fundido en vez de aparecer de golpe. Además, la tienda empieza a cargar la página siguiente en cuanto el cliente apoya el dedo sobre un enlace.">
         <div class="trans-previa" id="trans-previa" aria-hidden="true">
           <div class="trans-previa__barra" id="trans-barra"></div>
           <div class="trans-previa__pagina">saintvenik.cl</div>
@@ -885,7 +885,7 @@ async function pintarApariencia() {
             <s-option value="si">Activo en la tienda</s-option>
           </s-select>
           <s-color-field label="Color de la barra" id="t-color" value="${escapar(trans.color)}"></s-color-field>
-          <s-number-field label="Grosor de la barra" id="t-grosor" value="${trans.grosor}" min="1" max="6" step="1" details="En píxeles. La de Louis Vuitton es de 2."></s-number-field>
+          <s-number-field label="Grosor de la barra" id="t-grosor" value="${trans.grosor}" min="1" max="6" step="1" details="En píxeles. La de Louis Vuitton es de 2, gris (#999999)."></s-number-field>
           <s-number-field label="Duración del fundido" id="t-fundido" value="${trans.fundido}" min="0" max="800" step="50" details="En milisegundos. 0 = sin fundido, solo la barra."></s-number-field>
         </s-grid>
         <div class="casilla-polaris">
@@ -1604,6 +1604,7 @@ async function pintarEtiquetas() {
   /* La sección del descuento solo se ofrece cuando la tienda ya tiene sus
    * campos: antes, guardar fallaría. Si faltan, lo dice el aviso de arriba. */
   const hayDescuento = camposConfig.has('desc_activo');
+  const hayTamanos = camposConfig.has('desc_precio_letra') && camposConfig.has('desc_letra');
   const descuento = config.descuento ?? DESCUENTO_POR_DEFECTO;
   const tienda = new URLSearchParams(location.search).get('shop') || '';
   /* Los campos de borde y opacidad son nuevos: hasta que la tienda los tenga,
@@ -1655,6 +1656,9 @@ async function pintarEtiquetas() {
           <s-color-field label="Fondo" id="d-fondo" value="${escapar(descuento.fondo)}"></s-color-field>
           <s-color-field label="Texto" id="d-texto" value="${escapar(descuento.texto)}"></s-color-field>
           <s-number-field label="Redondeo" id="d-radio" value="${descuento.radio}" min="0" max="12" step="1" details="En la foto y la tarjeta. Junto al precio va siempre redondo."></s-number-field>
+          ${hayTamanos ? `
+          <s-number-field label="Precio en la ficha" id="d-precio-letra" value="${descuento.precioLetra}" min="0" max="28" step="1" details="En píxeles. El del tema es 20; más chico, el porcentaje se lee mejor. 0 = el del tema."></s-number-field>
+          <s-number-field label="Porcentaje junto al precio" id="d-letra" value="${descuento.letra}" min="10" max="20" step="1" details="En píxeles."></s-number-field>` : ''}
         </s-grid>
 
         <div class="casilla-polaris">
@@ -1720,7 +1724,7 @@ async function pintarEtiquetas() {
     document.getElementById('previa-etiquetas').innerHTML = muestras();
   };
 
-  if (hayDescuento) conectarDescuento(descuento, miPintado);
+  if (hayDescuento) conectarDescuento(descuento, miPintado, camposConfig);
 
   const conexiones = new Map();
 
@@ -1940,7 +1944,7 @@ function conectarTransicion(trans) {
 }
 
 /* La sección «Descuento» de la pantalla de insignias. */
-function conectarDescuento(descuento, miPintado) {
+function conectarDescuento(descuento, miPintado, camposConfig) {
   const caja = document.getElementById('descuento');
   const el = (id) => document.getElementById(id);
 
@@ -1950,6 +1954,10 @@ function conectarDescuento(descuento, miPintado) {
 
   const comoQueda = () => {
     const radio = String(el('d-radio').value ?? '').trim();
+    const px = (id, defecto) => {
+      const v = el(id) ? String(el(id).value ?? '').trim() : '';
+      return v === '' ? defecto : Number(v);
+    };
     return {
       modo: el('d-modo').value || 'no',
       formato: el('d-formato').value || 'pct',
@@ -1959,6 +1967,8 @@ function conectarDescuento(descuento, miPintado) {
       tarjetas: el('d-tarjetas').checked,
       foto: el('d-foto').checked,
       precio: el('d-precio').checked,
+      precioLetra: Math.max(0, Math.min(28, px('d-precio-letra', descuento.precioLetra))),
+      letra: Math.max(10, Math.min(20, px('d-letra', descuento.letra))),
     };
   };
 
@@ -1969,7 +1979,8 @@ function conectarDescuento(descuento, miPintado) {
     tag.style.cssText = `background:${v.fondo};color:${v.texto};border-radius:${v.radio}px`;
     const pill = el('d-previa-precio');
     pill.textContent = textoDescuento(17, v.formato);
-    pill.style.cssText = `background:${v.fondo};color:${v.texto}`;
+    pill.style.cssText = `background:${v.fondo};color:${v.texto};font-size:${v.letra}px`;
+    el('d-previa-precio').parentElement.style.fontSize = v.precioLetra ? `${v.precioLetra}px` : '20px';
     el('d-enlace').hidden = v.modo !== 'prueba';
   };
   caja.addEventListener('input', refrescar);
@@ -1988,7 +1999,7 @@ function conectarDescuento(descuento, miPintado) {
     boton.loading = true;
     try {
       const v = comoQueda();
-      await guardarDescuento(v);
+      await guardarDescuento(v, camposConfig);
       Object.assign(descuento, v);
       avisar(v.modo === 'si' ? 'Descuento guardado y activo en la tienda'
         : v.modo === 'prueba' ? 'Descuento guardado en vista previa' : 'Descuento guardado (apagado)');

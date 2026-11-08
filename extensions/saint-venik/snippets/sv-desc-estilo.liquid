@@ -1,0 +1,32 @@
+{%- comment -%}
+  Descuento en la ficha: lo que tiene que estar antes del primer pintado.
+  El precio un poco mas chico y el porcentaje un poco mas grande (llamada del
+  8-nov: el precio se comia al porcentaje), y el «AHORRA» del tema escondido.
+  Si llegara al final de la pagina, el precio se veria grande un instante y
+  despues encogeria. Por eso sale desde el embed de <head> (transiciones), y
+  tambien desde el de insignias por si alguien apaga ese: repetido no molesta.
+  En 'prueba' manda la clase que pone sv-descuento.js, solo con ?sv-vista=1.
+  Recibe `cfg`, la entrada de sv_configuracion.
+{%- endcomment -%}
+{%- liquid
+  assign e_modo = cfg.desc_activo.value | default: 'no' | append: ''
+  assign e_pre = 'html'
+  if e_modo == 'prueba'
+    assign e_pre = 'html.sv-desc-p'
+  endif
+  assign e_precio = cfg.desc_precio_letra.value | default: 17
+  assign e_letra = cfg.desc_letra.value | default: 14
+-%}
+{%- if e_modo == 'si' or e_modo == 'prueba' -%}
+  {%- unless cfg.desc_precio.value == 'no' -%}
+    <style>
+      {{ e_pre }} .sv-desc-precio { font-size: {{ e_letra }}px; }
+      {%- if e_precio > 0 %}
+      {{ e_pre }} .product-block--price .product__price { font-size: {{ e_precio }}px; }
+      {%- endif %}
+      {%- if e_modo == 'si' %}
+      .product__price-savings[data-save-price] { display: none !important; }
+      {%- endif %}
+    </style>
+  {%- endunless -%}
+{%- endif -%}

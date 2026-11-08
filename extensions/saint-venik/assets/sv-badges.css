@@ -126,11 +126,13 @@
   display: none !important;
 }
 
-/* Junto al precio de la ficha: una pastilla redonda, como la de la referencia. */
+/* Junto al precio de la ficha: una pastilla redonda, como la de la referencia.
+ * El tamano lo pone la app (snippet sv-desc-estilo); el relleno va en em para
+ * que la pastilla crezca con la letra. */
 .sv-desc-precio {
   display: inline-block;
   margin-left: 8px;
-  padding: 2px 9px;
+  padding: .15em .65em;
   border-radius: 999px;
   font-size: 0.8em;
   font-weight: 600;

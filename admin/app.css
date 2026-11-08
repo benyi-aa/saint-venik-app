@@ -552,7 +552,7 @@ body { padding-bottom: calc(48px + var(--shopify-safe-area-inset-bottom, 0px)); 
   left: 0;
   width: 100%;
   transform-origin: 0 50%;
-  animation: trans-barra 2.6s cubic-bezier(.1, .7, .15, 1) infinite;
+  animation: trans-barra 3s linear infinite;
 }
 .trans-previa__pagina {
   display: grid;
@@ -561,18 +561,19 @@ body { padding-bottom: calc(48px + var(--shopify-safe-area-inset-bottom, 0px)); 
   font: 600 13px/1 var(--fuente, system-ui);
   letter-spacing: .12em;
   color: #111;
-  animation: trans-pagina 2.6s ease infinite;
+  animation: trans-pagina 3s ease infinite;
 }
 @keyframes trans-barra {
-  0% { transform: scaleX(0); opacity: 1; }
-  60% { transform: scaleX(.85); opacity: 1; }
-  75% { transform: scaleX(1); opacity: 1; }
-  90%, 100% { transform: scaleX(1); opacity: 0; }
+  0%, 8% { transform: scaleX(0); opacity: 1; }
+  60% { transform: scaleX(.45); opacity: 1; }
+  68% { transform: scaleX(1); opacity: 1; }
+  80%, 100% { transform: scaleX(1); opacity: 0; }
 }
+
 @keyframes trans-pagina {
-  0%, 62% { opacity: 1; }
-  70% { opacity: .15; }
-  80%, 100% { opacity: 1; }
+  0%, 60% { opacity: 1; }
+  66% { opacity: .15; }
+  76%, 100% { opacity: 1; }
 }
 
 /* El color de un producto en la pantalla Productos: una ficha por color. */

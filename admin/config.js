@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611061826';
+import { gql, comprobarErrores } from './api.js?v=202611081911';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
@@ -67,6 +67,10 @@ const CAMPOS_CONFIG = [
   { key: 'desc_fondo', name: 'Descuento: fondo', type: 'color' },
   { key: 'desc_texto', name: 'Descuento: texto', type: 'color' },
   { key: 'desc_radio', name: 'Descuento: redondeo', type: 'number_integer' },
+  /* En la ficha el precio del tema (20 px) se comia al porcentaje: el precio
+   * baja un poco y el porcentaje sube un poco. 0 en el precio = el del tema. */
+  { key: 'desc_precio_letra', name: 'Descuento: tamaño del precio en la ficha (px)', type: 'number_integer' },
+  { key: 'desc_letra', name: 'Descuento: tamaño del porcentaje junto al precio (px)', type: 'number_integer' },
   /* Transiciones entre páginas (embed de <head>): la barra que se llena, el
    * fundido y la precarga. Mismo esquema de tres estados que el descuento. */
   { key: 'trans_activo', name: 'Transiciones: estado', type: 'single_line_text_field' },
@@ -115,12 +119,16 @@ export const DESCUENTO_POR_DEFECTO = {
   fondo: '#C4161C',
   texto: '#FFFFFF',
   radio: 2,
+  precioLetra: 17,
+  letra: 14,
 };
 
-/* Como la de louisvuitton.com: fina y oscura, y un fundido corto. */
+/* Como la de louisvuitton.com: fina y gris (medida en el video de la
+ * llamada), y un fundido corto. Gris y no negra: lo primero de la tienda es
+ * la cuenta regresiva, negra, y una barra negra encima no se ve. */
 export const TRANSICION_POR_DEFECTO = {
   modo: 'no',
-  color: '#111111',
+  color: '#999999',
   grosor: 2,
   fundido: 250,
   precarga: true,
@@ -377,10 +385,15 @@ function aDescuento(campos) {
     fondo: campos.desc_fondo || d.fondo,
     texto: campos.desc_texto || d.texto,
     radio: numero(campos.desc_radio, d.radio),
+    precioLetra: numero(campos.desc_precio_letra, d.precioLetra),
+    letra: numero(campos.desc_letra, d.letra),
   };
 }
 
-export async function guardarDescuento(d) {
+/* `presentes`: los campos que tiene hoy la definicion. Los dos de tamano son
+ * nuevos; mientras no se anadan (tarjeta de pendientes), guardar el resto no
+ * debe fallar por ellos. */
+export async function guardarDescuento(d, presentes = null) {
   const r = await gql(GUARDAR, {
     handle: { type: TIPO_CONFIG, handle: HANDLE },
     metaobject: {
@@ -393,7 +406,9 @@ export async function guardarDescuento(d) {
         { key: 'desc_fondo', value: d.fondo },
         { key: 'desc_texto', value: d.texto },
         { key: 'desc_radio', value: String(d.radio) },
-      ],
+        { key: 'desc_precio_letra', value: String(d.precioLetra) },
+        { key: 'desc_letra', value: String(d.letra) },
+      ].filter((f) => !presentes || presentes.has(f.key)),
     },
   });
   return comprobarErrores(r, 'metaobjectUpsert');

@@ -128,11 +128,22 @@ se puede enseñar antes de encender.
   fotos de la ficha y junto al precio. No se calcula: se lee del tema, que ya lo
   saca del precio tachado y lo cambia al elegir otra variante. Vive en
   `assets/sv-descuento.js`, que el embed de insignias solo carga cuando está
-  encendido; `sv-badges.js` lo espera (evento `sv:descuento`).
+  encendido; `sv-badges.js` lo espera (evento `sv:descuento`). En la ficha el
+  precio va más chico (17 px; el tema lo pone a 20) y el porcentaje más grande
+  (14 px), los dos ajustables en la pantalla. Ese estilo lo pinta el snippet
+  `sv-desc-estilo` desde el embed de `<head>` (y repetido desde el de insignias,
+  por si apagan aquel): si llegara al final de la página, el precio se vería
+  grande un instante y después encogería.
 - **Cambio de página** (pantalla Apariencia, embed «Transiciones de página», de
-  `<head>`). La barra fina que se llena arriba al tocar un enlace, el fundido
-  entre páginas (`@view-transition`, del navegador) y la precarga al apoyar el
-  dedo (reglas de especulación; nunca carrito, cuenta ni pago).
+  `<head>`). Calcado de louisvuitton.com, medido cuadro a cuadro en el video de
+  la llamada: una barra gris muy fina (`#999999`; negra no se vería sobre la
+  cuenta regresiva) que sale a los 0,25 s del toque y se llena lento y parejo
+  (≈20 % a los 0,8 s, 35 % al segundo); la página siguiente la recoge donde
+  quedó y la termina. La cuenta regresiva y el encabezado no se mueven: durante
+  el cambio llevan `view-transition-name`, y solo se funde lo de abajo. Además,
+  el fundido entre páginas (`@view-transition`, del navegador) y la precarga al
+  apoyar el dedo (reglas de especulación; nunca carrito, cuenta ni pago). Si la
+  página llega en menos de 0,25 s, la barra ni aparece.
 - **Filtros** (pantalla Filtros, embed «Filtros rápidos»). Los botones encima de
   los productos («Dorado», «Plateado», «Brillantes» en todas; las categorías en
   Best Sellers). Cada botón es una entrada de `sv_boton_filtro` y lleva a la misma
