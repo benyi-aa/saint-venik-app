@@ -485,3 +485,22 @@ pintado de la pagina nueva.
 Todo se controla desde la app (pantalla Apariencia). Tres estados, como el
 descuento: 'si', 'no' y 'prueba' (solo con ?sv-vista=1).
 ```
+
+### Segundo intento y diagnóstico (8 nov 2026)
+
+Con lo anterior el usuario seguía sin ver la barra en su iPhone. Lo más
+probable: el código solo escuchaba el evento `navigate` cuando el navegador
+tiene la Navigation API, y se saltaba el clic. Si Safari no da ese evento en
+los enlaces normales, la barra no arranca y la página nueva no recibe nada que
+terminar. Ahora, en el camino de Safari, se escuchan los dos (con una guarda de
+400 ms para no arrancar dos veces), y Safari se reconoce también por el motor
+(`AppleWebKit` sin `Chrome`), por si un día entiende las reglas de
+especulación pero sigue congelando las animaciones.
+
+Para ver qué pasa en un teléfono sin herramientas: `?sv-diag=1` carga
+`assets/sv-diag.js` (desde una línea en `transiciones.liquid`) y pinta abajo
+una caja con lo que pasa en cada cambio de página: qué sabe el navegador
+(`spec`, `nav`, `vt`), si llega el toque (`CLICK`, `NAVIGATE`), si sigue
+pintando después (`cuadros`), qué avance se guarda y se recoge (`guarda`,
+`trae`) y dónde queda la barra (`op`, `x`, `top`). Una captura de pantalla de
+esa caja basta. `?sv-diag=0` la quita.

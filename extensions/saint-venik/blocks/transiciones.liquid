@@ -67,6 +67,8 @@
       transition: transform .25s ease-out, opacity .3s ease .3s;
     }
   </style>
+  {%- comment -%} Diagnostico de la barra, solo con ?sv-diag=1: ver docs/tema.md. {%- endcomment -%}
+  <script>try{/[?&]sv-diag=1/.test(location.search)&&sessionStorage.setItem('sv-diag','1');sessionStorage.getItem('sv-diag')==='1'&&document.write('<scr'+'ipt src="{{ 'sv-diag.js' | asset_url }}"></scr'+'ipt>')}catch(e){}</script>
   <script>
     (function () {
       'use strict';
@@ -77,9 +79,10 @@
 
       if (/[?&]sv-vista(=1)?(&|$)/.test(location.search)) guardar('sv-vista', '1');
       /* Safari sin precarga: ver docs/tema.md, «La barra en el iPhone». */
-      var hs = window.HTMLScriptElement;
-      var lento = (leer('sv-lento') === '1' || !(hs && hs.supports && hs.supports('speculationrules'))) && leer('sv-vista') === '1';
-      var prog = 0, paso = null;
+      var hs = window.HTMLScriptElement, ua = navigator.userAgent;
+      var lento = (leer('sv-lento') === '1' || !(hs && hs.supports && hs.supports('speculationrules'))
+        || /AppleWebKit/.test(ua) && !/Chrom|Edg|OPR|Android/.test(ua)) && leer('sv-vista') === '1';
+      var prog = 0, paso = null, ya = 0;
 
       if (modo === 'prueba') {
         if (leer('sv-vista') !== '1') return;
@@ -101,7 +104,8 @@
 
       var tope = null;
       function empezar() {
-        if (!document.body) return;
+        if (!document.body || Date.now() - ya < 400) return;
+        ya = Date.now();
         var b = laBarra();
         b.style.transform = '';
         b.className = 'sv-barra';
@@ -168,7 +172,8 @@
           if (e.navigationType === 'reload' || e.navigationType === 'traverse') return;
           if (e.destination && cuenta(e.destination.url)) empezar();
         });
-      } else {
+      }
+      if (!window.navigation || lento) {
         /* Al final de la burbuja: si el tema ya cancelo el clic (abre el
          * carrito en un cajon, por ejemplo), no hay navegacion. */
         window.addEventListener('click', function (e) {
