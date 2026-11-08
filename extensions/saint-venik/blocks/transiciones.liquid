@@ -93,12 +93,16 @@
       }
 
       var barra = null;
+      /* Bajo la cabecera (logo, buscador, carrito) si se ve; si no, arriba. */
       function laBarra() {
-        if (barra) return barra;
-        barra = document.createElement('div');
-        barra.className = 'sv-barra';
-        barra.setAttribute('aria-hidden', 'true');
-        document.body.appendChild(barra);
+        if (!barra) {
+          barra = document.createElement('div');
+          barra.className = 'sv-barra';
+          barra.setAttribute('aria-hidden', 'true');
+          document.body.appendChild(barra);
+        }
+        var h = document.getElementById('SiteHeader'), r = h && h.getBoundingClientRect();
+        barra.style.top = (r && r.bottom > 0 && r.bottom < innerHeight / 2 ? Math.round(r.bottom) : 0) + 'px';
         return barra;
       }
 
@@ -122,8 +126,7 @@
         } else {
           b.className = 'sv-barra is-cargando';
         }
-        /* Si la navegacion no ocurre (la corto el usuario, o un script la
-         * cancelo), la barra no se queda colgada. */
+        /* Si la navegacion no ocurre, que no se quede colgada. */
         clearTimeout(tope);
         tope = setTimeout(terminar, 10000);
       }
@@ -144,8 +147,7 @@
           var cs = getComputedStyle(barra);
           var m = /matrix\(([^,]+)/.exec(cs.transform);
           if (cs.opacity !== '0' && m) p = Number(m[1]);
-          /* Con la precarga la pagina llega antes del cuarto de segundo y la
-           * barra no salia nunca: la nueva la acaba siempre, desde un 30 %. */
+          /* Minimo 30 %: con precarga la pagina llega antes de que salga. */
           if (p < .3) p = .3;
         } else if (paso) {
           p = Math.max(prog, .3);
@@ -174,8 +176,7 @@
         });
       }
       if (!window.navigation || lento) {
-        /* Al final de la burbuja: si el tema ya cancelo el clic (abre el
-         * carrito en un cajon, por ejemplo), no hay navegacion. */
+        /* Al final de la burbuja: si el tema cancelo el clic, no hay navegacion. */
         window.addEventListener('click', function (e) {
           if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
           var a = e.target.closest && e.target.closest('a[href]');
@@ -184,9 +185,7 @@
         });
       }
 
-      /* La pagina nueva recoge la barra donde la dejo la anterior y la acaba.
-       * En el primer pintado (pagereveal) si el navegador lo tiene, para que
-       * la barra ya este en el cambio; si no, en cuanto exista el body. */
+      /* La pagina nueva recoge la barra donde quedo y la acaba. */
       var dato = (leer(CLAVE) || '').split(':');
       var viene = Number(dato[1]) || 0;
       guardar(CLAVE, '');
@@ -203,6 +202,8 @@
       }
       window.addEventListener('pagereveal', recoger);
       document.addEventListener('DOMContentLoaded', recoger);
+      /* Si se pinto antes de existir la cabecera, se recoloca. */
+      document.addEventListener('DOMContentLoaded', function () { if (barra) laBarra(); });
 
       /* Lo que no se mueve al cambiar de pagina, si esta a la vista. */
       var QUIETOS = [['.svcd', 'sv-aviso'], ['#SiteHeader', 'sv-cabecera']];
@@ -214,9 +215,7 @@
           el.style.viewTransitionName = poner && r.height && r.bottom > 0 && r.top < innerHeight ? q[1] : '';
         });
       }
-      /* Si el navegador se salta el cambio (pestana de fondo, otro clic),
-       * rechaza estas promesas y, sin nadie que las escuche, sale un error en
-       * la consola. No hay nada que hacer: solo callarlo. */
+      /* Si el navegador se salta el cambio, que el rechazo no salga en la consola. */
       function callar(vt) {
         [vt.ready, vt.updateCallbackDone].forEach(function (p) {
           if (p && p.catch) p.catch(function () {});
@@ -244,11 +243,7 @@
   </script>
 
   {%- if t_precarga -%}
-    {%- comment -%}
-      Precarga al apoyar el dedo o el raton («moderate»). Fuera: carrito,
-      cuenta, pago, apps de terceros y cualquier enlace que abra otra
-      pestana o que alguien marque con data-no-prefetch.
-    {%- endcomment -%}
+    {%- comment -%} Precarga al apoyar el dedo o el raton; nunca carrito, cuenta ni pago. {%- endcomment -%}
     <script type="speculationrules">
       {
         "prefetch": [{

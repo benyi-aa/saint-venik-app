@@ -504,3 +504,17 @@ una caja con lo que pasa en cada cambio de página: qué sabe el navegador
 pintando después (`cuadros`), qué avance se guarda y se recoge (`guarda`,
 `trae`) y dónde queda la barra (`op`, `x`, `top`). Una captura de pantalla de
 esa caja basta. `?sv-diag=0` la quita.
+
+### La barra va bajo la cabecera (8 nov 2026)
+
+El diagnóstico en el iPhone del usuario dio `TOQUE: SI · PASA: 0.300 ·
+NUEVA: SI` y la barra roja se veía: la lógica funcionaba. Lo que fallaba era
+dónde estaba: `top: 0`, una línea gris de 2 px encima de la cuenta regresiva
+negra, pegada a la barra de estado del iPhone. El usuario pidió que fuera
+bajo la fila del logo, el buscador y el carrito, como en Louis Vuitton.
+
+`laBarra()` la coloca ahora en el borde inferior de `#SiteHeader` (193 px en
+el teléfono, 182 en el computador, con la cuenta regresiva y el aviso
+encima). Si la cabecera no se ve porque se bajó en la página, va arriba del
+todo. En la página nueva se recoloca en `DOMContentLoaded`, por si se pintó
+antes de que existiera la cabecera. Vale para todos, no solo para el iPhone.
