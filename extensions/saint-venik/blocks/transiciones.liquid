@@ -1,32 +1,4 @@
-{%- comment -%}
-  Saint Venik · Transiciones entre paginas
-  ---------------------------------------------------------------------------
-  Calcado de louisvuitton.com (llamada del 6-nov, minuto 0:25 del video): al
-  tocar un enlace sale arriba una barra gris muy fina que se llena lento y
-  parejo, el encabezado no se mueve y solo cambia lo de abajo. Cuatro piezas,
-  todas sin dependencias:
-
-    1. La barra. Sale un cuarto de segundo despues del toque (si la pagina
-       llega antes, ni aparece) y se llena hacia el 90 % con la curva medida
-       en el video: 20 % al segundo, 35 % al segundo y algo. Al irse, la
-       pagina guarda por donde iba; la nueva la recoge ahi y la termina. Se
-       lee como una sola barra aunque son dos documentos.
-    2. El fundido: `@view-transition { navigation: auto }`, la transicion
-       entre documentos del propio navegador. Donde no existe (Firefox), la
-       pagina cambia como siempre y la barra sigue funcionando.
-    3. Lo quieto: durante el cambio, la cuenta regresiva y el encabezado
-       llevan nombre (view-transition-name), y el navegador los deja en su
-       sitio en vez de fundirlos con el resto. Solo si estan a la vista.
-    4. La precarga: reglas de especulacion. Al apoyar el dedo o el raton
-       sobre un enlace, el navegador ya pide esa pagina. El carrito, la
-       cuenta y el pago quedan fuera.
-
-  Es un embed de <head> porque todo eso tiene que estar antes del primer
-  pintado de la pagina nueva.
-
-  Todo se controla desde la app (pantalla Apariencia). Tres estados, como el
-  descuento: 'si', 'no' y 'prueba' (solo con ?sv-vista=1).
-{%- endcomment -%}
+{%- comment -%} Saint Venik · Transiciones entre paginas (barra LV, fundido, precarga). Explicacion: docs/tema.md. {%- endcomment -%}
 
 {%- liquid
   assign cfg = null
