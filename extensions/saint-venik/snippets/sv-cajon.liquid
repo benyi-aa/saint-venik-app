@@ -1,0 +1,10 @@
+{%- comment -%} Filtros en el cajón lateral también en el computador: ver docs/tema.md. Recibe `cfg`. {%- endcomment -%}
+{%- assign k = cfg.filtros_cajon.value | default: 'prueba' | append: '' -%}
+{%- if template.name == 'collection' and k != 'no' -%}
+  {%- assign k_pre = 'html' -%}
+  {%- if k == 'prueba' -%}
+    {%- assign k_pre = 'html.sv-cajon' -%}
+    <script>try{/[?&]sv-vista(=1)?(&|$)/.test(location.search)&&sessionStorage.setItem('sv-vista','1');sessionStorage.getItem('sv-vista')==='1'&&document.documentElement.classList.add('sv-cajon')}catch(e){}</script>
+  {%- endif -%}
+  <style>@media (min-width:769px){ {{ k_pre }} .collection-filter__item--drawer{display:block}{{ k_pre }} .collection-content .grid__item--sidebar{width:0;padding:0;position:static;overflow:hidden}{{ k_pre }} .collection-content .grid__item--content{width:100%}}</style>
+{%- endif -%}
