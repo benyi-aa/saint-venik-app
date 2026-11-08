@@ -1,0 +1,59 @@
+/* Saint Venik · Filtros rapidos: las pastillas encima de los productos y
+ * los arreglos del menu «Filtrar». Lo carga el embed «Filtros rapidos» solo
+ * en las colecciones y solo si los filtros estan encendidos en la app. */
+.sv-filtros { margin: 14px 0 4px; }
+.sv-filtros[hidden] { display: none !important; }
+.sv-filtros__dentro { display: flex; flex-direction: column; gap: 8px; }
+.sv-filtros__fila { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 8px; }
+.sv-filtro {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 38px; padding: 6px 8px; box-sizing: border-box;
+  border: 1px solid #d9d6d1; border-radius: 999px; background: #fff; color: #111;
+  font-size: 12px; line-height: 1.15; letter-spacing: .01em; text-decoration: none;
+  white-space: nowrap; overflow: hidden;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.sv-filtro > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.sv-filtro:hover { border-color: #111; color: #111; }
+.sv-filtro.is-activo { background: #111; border-color: #111; color: #fff; }
+.sv-filtro.is-vacio { opacity: .38; cursor: default; }
+.sv-filtro.is-vacio:hover { border-color: #d9d6d1; }
+.sv-filtro svg { flex: 0 0 auto; width: 16px; height: 16px; }
+.sv-filtro__muestra {
+  flex: 0 0 auto; width: 15px; height: 15px; border-radius: 50%;
+  background-size: cover; background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14);
+}
+.sv-filtros__fila--apilada .sv-filtro {
+  flex-direction: column; gap: 5px; min-height: 62px; padding: 8px 4px;
+  border-radius: 12px; font-size: 11.5px;
+}
+.sv-filtros__fila--apilada .sv-filtro svg { width: 21px; height: 21px; }
+@media (min-width: 769px) {
+  .sv-filtros__dentro { flex-direction: row; flex-wrap: wrap; }
+  .sv-filtros__fila { display: contents; }
+  .sv-filtro,
+  .sv-filtros__fila--apilada .sv-filtro {
+    flex-direction: row; gap: 7px; min-height: 38px; padding: 6px 16px;
+    border-radius: 999px; font-size: 12.5px;
+  }
+  .sv-filtros__fila--apilada .sv-filtro svg { width: 16px; height: 16px; }
+}
+/* «Ordenar» dentro de Filtrar: se viste como los grupos del tema. */
+.sv-orden__boton {
+  display: flex; width: 100%; align-items: center; justify-content: space-between;
+  background: none; border: 0; cursor: pointer; text-align: left; color: inherit;
+}
+.sv-orden__boton svg { width: 14px; transition: transform .2s; }
+.sv-orden__boton[aria-expanded="true"] svg { transform: rotate(180deg); }
+.sv-orden__lista a { text-decoration: none; color: inherit; }
+.sv-orden__lista .tag--active .tag__text { font-weight: 700; }
+/* El tema empuja los grupos al fondo del menu y deja un hueco grande
+ * debajo de los filtros activos. Arriba, como en la referencia. */
+html.sv-filtros-on #FilterDrawer .drawer__scrollable { justify-content: flex-start; }
+.sv-ver {
+  flex: 0 0 auto;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(0, 0, 0, .08);
+}
+.sv-ver__boton { width: 100%; }

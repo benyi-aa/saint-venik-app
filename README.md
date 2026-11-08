@@ -140,8 +140,16 @@ se puede enseñar antes de encender.
   existan en **Search & Discovery**: Color, Categoría y Tipo, que son los
   metacampos de producto `custom.sv_color`, `custom.sv_categoria` y
   `custom.sv_tipo`. La pantalla los propone para cada producto (etiqueta de color,
-  título, colecciones) y se corrigen a mano. El embed también mete «Ordenar»
-  dentro del menú Filtrar.
+  título, colecciones) y se corrigen a mano.
+
+  Como en CRAFTD: tocar un botón filtra en el sitio, sin recargar ni saltar
+  arriba (usa la misma función del tema que el menú Filtrar). Los botones no
+  desaparecen al filtrar; el que se quedaría sin productos se ve apagado. El
+  menú Filtrar queda Color, Categoría, Tipo, Precio, Disponibilidad y Ordenar;
+  las opciones se marcan sin que el menú se cierre y se aplican juntas con «Ver
+  resultados» (o al cerrarlo). Ojo: Impulse pinta cada opción dos veces con el
+  mismo id (barra lateral y menú) y la etiqueta del menú marcaba la casilla de
+  la barra lateral; el embed hace que cada etiqueta del menú marque la suya.
 
 Los dos embeds nuevos, como el de insignias, hay que encenderlos una vez por
 tema en Personalizar → Configuración → Incrustaciones de apps.
