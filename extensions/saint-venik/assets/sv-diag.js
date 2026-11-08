@@ -35,7 +35,34 @@
     }
     var l;
     try { l = JSON.parse(leer(K) || '[]'); } catch (e) { l = []; }
-    caja.textContent = 'DIAGNOSTICO BARRA (?sv-diag=0 para quitar)\n' + l.slice(-18).join('\n');
+    caja.textContent = '';
+    var res = document.createElement('div');
+    res.style.cssText = 'font:bold 15px/1.35 -apple-system,sans-serif;margin-bottom:4px';
+    res.textContent = resumen(l);
+    caja.appendChild(res);
+    caja.appendChild(document.createTextNode('(?sv-diag=0 para quitar)\n' + l.slice(-14).join('\n')));
+  }
+
+  /* Tres respuestas en palabras, de la ultima vez que se toco un enlace:
+   * si el toque llego, si Safari siguio pintando despues, y si la pagina
+   * nueva recibio la barra. Se leen sin captura de pantalla. */
+  function resumen(l) {
+    var i = -1;
+    for (var j = l.length - 1; j >= 0; j -= 1) {
+      if (/ (CLICK|NAVIGATE) /.test(l[j])) { i = j; break; }
+    }
+    if (i < 0) return 'Toca un enlace y espera la pagina nueva';
+    while (i > 0 && / (CLICK|NAVIGATE) /.test(l[i - 1])) i -= 1;
+    var resto = l.slice(i).join('\n');
+    var corte = resto.indexOf(' INI ');
+    var antes = corte < 0 ? resto : resto.slice(0, corte);
+    var despues = corte < 0 ? '' : resto.slice(corte);
+    var c = /100ms cuadros=(\d+)/.exec(antes);
+    var g = /guarda=\d+:([\d.]+)/.exec(antes);
+    return 'TOQUE: ' + (/is-(viene|cargando)/.test(antes) ? 'SI' : 'NO') +
+      ' · PINTA: ' + (c ? (Number(c[1]) > 2 ? 'SI' : 'NO') + ' (' + c[1] + ')' : '?') +
+      ' · PASA: ' + (g ? g[1] : 'NADA') +
+      ' · NUEVA: ' + (corte < 0 ? '...' : (/ms is-/.test(despues) ? 'SI' : 'NO'));
   }
 
   function log(t) {
@@ -56,6 +83,12 @@
       ' op=' + cs.opacity + ' x=' + (m ? Number(m[1]).toFixed(2) : cs.transform) +
       ' top=' + Math.round(r.top) + ' h=' + Math.round(r.height);
   }
+
+  /* La barra, gruesa y roja mientras dura el diagnostico: que no haya duda
+   * de si se ve o no. */
+  var rojo = document.createElement('style');
+  rojo.textContent = '.sv-barra{height:6px!important;background:#e00!important}';
+  (document.head || document.documentElement).appendChild(rojo);
 
   /* Al cargar: que sabe hacer el navegador y que le dejo la pagina anterior
    * (el script de la barra lo borra justo despues, por eso se lee aqui). */
@@ -105,5 +138,6 @@
   document.addEventListener('DOMContentLoaded', function () {
     var v = window.visualViewport;
     log('DCL ' + estado() + ' alto=' + innerHeight + (v ? ' vvTop=' + Math.round(v.offsetTop) : ''));
+    setTimeout(function () { log('DCL+100ms ' + estado()); }, 100);
   });
 }());
