@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611082022';
+import { gql, comprobarErrores } from './api.js?v=202611082046';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
@@ -88,6 +88,9 @@ const CAMPOS_CONFIG = [
   { key: 'filtros_tipos', name: 'Filtros: valores de tipo', type: 'single_line_text_field' },
   { key: 'filtros_ordenar', name: 'Filtros: «Ordenar» dentro de Filtrar', type: 'single_line_text_field' },
   { key: 'filtros_columnas', name: 'Filtros: botones por fila en el teléfono', type: 'number_integer' },
+  /* El menú Filtrar en el computador: la columna del tema ('no') o el mismo
+   * cajón lateral que en el teléfono. Vacío = 'prueba' (snippet sv-cajon). */
+  { key: 'filtros_cajon', name: 'Filtros: menú en cajón lateral en el computador', type: 'single_line_text_field' },
 ];
 
 /* Lo mismo que ya pinta hoy el embed con sus ajustes de fábrica: así mover la
@@ -142,6 +145,7 @@ export const FILTROS_POR_DEFECTO = {
   tipos: ['Brillantes', 'Tenis', 'Perlas', 'Cubanas', 'Rope'],
   ordenar: true,
   columnas: 4,
+  cajon: 'prueba',
 };
 
 export const FORMATOS_DESCUENTO = [
@@ -320,10 +324,13 @@ function aFiltros(campos) {
     tipos: listaDeTexto(campos.filtros_tipos, d.tipos),
     ordenar: siNo(campos.filtros_ordenar, d.ordenar),
     columnas: numero(campos.filtros_columnas, d.columnas),
+    cajon: ['si', 'no', 'prueba'].includes(campos.filtros_cajon) ? campos.filtros_cajon : d.cajon,
   };
 }
 
-export async function guardarFiltrosConfig(f) {
+/* `presentes`: los campos que la tienda ya tiene. Uno que aún no se creó
+ * («Crear lo que falta») no se manda, para que guardar no falle por él. */
+export async function guardarFiltrosConfig(f, presentes = null) {
   const r = await gql(GUARDAR, {
     handle: { type: TIPO_CONFIG, handle: HANDLE },
     metaobject: {
@@ -334,7 +341,8 @@ export async function guardarFiltrosConfig(f) {
         { key: 'filtros_tipos', value: f.tipos.join(', ') },
         { key: 'filtros_ordenar', value: f.ordenar ? 'si' : 'no' },
         { key: 'filtros_columnas', value: String(f.columnas) },
-      ],
+        { key: 'filtros_cajon', value: f.cajon || 'prueba' },
+      ].filter((c) => !presentes || presentes.has(c.key)),
     },
   });
   return comprobarErrores(r, 'metaobjectUpsert');

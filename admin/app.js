@@ -1,48 +1,48 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611082022';
+import { estaEmbebida } from './api.js?v=202611082046';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611082022';
+} from './colores.js?v=202611082046';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611082022';
+} from './config.js?v=202611082046';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611082022';
+} from './filtros.js?v=202611082046';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611082022';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611082022';
+} from './productos.js?v=202611082046';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611082046';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611082022';
+} from './guias.js?v=202611082046';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611082022';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611082022';
+} from './vista-previa.js?v=202611082046';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611082046';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611082022';
+} from './etiquetas.js?v=202611082046';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611082022';
-import { ICONOS, svgIcono } from './iconos.js?v=202611082022';
+} from './beneficios.js?v=202611082046';
+import { ICONOS, svgIcono } from './iconos.js?v=202611082046';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611082022';
+const VERSION = '202611082046';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -2526,7 +2526,10 @@ async function pintarFiltros() {
     revisarEstructura(), leerConfig(), camposDeConfig(), cargarColores(), cargarColecciones(),
   ]);
   const hayConfig = camposConfig.has('filtros_activo');
-  const faltaLoNuestro = revision.pendientes.some((p) => /filtro|metacampo/i.test(p));
+  const hayCajon = camposConfig.has('filtros_cajon');
+  /* Un campo de configuración que falta (filtros_cajon…) no tapa la pantalla:
+   * sale en el aviso de arriba y su control aparece al crearlo. */
+  const faltaLoNuestro = revision.pendientes.some((p) => /filtro|metacampo/i.test(p) && !/^Campos de configuración/.test(p));
   const f = config.filtros ?? FILTROS_POR_DEFECTO;
   const [{ lista: botones, error }, { lista: productos, error: errorProductos }] = await Promise.all([
     cargarOVacio(cargarBotones, !faltaLoNuestro),
@@ -2567,6 +2570,12 @@ async function pintarFiltros() {
             <s-option value="si">Activo en la tienda</s-option>
           </s-select>
           <s-number-field label="Botones por fila en el teléfono, como mucho" id="f-columnas" value="${f.columnas}" min="2" max="5" step="1" details="Con 4 o más, el icono va encima del texto para que quepan."></s-number-field>
+          ${hayCajon ? `
+          <s-select label="Menú «Filtrar» en el computador" id="f-cajon" details="En el teléfono siempre es un cajón lateral.">
+            <s-option value="no">Columna a la izquierda, dentro de la página</s-option>
+            <s-option value="prueba">Cajón lateral: vista previa, solo con el enlace</s-option>
+            <s-option value="si">Cajón lateral en la tienda</s-option>
+          </s-select>` : ''}
         </s-grid>
         <div class="casilla-polaris">
           <s-checkbox label="Poner «Ordenar» dentro del menú Filtrar, como en craftdlondon.com" id="f-ordenar" ${f.ordenar ? 'checked' : ''}></s-checkbox>
@@ -2673,11 +2682,12 @@ async function pintarFiltros() {
 
   /* ---- Configuración y previa ---- */
   el('f-modo').value = f.modo;
+  if (hayCajon) el('f-cajon').value = f.cajon;
   el('f-simular').value = estadoFiltros.simular;
   const repintarPrevia = () => {
     const cols = Number(el('f-columnas').value) || f.columnas;
     el('f-previa').innerHTML = previaFiltrosHtml(botones, colores, cols, estadoFiltros.simular);
-    el('f-enlace').hidden = el('f-modo').value !== 'prueba';
+    el('f-enlace').hidden = el('f-modo').value !== 'prueba' && !(hayCajon && el('f-cajon').value === 'prueba');
   };
   el('f-simular').addEventListener('change', (e) => { estadoFiltros.simular = e.target.value; repintarPrevia(); });
   el('f-config').addEventListener('input', repintarPrevia);
@@ -2689,13 +2699,14 @@ async function pintarFiltros() {
     modo: el('f-modo').value || 'no',
     columnas: Math.max(2, Math.min(5, Number(el('f-columnas').value) || f.columnas)),
     ordenar: el('f-ordenar').checked,
+    cajon: hayCajon ? (el('f-cajon').value || 'prueba') : f.cajon,
   });
   el('f-guardar-config').addEventListener('click', async (e) => {
     const boton = e.currentTarget;
     boton.loading = true;
     try {
       const v = configActual();
-      await guardarFiltrosConfig(v);
+      await guardarFiltrosConfig(v, camposConfig);
       Object.assign(f, v);
       avisar(v.modo === 'si' ? 'Botones activos en la tienda' : v.modo === 'prueba' ? 'Botones en vista previa' : 'Botones apagados');
     } catch (error2) {
@@ -2710,7 +2721,7 @@ async function pintarFiltros() {
     boton.loading = true;
     const lista = (id) => String(el(id).value ?? '').split(',').map((x) => x.trim()).filter(Boolean);
     try {
-      await guardarFiltrosConfig({ ...configActual(), colores: lista('f-colores'), categorias: lista('f-categorias'), tipos: lista('f-tipos') });
+      await guardarFiltrosConfig({ ...configActual(), colores: lista('f-colores'), categorias: lista('f-categorias'), tipos: lista('f-tipos') }, camposConfig);
       avisar('Valores guardados');
       await ir('filtros');
     } catch (error2) {

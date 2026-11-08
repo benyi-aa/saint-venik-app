@@ -162,6 +162,16 @@ se puede enseñar antes de encender.
   mismo id (barra lateral y menú) y la etiqueta del menú marcaba la casilla de
   la barra lateral; el embed hace que cada etiqueta del menú marque la suya.
 
+  **Filtrar en el computador** (campo `filtros_cajon`, pedido del 8-nov: «que
+  aparezcan como la barrita del costado, no dentro de la página»). En vez de la
+  columna de la izquierda, el botón «Filtrar» y el mismo cajón lateral que en el
+  teléfono. Es el modo «cajón» de Impulse, pero hecho con CSS (snippet
+  `sv-cajon`, desde el embed de `<head>` y, de respaldo, desde el de filtros) en
+  vez de cambiar `filter_style` en las 18 plantillas de colección de cada tienda:
+  el cajón y su botón ya están en todas las páginas, el tema solo los esconde en
+  el computador. Mismos tres estados; con el campo sin crear vale `prueba`, así
+  que nadie lo ve hasta encenderlo en la app.
+
 Los dos embeds nuevos, como el de insignias, hay que encenderlos una vez por
 tema en Personalizar → Configuración → Incrustaciones de apps.
 

@@ -38,6 +38,7 @@
   endfor
 
   assign f_modo = f_cfg.filtros_activo.value | default: 'no' | append: ''
+  render 'sv-cajon', cfg: f_cfg
   assign f_on = false
   if template.name == 'collection' and collection.handle != blank
     if f_modo == 'si' or f_modo == 'prueba'
