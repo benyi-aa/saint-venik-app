@@ -216,13 +216,24 @@
           el.style.viewTransitionName = poner && r.height && r.bottom > 0 && r.top < innerHeight ? q[1] : '';
         });
       }
+      /* Si el navegador se salta el cambio (pestana de fondo, otro clic),
+       * rechaza estas promesas y, sin nadie que las escuche, sale un error en
+       * la consola. No hay nada que hacer: solo callarlo. */
+      function callar(vt) {
+        [vt.ready, vt.updateCallbackDone].forEach(function (p) {
+          if (p && p.catch) p.catch(function () {});
+        });
+      }
       window.addEventListener('pageswap', function (e) {
         alIrse();
-        if (e.viewTransition) nombrar(true);
+        if (!e.viewTransition) return;
+        callar(e.viewTransition);
+        nombrar(true);
       });
       window.addEventListener('pagehide', alIrse);
       window.addEventListener('pagereveal', function (e) {
         if (!e.viewTransition) return;
+        callar(e.viewTransition);
         nombrar(true);
         e.viewTransition.finished.then(function () { nombrar(false); }, function () { nombrar(false); });
       });
