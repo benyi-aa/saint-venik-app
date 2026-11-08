@@ -448,10 +448,10 @@ avanza a pasos de 60 ms desde JavaScript (`setTimeout`, no CSS): ~20 % al
 segundo, ~35 % a los dos, tope 90 %. Al irse pasa su avance real (mínimo
 30 %) y la página nueva la termina como siempre. Chrome sigue igual.
 
-Mientras se prueba en un iPhone de verdad va **solo en vista previa**:
-abrir la tienda con `?sv-vista=1`. Para probar ese camino en Chrome, poner
-`sessionStorage['sv-lento'] = '1'` en la pestaña. Cuando se confirme, se
-quita la condición de `sv-vista` en `lento` y queda para todos.
+Se probó primero solo en vista previa y el usuario lo confirmó en su iPhone el
+8-nov: desde entonces vale **para todos** (se quitó la condición de `sv-vista`
+en `lento`). Para probar ese camino en Chrome, poner
+`sessionStorage['sv-lento'] = '1'` en la pestaña.
 
 ## Cómo funciona el cambio de página (embed «Transiciones»)
 

@@ -81,7 +81,7 @@
       /* Safari sin precarga: ver docs/tema.md, «La barra en el iPhone». */
       var hs = window.HTMLScriptElement, ua = navigator.userAgent;
       var lento = (leer('sv-lento') === '1' || !(hs && hs.supports && hs.supports('speculationrules'))
-        || /AppleWebKit/.test(ua) && !/Chrom|Edg|OPR|Android/.test(ua)) && leer('sv-vista') === '1';
+        || /AppleWebKit/.test(ua) && !/Chrom|Edg|OPR|Android/.test(ua));
       var prog = 0, paso = null, ya = 0;
 
       if (modo === 'prueba') {
