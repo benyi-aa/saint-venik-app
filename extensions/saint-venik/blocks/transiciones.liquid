@@ -104,6 +104,18 @@
           barra.setAttribute('aria-hidden', 'true');
           document.body.appendChild(barra);
         }
+        /* Con el menu o el carrito abiertos, bajo el encabezado del cajon y de su
+           ancho: si no, cruza el menu por la mitad (video del 9-nov). */
+        var dr = document.querySelector('.drawer.drawer--is-open');
+        if (dr) {
+          var rd = dr.getBoundingClientRect(), dh = dr.querySelector('.drawer__header');
+          barra.style.top = Math.round(dh ? dh.getBoundingClientRect().bottom : rd.top) + 'px';
+          barra.style.left = Math.round(rd.left) + 'px';
+          barra.style.width = Math.round(rd.width) + 'px';
+          return barra;
+        }
+        barra.style.left = '';
+        barra.style.width = '';
         var h = document.getElementById('SiteHeader'), r = h && h.getBoundingClientRect();
         barra.style.top = (r && r.bottom > 0 && r.bottom < innerHeight / 2 ? Math.round(r.bottom) : 0) + 'px';
         return barra;
