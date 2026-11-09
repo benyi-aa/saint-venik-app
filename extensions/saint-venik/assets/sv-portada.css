@@ -25,6 +25,9 @@ html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="ba
     position: relative; z-index: 3; height: 165px; overflow: visible; cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
+  /* El tema envuelve el bloque en un inline-block: con el texto en capa,
+   * dejaba 5 px de linea de base bajo la foto. */
+  html.sv-portada .custom__item-inner:has(.collection-description-wrapper img) { display: block; }
   html.sv-portada .collection-description-wrapper:has(img) .collection-image-container {
     display: block; position: absolute; inset: 0; z-index: 0; margin: 0; padding: 0; overflow: hidden;
   }
@@ -59,7 +62,7 @@ html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="ba
    * lo que baje por encima de la barra. */
   html.sv-portada .collection-description-wrapper:has(img) .collection-description::before {
     content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; pointer-events: none;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, .45), rgba(0, 0, 0, .8) 70px, rgba(0, 0, 0, .94));
+    background: linear-gradient(to bottom, rgba(0, 0, 0, .45), rgba(0, 0, 0, .82) 80px, rgba(0, 0, 0, .94) 150px, #000 165px);
     transition: opacity .45s ease;
   }
   html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description::before { opacity: 1; }
@@ -75,7 +78,11 @@ html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="ba
     max-height: 0; opacity: 0; overflow: hidden; transform: translateY(10px);
     transition: max-height .45s ease, opacity .35s ease, transform .45s ease, margin .45s ease;
   }
-  html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description { justify-content: flex-start; padding-top: 18px; }
+  /* Si la descripcion no cabe, la capa llega hasta el final de la barra negra
+   * (--sv-hasta lo calcula el script): sin lineas de la barra cortadas. */
+  html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description {
+    justify-content: flex-start; padding-top: 18px; min-height: var(--sv-hasta, 165px);
+  }
   html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description p {
     max-height: 30em; opacity: 1; transform: none; margin-top: 8px;
   }

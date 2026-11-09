@@ -30,7 +30,28 @@
   else caja.querySelector('.collection-description').appendChild(flecha);
 
   function abierta() { return caja.classList.contains('sv-abierto'); }
+
+  /* Abierta, la descripcion es una capa: si no cabe en la foto baja por
+   * encima de la barra negra, y entonces la tapa entera para no dejar una
+   * linea de la barra cortada por la mitad. */
+  function hastaDonde() {
+    caja.style.removeProperty('--sv-hasta');
+    var d = caja.querySelector('.collection-description');
+    var p = d && d.querySelector('p');
+    var h = d && d.querySelector('h2');
+    if (!p) return;
+    var necesita = 59 + (h ? h.offsetHeight : 0) + p.scrollHeight;
+    if (necesita <= caja.offsetHeight) return;
+    var item = caja.closest('.custom__item');
+    var sig = item && item.nextElementSibling;
+    var arriba = caja.getBoundingClientRect().top;
+    var hasta = sig ? sig.getBoundingClientRect().bottom - arriba : 0;
+    if (!sig || hasta - caja.offsetHeight > 220) hasta = necesita;
+    caja.style.setProperty('--sv-hasta', Math.round(Math.max(hasta, necesita)) + 'px');
+  }
+
   function poner(abrir) {
+    if (abrir) hastaDonde();
     caja.classList.toggle('sv-abierto', abrir);
     if (telefono.matches) caja.setAttribute('aria-expanded', abrir ? 'true' : 'false');
     if (abrir) desde = window.pageYOffset;
