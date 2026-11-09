@@ -45,7 +45,11 @@
     }
 
     var mapa = {};
-    for (var k in C.f) if (k) mapa[k.replace(/\/$/, '')] = C.f[k];
+    /* Las claves pueden venir relativas o con dominio (enlaces de tipo URL). */
+    for (var k in C.f) {
+      if (!k) continue;
+      try { mapa[new URL(k, location.href).pathname.replace(/\/$/, '')] = C.f[k]; } catch (e) { /* nada */ }
+    }
 
     var items = d.querySelectorAll('.mobile-nav > .mobile-nav__item');
     for (var i = 0; i < items.length; i += 1) {

@@ -7,6 +7,6 @@
   endfor
 -%}
 {%- if m != 'no' -%}
-<script>window.svMenu={m:{{ m | json }},f:{ {%- for l in linklists['main-menu'].links -%}{%- if l.type == 'collection_link' and l.object.image -%}{{ l.url | json }}:{{ l.object.image | image_url: width: 240 | json }},{%- endif -%}{%- endfor -%}"":""}};</script>
+<script>window.svMenu={m:{{ m | json }},f:{ {%- for l in linklists['main-menu'].links -%}{%- assign c = nil -%}{%- if l.type == 'collection_link' -%}{%- assign c = l.object -%}{%- elsif l.url contains '/collections/' -%}{%- assign h = l.url | split: '/collections/' | last | split: '?' | first | split: '/' | first -%}{%- assign c = collections[h] -%}{%- endif -%}{%- if c.image -%}{{ l.url | json }}:{{ c.image | image_url: width: 240 | json }},{%- endif -%}{%- endfor -%}"":""}};</script>
 <link rel="stylesheet" href="{{ 'sv-menu.css' | asset_url }}"><script src="{{ 'sv-menu.js' | asset_url }}" defer></script>
 {%- endif -%}
