@@ -13,7 +13,8 @@
 
 html.sv-portada .custom-content:has(.collection-description-wrapper) { margin-bottom: 0; }
 html.sv-portada .custom-content:has(.collection-description-wrapper) > .custom__item { margin-bottom: 0; }
-html.sv-portada .custom-content:has(.collection-description-wrapper) .benefits-bar { margin-bottom: 0; }
+/* La barra negra se llama .benefits-bar en .cl y .sv-benefits en .com. */
+html.sv-portada .custom-content:has(.collection-description-wrapper) :is(.benefits-bar, .sv-benefits) { margin-bottom: 0; }
 html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="banner-3x2"] { margin-top: 0; }
 
 .sv-portada-flecha { display: none; }
