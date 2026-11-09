@@ -98,11 +98,6 @@
     {%- endif -%}
   {%- endfor -%}
 
-  {%- comment -%}
-    Nombre del color de este producto, para el encabezado: el de SU color, no
-    el de la primera etiqueta de color que lleve. Una Vienna verde se llama
-    «Verde» aunque tambien lleve `oro`.
-  {%- endcomment -%}
   {%- for entrada in colores -%}
     {%- assign etiqueta = entrada.etiqueta.value | downcase | strip -%}
     {%- if etiqueta != blank -%}
@@ -160,11 +155,6 @@
         {%- endif -%}
       {%- endfor -%}
 
-      {%- comment -%}
-        2) Colores que existen en el metaobjeto pero no estan en el ajuste:
-        van detras, en el orden del metaobjeto, para que un color nuevo
-        aparezca sin tener que tocar nada.
-      {%- endcomment -%}
       {%- for entrada in colores -%}
         {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
         {%- if etiqueta_entrada != blank -%}
@@ -186,10 +176,6 @@
         {%- endif -%}
       {%- endfor -%}
 
-      {%- comment -%}
-        3) Red de seguridad: un producto sin ninguna etiqueta de color se
-        dibuja igual con su imagen destacada, en vez de desaparecer.
-      {%- endcomment -%}
       {%- assign actual_tiene_color = false -%}
       {%- for entrada in colores -%}
         {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}

@@ -129,10 +129,6 @@
 {%- render 'sv-desc-estilo', cfg: cfg -%}
 
 {%- if hay_algo -%}
-  {%- comment -%}
-    Solo se descarga si el descuento esta encendido (o en vista previa).
-    sv-badges.js lo espera: ver el final de ese archivo.
-  {%- endcomment -%}
   {%- if d_hay -%}
     <script src="{{ 'sv-descuento.js' | asset_url }}" defer></script>
   {%- endif -%}
@@ -182,11 +178,6 @@
       ],
       "beneficios": [
         {%- assign pb = true -%}
-        {%- comment -%}
-          Por posicion, igual que el bloque de la ficha: el orden de la lista
-          que devuelve Shopify no esta garantizado y aqui cada beneficio cae
-          sobre una foto distinta, asi que el orden se nota.
-        {%- endcomment -%}
         {%- for i in (1..tope_benef) -%}
           {%- for b in beneficios -%}
             {%- if b.orden.value == i -%}

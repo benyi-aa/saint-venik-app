@@ -48,11 +48,6 @@
   {%- endunless -%}
 
   {%- if sv_hallado -%}
-    {%- comment -%}
-      En ingles manda nombre_en si alguien lo escribio en el panel. Si esta
-      vacio se usa nombre, que Translate & Adapt ya devuelve traducido: asi
-      los colores que no se tocaron siguen como estaban.
-    {%- endcomment -%}
     {%- assign sv_nombre_color = entrada.nombre.value -%}
     {%- if idioma == 'en' and entrada.nombre_en.value != blank -%}
       {%- assign sv_nombre_color = entrada.nombre_en.value -%}

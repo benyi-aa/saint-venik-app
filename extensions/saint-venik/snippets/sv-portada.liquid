@@ -8,7 +8,6 @@
   <script>try{ {%- if p == 'prueba' -%}/[?&]sv-vista(=1)?(&|$)/.test(location.search)&&sessionStorage.setItem('sv-vista','1');sessionStorage.getItem('sv-vista')==='1'&& {%- endif -%}document.documentElement.classList.add('sv-portada')}catch(e){}</script>
   <script src="{{ 'sv-portada.js' | asset_url }}" defer></script>
 {%- endif -%}
-{%- comment -%} Navidad (9-nov): banners de terciopelo rojo, sv-navidad-portada-<foto>.jpg en Archivos, uno por cada foto de verano (coleccion_<foto>.jpg); Best Sellers tiene el suyo (sv-navidad-portada-bestsellers.jpg) en vez del de cadena. Con la temporada en Navidad, o con ?sv-navidad=1 para verlo antes (=0 lo quita). Ver docs/tema.md. {%- endcomment -%}
 {%- if template.name == 'collection' -%}
 {%- liquid
   assign tm = 'normal'

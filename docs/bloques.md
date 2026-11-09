@@ -273,3 +273,34 @@ imagen           (imagen)   campo `imagen_muestra`; manda sobre el color
 actual           (boolean)  true si es el producto de esta pagina
 mostrar_etiqueta (boolean)
 marcar_agotado   (boolean)
+
+
+## Notas que estaban dentro del código (movidas el 9-nov por el límite de 100 KB de Liquid)
+
+**beneficios.liquid:** Se recorre por posicion en vez de fiarse del orden de la lista, que Shopify no garantiza. Son pocas entradas: el coste no se nota.
+
+**filtros.liquid:** Esto va en linea para que la barra este en su sitio antes de pintarse; lo que hacen las pastillas y el menu esta en assets/sv-filtros.js.
+
+**insignias.liquid:** Solo se descarga si el descuento esta encendido (o en vista previa). sv-badges.js lo espera: ver el final de ese archivo.
+
+**insignias.liquid:** Por posicion, igual que el bloque de la ficha: el orden de la lista que devuelve Shopify no esta garantizado y aqui cada beneficio cae sobre una foto distinta, asi que el orden se nota.
+
+**selector-color.liquid:** Nombre del color de este producto, para el encabezado: el de SU color, no el de la primera etiqueta de color que lleve. Una Vienna verde se llama «Verde» aunque tambien lleve `oro`.
+
+**selector-color.liquid:** 2) Colores que existen en el metaobjeto pero no estan en el ajuste: van detras, en el orden del metaobjeto, para que un color nuevo aparezca sin tener que tocar nada.
+
+**selector-color.liquid:** 3) Red de seguridad: un producto sin ninguna etiqueta de color se dibuja igual con su imagen destacada, en vez de desaparecer.
+
+**sv-color-entry.liquid:** En ingles manda nombre_en si alguien lo escribio en el panel. Si esta vacio se usa nombre, que Translate & Adapt ya devuelve traducido: asi los colores que no se tocaron siguen como estaban.
+
+**sv-guia-bloque.liquid:** Saint Venik · Un bloque de la guia de tallas. Parametros: bloque (metaobject bloque_guia) lang (string) 'es' o 'en'
+
+**sv-guia-bloque.liquid:** width y height con las medidas reales: el navegador reserva el hueco antes de descargar la imagen y la ventana no da un salto al abrirse.
+
+**sv-guia-bloque.liquid:** Se extrae el identificador de YouTube a mano: Liquid no tiene expresiones regulares, y split es suficiente para las dos formas de URL que existen.
+
+**sv-icono.liquid:** Tuerca: metal, no escudo. El escudo es el de garantia, y dos escudos iguales en la misma ficha no distinguen nada.
+
+**sv-inicio.liquid:** Banner «Tu cadena de cada dia» (reunion 9-nov): foto mas cerca de la cadena, texto sobre degradado, boton chico redondeado, sin espacios blancos y el texto entra suave. Ver docs/tema.md.
+
+**sv-portada.liquid:** Navidad (9-nov): banners de terciopelo rojo, sv-navidad-portada-<foto>.jpg en Archivos, uno por cada foto de verano (coleccion_<foto>.jpg); Best Sellers tiene el suyo (sv-navidad-portada-bestsellers.jpg) en vez del de cadena. Con la temporada en Navidad, o con ?sv-navidad=1 para verlo antes (=0 lo quita). Ver docs/tema.md.

@@ -76,10 +76,6 @@
       <ul class="sv-benef__lista" role="list">
         {%- assign puestos = 0 -%}
 
-        {%- comment -%}
-          Se recorre por posicion en vez de fiarse del orden de la lista, que
-          Shopify no garantiza. Son pocas entradas: el coste no se nota.
-        {%- endcomment -%}
         {%- for i in (1..tope) -%}
           {%- for b in todos -%}
             {%- if puestos < maximo and b.orden.value == i -%}

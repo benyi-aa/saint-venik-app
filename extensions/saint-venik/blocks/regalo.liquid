@@ -1,0 +1,38 @@
+{%- liquid
+  assign tm = 'normal'
+  for e in shop.metaobjects.sv_configuracion_2.values
+    assign tm = e.temporada.value | default: 'normal' | append: ''
+    break
+  endfor
+  assign img = images['sv-regalo-navidad.jpg']
+  if block.settings.imagen != blank
+    assign img = block.settings.imagen
+  endif
+  assign s = block.settings
+  assign u = routes.root_url | append: '/collections/best-sellers' | replace: '//', '/'
+-%}
+<div class="sv-regalo{% unless tm == 'navidad' %} sv-regalo--previa{% endunless %}" {{ block.shopify_attributes }}>
+<div class="sv-regalo__foto">{% if img != blank %}{{ img | image_url: width: 1200 | image_tag: loading: 'lazy', widths: '480,720,960,1200', sizes: '(min-width: 768px) 46vw, 100vw', alt: '' }}{% endif %}</div>
+<div class="sv-regalo__texto">
+<p class="sv-regalo__ante">{{ 'regalo_ante' | t }}</p>
+<h2 class="sv-regalo__titulo">{% if s.titulo != blank %}{{ s.titulo }}{% else %}{{ 'regalo_titulo' | t }}{% endif %}</h2>
+<p class="sv-regalo__bajada">{% if s.texto != blank %}{{ s.texto }}{% else %}{{ 'regalo_texto' | t }}{% endif %}</p>
+<a class="sv-regalo__boton" href="{{ s.enlace | default: u }}">{% if s.boton != blank %}{{ s.boton }}{% else %}{{ 'regalo_boton' | t }}{% endif %}</a>
+</div>
+</div>
+{% schema %}
+{
+  "name": "El regalo Nº1 para él",
+  "target": "section",
+  "stylesheet": "sv-regalo.css",
+  "enabled_on": { "templates": ["index"] },
+  "settings": [
+    { "type": "paragraph", "content": "Solo con la temporada en Navidad (app → Apariencia). Vacío = texto por defecto." },
+    { "type": "text", "id": "titulo", "label": "Título" },
+    { "type": "text", "id": "texto", "label": "Bajada" },
+    { "type": "text", "id": "boton", "label": "Botón" },
+    { "type": "url", "id": "enlace", "label": "Enlace (vacío = Best Sellers)" },
+    { "type": "image_picker", "id": "imagen", "label": "Foto (vacío = sv-regalo-navidad.jpg)" }
+  ]
+}
+{% endschema %}

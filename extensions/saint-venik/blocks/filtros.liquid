@@ -169,10 +169,6 @@
        {% unless hay %}data-vacio{% endunless %} hidden>
     <div class="sv-filtros__dentro page-width">{{ filas }}</div>
   </nav>
-  {%- comment -%}
-    Esto va en linea para que la barra este en su sitio antes de pintarse;
-    lo que hacen las pastillas y el menu esta en assets/sv-filtros.js.
-  {%- endcomment -%}
   <script>
     (function () {
       var nav = document.getElementById('sv-filtros');
