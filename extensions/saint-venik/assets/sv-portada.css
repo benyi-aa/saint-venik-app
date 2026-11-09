@@ -9,47 +9,50 @@
  *    titulo y aparece la descripcion entera (sv-portada.js). Va con :has(img)
  *    y no con una clase del script, para que este en su sitio desde el primer
  *    pintado; la flecha (la pone el script) ocupa un hueco ya reservado.
- * Todo cuelga de html.sv-portada, que pone el embed segun la app. */
+ * Todo cuelga de html.sv-portada, que pone el embed segun la app.
+ * En .com las colecciones usan su propio marcado (.sv-coldesc-<nombre>, con
+ * __text y __image, y una version por idioma): los selectores lo cubren con
+ * :is() y el script le pone las clases de .cl a la version visible. */
 
-html.sv-portada .custom-content:has(.collection-description-wrapper) { margin-bottom: 0; }
-html.sv-portada .custom-content:has(.collection-description-wrapper) > .custom__item { margin-bottom: 0; }
+html.sv-portada .custom-content:has(:is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"]))) { margin-bottom: 0; }
+html.sv-portada .custom-content:has(:is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"]))) > .custom__item { margin-bottom: 0; }
 /* La barra negra se llama .benefits-bar en .cl y .sv-benefits en .com. */
-html.sv-portada .custom-content:has(.collection-description-wrapper) :is(.benefits-bar, .sv-benefits) { margin-bottom: 0; }
-html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="banner-3x2"] { margin-top: 0; }
+html.sv-portada .custom-content:has(:is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"]))) :is(.benefits-bar, .sv-benefits) { margin-bottom: 0; }
+html.sv-portada .custom-content:has(:is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"]))) [class*="banner-3x2"] { margin-top: 0; }
 
 .sv-portada-flecha { display: none; }
 
 @media (max-width: 767px) {
   /* Alto fijo: abrir no mueve nada de la pagina. El texto abierto es una capa
    * (position absolute) que, si no cabe, baja por encima de la barra negra. */
-  html.sv-portada .collection-description-wrapper:has(img) {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) {
     position: relative; z-index: 3; height: 165px; overflow: visible; cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
   /* El tema envuelve el bloque en un inline-block: con el texto en capa,
    * dejaba 5 px de linea de base bajo la foto. */
-  html.sv-portada .custom__item-inner:has(.collection-description-wrapper img) { display: block; }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-image-container {
+  html.sv-portada .custom__item-inner:has(:is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])) img) { display: block; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-image-container,[class$="__image"]) {
     display: block; position: absolute; inset: 0; z-index: 0; margin: 0; padding: 0; overflow: hidden;
   }
   /* El encuadre de cada foto: que la joya quede sobre el titulo. */
-  html.sv-portada .collection-description-wrapper:has(img) .collection-image-container img {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-image-container,[class$="__image"]) img {
     position: absolute; left: 0; right: 0; bottom: 0; top: auto; width: 100%;
     height: var(--sv-alto, 100%); max-width: none; margin: 0;
     object-fit: cover; object-position: var(--sv-encuadre, 50% 70%);
   }
   /* --sv-alto agranda la foto (anclada abajo) cuando la joya esta muy abajo
    * en la imagen: asi sube por encima del titulo. */
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="bestsellers"] { --sv-encuadre: 62% 88%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_cadena"] { --sv-alto: 178%; --sv-encuadre: 58% 100%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_pulsera"] { --sv-alto: 128%; --sv-encuadre: 40% 100%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_anillos"] { --sv-encuadre: 50% 100%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_essentials"] { --sv-alto: 170%; --sv-encuadre: 50% 100%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_colgantes"] { --sv-encuadre: 55% 100%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_conjuntos"] { --sv-encuadre: 55% 100%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="bestsellers"] { --sv-encuadre: 62% 88%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_cadena"] { --sv-alto: 178%; --sv-encuadre: 58% 100%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_pulsera"] { --sv-alto: 128%; --sv-encuadre: 40% 100%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_anillos"] { --sv-encuadre: 50% 100%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_essentials"] { --sv-alto: 170%; --sv-encuadre: 50% 100%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_colgantes"] { --sv-encuadre: 55% 100%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_conjuntos"] { --sv-encuadre: 55% 100%; }
 
   /* Degradado fijo para leer el titulo. */
-  html.sv-portada .collection-description-wrapper:has(img) .collection-image-container::after {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-image-container,[class$="__image"])::after {
     content: ''; position: absolute; inset: 0; z-index: 1;
     background: linear-gradient(to top, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 62%);
   }
@@ -60,56 +63,56 @@ html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="ba
    * tamaño y los margenes son los mismos. Al abrir solo crece el texto, hasta
    * su alto exacto (--sv-texto, del script), y empuja el titulo hacia arriba;
    * el negro se funde y la flecha gira, todo con la misma curva. */
-  html.sv-portada .collection-description-wrapper:has(img) {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) {
     --sv-curva: cubic-bezier(.32, .72, 0, 1);
     --sv-tiempo: .55s;
   }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"]) {
     position: absolute; inset: 0; z-index: 1; box-sizing: border-box; overflow: hidden;
     display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
     text-align: center; padding: 14px 22px 9px; color: #fff;
   }
   /* El negro que entra al abrir. */
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description::before {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"])::before {
     content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; pointer-events: none;
     background: linear-gradient(to bottom, rgba(0, 0, 0, .55), rgba(0, 0, 0, .8) 45%, rgba(0, 0, 0, .9));
     transition: opacity var(--sv-tiempo) var(--sv-curva);
   }
-  html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description::before { opacity: 1; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])).sv-abierto:has(img) :is(.collection-description,[class$="__text"])::before { opacity: 1; }
   /* En una linea, aunque sea largo («Colgantes para hombre»). El hueco de
    * abajo es el de la flecha, que pone el script: asi nada salta al llegar. */
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description h2 {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"]) h2 {
     order: 0; color: #fff; font-size: clamp(19px, 6.2vw, 26px); line-height: 1.15;
     letter-spacing: .03em; margin: 0 0 23px; white-space: nowrap;
   }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description:has(.sv-portada-flecha) h2 { margin-bottom: 0; }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description p {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"]):has(.sv-portada-flecha) h2 { margin-bottom: 0; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"]) p {
     order: 2; flex: 0 0 auto; color: #fff; font-size: 12px; line-height: 1.42; margin: 0;
     max-height: 0; opacity: 0; overflow: hidden; transform: translateY(6px);
     transition: max-height var(--sv-tiempo) var(--sv-curva), opacity .3s ease, transform var(--sv-tiempo) var(--sv-curva);
   }
-  html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description p {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])).sv-abierto:has(img) :is(.collection-description,[class$="__text"]) p {
     max-height: var(--sv-texto, 9em); opacity: 1; transform: none;
     transition: max-height var(--sv-tiempo) var(--sv-curva), opacity .4s ease .12s, transform var(--sv-tiempo) var(--sv-curva);
   }
 
   /* La flecha va bajo el titulo y se enciende y apaga muy despacio: una
    * pista de que se abre, sin llamar la atencion. Abierta, apunta abajo. */
-  html.sv-portada .collection-description-wrapper:has(img) .sv-portada-flecha {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) .sv-portada-flecha {
     display: block; order: 1; flex: 0 0 auto; width: 16px; height: 16px; margin: 3px 0 4px; color: #fff;
     animation: sv-portada-latido 3.6s ease-in-out infinite;
     transition: transform var(--sv-tiempo) var(--sv-curva), opacity .4s ease;
   }
-  html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .sv-portada-flecha {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])).sv-abierto:has(img) .sv-portada-flecha {
     transform: rotate(180deg); animation: none; opacity: .8;
   }
 }
 
 @media (max-width: 767px) {
-  html.sv-portada .collection-description-wrapper:is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"])) .collection-description {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"])) :is(.collection-description,[class$="__text"]) {
     justify-content: flex-start; padding: 14px 22px 9px;
   }
-  html.sv-portada .collection-description-wrapper:is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"])) .collection-image-container::after {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"])) :is(.collection-image-container,[class$="__image"])::after {
     background: linear-gradient(to bottom, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 62%);
   }
 }
@@ -120,9 +123,9 @@ html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="ba
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.sv-portada .collection-description-wrapper:has(img) .sv-portada-flecha { animation: none; opacity: .6; }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description p,
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description::before { transition: none; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) .sv-portada-flecha { animation: none; opacity: .6; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"]) p,
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"])::before { transition: none; }
 }
 
 /* En el computador (pedido del 9-nov): lo mismo que en el telefono, la foto a
@@ -131,63 +134,63 @@ html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="ba
  * no tapar la joya, que suele estar al centro. --sv-y elige la altura del
  * encuadre de cada foto. El telefono no cambia. */
 @media (min-width: 768px) {
-  html.sv-portada .collection-description-wrapper:has(img) {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) {
     --sv-curva: cubic-bezier(.32, .72, 0, 1);
     --sv-tiempo: .55s;
     position: relative; z-index: 3; display: block; height: 300px; overflow: hidden; cursor: pointer;
   }
-  html.sv-portada .custom__item-inner:has(.collection-description-wrapper img) { display: block; }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-image-container {
+  html.sv-portada .custom__item-inner:has(:is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])) img) { display: block; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-image-container,[class$="__image"]) {
     display: block; position: absolute; inset: 0; z-index: 0; margin: 0 !important; padding: 0 !important; overflow: hidden;
   }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-image-container img {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-image-container,[class$="__image"]) img {
     width: 100%; height: 100%; max-width: none; margin: 0; object-fit: cover; object-position: 50% var(--sv-y, 55%);
   }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_cadena"] { --sv-y: 55%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_pulsera"] { --sv-y: 40%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_anillos"] { --sv-y: 55%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_essentials"] { --sv-y: 72%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_colgantes"] { --sv-y: 72%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_conjuntos"] { --sv-y: 62%; }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-image-container::after {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_cadena"] { --sv-y: 55%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_pulsera"] { --sv-y: 40%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_anillos"] { --sv-y: 55%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_essentials"] { --sv-y: 72%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_colgantes"] { --sv-y: 72%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_conjuntos"] { --sv-y: 62%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-image-container,[class$="__image"])::after {
     content: ''; position: absolute; inset: 0; z-index: 1;
     background: linear-gradient(90deg, rgba(0, 0, 0, .62) 0%, rgba(0, 0, 0, .32) 34%, rgba(0, 0, 0, 0) 58%);
   }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"]) {
     position: absolute; inset: 0; z-index: 1; box-sizing: border-box; max-width: none;
     display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
     text-align: left; padding: 0 6% !important; color: #fff;
   }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description::before {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"])::before {
     content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; pointer-events: none;
     background: linear-gradient(90deg, rgba(0, 0, 0, .82) 0%, rgba(0, 0, 0, .6) 42%, rgba(0, 0, 0, .15) 75%);
     transition: opacity var(--sv-tiempo) var(--sv-curva);
   }
-  html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description::before { opacity: 1; }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description h2 {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])).sv-abierto:has(img) :is(.collection-description,[class$="__text"])::before { opacity: 1; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"]) h2 {
     order: 0; color: #fff; font-size: clamp(30px, 3.2vw, 42px); line-height: 1.1;
     letter-spacing: .03em; margin: 0; white-space: nowrap;
   }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description p {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"]) p {
     order: 2; flex: 0 0 auto; max-width: 520px; color: #fff; font-size: 15px; line-height: 1.55; margin: 10px 0 0;
     max-height: 0; opacity: 0; overflow: hidden; transform: translateY(6px);
     transition: max-height var(--sv-tiempo) var(--sv-curva), opacity .3s ease, transform var(--sv-tiempo) var(--sv-curva);
   }
-  html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description p {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])).sv-abierto:has(img) :is(.collection-description,[class$="__text"]) p {
     max-height: var(--sv-texto, 9em); opacity: 1; transform: none;
     transition: max-height var(--sv-tiempo) var(--sv-curva), opacity .4s ease .12s, transform var(--sv-tiempo) var(--sv-curva);
   }
-  html.sv-portada .collection-description-wrapper:has(img) .sv-portada-flecha {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) .sv-portada-flecha {
     display: block; order: 1; flex: 0 0 auto; width: 18px; height: 18px; margin: 8px 0 0; color: #fff;
     animation: sv-portada-latido 3.6s ease-in-out infinite;
     transition: transform var(--sv-tiempo) var(--sv-curva), opacity .4s ease;
   }
-  html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .sv-portada-flecha {
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])).sv-abierto:has(img) .sv-portada-flecha {
     transform: rotate(180deg); animation: none; opacity: .8;
   }
 }
 @media (min-width: 768px) and (prefers-reduced-motion: reduce) {
-  html.sv-portada .collection-description-wrapper:has(img) .sv-portada-flecha { animation: none; opacity: .6; }
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description p,
-  html.sv-portada .collection-description-wrapper:has(img) .collection-description::before { transition: none; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) .sv-portada-flecha { animation: none; opacity: .6; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"]) p,
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-description,[class$="__text"])::before { transition: none; }
 }

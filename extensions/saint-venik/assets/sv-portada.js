@@ -7,7 +7,17 @@
   'use strict';
   var raiz = document.documentElement;
   if (!raiz.classList.contains('sv-portada')) return;
-  var caja = document.querySelector('.collection-description-wrapper');
+  /* En .com: .sv-coldesc-<nombre> (una por idioma, la otra oculta). Se toma la
+   * visible y se le ponen las clases de .cl para que el resto sea igual. */
+  var caja = [].filter.call(document.querySelectorAll('.collection-description-wrapper, [class^="sv-coldesc-"]:not([class*="__"])'), function (c) {
+    return getComputedStyle(c).display !== 'none';
+  })[0];
+  if (caja && !caja.classList.contains('collection-description-wrapper')) {
+    caja.classList.add('collection-description-wrapper');
+    var tx = caja.querySelector('[class$="__text"]'), im = caja.querySelector('[class$="__image"]');
+    if (tx) tx.classList.add('collection-description');
+    if (im) im.classList.add('collection-image-container');
+  }
   if (!caja || !caja.querySelector('.collection-image-container img') || !caja.querySelector('.collection-description')) return;
   /* Antes solo en el telefono; ahora en todo tamaño. Se deja el nombre. */
   var telefono = window.matchMedia('all');
