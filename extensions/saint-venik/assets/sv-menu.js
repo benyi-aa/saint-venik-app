@@ -77,7 +77,8 @@
       var link = li.querySelector('a');
       var r = link && !li.querySelector('.mobile-nav__sublist') ? ruta(link) : '';
       var h = (/\/collections\/([^\/?#]+)$/.exec(r) || [])[1];
-      var foto = mapa[r];
+      /* Foto en uso propia del menú (sv-menu-<colección>.jpg en Archivos, 9-nov) si la hay. */
+      var foto = (C.h && h && C.h[/essentials/.test(h) ? 'essentials' : h]) || mapa[r];
       if (!foto && (!h || h === 'all')) {
         li.classList.add('sv-menu-simple');
         continue;
@@ -100,9 +101,24 @@
     document.addEventListener('click', function (e) {
       if (e.target.closest && e.target.closest('.js-drawer-open-nav, [aria-controls="NavDrawer"]')) cargar();
     }, true);
-    window.addEventListener('load', function () { setTimeout(cargar, 4000); });
+    if (document.readyState === 'complete') cargar();
+    else window.addEventListener('load', cargar);
+    document.addEventListener('touchstart', cargar, { passive: true, once: true });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', armar);
-  else armar();
+  /* Se carga async y arma el cajón apenas está entero en la página (ya hay
+   * algo después de él), sin esperar a que se lea toda la colección: en un
+   * teléfono lento, abrir el menú antes mostraba el del tema o fotos vacías. */
+  function entero(d) {
+    for (var n = d; n && n !== document.body; n = n.parentNode) if (n.nextElementSibling) return true;
+    return false;
+  }
+  function cuando() {
+    var d = document.getElementById('NavDrawer');
+    if (d && entero(d)) { armar(); return; }
+    if (document.readyState === 'loading') requestAnimationFrame(cuando);
+    else armar();
+  }
+  cuando();
+  document.addEventListener('DOMContentLoaded', armar);
 }());

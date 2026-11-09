@@ -577,3 +577,21 @@ Pedida por Benjamín en la reunión del 9-nov. Va en lugar del 3x2, que era el p
 - **Cuándo se ve:** solo con la temporada en Navidad o con `?sv-navidad=1` (clase `html.sv-nav`, que pone `sv-inicio.liquid`). En temporada Normal el HTML sale oculto y la foto no se descarga (`loading=lazy` con `display:none`).
 - **Textos:** salen de `locales/` (es/en). El editor del tema permite cambiarlos, cambiar el enlace (vacío = Best Sellers del idioma) y la foto.
 - **Foto:** el botón «Preparar las fotos de Navidad» del panel la lleva a Archivos.
+
+## Fotos del inicio, segunda versión (9-nov, feedback de Benjamín y Alfonso)
+
+Las fotos se rehicieron con Nano Banana Pro con otro estilo. El realismo y la luz sobre el metal se toman de la referencia de Alfonso (`branding/colecciones-inicio/para-nano-banana/referencias/realismo-alfonso.jpg`: joyas sobre negro brillante, cada eslabón nítido, brillos y reflejos de estudio). El fondo es el de la tarjeta «Bracelets» de Jaxxon: negro con un tinte azul acero y haces de luz que entran por una esquina.
+
+Qué cambió en cada foto:
+- **Cadenas:** las mismas Cuban 8mm, oro y plata, cruzadas.
+- **Pulseras:** las mismas (tennis 5mm y Cuban 8mm de oro y de plata), ahora SEPARADAS y paradas en fila.
+- **Colgantes:** Vault Blue Oro, Crucifix (plata) y Cross Minimal Oro, en orden oro–plata–oro.
+- **Anillos:** los mismos (Eros Oro, Box y Roman XI), ahora acostados.
+
+Las anteriores quedaron en `branding/colecciones-inicio/v1/`. El carrito vacío usa los mismos archivos (`sv-inicio-<colección>.jpg`).
+
+## Menú del teléfono: fotos en uso y carga temprana (9-nov)
+
+Cada tarjeta del menú usa `sv-menu-<colección>.jpg` si existe en Archivos; si no, la imagen de la colección. Las colecciones de Essentials usan la clave `essentials`. Son recortes cuadrados de las fotos de modelo de los banners de colección, más una de Best Sellers generada en uso, y los lleva a Archivos el botón «Traer las fotos nuevas a Archivos». El mapa por colección (`svMenu.h`) también sirve en .com, donde el menú no sale de la lista de Shopify.
+
+`sv-menu.js` ahora carga async y arma el cajón apenas está entero (ya hay algo después de #NavDrawer), sin esperar a que se lea toda la página. Las fotos se piden al terminar de cargar la página o con el primer toque. Antes se armaba al terminar de leer la página y las fotos llegaban 4 s después de cargar, así que entrando directo a una colección pesada con un teléfono lento, el menú salía sin armar o con las fotos vacías.
