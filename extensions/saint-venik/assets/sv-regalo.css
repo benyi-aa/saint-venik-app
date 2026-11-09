@@ -1,6 +1,6 @@
 /* Saint Venik · «El regalo Nº1 para él» (bloque regalo.liquid). Fondo degradado
  * burdeo como Jaxxon pero de regalo; la foto (también sobre burdeo) se funde
- * en el fondo con una máscara. Teléfono: foto arriba y texto centrado abajo.
+ * con el fondo solo hacia el texto: abajo en el teléfono, a la izquierda en el computador. Teléfono: foto arriba y texto centrado abajo.
  * Computador: texto a la izquierda y foto a la derecha. */
 .sv-regalo { display: grid; grid-template-columns: 1fr; color: #fff; text-align: center; overflow: hidden;
   background: radial-gradient(circle at 50% 32%, #3d0d14 0%, #22060b 52%, #130305 100%); }
@@ -8,8 +8,8 @@
 html.sv-nav .sv-regalo--previa { display: grid; }
 .sv-regalo__foto { width: 100%; max-width: 560px; margin: 0 auto; aspect-ratio: 1 / 1; }
 .sv-regalo__foto img { display: block; width: 100%; height: 100%; object-fit: cover;
-  -webkit-mask-image: radial-gradient(closest-side, #000 74%, transparent 100%);
-  mask-image: radial-gradient(closest-side, #000 74%, transparent 100%); }
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 78%, transparent 100%); }
 .sv-regalo__texto { padding: 0 24px 40px; margin-top: -18px; position: relative; }
 .sv-regalo__ante { margin: 0 0 10px; font-size: 11px; letter-spacing: .32em; text-transform: uppercase; color: #e3c79a; }
 .sv-regalo__titulo { margin: 0 0 10px; color: #fff; font-size: clamp(26px, 7.4vw, 46px); line-height: 1.08; letter-spacing: .03em; text-transform: uppercase; }
@@ -26,4 +26,6 @@ html.sv-nav .sv-regalo--previa { display: grid; }
   .sv-regalo__bajada { font-size: 17px; margin-bottom: 28px; }
   .sv-regalo__boton { font-size: 13px; padding: 13px 24px; }
   .sv-regalo__foto { max-width: 600px; margin: 0 auto 0 0; }
+  /* La caja y la bolsita van al borde derecho de la foto (9-nov): solo se funde el lado del texto. */
+  .sv-regalo__foto img { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 16%); mask-image: linear-gradient(to right, transparent 0, #000 16%); }
 }
