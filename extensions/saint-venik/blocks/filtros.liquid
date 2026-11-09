@@ -1,34 +1,4 @@
-{%- comment -%}
-  Saint Venik · Filtros rapidos en las colecciones
-  ---------------------------------------------------------------------------
-  Las pastillas encima de los productos, como en craftdlondon.com: «Dorado»,
-  «Plateado», «Brillantes» en todas las colecciones, y en Best Sellers ademas
-  las categorias. En el telefono van en filas fijas, sin deslizar.
-
-  Cada pastilla es una entrada del metaobjeto `sv_boton_filtro` (se crean,
-  cambian y ordenan en la app, pantalla Filtros). No filtran por su cuenta:
-  son el filtro de Shopify de esa misma coleccion (?filter.p.m.custom.sv_color
-  =Dorado), asi que el menu «Filtrar», la paginacion y las pastillas dicen
-  siempre lo mismo. Por eso una pastilla solo sale si ese filtro existe en la
-  tienda (Search & Discovery) y tiene productos en esta coleccion.
-
-  POR QUE UN EMBED Y NO UN BLOQUE
-  La tienda tiene dieciocho plantillas de coleccion. Un bloque habria que
-  ponerlo a mano en cada una, y en cada plantilla nueva. El embed sale en
-  todas solo, y se coloca encima de los productos.
-
-  Al tocar una pastilla, la coleccion se filtra en el sitio, con el mismo
-  mecanismo que usa el menu del tema: no se recarga la pagina ni se salta
-  arriba. Las pastillas no desaparecen al filtrar: la que se quedaria sin
-  productos se apaga hasta que vuelva a tenerlos.
-
-  Y deja el menu «Filtrar» como en craftdlondon.com: Color, Categoria y Tipo
-  primero, despues Precio y Disponibilidad, al final «Ordenar»; se marcan
-  varias opciones y se aplican juntas con «Ver resultados» (o al cerrar el
-  menu), en vez de cerrarse con cada toque.
-
-  Tres estados desde la app: 'si', 'no' y 'prueba' (solo con ?sv-vista=1).
-{%- endcomment -%}
+{%- comment -%} Saint Venik · Filtros rapidos: las pastillas y el menu «Filtrar». Explicacion completa en el README (Filtros). {%- endcomment -%}
 
 {%- liquid
   assign f_cfg = null

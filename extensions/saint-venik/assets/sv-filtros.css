@@ -29,6 +29,10 @@
   border-radius: 12px; font-size: 11.5px;
 }
 .sv-filtros__fila--apilada .sv-filtro svg { width: 21px; height: 21px; }
+/* Un boton sin icono ni muestra (solo texto) no se apila: queda pastilla. */
+.sv-filtros__fila--apilada .sv-filtro:not(:has(svg, .sv-filtro__muestra)) {
+  flex-direction: row; min-height: 38px; padding: 6px 4px; border-radius: 999px; font-size: 12px;
+}
 @media (min-width: 769px) {
   .sv-filtros__dentro { flex-direction: row; flex-wrap: wrap; }
   .sv-filtros__fila { display: contents; }

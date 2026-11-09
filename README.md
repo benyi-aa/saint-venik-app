@@ -191,7 +191,31 @@ se puede enseñar antes de encender.
 
   Las píldoras se combinan entre sí: cada una añade o quita su valor y deja los
   demás. Dos del mismo filtro suman (Cadenas o Pulseras); de filtros distintos
-  se cruzan (Cadenas y Dorado).
+  se cruzan (Cadenas y Dorado). Un botón sin icono (Icono → ninguno en la app)
+  queda como pastilla de texto también en el teléfono, en vez de caja apilada.
+
+  Por qué un embed y no un bloque: la tienda tiene dieciocho plantillas de
+  colección. Un bloque habría que ponerlo a mano en cada una (y en cada
+  plantilla nueva); el embed sale en todas y se coloca solo encima de los
+  productos. Al filtrar, las pastillas no desaparecen: la que se quedaría sin
+  productos se apaga hasta que vuelva a tenerlos.
+
+- **Portada de las colecciones** (campo `colecciones_portada`, pedido del 9-nov
+  con la referencia de lostgenclub; snippet `sv-portada` desde el embed de
+  `<head>`, `assets/sv-portada.css` y `.js`). Cada colección empieza con un
+  bloque de texto y foto (`.collection-description-wrapper`, de una sección
+  «Contenido personalizado» de cada plantilla), luego la barra negra de
+  beneficios y el banner 3x2. Quita las franjas blancas entre los tres, y en el
+  teléfono, donde el tema escondía la foto, la deja baja (165 px) con el título
+  encima sobre un degradado negro. Debajo del título, una flecha que se
+  enciende y apaga muy despacio. Al tocar, el título sube, aparece la
+  descripción entera y la foto se oscurece; se cierra al volver a tocar, al
+  tocar fuera o al bajar más de 60 px. El encuadre va por foto (`--sv-encuadre`
+  según el nombre del archivo) para que la joya quede sobre el título; en
+  Colgantes y Conjuntos la cruz está en el borde de abajo de la foto y el título
+  la tapa en parte: esas piden una foto pensada para el teléfono. Va con
+  `:has(img)` para estar en su sitio desde el primer pintado. Tres estados;
+  con el campo sin crear vale `si`.
 
 Los dos embeds nuevos, como el de insignias, hay que encenderlos una vez por
 tema en Personalizar → Configuración → Incrustaciones de apps.

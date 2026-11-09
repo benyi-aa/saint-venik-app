@@ -1,0 +1,7 @@
+{%- comment -%} Portada de las colecciones (foto con el titulo encima en el telefono): ver README. Recibe `cfg`. {%- endcomment -%}
+{%- assign p = cfg.colecciones_portada.value | default: 'si' | append: '' -%}
+{%- if template.name == 'collection' and p != 'no' -%}
+  {{- 'sv-portada.css' | asset_url | stylesheet_tag -}}
+  <script>try{ {%- if p == 'prueba' -%}/[?&]sv-vista(=1)?(&|$)/.test(location.search)&&sessionStorage.setItem('sv-vista','1');sessionStorage.getItem('sv-vista')==='1'&& {%- endif -%}document.documentElement.classList.add('sv-portada')}catch(e){}</script>
+  <script src="{{ 'sv-portada.js' | asset_url }}" defer></script>
+{%- endif -%}

@@ -26,15 +26,15 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores, capacidadActiva, enUnaPasada } from './api.js?v=202611090028';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611090028';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611090028';
-import { copiarArchivo } from './archivos.js?v=202611090028';
-import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611090028';
-import { faltaEstructuraFiltros, asegurarEstructuraFiltros } from './filtros.js?v=202611090028';
+import { gql, comprobarErrores, capacidadActiva, enUnaPasada } from './api.js?v=202611090317';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611090317';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611090317';
+import { copiarArchivo } from './archivos.js?v=202611090317';
+import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611090317';
+import { faltaEstructuraFiltros, asegurarEstructuraFiltros } from './filtros.js?v=202611090317';
 import {
   faltaEstructuraBeneficios, asegurarEstructuraBeneficios, sembrarBeneficios,
-} from './beneficios.js?v=202611090028';
+} from './beneficios.js?v=202611090317';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 

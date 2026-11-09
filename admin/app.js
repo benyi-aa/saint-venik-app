@@ -1,48 +1,48 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611090028';
+import { estaEmbebida } from './api.js?v=202611090317';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611090028';
+} from './colores.js?v=202611090317';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611090028';
+} from './config.js?v=202611090317';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611090028';
+} from './filtros.js?v=202611090317';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611090028';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611090028';
+} from './productos.js?v=202611090317';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611090317';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611090028';
+} from './guias.js?v=202611090317';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611090028';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611090028';
+} from './vista-previa.js?v=202611090317';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611090317';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611090028';
+} from './etiquetas.js?v=202611090317';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611090028';
-import { ICONOS, svgIcono } from './iconos.js?v=202611090028';
+} from './beneficios.js?v=202611090317';
+import { ICONOS, svgIcono } from './iconos.js?v=202611090317';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611090028';
+const VERSION = '202611090317';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -2528,6 +2528,7 @@ async function pintarFiltros() {
   const hayConfig = camposConfig.has('filtros_activo');
   const hayCajon = camposConfig.has('filtros_cajon');
   const hayPrecio = camposConfig.has('filtros_precio');
+  const hayPortada = camposConfig.has('colecciones_portada');
   /* Un campo de configuración que falta (filtros_cajon…) no tapa la pantalla:
    * sale en el aviso de arriba y su control aparece al crearlo. */
   const faltaLoNuestro = revision.pendientes.some((p) => /filtro|metacampo/i.test(p) && !/^Campos de configuración/.test(p));
@@ -2582,6 +2583,12 @@ async function pintarFiltros() {
             <s-option value="no">Solo el slider</s-option>
             <s-option value="prueba">Slider y casillas: vista previa, solo con el enlace</s-option>
             <s-option value="si">Slider y casillas en la tienda</s-option>
+          </s-select>` : ''}
+          ${hayPortada ? `
+          <s-select label="Portada de la colección en el teléfono" id="f-portada" details="La foto baja con el título encima; al tocarla sale la descripción. También quita los espacios hasta el 3x2.">
+            <s-option value="no">Como el tema: solo el texto</s-option>
+            <s-option value="prueba">Foto con título: vista previa, solo con el enlace</s-option>
+            <s-option value="si">Foto con título en la tienda</s-option>
           </s-select>` : ''}
         </s-grid>
         <div class="casilla-polaris">
@@ -2691,12 +2698,13 @@ async function pintarFiltros() {
   el('f-modo').value = f.modo;
   if (hayCajon) el('f-cajon').value = f.cajon;
   if (hayPrecio) el('f-precio').value = f.precio;
+  if (hayPortada) el('f-portada').value = f.portada;
   el('f-simular').value = estadoFiltros.simular;
   const repintarPrevia = () => {
     const cols = Number(el('f-columnas').value) || f.columnas;
     el('f-previa').innerHTML = previaFiltrosHtml(botones, colores, cols, estadoFiltros.simular);
     el('f-enlace').hidden = el('f-modo').value !== 'prueba' && !(hayCajon && el('f-cajon').value === 'prueba')
-      && !(hayPrecio && el('f-precio').value === 'prueba');
+      && !(hayPrecio && el('f-precio').value === 'prueba') && !(hayPortada && el('f-portada').value === 'prueba');
   };
   el('f-simular').addEventListener('change', (e) => { estadoFiltros.simular = e.target.value; repintarPrevia(); });
   el('f-config').addEventListener('input', repintarPrevia);
@@ -2710,6 +2718,7 @@ async function pintarFiltros() {
     ordenar: el('f-ordenar').checked,
     cajon: hayCajon ? (el('f-cajon').value || 'prueba') : f.cajon,
     precio: hayPrecio ? (el('f-precio').value || 'prueba') : f.precio,
+    portada: hayPortada ? (el('f-portada').value || 'si') : f.portada,
   });
   el('f-guardar-config').addEventListener('click', async (e) => {
     const boton = e.currentTarget;
