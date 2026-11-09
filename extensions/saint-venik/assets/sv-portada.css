@@ -108,14 +108,9 @@ html.sv-portada .custom-content:has(:is(.collection-description-wrapper,[class^=
   }
 }
 
-@media (max-width: 767px) {
-  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"]), :has(img[src*="sv-navidad-portada-colgantes"]), :has(img[src*="sv-navidad-portada-conjuntos"]), :has(img[src*="sv-navidad-portada-bestsellers"])) :is(.collection-description,[class$="__text"]) {
-    justify-content: flex-start; padding: 14px 22px 9px;
-  }
-  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"]), :has(img[src*="sv-navidad-portada-colgantes"]), :has(img[src*="sv-navidad-portada-conjuntos"]), :has(img[src*="sv-navidad-portada-bestsellers"])) :is(.collection-image-container,[class$="__image"])::after {
-    background: linear-gradient(to bottom, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 62%);
-  }
-}
+/* Desde el 9-nov el título va SIEMPRE abajo en el teléfono, también en Colgantes
+ * y Conjuntos: donde la joya quedaba debajo del título, el teléfono usa una foto
+ * propia alargada hacia abajo (ver sv-portada.liquid y docs/tema.md). */
 
 @keyframes sv-portada-latido {
   0%, 100% { opacity: .22; }

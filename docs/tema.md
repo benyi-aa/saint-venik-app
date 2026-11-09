@@ -595,3 +595,23 @@ Las anteriores quedaron en `branding/colecciones-inicio/v1/`. El carrito vacío 
 Cada tarjeta del menú usa `sv-menu-<colección>.jpg` si existe en Archivos; si no, la imagen de la colección. Las colecciones de Essentials usan la clave `essentials`. Son recortes cuadrados de las fotos de modelo de los banners de colección, más una de Best Sellers generada en uso, y los lleva a Archivos el botón «Traer las fotos nuevas a Archivos». El mapa por colección (`svMenu.h`) también sirve en .com, donde el menú no sale de la lista de Shopify.
 
 `sv-menu.js` ahora carga async y arma el cajón apenas está entero (ya hay algo después de #NavDrawer), sin esperar a que se lea toda la página. Las fotos se piden al terminar de cargar la página o con el primer toque. Antes se armaba al terminar de leer la página y las fotos llegaban 4 s después de cargar, así que entrando directo a una colección pesada con un teléfono lento, el menú salía sin armar o con las fotos vacías.
+
+## Título del banner siempre abajo en el teléfono (9-nov)
+
+Pedido del usuario: en el teléfono, el título de la portada de cada colección va siempre abajo, en todas las páginas. Antes Colgantes y Conjuntos lo tenían arriba, y eso se quitó de sv-portada.css. Donde el título tapaba la joya, el título no se mueve: se cambia la foto. Cada caso tiene una versión para el teléfono, alargada hacia abajo con Nano Banana Pro (más pecho y camisa, o más terciopelo) y recortada a la proporción del banner del teléfono (≈2,3:1), con la joya arriba:
+
+- **Verano:** `sv-portada-movil-<foto>.jpg` (pulsera, colgantes, conjuntos). La sube «Traer las fotos nuevas a Archivos».
+- **Navidad:** `sv-navidad-portada-<foto>-movil.jpg` (cadena, pulsera, colgantes, conjuntos, essentials, bestsellers). La sube «Preparar las fotos de Navidad».
+
+`sv-portada.liquid` las busca por nombre y en el teléfono cambia el `src` (en verano con la clase `html.sv-pm`, en Navidad con `html.sv-nav`). La foto se esconde hasta que la nueva cargó. En el computador no cambia nada. Las originales están en `branding/colecciones-inicio/movil/`.
+
+## Fotos del inicio, tercera versión (9-nov, noche)
+
+Corregidas tras el feedback del usuario. Las de la segunda versión quedaron en `branding/colecciones-inicio/v2/`.
+
+- **Cadenas:** las dos Cuban 8mm completas, separadas y colgando en U, con el SV del broche legible.
+- **Anillos:** Eros Oro, Box y Signet (el Signet reemplaza al Roman XI, cuyas letras no salían fieles).
+- **Pulseras:** la misma composición (las tres paradas en fila y separadas), más realista.
+- **Colgantes:** acostados sobre negro brillante, cámara baja, en orden oro–plata–oro.
+
+La foto de Navidad de Colgantes del inicio ahora tiene los mismos tres (Vault Blue Oro, Crucifix y Cross Minimal Oro).

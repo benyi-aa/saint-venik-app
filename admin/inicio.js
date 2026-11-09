@@ -1,7 +1,7 @@
 /* Inicio de la tienda: la cuadrícula de colecciones sobre negro (reunión
  * 9-nov). En Navidad, cada foto es la del metacampo de colección
  * custom.foto_navidad, que esta app crea. */
-import { gql, comprobarErrores } from './api.js?v=202611092301';
+import { gql, comprobarErrores } from './api.js?v=202611092349';
 
 const METACAMPO_NAVIDAD = `
   query MetacampoNavidad {
@@ -86,6 +86,10 @@ export async function prepararNavidad(copiar, reemplazar, traer, base) {
   for (const k of ['cadena', 'pulsera', 'anillos', 'colgantes', 'conjuntos', 'essentials', 'bestsellers']) {
     await traer(`${base}sv-navidad-portada-${k}.jpg?v=${v}`);
     hechas.push(`banner ${k}`);
+  }
+  /* Sus versiones para el teléfono: el título va siempre abajo y aquí la joya queda arriba. */
+  for (const k of ['cadena', 'pulsera', 'colgantes', 'conjuntos', 'essentials', 'bestsellers']) {
+    await traer(`${base}sv-navidad-portada-${k}-movil.jpg?v=${v}`);
   }
   /* La foto de la sección «El regalo Nº1 para él» (bloque regalo del inicio). */
   await traer(`${base}sv-regalo-navidad.jpg?v=${v}`);
