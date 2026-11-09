@@ -159,14 +159,18 @@
     if (!lista.length && !conDesc) return;
     var pct = conDesc ? DESC.pctFicha() : 0;
 
-    /* En todas las fotos: es un carrusel, asi no desaparece al pasar. */
+    /* En todas las fotos: es un carrusel, asi no desaparece al pasar. En el
+     * computador, con 'segunda', el descuento solo en la segunda foto
+     * (reunion 9-nov, como Lost Gen); el resto lo esconde sv-badges.css. */
     var fotos = fotosDeLaFicha();
     for (var i = 0; i < fotos.length; i += 1) {
       if (fotos[i].dataset[MARCA]) continue;
       fotos[i].dataset[MARCA] = '1';
       var cont = caja(lista, datos.esquinaFicha, 'ficha');
       if (conDesc) {
-        cont.insertBefore(DESC.registrar(DESC.span(pct)), cont.firstChild);
+        var d = DESC.registrar(DESC.span(pct));
+        if (DESC.fotoCompu === 'segunda' && i !== 1) d.classList.add('sv-tag--movil');
+        cont.insertBefore(d, cont.firstChild);
       }
       anclar(fotos[i]).appendChild(cont);
     }

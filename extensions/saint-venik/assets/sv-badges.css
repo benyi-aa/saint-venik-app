@@ -152,3 +152,8 @@ html.sv-desc-t .grid-product__tag--sale,
 html.sv-desc-p .product__price-savings[data-save-price] {
   display: none !important;
 }
+
+/* Descuento en la ficha: en el computador solo en la segunda foto. */
+@media (min-width: 769px) {
+  .sv-tag--movil { display: none !important; }
+}

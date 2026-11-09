@@ -138,6 +138,16 @@
   if cfg.desc_precio.value == 'no'
     assign d_precio = false
   endif
+  comment
+    En el computador, en la ficha: 'segunda' (solo la segunda foto; reunion 9-nov) o 'todas'. Vive en sv_configuracion_2.
+  endcomment
+  assign d_compu = 'segunda'
+  for e in shop.metaobjects.sv_configuracion_2.values
+    if e.desc_foto_compu.value == 'todas'
+      assign d_compu = 'todas'
+    endif
+    break
+  endfor
   assign d_formato = cfg.desc_formato.value | default: 'pct' | append: ''
   assign d_fondo = cfg.desc_fondo.value | default: '#C4161C' | append: ''
   assign d_texto = cfg.desc_texto.value | default: '#FFFFFF' | append: ''
@@ -258,6 +268,7 @@
         "modo": {{ d_modo | json }},
         "tarjetas": {{ d_tarjetas | json }},
         "foto": {{ d_foto | json }},
+        "fotoCompu": {{ d_compu | json }},
         "precio": {{ d_precio | json }},
         "formato": {{ d_formato | json }},
         "fondo": {{ d_fondo | json }},

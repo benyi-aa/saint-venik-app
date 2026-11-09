@@ -1,48 +1,48 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611091401';
+import { estaEmbebida } from './api.js?v=202611091421';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611091401';
+} from './colores.js?v=202611091421';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611091401';
+} from './config.js?v=202611091421';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611091401';
+} from './filtros.js?v=202611091421';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611091401';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611091401';
+} from './productos.js?v=202611091421';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611091421';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611091401';
+} from './guias.js?v=202611091421';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611091401';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611091401';
+} from './vista-previa.js?v=202611091421';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611091421';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611091401';
+} from './etiquetas.js?v=202611091421';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611091401';
-import { ICONOS, svgIcono } from './iconos.js?v=202611091401';
+} from './beneficios.js?v=202611091421';
+import { ICONOS, svgIcono } from './iconos.js?v=202611091421';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611091401';
+const VERSION = '202611091421';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1606,6 +1606,7 @@ async function pintarEtiquetas() {
   const hayDescuento = camposConfig.has('desc_activo');
   const hayTamanos = camposConfig.has('desc_precio_letra') && camposConfig.has('desc_letra');
   const hayPrecios = ['precio_colores', 'precio_oferta', 'precio_tachado'].every((k) => camposConfig.has(k));
+  const hayCompu = camposConfig.has('desc_foto_compu');
   const descuento = config.descuento ?? DESCUENTO_POR_DEFECTO;
   const tienda = new URLSearchParams(location.search).get('shop') || '';
   /* Los campos de borde y opacidad son nuevos: hasta que la tienda los tenga,
@@ -1668,6 +1669,7 @@ async function pintarEtiquetas() {
         <div class="casilla-polaris">
           <s-checkbox label="En las tarjetas de las colecciones" id="d-tarjetas" ${descuento.tarjetas ? 'checked' : ''}></s-checkbox>
           <s-checkbox label="Sobre las fotos de la ficha" id="d-foto" ${descuento.foto ? 'checked' : ''}></s-checkbox>
+          ${hayCompu ? `<s-checkbox label="En el computador, solo en la segunda foto (en el teléfono, en todas)" id="d-foto-segunda" ${descuento.fotoCompu === 'segunda' ? 'checked' : ''}></s-checkbox>` : ''}
           <s-checkbox label="Junto al precio en la ficha" id="d-precio" ${descuento.precio ? 'checked' : ''}></s-checkbox>
           ${hayPrecios ? `<s-checkbox label="Precios con estos colores (tarjetas y ficha); sin marcar, los del tema" id="d-precio-colores" ${descuento.precioColores ? 'checked' : ''}></s-checkbox>` : ''}
         </div>
@@ -1977,6 +1979,7 @@ function conectarDescuento(descuento, miPintado, camposConfig) {
       precioColores: el('d-precio-colores') ? el('d-precio-colores').checked : descuento.precioColores,
       oferta: el('d-oferta') ? colorPlano(el('d-oferta').value, descuento.oferta) : descuento.oferta,
       tachado: el('d-tachado') ? colorPlano(el('d-tachado').value, descuento.tachado) : descuento.tachado,
+      fotoCompu: el('d-foto-segunda') ? (el('d-foto-segunda').checked ? 'segunda' : 'todas') : descuento.fotoCompu,
     };
   };
 

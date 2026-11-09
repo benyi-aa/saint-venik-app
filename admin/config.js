@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611091401';
+import { gql, comprobarErrores } from './api.js?v=202611091421';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 /* Shopify admite como mucho 40 campos por definición de metaobjeto y
@@ -114,6 +114,10 @@ const CAMPOS_CONFIG_2 = [
   { key: 'precio_colores', name: 'Precios: colores propios', type: 'single_line_text_field' },
   { key: 'precio_oferta', name: 'Precios: color del precio de oferta', type: 'color' },
   { key: 'precio_tachado', name: 'Precios: color del precio tachado', type: 'color' },
+  /* Descuento sobre las fotos de la ficha en el computador: 'segunda' (solo
+   * en la segunda, como Lost Gen; reunión 9-nov) o 'todas'. Vacío = 'segunda'.
+   * En el teléfono va en todas. */
+  { key: 'desc_foto_compu', name: 'Descuento en las fotos: en el computador', type: 'single_line_text_field' },
 ];
 
 /* Lo mismo que ya pinta hoy el embed con sus ajustes de fábrica: así mover la
@@ -151,6 +155,7 @@ export const DESCUENTO_POR_DEFECTO = {
   precioColores: false,
   oferta: '#E32C2B',
   tachado: '#8C8C8C',
+  fotoCompu: 'segunda',
 };
 
 /* Como la de louisvuitton.com: fina y gris (medida en el video de la
@@ -486,6 +491,7 @@ function aDescuento(campos) {
     precioColores: siNo(campos.precio_colores, d.precioColores),
     oferta: campos.precio_oferta || d.oferta,
     tachado: campos.precio_tachado || d.tachado,
+    fotoCompu: campos.desc_foto_compu === 'todas' ? 'todas' : d.fotoCompu,
   };
 }
 
@@ -509,6 +515,7 @@ export async function guardarDescuento(d, presentes = null) {
     { key: 'precio_colores', value: d.precioColores ? 'si' : 'no' },
     { key: 'precio_oferta', value: d.oferta },
     { key: 'precio_tachado', value: d.tachado },
+    { key: 'desc_foto_compu', value: d.fotoCompu },
   ].filter((f) => !presentes || presentes.has(f.key)));
 }
 

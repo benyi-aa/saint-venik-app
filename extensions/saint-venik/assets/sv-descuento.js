@@ -100,6 +100,7 @@
     return {
       tarjetas: Boolean(DESC.tarjetas),
       foto: Boolean(DESC.foto),
+      fotoCompu: DESC.fotoCompu === 'todas' ? 'todas' : 'segunda',
       precio: Boolean(DESC.precio),
 
       pctTarjeta: function (tarjeta) {
