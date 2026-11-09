@@ -146,12 +146,12 @@ html.sv-portada .custom-content:has(:is(.collection-description-wrapper,[class^=
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-image-container,[class$="__image"]) img {
     width: 100%; height: 100%; max-width: none; margin: 0; object-fit: cover; object-position: 50% var(--sv-y, 55%);
   }
-  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_cadena"] { --sv-y: 88%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_cadena"] { --sv-y: 80%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_pulsera"] { --sv-y: 40%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_anillos"] { --sv-y: 55%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_essentials"] { --sv-y: 72%; }
-  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_colgantes"] { --sv-y: 100%; }
-  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_conjuntos"] { --sv-y: 96%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_colgantes"] { --sv-y: 92%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_conjuntos"] { --sv-y: 78%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-image-container,[class$="__image"])::after {
     content: ''; position: absolute; inset: 0; z-index: 1;
     background: linear-gradient(90deg, rgba(0, 0, 0, .62) 0%, rgba(0, 0, 0, .32) 34%, rgba(0, 0, 0, 0) 58%);
