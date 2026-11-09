@@ -10,7 +10,7 @@
  * Por eso se comprueba el host ANTES de intentarlo y, si no es de los conocidos,
  * se explica que paso en vez de dejar un error mudo.
  */
-import { gql, comprobarErrores } from './api.js?v=202611092003';
+import { gql, comprobarErrores } from './api.js?v=202611092012';
 
 const HOSTS_CON_CORS = /(storage\.googleapis\.com|s3\.amazonaws\.com)$/;
 
@@ -198,4 +198,27 @@ export async function reemplazarArchivo(id, url) {
   }
   if (!ultimo) throw new Error('El archivo tarda más de lo normal en procesarse. Recarga en un momento.');
   return { id: ultimo.id, url: urlDe(ultimo) };
+}
+
+/* Trae a Archivos la foto de `url` con su mismo nombre. Si ya hay un archivo
+ * con ese nombre exacto, le cambia el contenido: el tema lo pide por nombre
+ * (shopify://shop_images/sv-inicio-anillos.jpg) y una copia nueva quedaria
+ * como sv-inicio-anillos_1a2b.jpg, que nadie usa. Si no hay, lo crea. */
+const POR_NOMBRE = `
+  query ArchivoPorNombre($q: String!) {
+    files(first: 25, query: $q) {
+      nodes { id ... on MediaImage { image { url } } ... on GenericFile { url } }
+    }
+  }
+`;
+
+export async function traerArchivo(url, opciones) {
+  const absoluta = url.startsWith('//') ? `https:${url}` : url;
+  const nombre = decodeURIComponent(new URL(absoluta).pathname.split('/').pop() || '');
+  const base = nombre.replace(/\.[^.]+$/, '');
+  const { files } = await gql(POR_NOMBRE, { q: base }, { sinMemoria: true });
+  const nombreDe = (n) => decodeURIComponent((n.image?.url ?? n.url ?? '').split('?')[0].split('/').pop());
+  const mismo = files.nodes.find((n) => nombreDe(n) === nombre);
+  if (mismo) return { ...(await reemplazarArchivo(mismo.id, absoluta)), reemplazado: true };
+  return copiarArchivo(absoluta, opciones);
 }

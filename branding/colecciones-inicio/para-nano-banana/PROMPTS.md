@@ -24,6 +24,8 @@ Square 1:1 product photo for a men's jewelry store category tile. Use the two ex
 ```
 
 ## Anillos
+Desde el 9-nov el dorado es el Anillo Eros Oro (banda con estrías negras en diagonal), no el sello de ónix: la foto publicada se hizo editando la de abajo y cambiando solo ese anillo, con `anillo-eros-oro.png` adjunto.
+
 Adjuntar: `anillos/anillo-classic-onyx-oro.png`, `anillos/anillo-box.png`, `anillos/anillo-roman-xi-1.png`, `anillos/referencia-jaxxon.png`
 
 ```
