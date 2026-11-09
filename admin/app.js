@@ -1,48 +1,48 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611091601';
+import { estaEmbebida } from './api.js?v=202611091609';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611091601';
+} from './colores.js?v=202611091609';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611091601';
+} from './config.js?v=202611091609';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611091601';
+} from './filtros.js?v=202611091609';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611091601';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611091601';
+} from './productos.js?v=202611091609';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611091609';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611091601';
+} from './guias.js?v=202611091609';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611091601';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611091601';
+} from './vista-previa.js?v=202611091609';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611091609';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611091601';
+} from './etiquetas.js?v=202611091609';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611091601';
-import { ICONOS, svgIcono } from './iconos.js?v=202611091601';
+} from './beneficios.js?v=202611091609';
+import { ICONOS, svgIcono } from './iconos.js?v=202611091609';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611091601';
+const VERSION = '202611091609';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -910,10 +910,10 @@ async function pintarApariencia() {
       </s-section>` : ''}
 
       ${hayInicio ? `
-      <s-section id="inicio" heading="Inicio: categorías sobre negro" subheading="Como Jaxxon: «Compra por categoría» sobre fondo negro, las colecciones en tarjetas que se deslizan con una barrita debajo, en lugar de las fotos con borde blanco. Cada tarjeta usa la imagen de la colección (Productos → Colecciones). En Navidad usa la de su campo «Foto de Navidad», que está más abajo en la misma página de la colección; si una no la tiene, sale la normal. Qué colecciones y en qué orden: editor del tema, inicio, sección «Categorías (fondo negro)».">
+      <s-section id="inicio" heading="Inicio: colecciones" subheading="La cuadrícula de colecciones del inicio (Cadenas, Pulseras, Colgantes, Anillos) se queda igual, una debajo de otra, pero sobre fondo negro y sin el borde blanco alrededor de cada foto. Las fotos normales se cambian en el editor del tema, en cada tarjeta de la cuadrícula. En Navidad cada tarjeta usa la «Foto de Navidad» de su colección (Productos → Colecciones → la colección, abajo en Metacampos); si una no la tiene, sale la normal.">
         <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
           <s-select label="Estado" id="i-modo">
-            <s-option value="no">Apagado: la cuadrícula de siempre</s-option>
+            <s-option value="no">Apagado: fondo blanco, como siempre</s-option>
             <s-option value="prueba">Vista previa: solo con el enlace</s-option>
             <s-option value="si">Activo en la tienda</s-option>
           </s-select>
@@ -1982,7 +1982,7 @@ function conectarTransicion(trans) {
   });
 }
 
-/* La sección «Inicio: categorías sobre negro» de Apariencia. */
+/* La sección «Inicio: colecciones» de Apariencia. */
 function conectarInicio(inicio) {
   const el = (id) => document.getElementById(id);
   el('i-modo').value = inicio.modo;
@@ -1998,8 +1998,8 @@ function conectarInicio(inicio) {
       await guardarInicio(v);
       Object.assign(inicio, v);
       const t = v.temporada === 'navidad' ? ' (Navidad)' : '';
-      avisar(v.modo === 'si' ? `Categorías guardadas y activas en la tienda${t}`
-        : v.modo === 'prueba' ? `Categorías guardadas en vista previa${t}` : 'Categorías guardadas (apagadas)');
+      avisar(v.modo === 'si' ? `Fondo negro activo en la tienda${t}`
+        : v.modo === 'prueba' ? `Fondo negro en vista previa${t}` : `Fondo negro apagado${t}`);
     } catch (error2) {
       avisar(error2.message, true);
     } finally {

@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611091601';
+import { gql, comprobarErrores } from './api.js?v=202611091609';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 /* Shopify admite como mucho 40 campos por definición de metaobjeto y
@@ -122,11 +122,12 @@ const CAMPOS_CONFIG_2 = [
    * tarjeta gris con su foto, el logo a la izquierda y la X sin recuadro.
    * 'si' / 'no' / 'prueba'; vacío = 'prueba' (snippet sv-menu). */
   { key: 'menu_tarjetas', name: 'Menú del teléfono: tarjetas con foto', type: 'single_line_text_field' },
-  /* Inicio: la sección «Categorías» sobre negro, como Jaxxon (bloque
-   * categorias). 'si' / 'no' / 'prueba'; vacío = 'prueba'. */
-  { key: 'categorias_inicio', name: 'Inicio: categorías sobre negro', type: 'single_line_text_field' },
-  /* 'normal' o 'navidad': en Navidad las tarjetas usan la «Foto de Navidad»
-   * de cada colección. Vacío = 'normal'. */
+  /* Inicio: la cuadrícula de colecciones (Cadenas, Pulseras…) sobre negro en
+   * vez de blanco, misma disposición (snippet sv-inicio). 'si' / 'no' /
+   * 'prueba'; vacío = 'prueba'. */
+  { key: 'categorias_inicio', name: 'Inicio: colecciones sobre negro', type: 'single_line_text_field' },
+  /* 'normal' o 'navidad': en Navidad las fotos de la cuadrícula del inicio
+   * son la «Foto de Navidad» de cada colección. Vacío = 'normal'. */
   { key: 'temporada', name: 'Temporada de la tienda', type: 'single_line_text_field' },
 ];
 

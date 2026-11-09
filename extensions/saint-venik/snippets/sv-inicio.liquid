@@ -1,0 +1,22 @@
+{%- comment -%} Inicio: cuadricula de colecciones sobre negro y fotos de Navidad. Ver docs/tema.md, «Colecciones del inicio». {%- endcomment -%}
+{%- if template.name == 'index' -%}
+{%- liquid
+  assign m = 'prueba'
+  assign tm = 'normal'
+  for e in shop.metaobjects.sv_configuracion_2.values
+    assign m = e.categorias_inicio.value | default: 'prueba' | append: ''
+    assign tm = e.temporada.value | default: 'normal' | append: ''
+    break
+  endfor
+  assign p = 'html'
+  if m == 'prueba'
+    assign p = 'html.sv-ini'
+  endif
+  assign g = '[id$="__promo-grid2"]'
+-%}
+{%- if m == 'prueba' -%}<script>try{/[?&]sv-vista(=1)?(&|$)/.test(location.search)&&sessionStorage.setItem('sv-vista','1');sessionStorage.getItem('sv-vista')==='1'&&document.documentElement.classList.add('sv-ini')}catch(e){}</script>{%- endif -%}
+<style>
+{%- if m != 'no' -%}{{ p }} {{ g }}{background:#000}{%- endif -%}
+{%- if tm == 'navidad' -%}{%- for h in 'cadenas,pulseras,colgantes,anillos,conjuntos,best-sellers' | split: ',' -%}{%- assign f = collections[h].metafields.custom.foto_navidad.value -%}{%- if f -%}{{ g }} .promo-grid__container:has(a[href$="/collections/{{ h }}"]) .promo-grid__bg{background:#5c0a10 url({{ f | image_url: width: 1400 }}) center/cover}{{ g }} .promo-grid__container:has(a[href$="/collections/{{ h }}"]) .promo-grid__bg image-element{display:none}{%- endif -%}{%- endfor -%}{%- endif -%}
+</style>
+{%- endif -%}

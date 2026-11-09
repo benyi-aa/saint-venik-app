@@ -26,16 +26,16 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores, capacidadActiva, enUnaPasada } from './api.js?v=202611091601';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611091601';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611091601';
-import { copiarArchivo } from './archivos.js?v=202611091601';
-import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611091601';
-import { faltaEstructuraFiltros, asegurarEstructuraFiltros } from './filtros.js?v=202611091601';
+import { gql, comprobarErrores, capacidadActiva, enUnaPasada } from './api.js?v=202611091609';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611091609';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611091609';
+import { copiarArchivo } from './archivos.js?v=202611091609';
+import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611091609';
+import { faltaEstructuraFiltros, asegurarEstructuraFiltros } from './filtros.js?v=202611091609';
 import {
   faltaEstructuraBeneficios, asegurarEstructuraBeneficios, sembrarBeneficios,
-} from './beneficios.js?v=202611091601';
-import { faltaEstructuraInicio, asegurarEstructuraInicio } from './inicio.js?v=202611091601';
+} from './beneficios.js?v=202611091609';
+import { faltaEstructuraInicio, asegurarEstructuraInicio } from './inicio.js?v=202611091609';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
@@ -226,7 +226,7 @@ export async function revisarEstructura() {
       /* Los filtros: los botones de la página y los tres metacampos de
        * producto que filtra la tienda. */
       faltaEstructuraFiltros(),
-      /* El campo «Foto de Navidad» de las colecciones (categorías del inicio). */
+      /* El campo «Foto de Navidad» de las colecciones (cuadrícula del inicio). */
       faltaEstructuraInicio(),
     ]);
 
