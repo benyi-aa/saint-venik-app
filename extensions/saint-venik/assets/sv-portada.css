@@ -28,16 +28,19 @@ html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="ba
   }
   /* El encuadre de cada foto: que la joya quede sobre el titulo. */
   html.sv-portada .collection-description-wrapper:has(img) .collection-image-container img {
-    position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; margin: 0;
+    position: absolute; left: 0; right: 0; bottom: 0; top: auto; width: 100%;
+    height: var(--sv-alto, 100%); max-width: none; margin: 0;
     object-fit: cover; object-position: var(--sv-encuadre, 50% 70%);
   }
+  /* --sv-alto agranda la foto (anclada abajo) cuando la joya esta muy abajo
+   * en la imagen: asi sube por encima del titulo. */
   html.sv-portada .collection-description-wrapper:has(img) img[src*="bestsellers"] { --sv-encuadre: 62% 88%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_cadena"] { --sv-encuadre: 60% 100%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_pulsera"] { --sv-encuadre: 45% 55%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_anillos"] { --sv-encuadre: 50% 52%; }
+  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_cadena"] { --sv-alto: 178%; --sv-encuadre: 58% 100%; }
+  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_pulsera"] { --sv-alto: 170%; --sv-encuadre: 40% 100%; }
+  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_anillos"] { --sv-encuadre: 50% 75%; }
+  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_essentials"] { --sv-alto: 170%; --sv-encuadre: 50% 100%; }
   html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_colgantes"] { --sv-encuadre: 55% 100%; }
   html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_conjuntos"] { --sv-encuadre: 55% 100%; }
-  html.sv-portada .collection-description-wrapper:has(img) img[src*="coleccion_essentials"] { --sv-encuadre: 50% 100%; }
 
   /* Degradado fijo para leer el titulo, y el negro que entra al abrir. */
   html.sv-portada .collection-description-wrapper:has(img) .collection-image-container::after {
@@ -79,6 +82,20 @@ html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="ba
   }
   html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .sv-portada-flecha {
     transform: rotate(180deg); animation: none; opacity: .8;
+  }
+}
+
+/* Colgantes y Conjuntos: la cruz esta en el borde de abajo de la foto y
+ * ningun encuadre la deja libre; ahi el titulo va arriba. */
+@media (max-width: 767px) {
+  html.sv-portada .collection-description-wrapper:is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"])) .collection-description {
+    justify-content: flex-start; padding: 14px 22px 30px;
+  }
+  html.sv-portada .collection-description-wrapper:is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"])) .collection-image-container::after {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 62%);
+  }
+  html.sv-portada .collection-description-wrapper:not(.sv-abierto):is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"])) .sv-portada-flecha {
+    top: 48px; bottom: auto;
   }
 }
 
