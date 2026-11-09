@@ -214,7 +214,10 @@ se puede enseñar antes de encender.
   según el nombre del archivo) para que la joya quede sobre el título; en
   Colgantes y Conjuntos la cruz está en el borde de abajo de la foto y el título
   la tapa en parte: esas piden una foto pensada para el teléfono. Va con
-  `:has(img)` para estar en su sitio desde el primer pintado. Tres estados;
+  `:has(img)` para estar en su sitio desde el primer pintado. El bloque tiene
+  alto fijo y el texto abierto es una capa (`position: absolute`): si no cabe,
+  baja por encima de la barra negra, pero la página no se mueve (pedido del
+  9-nov, grabación: «la página abajo se mueve»). Tres estados;
   con el campo sin crear vale `si`.
 
 Los dos embeds nuevos, como el de insignias, hay que encenderlos una vez por
