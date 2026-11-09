@@ -1,13 +1,4 @@
-{%- comment -%}
-  Descuento en la ficha: lo que tiene que estar antes del primer pintado.
-  El precio un poco mas chico y el porcentaje un poco mas grande (llamada del
-  8-nov: el precio se comia al porcentaje), y el «AHORRA» del tema escondido.
-  Si llegara al final de la pagina, el precio se veria grande un instante y
-  despues encogeria. Por eso sale desde el embed de <head> (transiciones), y
-  tambien desde el de insignias por si alguien apaga ese: repetido no molesta.
-  En 'prueba' manda la clase que pone sv-descuento.js, solo con ?sv-vista=1.
-  Recibe `cfg`, la entrada de sv_configuracion.
-{%- endcomment -%}
+{%- comment -%} Descuento y colores de precio en la ficha antes del primer pintado: ver docs/tema.md, «Estilo del descuento». Recibe `cfg`. {%- endcomment -%}
 {%- liquid
   assign e_modo = cfg.desc_activo.value | default: 'no' | append: ''
   assign e_pre = 'html'
@@ -30,3 +21,9 @@
     </style>
   {%- endunless -%}
 {%- endif -%}
+{%- for e in shop.metaobjects.sv_configuracion_2.values -%}
+  {%- if e.precio_colores.value == 'si' -%}
+    {%- assign o = e.precio_oferta.value | default: '#E32C2B' -%}{%- assign x = e.precio_tachado.value | default: '#8C8C8C' -%}
+    <style>.grid-product__price--original,.product__price--compare{color:{{ x }}}.grid-product__price--original2,.product__price.on-sale{color:{{ o }}}</style>
+  {%- endif -%}{%- break -%}
+{%- endfor -%}

@@ -518,3 +518,16 @@ el teléfono, 182 en el computador, con la cuenta regresiva y el aviso
 encima). Si la cabecera no se ve porque se bajó en la página, va arriba del
 todo. En la página nueva se recoloca en `DOMContentLoaded`, por si se pintó
 antes de que existiera la cabecera. Vale para todos, no solo para el iPhone.
+
+## Estilo del descuento (snippet sv-desc-estilo)
+
+Descuento en la ficha: lo que tiene que estar antes del primer pintado.
+El precio un poco mas chico y el porcentaje un poco mas grande (llamada del
+8-nov: el precio se comia al porcentaje), y el «AHORRA» del tema escondido.
+Si llegara al final de la pagina, el precio se veria grande un instante y
+despues encogeria. Por eso sale desde el embed de <head> (transiciones), y
+tambien desde el de insignias por si alguien apaga ese: repetido no molesta.
+En 'prueba' manda la clase que pone sv-descuento.js, solo con ?sv-vista=1.
+Recibe `cfg`, la entrada de sv_configuracion.
+
+Colores de los precios (reunión del 9-nov): precio tachado en gris y precio de oferta en rojo, en las tarjetas (`.grid-product__price--original` / `--original2`) y en la ficha (`.product__price--compare` / `.product__price.on-sale`). Viven en `sv_configuracion_2` (`precio_colores` si/no, `precio_oferta`, `precio_tachado`); se cambian en la app, Insignias → Descuento. Vacío o 'no' = los colores del tema.

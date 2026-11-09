@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611091131';
+import { gql, comprobarErrores } from './api.js?v=202611091401';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 /* Shopify admite como mucho 40 campos por definición de metaobjeto y
@@ -108,6 +108,12 @@ const CAMPOS_CONFIG_2 = [
    * descripción al tocarla, y sin espacios hasta el 3x2. Vacío = 'si'
    * (snippet sv-portada): se pidió aplicarla en todas el 9-nov. */
   { key: 'colecciones_portada', name: 'Colecciones: foto con título en el teléfono', type: 'single_line_text_field' },
+  /* Reunión del 9-nov: precio tachado en gris y precio de oferta en rojo, en
+   * las tarjetas y en la ficha. 'si' = usa los dos colores de abajo; vacío o
+   * 'no' = los del tema (snippet sv-desc-estilo). */
+  { key: 'precio_colores', name: 'Precios: colores propios', type: 'single_line_text_field' },
+  { key: 'precio_oferta', name: 'Precios: color del precio de oferta', type: 'color' },
+  { key: 'precio_tachado', name: 'Precios: color del precio tachado', type: 'color' },
 ];
 
 /* Lo mismo que ya pinta hoy el embed con sus ajustes de fábrica: así mover la
@@ -141,6 +147,10 @@ export const DESCUENTO_POR_DEFECTO = {
   radio: 2,
   precioLetra: 17,
   letra: 14,
+  /* Apagado de fábrica: hasta guardarlo, los precios siguen como en el tema. */
+  precioColores: false,
+  oferta: '#E32C2B',
+  tachado: '#8C8C8C',
 };
 
 /* Como la de louisvuitton.com: fina y gris (medida en el video de la
@@ -442,11 +452,11 @@ export async function guardarTransicion(t) {
     handle: { type: TIPO_CONFIG, handle: HANDLE },
     metaobject: {
       fields: [
-        { key: 'trans_activo', value: t.modo },
-        { key: 'trans_color', value: t.color },
-        { key: 'trans_grosor', value: String(t.grosor) },
-        { key: 'trans_fundido', value: String(t.fundido) },
-        { key: 'trans_precarga', value: t.precarga ? 'si' : 'no' },
+    { key: 'trans_activo', value: t.modo },
+    { key: 'trans_color', value: t.color },
+    { key: 'trans_grosor', value: String(t.grosor) },
+    { key: 'trans_fundido', value: String(t.fundido) },
+    { key: 'trans_precarga', value: t.precarga ? 'si' : 'no' },
       ],
     },
   });
@@ -473,6 +483,9 @@ function aDescuento(campos) {
     radio: numero(campos.desc_radio, d.radio),
     precioLetra: numero(campos.desc_precio_letra, d.precioLetra),
     letra: numero(campos.desc_letra, d.letra),
+    precioColores: siNo(campos.precio_colores, d.precioColores),
+    oferta: campos.precio_oferta || d.oferta,
+    tachado: campos.precio_tachado || d.tachado,
   };
 }
 
@@ -480,24 +493,23 @@ function aDescuento(campos) {
  * nuevos; mientras no se anadan (tarjeta de pendientes), guardar el resto no
  * debe fallar por ellos. */
 export async function guardarDescuento(d, presentes = null) {
-  const r = await gql(GUARDAR, {
-    handle: { type: TIPO_CONFIG, handle: HANDLE },
-    metaobject: {
-      fields: [
-        { key: 'desc_activo', value: d.modo },
-        { key: 'desc_tarjetas', value: d.tarjetas ? 'si' : 'no' },
-        { key: 'desc_foto', value: d.foto ? 'si' : 'no' },
-        { key: 'desc_precio', value: d.precio ? 'si' : 'no' },
-        { key: 'desc_formato', value: d.formato },
-        { key: 'desc_fondo', value: d.fondo },
-        { key: 'desc_texto', value: d.texto },
-        { key: 'desc_radio', value: String(d.radio) },
-        { key: 'desc_precio_letra', value: String(d.precioLetra) },
-        { key: 'desc_letra', value: String(d.letra) },
-      ].filter((f) => !presentes || presentes.has(f.key)),
-    },
-  });
-  return comprobarErrores(r, 'metaobjectUpsert');
+  /* Los colores de los precios viven en sv_configuracion_2: guardarCampos
+   * manda cada clave a su definición. */
+  return guardarCampos([
+    { key: 'desc_activo', value: d.modo },
+    { key: 'desc_tarjetas', value: d.tarjetas ? 'si' : 'no' },
+    { key: 'desc_foto', value: d.foto ? 'si' : 'no' },
+    { key: 'desc_precio', value: d.precio ? 'si' : 'no' },
+    { key: 'desc_formato', value: d.formato },
+    { key: 'desc_fondo', value: d.fondo },
+    { key: 'desc_texto', value: d.texto },
+    { key: 'desc_radio', value: String(d.radio) },
+    { key: 'desc_precio_letra', value: String(d.precioLetra) },
+    { key: 'desc_letra', value: String(d.letra) },
+    { key: 'precio_colores', value: d.precioColores ? 'si' : 'no' },
+    { key: 'precio_oferta', value: d.oferta },
+    { key: 'precio_tachado', value: d.tachado },
+  ].filter((f) => !presentes || presentes.has(f.key)));
 }
 
 /* Cuántos productos activos tienen hoy precio tachado por encima del precio:
