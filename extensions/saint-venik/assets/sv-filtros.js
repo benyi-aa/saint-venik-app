@@ -7,6 +7,7 @@
  *  - Menu «Filtrar»: Color, Categoria y Tipo arriba, despues Precio y
  *    Disponibilidad, al final «Ordenar». Las opciones se marcan sin que se
  *    cierre y se aplican con «Ver resultados» (o al cerrarlo).
+ *  - Precio: debajo del slider, «Desde» y «Hasta» para escribirlo.
  */
 (function () {
   'use strict';
@@ -224,13 +225,7 @@
     pendiente = true;
   }, true);
 
-  function verResultados(cerrar) {
-    var form = menuForm();
-    var habia = pendiente;
-    var cajon = window.theme && window.theme.FilterDrawer;
-    pendiente = false;
-    if (cerrar && cajon && cajon.isOpen) cajon.close();
-    if (!habia || !form) return;
+  function aplicar(form) {
     var col = laColeccion();
     if (!col || typeof col.renderFromFormData !== 'function') {
       var p = limpios(form);
@@ -241,6 +236,141 @@
     }
     try { col.updateScroll(true); col.startLoading(); } catch (err) { /* sin rejilla */ }
     col.renderFromFormData(new FormData(form));
+  }
+
+  function verResultados(cerrar) {
+    var form = menuForm();
+    var habia = pendiente;
+    var cajon = window.theme && window.theme.FilterDrawer;
+    pendiente = false;
+    if (cerrar && cajon && cajon.isOpen) cajon.close();
+    if (habia && form) aplicar(form);
+  }
+
+  /* ---- Precio: ademas del slider, dos casillas para escribirlo ----
+   * Pedido del 8-nov: «abajo del slider se debe poder escribir los valores».
+   * Las dos cosas van juntas: mover el slider escribe las casillas, y escribir
+   * mueve el slider. Lo escrito se respeta tal cual aunque el slider salte de
+   * 10 en 10. En el menu se aplica como lo demas (Ver resultados, Enter o al
+   * cerrarlo); en la columna de la izquierda, con Enter o al salir de ellas. */
+  var conPrecio = nav.dataset.precio === 'si';
+  if (nav.dataset.precio === 'prueba') {
+    try {
+      if (/[?&]sv-vista(=1)?(&|$)/.test(location.search)) sessionStorage.setItem('sv-vista', '1');
+      conPrecio = sessionStorage.getItem('sv-vista') === '1';
+    } catch (e) { /* privado */ }
+  }
+  var formato = (window.theme && theme.settings && theme.settings.moneyFormat) || '';
+  var sinDecimales = /no_decimals/.test(formato);
+  var fijando = false;
+
+  /* El tema da formato a un texto con dos decimales («45.00»), no a un numero. */
+  function dinero(n) {
+    try { return theme.Currency.formatMoney(n.toFixed(2), formato); } catch (e) { return String(n); }
+  }
+  function enCasilla(n) {
+    var t = dinero(n).replace(/[^\d.,]/g, '');
+    return sinDecimales ? t : t.replace(/\.00$/, '');
+  }
+  function leerCifra(s) {
+    var n = sinDecimales ? parseInt(String(s).replace(/\D/g, ''), 10) : parseFloat(String(s).replace(/[^\d.]/g, ''));
+    return isNaN(n) ? null : n;
+  }
+
+  function casillasDe(caja) { return caja.querySelectorAll('.sv-precio input'); }
+
+  function escribir(caja, vals) {
+    if (fijando) return;
+    var cs = casillasDe(caja);
+    for (var i = 0; i < cs.length; i += 1) {
+      if (document.activeElement !== cs[i]) cs[i].value = enCasilla(parseFloat(vals[i]) || 0);
+    }
+  }
+
+  function fijar(caja) {
+    var desliz = caja.querySelector('.price-range__slider');
+    var cs = casillasDe(caja);
+    var rmin = parseFloat(caja.dataset.min) || 0;
+    var rmax = parseFloat(caja.dataset.max) || 100;
+    var a = leerCifra(cs[0].value);
+    var b = leerCifra(cs[1].value);
+    a = Math.max(rmin, Math.min(rmax, a === null ? rmin : a));
+    b = Math.max(rmin, Math.min(rmax, b === null ? rmax : b));
+    if (a > b) { var t = a; a = b; b = t; }
+    fijando = true;
+    try { if (desliz && desliz.noUiSlider) desliz.noUiSlider.set([a, b]); } catch (e) { /* sin slider */ }
+    fijando = false;
+    caja.querySelector('.price-range__input-min').value = a > rmin ? a : '';
+    caja.querySelector('.price-range__input-max').value = b < rmax ? b : '';
+    cs[0].value = enCasilla(a);
+    cs[1].value = enCasilla(b);
+    var dmin = caja.querySelector('.price-range__display-min');
+    var dmax = caja.querySelector('.price-range__display-max');
+    if (dmin) dmin.textContent = dinero(a);
+    if (dmax) dmax.textContent = dinero(b);
+    caja.svSucio = true;
+    if (caja.closest('#FilterDrawer')) pendiente = true;
+  }
+
+  function aplicarPrecio(caja) {
+    if (!caja.svSucio) return;
+    caja.svSucio = false;
+    if (caja.closest('#FilterDrawer')) { verResultados(true); return; }
+    var form = caja.closest('form');
+    if (form) aplicar(form);
+  }
+
+  function casilla(rotulo, lado, moneda) {
+    var lab = el('label', 'sv-precio__campo');
+    lab.appendChild(el('span', 'sv-precio__rotulo', rotulo));
+    var caja = el('span', 'sv-precio__caja');
+    if (moneda) caja.appendChild(el('span', 'sv-precio__moneda', moneda));
+    var inp = el('input');
+    inp.type = 'text';
+    inp.inputMode = sinDecimales ? 'numeric' : 'decimal';
+    inp.autocomplete = 'off';
+    inp.dataset.lado = lado;
+    caja.appendChild(inp);
+    lab.appendChild(caja);
+    return lab;
+  }
+
+  function armarPrecio(caja) {
+    var fila = caja.querySelector('.sv-precio');
+    if (!fila) {
+      var muestra = caja.querySelector('.price-range__display-min');
+      var moneda = ((muestra && muestra.textContent.trim().match(/^[^\d\s.,]+/)) || [''])[0];
+      fila = el('div', 'sv-precio');
+      fila.appendChild(casilla(EN ? 'From' : 'Desde', 'min', moneda));
+      fila.appendChild(casilla(EN ? 'To' : 'Hasta', 'max', moneda));
+      var tras = caja.querySelector('.price-range__slider-wrapper');
+      caja.insertBefore(fila, tras ? tras.nextSibling : null);
+      /* Sin esto, el tema filtra (y cierra el menu) con cada tecla. */
+      fila.addEventListener('input', function (e) { e.stopPropagation(); });
+      fila.addEventListener('change', function (e) { e.stopPropagation(); fijar(caja); });
+      fila.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        fijar(caja);
+        aplicarPrecio(caja);
+      });
+      fila.addEventListener('focusout', function (e) {
+        if (caja.closest('#FilterDrawer') || (e.relatedTarget && fila.contains(e.relatedTarget))) return;
+        setTimeout(function () { aplicarPrecio(caja); }, 0);
+      });
+    }
+    var desliz = caja.querySelector('.price-range__slider');
+    var api = desliz && desliz.noUiSlider;
+    if (!api || api.svPrecio) return;
+    api.svPrecio = true;
+    api.on('update.sv', function (vals) { escribir(caja, vals); });
+    escribir(caja, api.get());
+  }
+
+  function casillasPrecio() {
+    if (!conPrecio) return;
+    var cajas = document.querySelectorAll('.price-range');
+    for (var i = 0; i < cajas.length; i += 1) armarPrecio(cajas[i]);
   }
 
   function botonVer() {
@@ -272,6 +402,7 @@
     }
     ordenarEnMenu();
     botonVer();
+    casillasPrecio();
   }
 
   /* El tema repinta productos y menu en cada filtro: se vuelve a ajustar. */
@@ -288,6 +419,9 @@
     alCambiar();
   });
   window.addEventListener('popstate', programar);
+  /* El slider del precio lo crea el tema al cargar, quiza despues de esto. */
+  document.addEventListener('DOMContentLoaded', programar);
+  window.addEventListener('load', programar);
   var obs = document.querySelector('.collection-content') || document.getElementById('CollectionAjaxContent');
   if (obs) new MutationObserver(programar).observe(obs, { childList: true, subtree: true });
   alCambiar();

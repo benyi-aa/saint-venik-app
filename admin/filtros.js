@@ -23,11 +23,11 @@
  * filtro de Shopify puesto (?filter.p.m.custom.sv_color=Dorado). Asi los
  * botones, el menu «Filtrar» y la paginacion dicen siempre lo mismo.
  */
-import { gql, comprobarErrores } from './api.js?v=202611082046';
+import { gql, comprobarErrores } from './api.js?v=202611090028';
 import {
   aObjetoComun, cargarEntradas, crearEntrada, guardarEntrada, borrarEntrada,
   faltaEstructura, asegurarEstructura, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611082046';
+} from './asignacion.js?v=202611090028';
 
 /* ---------------------------------------------------------------------------
  * Los tres metacampos de producto

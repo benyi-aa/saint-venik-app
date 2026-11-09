@@ -172,6 +172,21 @@ se puede enseñar antes de encender.
   el computador. Mismos tres estados; con el campo sin crear vale `prueba`, así
   que nadie lo ve hasta encenderlo en la app.
 
+  **Precio escrito a mano** (campo `filtros_precio`, pedido del 8-nov: «abajo
+  del slider se debe poder escribir los valores… deben estar ambas opciones»).
+  Debajo del slider de Impulse, «Desde» y «Hasta». Van juntos: mover el slider
+  escribe las casillas y escribir mueve el slider. El slider salta de 10 en 10,
+  pero el filtro usa lo escrito tal cual. En el menú se aplica como el resto
+  (Ver resultados, Enter o al cerrarlo); en la columna de la izquierda, con
+  Enter o al salir de las casillas. Las casillas no tienen `name` y cortan su
+  evento `input`, porque el tema filtra y cierra el menú con cada `input` del
+  formulario. Lo pinta `sv-filtros.js`; el estado llega en `data-precio`. Mismos
+  tres estados, y con el campo sin crear vale `prueba`.
+
+  Las píldoras se combinan entre sí: cada una añade o quita su valor y deja los
+  demás. Dos del mismo filtro suman (Cadenas o Pulseras); de filtros distintos
+  se cruzan (Cadenas y Dorado).
+
 Los dos embeds nuevos, como el de insignias, hay que encenderlos una vez por
 tema en Personalizar → Configuración → Incrustaciones de apps.
 

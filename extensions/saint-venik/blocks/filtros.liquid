@@ -194,6 +194,7 @@
 
   <nav id="sv-filtros" class="sv-filtros" data-modo="{{ f_modo }}"
        data-en="{% if lang == 'en' %}1{% endif %}" data-ordenar="{% if f_ordenar %}1{% endif %}"
+       data-precio="{{ f_cfg.filtros_precio.value | default: 'prueba' }}"
        aria-label="{% if lang == 'en' %}Quick filters{% else %}Filtros rápidos{% endif %}"
        {% unless hay %}data-vacio{% endunless %} hidden>
     <div class="sv-filtros__dentro page-width">{{ filas }}</div>

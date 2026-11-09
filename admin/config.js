@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611082046';
+import { gql, comprobarErrores } from './api.js?v=202611090028';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 const HANDLE = 'general';
@@ -91,6 +91,9 @@ const CAMPOS_CONFIG = [
   /* El menú Filtrar en el computador: la columna del tema ('no') o el mismo
    * cajón lateral que en el teléfono. Vacío = 'prueba' (snippet sv-cajon). */
   { key: 'filtros_cajon', name: 'Filtros: menú en cajón lateral en el computador', type: 'single_line_text_field' },
+  /* Debajo del slider de precio, «Desde» y «Hasta» para escribirlo. Vacío =
+   * 'prueba' (data-precio del embed de filtros). */
+  { key: 'filtros_precio', name: 'Filtros: casillas para escribir el precio', type: 'single_line_text_field' },
 ];
 
 /* Lo mismo que ya pinta hoy el embed con sus ajustes de fábrica: así mover la
@@ -146,6 +149,7 @@ export const FILTROS_POR_DEFECTO = {
   ordenar: true,
   columnas: 4,
   cajon: 'prueba',
+  precio: 'prueba',
 };
 
 export const FORMATOS_DESCUENTO = [
@@ -325,6 +329,7 @@ function aFiltros(campos) {
     ordenar: siNo(campos.filtros_ordenar, d.ordenar),
     columnas: numero(campos.filtros_columnas, d.columnas),
     cajon: ['si', 'no', 'prueba'].includes(campos.filtros_cajon) ? campos.filtros_cajon : d.cajon,
+    precio: ['si', 'no', 'prueba'].includes(campos.filtros_precio) ? campos.filtros_precio : d.precio,
   };
 }
 
@@ -342,6 +347,7 @@ export async function guardarFiltrosConfig(f, presentes = null) {
         { key: 'filtros_ordenar', value: f.ordenar ? 'si' : 'no' },
         { key: 'filtros_columnas', value: String(f.columnas) },
         { key: 'filtros_cajon', value: f.cajon || 'prueba' },
+        { key: 'filtros_precio', value: f.precio || 'prueba' },
       ].filter((c) => !presentes || presentes.has(c.key)),
     },
   });
