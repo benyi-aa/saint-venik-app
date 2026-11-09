@@ -32,5 +32,5 @@ html.sv-menu #NavDrawer .sv-menu-simple a {
 }
 html.sv-menu #NavDrawer .sv-menu-simple { margin: 0 10px; }
 /* «Ingresar» va dentro de una grilla del tema con su propio margen. */
-html.sv-menu #NavDrawer .mobile-nav__item--secondary .grid { margin-left: 0; padding-left: 0; }
+html.sv-menu #NavDrawer .mobile-nav__item--secondary .grid { margin-left: 0 !important; padding-left: 0 !important; }
 html.sv-menu #NavDrawer .mobile-nav__item--secondary .grid__item { padding-left: 0; }
