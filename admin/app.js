@@ -1,49 +1,49 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611092012';
+import { estaEmbebida } from './api.js?v=202611092108';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611092012';
+} from './colores.js?v=202611092108';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611092012';
+} from './config.js?v=202611092108';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611092012';
+} from './filtros.js?v=202611092108';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611092012';
-import { prepararNavidad } from './inicio.js?v=202611092012';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611092012';
+} from './productos.js?v=202611092108';
+import { prepararNavidad } from './inicio.js?v=202611092108';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611092108';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611092012';
+} from './guias.js?v=202611092108';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611092012';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611092012';
+} from './vista-previa.js?v=202611092108';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611092108';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611092012';
+} from './etiquetas.js?v=202611092108';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611092012';
-import { ICONOS, svgIcono } from './iconos.js?v=202611092012';
+} from './beneficios.js?v=202611092108';
+import { ICONOS, svgIcono } from './iconos.js?v=202611092108';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611092012';
+const VERSION = '202611092108';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -925,7 +925,7 @@ async function pintarApariencia() {
         </s-grid>
         <p class="ayuda" id="i-enlace" hidden>Para verlo antes de encenderlo: <a target="_blank" rel="noopener" href="https://${escapar(tienda)}/?sv-vista=1">abre la tienda con este enlace</a>. Solo lo ve quien entra por ahí.</p>
         <p class="ayuda">Fotos de colección estilo Jaxxon (9-nov, Nano Banana): este botón las deja en Contenido → Archivos de la tienda como sv-inicio-cadenas.jpg, -pulseras, -colgantes y -anillos. Después se eligen en cada tarjeta de la cuadrícula. Si ya estaban, las cambia por la versión más nueva en el mismo archivo, y la tienda la muestra sola (9-nov: anillos con el Eros Oro).</p>
-        <p class="ayuda">«Preparar las fotos de Navidad» deja la foto de terciopelo rojo en cada colección. Si ya la tenía, la cambia por la versión más nueva en el mismo archivo, sin crear copias.</p>
+        <p class="ayuda">«Preparar las fotos de Navidad» deja la foto de terciopelo rojo en cada colección y los banners de Navidad de las páginas de colección (Cadenas, Pulseras, Anillos, Colgantes, Conjuntos y Essentials, con otras joyas). Si ya estaban, los cambia por la versión más nueva en el mismo archivo, sin crear copias. Todo se ve al poner la temporada en Navidad; para mirar los banners antes, abre una colección de la tienda con ?sv-navidad=1 al final de la dirección.</p>
         <s-stack direction="inline" gap="base">
           <s-button id="i-fotos">Traer las fotos nuevas a Archivos</s-button>
           <s-button id="i-navidad">Preparar las fotos de Navidad</s-button>
@@ -2021,7 +2021,7 @@ function conectarInicio(inicio) {
     boton.loading = true;
     try {
       const base = new URL('fotos-inicio/', location.href.split('?')[0]).href;
-      const hechas = await prepararNavidad(copiarArchivo, reemplazarArchivo, base);
+      const hechas = await prepararNavidad(copiarArchivo, reemplazarArchivo, traerArchivo, base);
       avisar(`Fotos de Navidad listas en: ${hechas.join(', ')}. Se ven al poner la temporada en Navidad.`);
     } catch (error2) {
       avisar(error2.message, true);

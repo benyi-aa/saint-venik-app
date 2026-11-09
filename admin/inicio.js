@@ -1,7 +1,7 @@
 /* Inicio de la tienda: la cuadrícula de colecciones sobre negro (reunión
  * 9-nov). En Navidad, cada foto es la del metacampo de colección
  * custom.foto_navidad, que esta app crea. */
-import { gql, comprobarErrores } from './api.js?v=202611092012';
+import { gql, comprobarErrores } from './api.js?v=202611092108';
 
 const METACAMPO_NAVIDAD = `
   query MetacampoNavidad {
@@ -60,7 +60,7 @@ const PONER = `mutation PonerNavidad($metafields: [MetafieldsSetInput!]!) {
   metafieldsSet(metafields: $metafields) { metafields { id } userErrors { field message code } }
 }`;
 
-export async function prepararNavidad(copiar, reemplazar, base) {
+export async function prepararNavidad(copiar, reemplazar, traer, base) {
   const hechas = [];
   /* ?v= para que Shopify no se lleve una copia vieja guardada en GitHub Pages. */
   const v = Date.now();
@@ -79,6 +79,13 @@ export async function prepararNavidad(copiar, reemplazar, base) {
       metafields: [{ ownerId: c.id, namespace: 'custom', key: 'foto_navidad', type: 'file_reference', value: f.id }],
     }), 'metafieldsSet');
     hechas.push(h);
+  }
+  /* Los banners de cada colección (terciopelo rojo, 21:9): van a Archivos con
+   * su nombre y la extensión los cambia por la foto de verano coleccion_<k>.jpg
+   * cuando la temporada es Navidad. Mismo nombre: se reemplazan, no se copian. */
+  for (const k of ['cadena', 'pulsera', 'anillos', 'colgantes', 'conjuntos', 'essentials']) {
+    await traer(`${base}sv-navidad-portada-${k}.jpg?v=${v}`);
+    hechas.push(`banner ${k}`);
   }
   return hechas;
 }
