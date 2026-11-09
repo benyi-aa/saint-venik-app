@@ -183,6 +183,12 @@ se puede enseñar antes de encender.
   formulario. Lo pinta `sv-filtros.js`; el estado llega en `data-precio`. Mismos
   tres estados, y con el campo sin crear vale `prueba`.
 
+  Ojo en .cl: Impulse escribe el rango con el formato de la tienda («59.990») y
+  lo lee con `parseFloat`, o sea 59,99. Sin arreglo, el slider de .cl va de $0
+  a $60 y moverlo filtra «hasta 30 pesos»: 0 productos. Con las casillas
+  encendidas, `sv-filtros.js` lee solo las cifras en pesos, corrige el rango
+  del slider (`updateOptions`) y muestra los montos con punto de miles.
+
   Las píldoras se combinan entre sí: cada una añade o quita su valor y deja los
   demás. Dos del mismo filtro suman (Cadenas o Pulseras); de filtros distintos
   se cruzan (Cadenas y Dorado).

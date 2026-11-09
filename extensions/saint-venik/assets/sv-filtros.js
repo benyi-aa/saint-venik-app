@@ -264,17 +264,28 @@
   var sinDecimales = /no_decimals/.test(formato);
   var fijando = false;
 
-  /* El tema da formato a un texto con dos decimales («45.00»), no a un numero. */
+  var simbolo = formato.split('{{')[0] || '$';
+  /* Pesos: con punto de miles, como en la tienda («$19.990»). Dolares: el
+   * formato del tema, que pide un texto con dos decimales («45.00»). */
+  var miles = function (n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
   function dinero(n) {
-    try { return theme.Currency.formatMoney(n.toFixed(2), formato); } catch (e) { return String(n); }
+    if (sinDecimales) return simbolo + miles(n);
+    try { return theme.Currency.formatMoney(n.toFixed(2), formato); } catch (e) { return simbolo + n; }
   }
   function enCasilla(n) {
-    var t = dinero(n).replace(/[^\d.,]/g, '');
-    return sinDecimales ? t : t.replace(/\.00$/, '');
+    return sinDecimales ? miles(n) : dinero(n).replace(/[^\d.,]/g, '').replace(/\.00$/, '');
   }
+  /* En .cl la tienda escribe «59.990» y el tema lo leia como 59,99: el slider
+   * iba de $0 a $60 y moverlo dejaba 0 productos. En pesos, solo las cifras. */
   function leerCifra(s) {
+    if (s == null || String(s).trim() === '') return null;
     var n = sinDecimales ? parseInt(String(s).replace(/\D/g, ''), 10) : parseFloat(String(s).replace(/[^\d.]/g, ''));
     return isNaN(n) ? null : n;
+  }
+  function rango(caja) {
+    var a = leerCifra(caja.dataset.min);
+    var b = leerCifra(caja.dataset.max);
+    return [a === null ? 0 : a, b === null ? 100 : b];
   }
 
   function casillasDe(caja) { return caja.querySelectorAll('.sv-precio input'); }
@@ -282,16 +293,20 @@
   function escribir(caja, vals) {
     if (fijando) return;
     var cs = casillasDe(caja);
+    var ds = [caja.querySelector('.price-range__display-min'), caja.querySelector('.price-range__display-max')];
     for (var i = 0; i < cs.length; i += 1) {
-      if (document.activeElement !== cs[i]) cs[i].value = enCasilla(parseFloat(vals[i]) || 0);
+      var n = parseFloat(vals[i]) || 0;
+      if (document.activeElement !== cs[i]) cs[i].value = enCasilla(n);
+      if (ds[i]) ds[i].textContent = dinero(n);
     }
   }
 
   function fijar(caja) {
     var desliz = caja.querySelector('.price-range__slider');
     var cs = casillasDe(caja);
-    var rmin = parseFloat(caja.dataset.min) || 0;
-    var rmax = parseFloat(caja.dataset.max) || 100;
+    var r = rango(caja);
+    var rmin = r[0];
+    var rmax = r[1];
     var a = leerCifra(cs[0].value);
     var b = leerCifra(cs[1].value);
     a = Math.max(rmin, Math.min(rmax, a === null ? rmin : a));
@@ -338,11 +353,9 @@
   function armarPrecio(caja) {
     var fila = caja.querySelector('.sv-precio');
     if (!fila) {
-      var muestra = caja.querySelector('.price-range__display-min');
-      var moneda = ((muestra && muestra.textContent.trim().match(/^[^\d\s.,]+/)) || [''])[0];
       fila = el('div', 'sv-precio');
-      fila.appendChild(casilla(EN ? 'From' : 'Desde', 'min', moneda));
-      fila.appendChild(casilla(EN ? 'To' : 'Hasta', 'max', moneda));
+      fila.appendChild(casilla(EN ? 'From' : 'Desde', 'min', simbolo));
+      fila.appendChild(casilla(EN ? 'To' : 'Hasta', 'max', simbolo));
       var tras = caja.querySelector('.price-range__slider-wrapper');
       caja.insertBefore(fila, tras ? tras.nextSibling : null);
       /* Sin esto, el tema filtra (y cierra el menu) con cada tecla. */
@@ -363,17 +376,20 @@
     var api = desliz && desliz.noUiSlider;
     if (!api || api.svPrecio) return;
     api.svPrecio = true;
+    var r = rango(caja);
+    var exactos = [leerCifra(caja.dataset.minValue), leerCifra(caja.dataset.maxValue)];
+    var ini = [exactos[0] === null ? r[0] : exactos[0], exactos[1] === null ? r[1] : exactos[1]];
+    var hoy = api.options.range || {};
+    if (sinDecimales && (hoy.min !== r[0] || hoy.max !== r[1])) {
+      try { api.updateOptions({ range: { min: r[0], max: r[1] }, start: ini }, false); } catch (e) { /* otro slider */ }
+    }
     api.on('update.sv', function (vals) { escribir(caja, vals); });
     /* Al cargar, lo que dice el filtro (45), no donde salto el slider (50). */
-    var vals = api.get();
-    var exactos = [caja.dataset.minValue, caja.dataset.maxValue];
     var cs = casillasDe(caja);
     var ds = [caja.querySelector('.price-range__display-min'), caja.querySelector('.price-range__display-max')];
     for (var i = 0; i < 2; i += 1) {
-      var x = parseFloat(exactos[i]);
-      if (isNaN(x)) x = parseFloat(vals[i]) || 0;
-      else if (ds[i]) ds[i].textContent = dinero(x);
-      cs[i].value = enCasilla(x);
+      cs[i].value = enCasilla(ini[i]);
+      if (ds[i]) ds[i].textContent = dinero(ini[i]);
     }
   }
 
