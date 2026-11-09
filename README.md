@@ -215,9 +215,10 @@ se puede enseñar antes de encender.
   Colgantes y Conjuntos la cruz está en el borde de abajo de la foto y el título
   la tapa en parte: esas piden una foto pensada para el teléfono. Va con
   `:has(img)` para estar en su sitio desde el primer pintado. El bloque tiene
-  alto fijo y el texto abierto es una capa (`position: absolute`): si no cabe,
-  baja por encima de la barra negra, pero la página no se mueve (pedido del
-  9-nov, grabación: «la página abajo se mueve»). Tres estados;
+  alto fijo y el texto es una capa (`position: absolute`) que nunca sale de la
+  foto: abierta, el título se achica, el texto pasa a 12 px y, si aun así no
+  cupiera, se desliza dentro. Ni se mueve la página ni se tapa la barra negra
+  (pedidos del 9-nov, dos grabaciones). Tres estados;
   con el campo sin crear vale `si`.
 
 Los dos embeds nuevos, como el de insignias, hay que encenderlos una vez por
