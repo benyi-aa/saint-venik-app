@@ -10,7 +10,7 @@
  * Por eso se comprueba el host ANTES de intentarlo y, si no es de los conocidos,
  * se explica que paso en vez de dejar un error mudo.
  */
-import { gql, comprobarErrores } from './api.js?v=202611091949';
+import { gql, comprobarErrores } from './api.js?v=202611092003';
 
 const HOSTS_CON_CORS = /(storage\.googleapis\.com|s3\.amazonaws\.com)$/;
 
@@ -166,4 +166,36 @@ export async function copiarArchivo(url, { imagen = true } = {}) {
   const creado = comprobarErrores(d, 'fileCreate').files[0];
   const listo = await esperarListo(creado.id);
   return { id: listo.id, url: listo.image?.url ?? listo.url ?? null };
+}
+
+/* Cambia el contenido de un archivo que ya existe sin crear otro: mismo id, asi
+ * que todo lo que lo usa (un metacampo, una tarjeta del tema) ve la foto nueva
+ * sin tocar nada mas. Shopify la descarga desde `url`. */
+const CAMBIAR = `
+  mutation CambiarArchivo($files: [FileUpdateInput!]!) {
+    fileUpdate(files: $files) {
+      files { id fileStatus }
+      userErrors { field message code }
+    }
+  }
+`;
+
+export async function reemplazarArchivo(id, url) {
+  const urlDe = (n) => n?.image?.url ?? n?.url ?? null;
+  const antes = urlDe((await gql(ESTADO, { id }, { sinMemoria: true })).node);
+  comprobarErrores(await gql(CAMBIAR, { files: [{ id, originalSource: url }] }), 'fileUpdate');
+  /* Justo despues de pedirlo todavia puede verse READY con la foto vieja: se
+   * espera a que cambie la URL (la ?v= de Shopify), con un tope. */
+  let ultimo = null;
+  for (let i = 0; i < 30; i++) {
+    await espera(1000);
+    const { node } = await gql(ESTADO, { id }, { sinMemoria: true });
+    if (node?.fileStatus === 'FAILED') throw new Error('Shopify no pudo procesar el archivo nuevo.');
+    if (node?.fileStatus === 'READY') {
+      ultimo = node;
+      if (urlDe(node) !== antes) break;
+    }
+  }
+  if (!ultimo) throw new Error('El archivo tarda más de lo normal en procesarse. Recarga en un momento.');
+  return { id: ultimo.id, url: urlDe(ultimo) };
 }

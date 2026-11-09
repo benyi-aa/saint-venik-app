@@ -1,7 +1,7 @@
 /* Inicio de la tienda: la cuadrícula de colecciones sobre negro (reunión
  * 9-nov). En Navidad, cada foto es la del metacampo de colección
  * custom.foto_navidad, que esta app crea. */
-import { gql, comprobarErrores } from './api.js?v=202611091949';
+import { gql, comprobarErrores } from './api.js?v=202611092003';
 
 const METACAMPO_NAVIDAD = `
   query MetacampoNavidad {
@@ -48,18 +48,33 @@ export async function asegurarEstructuraInicio(pasos) {
 /* Las fotos de Navidad (9-nov, Nano Banana, estilo CRAFTD): se copian a Archivos
  * desde admin/fotos-inicio/ y cada una queda en el «Foto de Navidad» de su
  * colección. Con la temporada en Normal no se ve nada; en Navidad las usan la
- * cuadrícula del inicio y el carrito vacío. */
-const COLECCION = `query Coleccion($q: String!) { collections(first: 1, query: $q) { nodes { id handle } } }`;
+ * cuadrícula del inicio y el carrito vacío. Si la colección ya tiene foto, se
+ * cambia el contenido de ese mismo archivo: volver a apretar el botón no deja
+ * copias repetidas en Archivos. */
+const COLECCION = `query Coleccion($q: String!) {
+  collections(first: 1, query: $q) {
+    nodes { id handle foto: metafield(namespace: "custom", key: "foto_navidad") { reference { ... on MediaImage { id } } } }
+  }
+}`;
 const PONER = `mutation PonerNavidad($metafields: [MetafieldsSetInput!]!) {
   metafieldsSet(metafields: $metafields) { metafields { id } userErrors { field message code } }
 }`;
 
-export async function prepararNavidad(copiar, base) {
+export async function prepararNavidad(copiar, reemplazar, base) {
   const hechas = [];
+  /* ?v= para que Shopify no se lleve una copia vieja guardada en GitHub Pages. */
+  const v = Date.now();
   for (const h of ['cadenas', 'pulseras', 'colgantes', 'anillos']) {
-    const c = (await gql(COLECCION, { q: `handle:${h}` })).collections.nodes.find((n) => n.handle === h);
+    const c = (await gql(COLECCION, { q: `handle:${h}` }, { sinMemoria: true })).collections.nodes.find((n) => n.handle === h);
     if (!c) continue;
-    const f = await copiar(`${base}sv-navidad-${h}.jpg`);
+    const fuente = `${base}sv-navidad-${h}.jpg?v=${v}`;
+    const actual = c.foto?.reference?.id;
+    if (actual) {
+      await reemplazar(actual, fuente);
+      hechas.push(h);
+      continue;
+    }
+    const f = await copiar(fuente);
     comprobarErrores(await gql(PONER, {
       metafields: [{ ownerId: c.id, namespace: 'custom', key: 'foto_navidad', type: 'file_reference', value: f.id }],
     }), 'metafieldsSet');
