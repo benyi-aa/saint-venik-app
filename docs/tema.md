@@ -559,11 +559,12 @@ Desde el 9-nov la portada (foto con el título encima, clic para abrir la descri
 
 Desde el 9-nov cada foto de verano de las páginas de colección (`coleccion_<foto>.jpg`, puesta a mano en el bloque «Contenido personalizado» de cada plantilla) tiene una versión de Navidad: `sv-navidad-portada-<foto>.jpg`, con `<foto>` en cadena, pulsera, anillos, colgantes, conjuntos o essentials. Las hizo Nano Banana Pro con el Generador interno, en 21:9 (el mismo formato que la franja del teléfono). Son joyas sobre terciopelo rojo, como CRAFTD, pero con otra disposición que las fotos de Navidad del inicio (filas horizontales, no un montón en diagonal) y con otras joyas:
 
-- Cadena: Rope Oro 4mm, Fígaro 5mm y Tennis 3mm. También la ven Best Sellers y las colecciones generales, que usan la foto de cadena.
+- Cadena: Rope Oro 4mm, Fígaro 5mm y Tennis 3mm. También la ven las colecciones generales, que usan la foto de cadena (menos Best Sellers, que tiene la suya).
 - Pulsera: Red Clover Oro, Black Clover y Brazalete Iconic Oro.
 - Anillos: Signet, Black Hades Oro y Hermés Oro, acostados.
 - Colgantes: Vault Red Oro, Florence y Compass II Oro.
 - Conjuntos: Fleur de lis Rope Set Oro y Compass II Miami Cuban 5mm Set.
 - Essentials: Vault Green Oro, Pulsera Sfera y White Capri Oro.
+- Best Sellers (`sv-navidad-portada-bestsellers.jpg`): sus más vendidos (Cadena Miami Cuban 5mm, Faith Pendant Oro, Pulsera Miami Cuban 5mm y Vault Blue Pendant Oro) colgados de un rollo de terciopelo. En verano Best Sellers usa la foto de cadena, así que sv-portada.liquid elige este archivo en lugar del de cadena solo cuando `collection.handle` es best-sellers. En el teléfono el título va arriba, como en Colgantes y Conjuntos.
 
 El botón «Preparar las fotos de Navidad» del panel las lleva a Archivos desde `admin/fotos-inicio/`, reemplazando si ya estaban. No hace falta tocar las plantillas: `snippets/sv-portada.liquid` busca cada archivo por nombre (`images[...]`). Si la temporada es Navidad, esconde la foto de verano desde el primer pintado y le cambia el `src` al cargar. Así los encuadres por foto (`--sv-y`, `--sv-encuadre`) son los de la foto de Navidad. Con `?sv-navidad=1` se ve antes de encender la temporada (queda en la sesión; `?sv-navidad=0` lo quita). Desde el 9-nov la misma llave también muestra las fotos de Navidad del inicio (`sv-inicio.liquid` saca sus reglas con `html.sv-nav` delante mientras la temporada sea Normal); el carrito vacío, que es del tema, no tiene vista previa. Las originales están en `branding/colecciones-inicio/navidad/portadas/`.

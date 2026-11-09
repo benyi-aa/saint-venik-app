@@ -1,7 +1,7 @@
 /* Inicio de la tienda: la cuadrícula de colecciones sobre negro (reunión
  * 9-nov). En Navidad, cada foto es la del metacampo de colección
  * custom.foto_navidad, que esta app crea. */
-import { gql, comprobarErrores } from './api.js?v=202611092108';
+import { gql, comprobarErrores } from './api.js?v=202611092239';
 
 const METACAMPO_NAVIDAD = `
   query MetacampoNavidad {
@@ -83,7 +83,7 @@ export async function prepararNavidad(copiar, reemplazar, traer, base) {
   /* Los banners de cada colección (terciopelo rojo, 21:9): van a Archivos con
    * su nombre y la extensión los cambia por la foto de verano coleccion_<k>.jpg
    * cuando la temporada es Navidad. Mismo nombre: se reemplazan, no se copian. */
-  for (const k of ['cadena', 'pulsera', 'anillos', 'colgantes', 'conjuntos', 'essentials']) {
+  for (const k of ['cadena', 'pulsera', 'anillos', 'colgantes', 'conjuntos', 'essentials', 'bestsellers']) {
     await traer(`${base}sv-navidad-portada-${k}.jpg?v=${v}`);
     hechas.push(`banner ${k}`);
   }
