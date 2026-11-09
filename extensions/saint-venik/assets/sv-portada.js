@@ -1,15 +1,16 @@
-/* Saint Venik · Portada de las colecciones en el telefono (ver sv-portada.css).
+/* Saint Venik · Portada de las colecciones (ver sv-portada.css).
  *
  * Tocar la foto la abre: sube el titulo, aparece la descripcion entera y la
  * foto se oscurece. Se cierra al volver a tocarla, al tocar fuera o al bajar
- * por la pagina. En el computador no hace nada: ahi el tema ya lo muestra todo. */
+ * por la pagina. Desde el 9-nov tambien en el computador (clic). */
 (function () {
   'use strict';
   var raiz = document.documentElement;
   if (!raiz.classList.contains('sv-portada')) return;
   var caja = document.querySelector('.collection-description-wrapper');
   if (!caja || !caja.querySelector('.collection-image-container img') || !caja.querySelector('.collection-description')) return;
-  var telefono = window.matchMedia('(max-width: 767px)');
+  /* Antes solo en el telefono; ahora en todo tamaño. Se deja el nombre. */
+  var telefono = window.matchMedia('all');
   var desde = 0;
 
   var ns = 'http://www.w3.org/2000/svg';
