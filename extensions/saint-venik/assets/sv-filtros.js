@@ -265,18 +265,18 @@
   var fijando = false;
 
   var simbolo = formato.split('{{')[0] || '$';
-  /* Pesos: con punto de miles, como en la tienda («$19.990»). Dolares: el
-   * formato del tema, que pide un texto con dos decimales («45.00»). */
-  var miles = function (n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
+  /* Como los precios de las fichas («$27,990», «$45.00»). El tema da formato
+   * a un texto con dos decimales («45.00»), no a un numero. */
   function dinero(n) {
-    if (sinDecimales) return simbolo + miles(n);
-    try { return theme.Currency.formatMoney(n.toFixed(2), formato); } catch (e) { return simbolo + n; }
+    try { return theme.Currency.formatMoney(n.toFixed(2), formato); } catch (e) { return simbolo + Math.round(n); }
   }
   function enCasilla(n) {
-    return sinDecimales ? miles(n) : dinero(n).replace(/[^\d.,]/g, '').replace(/\.00$/, '');
+    var t = dinero(n).replace(/[^\d.,]/g, '');
+    return sinDecimales ? t : t.replace(/\.00$/, '');
   }
   /* En .cl la tienda escribe «59.990» y el tema lo leia como 59,99: el slider
-   * iba de $0 a $60 y moverlo dejaba 0 productos. En pesos, solo las cifras. */
+   * iba de $0 a $60 y moverlo dejaba 0 productos. En pesos, solo las cifras
+   * («30.000», «30,000» y «30000» son lo mismo). */
   function leerCifra(s) {
     if (s == null || String(s).trim() === '') return null;
     var n = sinDecimales ? parseInt(String(s).replace(/\D/g, ''), 10) : parseFloat(String(s).replace(/[^\d.]/g, ''));

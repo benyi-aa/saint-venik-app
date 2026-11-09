@@ -187,7 +187,7 @@ se puede enseñar antes de encender.
   lo lee con `parseFloat`, o sea 59,99. Sin arreglo, el slider de .cl va de $0
   a $60 y moverlo filtra «hasta 30 pesos»: 0 productos. Con las casillas
   encendidas, `sv-filtros.js` lee solo las cifras en pesos, corrige el rango
-  del slider (`updateOptions`) y muestra los montos con punto de miles.
+  del slider (`updateOptions`) y muestra los montos como las fichas («$27,990»).
 
   Las píldoras se combinan entre sí: cada una añade o quita su valor y deja los
   demás. Dos del mismo filtro suman (Cadenas o Pulseras); de filtros distintos
