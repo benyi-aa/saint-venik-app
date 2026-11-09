@@ -1,15 +1,4 @@
-{% comment %}
-  Saint Venik · Una muestra de color.
-
-  Parametros:
-    producto         (product)  obligatorio
-    nombre           (string)   texto accesible y etiqueta visible
-    color            (color)    campo `muestra` del metaobjeto
-    imagen           (imagen)   campo `imagen_muestra`; manda sobre el color
-    actual           (boolean)  true si es el producto de esta pagina
-    mostrar_etiqueta (boolean)
-    marcar_agotado   (boolean)
-{% endcomment %}
+{% comment %} docs/bloques.md: «sv-color-swatch.liquid · 1» {% endcomment %}
 
 {%- liquid
   assign sv_nombre = nombre | default: producto.title

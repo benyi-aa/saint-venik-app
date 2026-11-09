@@ -26,15 +26,16 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores, capacidadActiva, enUnaPasada } from './api.js?v=202611091430';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611091430';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611091430';
-import { copiarArchivo } from './archivos.js?v=202611091430';
-import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611091430';
-import { faltaEstructuraFiltros, asegurarEstructuraFiltros } from './filtros.js?v=202611091430';
+import { gql, comprobarErrores, capacidadActiva, enUnaPasada } from './api.js?v=202611091601';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611091601';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611091601';
+import { copiarArchivo } from './archivos.js?v=202611091601';
+import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611091601';
+import { faltaEstructuraFiltros, asegurarEstructuraFiltros } from './filtros.js?v=202611091601';
 import {
   faltaEstructuraBeneficios, asegurarEstructuraBeneficios, sembrarBeneficios,
-} from './beneficios.js?v=202611091430';
+} from './beneficios.js?v=202611091601';
+import { faltaEstructuraInicio, asegurarEstructuraInicio } from './inicio.js?v=202611091601';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
@@ -206,7 +207,7 @@ export async function revisarEstructura() {
 
     const [
       faltanBloque, faltanGuia, hayConfig, faltanConfig,
-      deColor, deEtiquetas, deBeneficios, malBloque, malGuia, faltanTipos, deFiltros,
+      deColor, deEtiquetas, deBeneficios, malBloque, malGuia, faltanTipos, deFiltros, deInicio,
     ] = await Promise.all([
       estado.bloque ? faltanCampos(TIPO_BLOQUE, CAMPOS_BLOQUE) : [],
       estado.guia ? faltanCampos(TIPO_GUIA, CAMPOS_GUIA) : [],
@@ -225,6 +226,8 @@ export async function revisarEstructura() {
       /* Los filtros: los botones de la página y los tres metacampos de
        * producto que filtra la tienda. */
       faltaEstructuraFiltros(),
+      /* El campo «Foto de Navidad» de las colecciones (categorías del inicio). */
+      faltaEstructuraInicio(),
     ]);
 
     /* El orden importa: es el que ve la persona en la tarjeta de pendientes. */
@@ -238,7 +241,7 @@ export async function revisarEstructura() {
     } else if (faltanConfig.length) {
       pendientes.push(`Campos de configuración que faltan: ${faltanConfig.join(', ')}.`);
     }
-    pendientes.push(...deColor, ...deEtiquetas, ...deBeneficios, ...malBloque, ...malGuia, ...deFiltros);
+    pendientes.push(...deColor, ...deEtiquetas, ...deBeneficios, ...malBloque, ...malGuia, ...deFiltros, ...deInicio);
     if (faltanTipos.length) pendientes.push(`Tipos de bloque que faltan: ${faltanTipos.join(', ')}.`);
 
     return { estado, pendientes };
@@ -301,6 +304,7 @@ export async function crearEstructura() {
   await asegurarEstructuraBeneficios(pasos);
   await sembrarBeneficios(pasos);
   await asegurarEstructuraFiltros(pasos);
+  await asegurarEstructuraInicio(pasos);
 
   /* El campo `tipo` limita sus valores con una lista de opciones. Un tipo nuevo
    * no basta con soportarlo en el panel: hay que ampliar esa lista o Shopify

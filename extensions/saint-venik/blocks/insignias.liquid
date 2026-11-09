@@ -1,32 +1,4 @@
-{%- comment -%}
-  Saint Venik · Insignias sobre los productos
-  ---------------------------------------------------------------------------
-  "Mas vendido", "Novedad": un rectangulo macizo arriba a la izquierda de la
-  tarjeta en la coleccion, y arriba a la derecha sobre la foto en la ficha.
-
-  POR QUE ESTO ES UN APP EMBED Y NO UN BLOQUE COMO LOS OTROS TRES
-  Una tarjeta de producto no es una seccion ni un bloque de tema: es un snippet
-  dentro del bucle del grid, y la documentacion de Shopify dice que los bloques
-  de tipo @app no se admiten en secciones renderizadas estaticamente. O sea que
-  no hay ningun sitio donde enganchar un bloque por tarjeta. La unica via es un
-  embed que emita los datos en Liquid y un JS que coloque los nodos. Los datos
-  NO se piden por fetch a proposito: salen ya resueltos aqui, del lado del
-  servidor, que es lo que pide la guia de rendimiento de Shopify.
-
-  SE ACTIVA A MANO EN CADA TIENDA
-  Personalizar -> Configuracion -> Incrustaciones de apps -> "Insignias de
-  producto". Un embed no aparece en la tienda hasta que alguien lo enciende
-  ahi, y eso queda guardado en el tema, no en la app: al cambiar de tema hay
-  que volver a encenderlo.
-
-  LOS DATOS
-  De cada entrada de `sv_etiqueta` salen el texto en los dos idiomas, los dos
-  colores y la lista de handles que el panel ya resolvio (productos elegidos a
-  mano + los de las colecciones elegidas). Se emite tambien la lista de
-  colecciones: en una pagina de coleccion eso permite acertar aunque los
-  handles se hayan quedado viejos porque entro un producto nuevo a la
-  coleccion despues del ultimo recalculo.
-{%- endcomment -%}
+{%- comment -%} docs/bloques.md: «insignias.liquid · 1» {%- endcomment -%}
 
 {%- liquid
   assign lang = localization.language.iso_code | slice: 0, 2 | downcase
@@ -148,12 +120,7 @@
 -%}
 
 {%- if d_modo == 'si' -%}
-  {%- comment -%}
-    Lo del tema se esconde desde el servidor y no desde el script: si lo
-    escondiera el script, el «AHORRA» del tema se veria un instante en cada
-    carga. En 'prueba' lo hace el script, porque solo el sabe si hay
-    ?sv-vista=1, y ese parpadeo en una vista previa da igual.
-  {%- endcomment -%}
+  {%- comment -%} docs/bloques.md: «insignias.liquid · 2» {%- endcomment -%}
   <style>
     {%- if d_tarjetas %} .grid-product__tag--sale { display: none !important; } {% endif -%}
     {%- if d_precio %} .product__price-savings[data-save-price] { display: none !important; } {% endif -%}

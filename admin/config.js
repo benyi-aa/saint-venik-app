@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611091430';
+import { gql, comprobarErrores } from './api.js?v=202611091601';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 /* Shopify admite como mucho 40 campos por definición de metaobjeto y
@@ -122,6 +122,12 @@ const CAMPOS_CONFIG_2 = [
    * tarjeta gris con su foto, el logo a la izquierda y la X sin recuadro.
    * 'si' / 'no' / 'prueba'; vacío = 'prueba' (snippet sv-menu). */
   { key: 'menu_tarjetas', name: 'Menú del teléfono: tarjetas con foto', type: 'single_line_text_field' },
+  /* Inicio: la sección «Categorías» sobre negro, como Jaxxon (bloque
+   * categorias). 'si' / 'no' / 'prueba'; vacío = 'prueba'. */
+  { key: 'categorias_inicio', name: 'Inicio: categorías sobre negro', type: 'single_line_text_field' },
+  /* 'normal' o 'navidad': en Navidad las tarjetas usan la «Foto de Navidad»
+   * de cada colección. Vacío = 'normal'. */
+  { key: 'temporada', name: 'Temporada de la tienda', type: 'single_line_text_field' },
 ];
 
 /* Lo mismo que ya pinta hoy el embed con sus ajustes de fábrica: así mover la
@@ -407,6 +413,10 @@ export async function leerConfig() {
     transicion: aTransicion(campos),
     filtros: aFiltros(campos),
     menu: ['si', 'no', 'prueba'].includes(campos.menu_tarjetas) ? campos.menu_tarjetas : 'prueba',
+    inicio: {
+      modo: ['si', 'no', 'prueba'].includes(campos.categorias_inicio) ? campos.categorias_inicio : 'prueba',
+      temporada: campos.temporada === 'navidad' ? 'navidad' : 'normal',
+    },
   };
 }
 
@@ -432,6 +442,13 @@ function aFiltros(campos) {
 
 /* `presentes`: los campos que la tienda ya tiene. Uno que aún no se creó
  * («Crear lo que falta») no se manda, para que guardar no falle por él. */
+export async function guardarInicio(v) {
+  return guardarCampos([
+    { key: 'categorias_inicio', value: v.modo },
+    { key: 'temporada', value: v.temporada },
+  ]);
+}
+
 export async function guardarMenu(modo) {
   return guardarCampos([{ key: 'menu_tarjetas', value: modo }]);
 }

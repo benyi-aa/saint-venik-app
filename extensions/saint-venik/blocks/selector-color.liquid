@@ -1,24 +1,4 @@
-{% comment %}
-  Saint Venik · Selector de color entre productos hermanos
-  ---------------------------------------------------------------------------
-  En esta tienda los colores NO son variantes: son productos separados que se
-  apuntan entre si con el metacampo `custom.hermano_de_color`
-  (lista de referencias a producto).
-
-  El aspecto de cada muestra sale del metaobjeto `color`:
-    nombre         -> texto visible en espanol (Translate & Adapt lo traduce)
-    nombre_en      -> texto visible en ingles; si esta vacio, manda la traduccion
-    muestra        -> color de la muestra
-    imagen_muestra -> archivo, tiene prioridad sobre el color
-    etiqueta       -> etiqueta del producto que corresponde (oro, acero-inox)
-
-  El producto se asocia a su color porque lleva esa etiqueta. El orden lo fija
-  el ajuste "Orden de los colores", no el orden del metacampo ni el del
-  metaobjeto, para que sea identico en todas las fichas. Los enlaces usan
-  `product.url`, que ya incluye /en/ cuando toca.
-
-  Si el producto no tiene hermanos, el bloque no dibuja nada.
-{% endcomment %}
+{% comment %} docs/bloques.md: «selector-color.liquid · 1» {% endcomment %}
 
 {%- assign hermanos = product.metafields.custom.hermano_de_color.value -%}
 
@@ -68,16 +48,7 @@
     assign nombre_actual = ''
   -%}
 
-  {%- comment -%}
-    De que color es ESTE producto. Se decide una sola vez, antes de dibujar
-    nada, porque un producto puede llevar dos etiquetas de color por error y
-    entonces se adueñaba de las dos muestras: las dos salian marcadas como
-    "la actual", ninguna quedaba enlazada y el selector se moria. Paso de
-    verdad con una pulsera etiquetada a la vez `acero-inox` y `oro`.
-
-    Manda la primera que aparezca en el mismo orden en que se dibujan. Las
-    demas se buscan entre los hermanos, asi que siguen siendo pulsables.
-  {%- endcomment -%}
+  {%- comment -%} docs/bloques.md: «selector-color.liquid · 2» {%- endcomment -%}
   {%- assign etiqueta_propia = '' -%}
   {%- for etiqueta_pedida in orden -%}
     {%- assign etq = etiqueta_pedida | downcase | strip -%}
@@ -101,14 +72,7 @@
   {%- endif -%}
 
 
-  {%- comment -%}
-    Lo mismo para cada hermano: de que color es, uno solo. Hace falta para
-    familias que se distinguen por algo que no es el metal, como la Vienna
-    Link (blanca, turquesa, verde): las tres llevan `oro` y ademas la suya.
-    Si al buscar «oro» bastara con llevar la etiqueta, cualquiera de las tres
-    se quedaba la muestra de oro. Asi, cada hermano solo responde a su color.
-    Va como «|id:etiqueta|» para poder preguntarlo con un `contains`.
-  {%- endcomment -%}
+  {%- comment -%} docs/bloques.md: «selector-color.liquid · 3» {%- endcomment -%}
   {%- assign propias_hermanos = '|' -%}
   {%- for hermano in hermanos -%}
     {%- assign etq_h = hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}

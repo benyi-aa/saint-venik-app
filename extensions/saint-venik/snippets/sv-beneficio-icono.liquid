@@ -1,21 +1,4 @@
-{%- comment -%}
-  Saint Venik · El icono de un beneficio
-  ---------------------------------------------------------------------------
-  Manda la imagen subida; si no hay, el icono dibujado del juego de la app.
-  Es la misma regla que la muestra de color, donde la imagen manda sobre el
-  color, y conviene que se diga igual en el panel.
-
-  La precedencia vive aqui y no dentro de sv-icono.liquid porque ese archivo es
-  el ORIGINAL del juego de iconos: scripts/iconos.mjs lo lee por texto para
-  generar admin/iconos.js, y meterle logica lo dejaria colgando de su forma.
-
-  Un aviso que hay que dar en el panel: una imagen se muestra con sus propios
-  colores. Los iconos dibujados siguen al color del texto de la pildora
-  (stroke="currentColor"); un PNG no, asi que uno negro sobre fondo oscuro
-  desaparece.
-
-  Parametros: b (entrada de sv_beneficio), clase (para el <img>).
-{%- endcomment -%}
+{%- comment -%} docs/bloques.md: «sv-beneficio-icono.liquid · 1» {%- endcomment -%}
 
 {%- liquid
   assign sv_img = b.icono_imagen.value
@@ -23,13 +6,7 @@
 -%}
 
 {%- if sv_img != blank -%}
-  {%- comment -%}
-    Se distinguen por `url`, que SOLO tiene el archivo generico (un SVG): el
-    objeto de imagen de Liquid no lo expone y hay que pedirle `image_url`, que
-    ademas lo sirve ya escalado por la CDN. Mirar `.image` no sirve: eso es la
-    forma de GraphQL, no la de Liquid, y dejaba un <img src=""> vacio en la
-    ficha justo con un PNG, que es el caso normal.
-  {%- endcomment -%}
+  {%- comment -%} docs/bloques.md: «sv-beneficio-icono.liquid · 2» {%- endcomment -%}
   {%- if sv_img.url != blank -%}
     <img class="{{ sv_clase }}" src="{{ sv_img.url }}" alt="" loading="lazy" width="24" height="24" />
   {%- else -%}

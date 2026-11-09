@@ -1,24 +1,4 @@
-{% comment %}
-  Saint Venik · Selector de talla
-  ---------------------------------------------------------------------------
-  Lee las variantes reales del producto. No inventa tallas ni las saca de
-  metacampos: cada boton es una variante, con su disponibilidad.
-
-  Dibuja UNA FILA POR OPCION. Casi todo el catalogo tiene una sola ("Tamano",
-  con 8 US y 10 US), pero los conjuntos llevan dos: el Cuban Set tiene la talla
-  de la cadena y la de la pulsera por separado. Antes esos productos no
-  mostraban nada; ahora muestran una fila para cada medida.
-
-  Con dos o mas opciones, un valor puede no existir: no toda combinacion tiene
-  variante. Esos se dibujan apagados y sin enlace, distintos de los agotados.
-
-  Cada boton es un enlace a ?variant=..., asi funciona sin JavaScript y el
-  enlace se puede compartir. Con una sola opcion y JavaScript, elegir talla no
-  recarga: se cambia el input del formulario. Con varias opciones siempre se
-  navega, porque al cambiar una medida cambian las combinaciones validas de la
-  otra, y recalcularlas en el navegador seria repetir en JavaScript lo que
-  Liquid ya sabe hacer bien.
-{% endcomment %}
+{% comment %} docs/bloques.md: «selector-talla.liquid · 1» {% endcomment %}
 
 {%- if product != blank and product.has_only_default_variant == false -%}
   {%- liquid

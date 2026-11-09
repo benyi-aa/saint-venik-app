@@ -1,0 +1,42 @@
+{%- comment -%} Categorias del inicio sobre negro, como Jaxxon (reunion 9-nov): ver docs/tema.md, «Categorías del inicio». {%- endcomment -%}
+{%- liquid
+  assign modo = 'prueba'
+  assign temporada = 'normal'
+  for e in shop.metaobjects.sv_configuracion_2.values
+    assign modo = e.categorias_inicio.value | default: 'prueba' | append: ''
+    assign temporada = e.temporada.value | default: 'normal' | append: ''
+    break
+  endfor
+  assign lista = block.settings.colecciones
+-%}
+{%- if modo != 'no' and lista != blank -%}
+<script>try{var v=/[?&]sv-vista(=1)?(&|$)/.test(location.search);if(v)sessionStorage.setItem('sv-vista','1');if({{ modo | json }}==='si'||v||sessionStorage.getItem('sv-vista')==='1')document.documentElement.classList.add('sv-cat-on')}catch(e){}</script>
+<link rel="stylesheet" href="{{ 'sv-categorias.css' | asset_url }}">
+<div class="sv-cat sv-cat--{{ temporada }}" {{ block.shopify_attributes }}>
+  {%- if block.settings.titulo != blank -%}<h2 class="sv-cat__titulo">{{ block.settings.titulo | escape }}</h2>{%- endif -%}
+  <div class="sv-cat__pista" data-sv-cat>
+    {%- for c in lista -%}
+      {%- assign foto = c.image -%}
+      {%- if temporada == 'navidad' and c.metafields.custom.foto_navidad.value -%}{%- assign foto = c.metafields.custom.foto_navidad.value -%}{%- endif -%}
+      <a class="sv-cat__tarjeta" href="{{ c.url }}">
+        <span class="sv-cat__foto">{%- if foto -%}{{ foto | image_url: width: 800 | image_tag: loading: 'lazy', widths: '360,540,720,800', sizes: '(min-width: 769px) 24vw, 46vw', alt: c.title }}{%- endif -%}</span>
+        <span class="sv-cat__nombre">{{ c.title }}</span>
+      </a>
+    {%- endfor -%}
+  </div>
+  <div class="sv-cat__barra" aria-hidden="true"><span></span></div>
+</div>
+<script src="{{ 'sv-categorias.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Categorías (fondo negro)",
+  "target": "section",
+  "settings": [
+    { "type": "text", "id": "titulo", "label": "Título", "default": "Compra por categoría" },
+    { "type": "collection_list", "id": "colecciones", "label": "Colecciones", "limit": 12 },
+    { "type": "paragraph", "content": "Apagado / vista previa / activo y la temporada (normal o Navidad) se eligen en la app Color & Size Picker → Apariencia. Cada tarjeta usa la imagen de la colección; en Navidad, la de su campo «Foto de Navidad»." }
+  ]
+}
+{% endschema %}

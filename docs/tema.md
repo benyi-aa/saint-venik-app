@@ -541,3 +541,11 @@ En la ficha, en el computador (`desc_foto_compu` en sv_configuracion_2): 'segund
 ## Menú del teléfono (snippet sv-menu)
 
 Como gasper.co (reunión 9-nov): cada colección del menú principal (`main-menu`) en una tarjeta gris #f2f2f2 de 80 px con la foto de la colección a la derecha; lo que no es colección (Contacto, Ingresar) queda como enlace simple. Arriba, el logo de la cabecera a la izquierda y la X sin recuadro. El snippet solo pasa el estado (`menu_tarjetas` en sv_configuracion_2: si/no/prueba, vacío = prueba) y el mapa ruta → foto; el resto vive en assets/sv-menu.css y sv-menu.js, que arman el cajón #NavDrawer de Impulse sin tocar el tema. Las fotos se piden al tocar el botón del menú (o un rato después de cargar), no con cada página.
+
+## Categorías del inicio (bloque categorias)
+
+Reunión del 9-nov: la cuadrícula de colecciones del inicio (promo-grid2, con su borde blanco) pasa a una sección sobre negro como «Shop by Category» de jaxxon.com. Lleva el título, las colecciones en tarjetas de 4:5 con esquinas de 10 px que se deslizan de lado (dos y un poco en el teléfono, cuatro en el computador), el nombre en blanco debajo y una barrita que sigue el deslizamiento (assets/sv-categorias.css/js).
+
+- Es un bloque de app de tipo sección («Categorías (fondo negro)»). Las colecciones y su orden se eligen en el editor del tema; el estado y la temporada, en la app (Apariencia), campos `categorias_inicio` (si/no/prueba, vacío = prueba) y `temporada` (normal/navidad) de sv_configuracion_2.
+- Cuando se ve, pone `html.sv-cat-on` y esconde la sección `…__promo-grid2`: la cuadrícula vieja sigue en el tema, así que apagarla en la app la devuelve tal cual. Por eso la sección nueva va ANTES de promo-grid2 en index.json: el script corre antes de pintar la vieja.
+- Foto de cada tarjeta: la imagen de la colección. En Navidad, el metacampo de colección `custom.foto_navidad` (lo crea «Crear lo que falta»); sin él, la normal. Las fotos de Navidad van como las de craftdlondon.com: terciopelo rojo y cintas de satín.

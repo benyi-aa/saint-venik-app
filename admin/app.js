@@ -1,48 +1,48 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611091430';
+import { estaEmbebida } from './api.js?v=202611091601';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611091430';
+} from './colores.js?v=202611091601';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-  guardarDescuento, guardarMenu, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
+  guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611091430';
+} from './config.js?v=202611091601';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611091430';
+} from './filtros.js?v=202611091601';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611091430';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611091430';
+} from './productos.js?v=202611091601';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611091601';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611091430';
+} from './guias.js?v=202611091601';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611091430';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611091430';
+} from './vista-previa.js?v=202611091601';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611091601';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611091430';
+} from './etiquetas.js?v=202611091601';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611091430';
-import { ICONOS, svgIcono } from './iconos.js?v=202611091430';
+} from './beneficios.js?v=202611091601';
+import { ICONOS, svgIcono } from './iconos.js?v=202611091601';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611091430';
+const VERSION = '202611091601';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -838,6 +838,7 @@ async function pintarApariencia() {
   ]);
   const hayTransicion = camposConfig.has('trans_activo');
   const hayMenu = camposConfig.has('menu_tarjetas');
+  const hayInicio = camposConfig.has('categorias_inicio') && camposConfig.has('temporada');
   const trans = config.transicion ?? TRANSICION_POR_DEFECTO;
   const tienda = new URLSearchParams(location.search).get('shop') || '';
 
@@ -908,6 +909,23 @@ async function pintarApariencia() {
         <s-button slot="primary-action" variant="primary" id="guardar-menu">Guardar</s-button>
       </s-section>` : ''}
 
+      ${hayInicio ? `
+      <s-section id="inicio" heading="Inicio: categorías sobre negro" subheading="Como Jaxxon: «Compra por categoría» sobre fondo negro, las colecciones en tarjetas que se deslizan con una barrita debajo, en lugar de las fotos con borde blanco. Cada tarjeta usa la imagen de la colección (Productos → Colecciones). En Navidad usa la de su campo «Foto de Navidad», que está más abajo en la misma página de la colección; si una no la tiene, sale la normal. Qué colecciones y en qué orden: editor del tema, inicio, sección «Categorías (fondo negro)».">
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-select label="Estado" id="i-modo">
+            <s-option value="no">Apagado: la cuadrícula de siempre</s-option>
+            <s-option value="prueba">Vista previa: solo con el enlace</s-option>
+            <s-option value="si">Activo en la tienda</s-option>
+          </s-select>
+          <s-select label="Temporada" id="i-temporada">
+            <s-option value="normal">Normal</s-option>
+            <s-option value="navidad">Navidad</s-option>
+          </s-select>
+        </s-grid>
+        <p class="ayuda" id="i-enlace" hidden>Para verlo antes de encenderlo: <a target="_blank" rel="noopener" href="https://${escapar(tienda)}/?sv-vista=1">abre la tienda con este enlace</a>. Solo lo ve quien entra por ahí.</p>
+        <s-button slot="primary-action" variant="primary" id="guardar-inicio">Guardar</s-button>
+      </s-section>` : ''}
+
       <s-section heading="Botón de la guía de tallas" subheading="Si lo dejas vacío se usa el texto por defecto en cada idioma.">
         <s-grid gridTemplateColumns="repeat(auto-fit, minmax(220px, 1fr))" gap="base">
           <s-text-field id="boton-es" label="Texto en español" value="${escapar(config.botonGuiaEs)}" placeholder="Guía de tallas"></s-text-field>
@@ -964,6 +982,7 @@ async function pintarApariencia() {
 
   if (hayTransicion) conectarTransicion(trans);
   if (hayMenu) conectarMenu(config.menu);
+  if (hayInicio) conectarInicio(config.inicio);
 
   document.getElementById('guardar-boton').addEventListener('click', async (e) => {
     const boton = e.currentTarget;
@@ -1955,6 +1974,32 @@ function conectarTransicion(trans) {
       Object.assign(trans, v);
       avisar(v.modo === 'si' ? 'Cambio de página guardado y activo en la tienda'
         : v.modo === 'prueba' ? 'Cambio de página guardado en vista previa' : 'Cambio de página guardado (apagado)');
+    } catch (error2) {
+      avisar(error2.message, true);
+    } finally {
+      boton.loading = false;
+    }
+  });
+}
+
+/* La sección «Inicio: categorías sobre negro» de Apariencia. */
+function conectarInicio(inicio) {
+  const el = (id) => document.getElementById(id);
+  el('i-modo').value = inicio.modo;
+  el('i-temporada').value = inicio.temporada;
+  const refrescar = () => { el('i-enlace').hidden = el('i-modo').value !== 'prueba'; };
+  el('i-modo').addEventListener('change', refrescar);
+  refrescar();
+  el('guardar-inicio').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    boton.loading = true;
+    try {
+      const v = { modo: el('i-modo').value || 'prueba', temporada: el('i-temporada').value || 'normal' };
+      await guardarInicio(v);
+      Object.assign(inicio, v);
+      const t = v.temporada === 'navidad' ? ' (Navidad)' : '';
+      avisar(v.modo === 'si' ? `Categorías guardadas y activas en la tienda${t}`
+        : v.modo === 'prueba' ? `Categorías guardadas en vista previa${t}` : 'Categorías guardadas (apagadas)');
     } catch (error2) {
       avisar(error2.message, true);
     } finally {

@@ -1,19 +1,4 @@
-{% comment %}
-  Saint Venik · Guia de tallas
-  ---------------------------------------------------------------------------
-  Dibuja un enlace que abre una ventana con la guia que corresponde al producto.
-
-  Que guia le toca lo decide el campo `palabras_clave` de cada guia: si alguna de
-  sus palabras aparece en el tipo, el titulo o las etiquetas del producto, esa es
-  su guia. Asi un producto nuevo encuentra su guia sin que nadie se la asigne.
-
-  El contenido y el texto del boton se editan en el panel de la app, no aqui.
-  El bloque solo se coloca una vez y ya.
-
-  Si el producto no encaja en ninguna guia, o la guia no tiene bloques visibles
-  en el idioma actual, no se dibuja nada: mas vale sin boton que con un boton
-  que abre una ventana vacia.
-{% endcomment %}
+{% comment %} docs/bloques.md: «guia-de-tallas.liquid · 1» {% endcomment %}
 
 {%- if product != blank -%}
   {%- liquid
@@ -129,11 +114,7 @@
 
           <div class="sv-guia-dialogo__cuerpo">
             <div class="sv-guia">
-              {%- comment -%}
-                Se recorre por posicion en vez de fiarse del orden de la lista,
-                que Shopify no garantiza. Son pocos bloques, asi que el coste de
-                recorrerlos varias veces no se nota.
-              {%- endcomment -%}
+              {%- comment -%} docs/bloques.md: «guia-de-tallas.liquid · 2» {%- endcomment -%}
               {%- for i in (1..tope) -%}
                 {%- for bloque in bloques -%}
                   {%- if bloque.orden.value == i -%}

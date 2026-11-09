@@ -1,29 +1,4 @@
-{%- comment -%}
-  Saint Venik · Beneficios del producto
-  ---------------------------------------------------------------------------
-  Tres ventajas cortas bajo el boton de compra: "Garantia de por vida",
-  "Resistente al agua y el sudor", "Hipoalergenico". No son las mismas para
-  todo el catalogo: los brillantes no resisten el agua, asi que ahi ese se
-  cambia por "Joyeria fina". Por eso cada beneficio decide a que productos
-  alcanza, en vez de haber una lista fija por tienda.
-
-  Cada entrada del metaobjeto `sv_beneficio` lleva:
-    nombre / nombre_en   el texto visible en cada idioma
-    icono                clave del juego de iconos (snippet sv-icono)
-    orden                posicion; manda sobre el orden de la lista
-    productos            productos elegidos a mano, para el panel
-    colecciones          colecciones elegidas, para el panel
-    handles              los handles que salen de las dos listas de arriba,
-                         ya resueltos por el panel, entre barras: |a|b|c|
-    activo               permite apagarlo sin borrarlo
-
-  El emparejamiento se hace contra `handles` y no recorriendo `productos`:
-  un campo de lista de referencias solo deja leer 50 elementos por bucle en
-  Liquid, y una coleccion de oro pasa de 50 facil. Una cadena con los handles
-  no tiene ese tope y la comprobacion es un `contains`, no un bucle. El precio
-  es que el panel tiene que recalcularla cuando cambia una coleccion, y eso
-  lo hace al abrir la pantalla.
-{%- endcomment -%}
+{%- comment -%} docs/bloques.md: «beneficios.liquid · 1» {%- endcomment -%}
 
 {%- if product != blank -%}
   {%- liquid

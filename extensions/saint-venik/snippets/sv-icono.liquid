@@ -1,27 +1,6 @@
-{%- comment -%}
-  Saint Venik · Iconos de los beneficios
-  ---------------------------------------------------------------------------
-  Un solo trazo de 1.5 sobre una rejilla de 24, sin relleno: el estilo es el
-  mismo en los doce, que es lo que los hace parecer una familia y no doce
-  iconos sueltos. El color lo pone `currentColor`, asi que el icono sigue al
-  texto de la pildora sin tener que tocarlo aqui.
+{%- comment -%} docs/bloques.md: «sv-icono.liquid · 1» {%- endcomment -%}
 
-  La misma lista esta en admin/iconos.js, porque el panel tiene que poder
-  enseñarlos para elegir y Liquid no puede leer un .js. Ese archivo lo genera
-  `npm run iconos` desde aqui, y `npm run revisar` falla si se han separado.
-
-  Parametros:
-    nombre  clave del icono. Una clave desconocida no dibuja nada, a proposito:
-            un beneficio sin icono se ve igual de bien y es mejor que un hueco
-            con un interrogante.
-{%- endcomment -%}
-
-{%- comment -%}
-  El trazo se captura primero y solo despues se decide si hay svg que dibujar.
-  Antes habia una lista de claves conocidas aqui arriba para eso, pero era una
-  tercera copia de la misma lista: anadir un icono al `case` y olvidar la lista
-  daba un icono que el panel ofrecia y la tienda no pintaba, sin ningun error.
-{%- endcomment -%}
+{%- comment -%} docs/bloques.md: «sv-icono.liquid · 2» {%- endcomment -%}
 
 {%- assign sv_i = nombre | strip | downcase -%}
 
