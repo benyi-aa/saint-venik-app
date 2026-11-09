@@ -16,7 +16,7 @@
 -%}
 {%- if m == 'prueba' -%}<script>try{/[?&]sv-vista(=1)?(&|$)/.test(location.search)&&sessionStorage.setItem('sv-vista','1');sessionStorage.getItem('sv-vista')==='1'&&document.documentElement.classList.add('sv-ini')}catch(e){}</script>{%- endif -%}
 <style>
-{%- if m != 'no' -%}{{ p }} {{ g }}{background:#000}{{ p }} {{ g }} .promo-grid{padding-top:16px;padding-bottom:10px}{%- endif -%}
+{%- if m != 'no' -%}{{ p }} {{ g }}{background:#000}{{ p }} {{ g }} .promo-grid{padding-top:16px;padding-bottom:10px}{{ p }} {{ g }}+.shopify-section{margin-top:0!important}{%- endif -%}
 {%- if tm == 'navidad' -%}{%- assign hs = 'cadenas,pulseras,colgantes,anillos,conjuntos,best-sellers' | split: ',' -%}{%- for h in hs -%}{%- assign f = collections[h].metafields.custom.foto_navidad.value -%}{%- if f -%}{{ g }} .promo-grid__container:has(a[href$="/collections/{{ h }}"]) .promo-grid__bg{background:#5c0a10 url({{ f | image_url: width: 1400 }}) center/cover}{{ g }} .promo-grid__container:has(a[href$="/collections/{{ h }}"]) .promo-grid__bg image-element{display:none}{%- endif -%}{%- endfor -%}{%- endif -%}
 </style>
 {%- endif -%}
