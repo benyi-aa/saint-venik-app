@@ -1,7 +1,7 @@
 /* Inicio de la tienda: la cuadrícula de colecciones sobre negro (reunión
  * 9-nov). En Navidad, cada foto es la del metacampo de colección
  * custom.foto_navidad, que esta app crea. */
-import { gql, comprobarErrores } from './api.js?v=202611091927';
+import { gql, comprobarErrores } from './api.js?v=202611091947';
 
 const METACAMPO_NAVIDAD = `
   query MetacampoNavidad {
@@ -43,4 +43,27 @@ export async function asegurarEstructuraInicio(pasos) {
   comprobarErrores(r, 'metafieldDefinitionCreate');
   pasos.push('Campo «Foto de Navidad» de las colecciones creado');
   return pasos;
+}
+
+/* Las fotos de Navidad (9-nov, Nano Banana, estilo CRAFTD): se copian a Archivos
+ * desde admin/fotos-inicio/ y cada una queda en el «Foto de Navidad» de su
+ * colección. Con la temporada en Normal no se ve nada; en Navidad las usan la
+ * cuadrícula del inicio y el carrito vacío. */
+const COLECCION = `query Coleccion($q: String!) { collections(first: 1, query: $q) { nodes { id handle } } }`;
+const PONER = `mutation PonerNavidad($metafields: [MetafieldsSetInput!]!) {
+  metafieldsSet(metafields: $metafields) { metafields { id } userErrors { field message code } }
+}`;
+
+export async function prepararNavidad(copiar, base) {
+  const hechas = [];
+  for (const h of ['cadenas', 'pulseras', 'colgantes', 'anillos']) {
+    const c = (await gql(COLECCION, { q: `handle:${h}` })).collections.nodes.find((n) => n.handle === h);
+    if (!c) continue;
+    const f = await copiar(`${base}sv-navidad-${h}.jpg`);
+    comprobarErrores(await gql(PONER, {
+      metafields: [{ ownerId: c.id, namespace: 'custom', key: 'foto_navidad', type: 'file_reference', value: f.id }],
+    }), 'metafieldsSet');
+    hechas.push(h);
+  }
+  return hechas;
 }
