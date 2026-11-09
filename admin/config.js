@@ -8,9 +8,14 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611090317';
+import { gql, comprobarErrores } from './api.js?v=202611091131';
 
 export const TIPO_CONFIG = 'sv_configuracion';
+/* Shopify admite como mucho 40 campos por definición de metaobjeto y
+ * sv_configuracion ya tiene los 40. Lo nuevo va en una segunda definición,
+ * con su propia entrada «general»: el panel lee y guarda las dos como si
+ * fueran una, y el Liquid que usa un campo de aquí lo busca en esta. */
+export const TIPO_CONFIG_2 = 'sv_configuracion_2';
 const HANDLE = 'general';
 
 export const ORDEN_POR_DEFECTO = ['acero-inox', 'oro'];
@@ -29,6 +34,7 @@ export const APARIENCIA_POR_DEFECTO = {
  * tallas", con t minuscula), que no es lo que muestran las tiendas. */
 export const TEXTOS_BOTON_POR_DEFECTO = { es: 'Guía de Tallas', en: 'Size guide' };
 
+/* Llena: 40 campos, el tope de Shopify. Los nuevos van en CAMPOS_CONFIG_2. */
 const CAMPOS_CONFIG = [
   { key: 'orden_colores', name: 'Orden de los colores', type: 'single_line_text_field' },
   { key: 'boton_guia_es', name: 'Texto del botón de guía (español)', type: 'single_line_text_field' },
@@ -94,6 +100,10 @@ const CAMPOS_CONFIG = [
   /* Debajo del slider de precio, «Desde» y «Hasta» para escribirlo. Vacío =
    * 'prueba' (data-precio del embed de filtros). */
   { key: 'filtros_precio', name: 'Filtros: casillas para escribir el precio', type: 'single_line_text_field' },
+];
+
+/* En sv_configuracion_2. Hasta 40 también. */
+const CAMPOS_CONFIG_2 = [
   /* La foto de cada colección en el teléfono, con el título encima y la
    * descripción al tocarla, y sin espacios hasta el 3x2. Vacío = 'si'
    * (snippet sv-portada): se pidió aplicarla en todas el 9-nov. */
@@ -172,8 +182,17 @@ export function textoDescuento(n, formato) {
 const DEFINICION = `
   query DefinicionConfig {
     metaobjectDefinitionByType(type: "${TIPO_CONFIG}") { id fieldDefinitions { key } }
+    dos: metaobjectDefinitionByType(type: "${TIPO_CONFIG_2}") { id fieldDefinitions { key } }
   }
 `;
+
+/* Las dos definiciones, con lo que le toca a cada una. */
+const PARTES = [
+  { clave: 'metaobjectDefinitionByType', tipo: TIPO_CONFIG, campos: CAMPOS_CONFIG },
+  { clave: 'dos', tipo: TIPO_CONFIG_2, campos: CAMPOS_CONFIG_2 },
+];
+const DE_LA_2 = new Set(CAMPOS_CONFIG_2.map((c) => c.key));
+const clavesDe = (def) => new Set((def?.fieldDefinitions ?? []).map((f) => f.key));
 
 const ACTUALIZAR_DEFINICION = `
   mutation ActualizarDefinicionConfig($id: ID!, $definition: MetaobjectDefinitionUpdateInput!) {
@@ -201,6 +220,14 @@ const LEER = `
   }
 `;
 
+const LEER_2 = `
+  query Config2 {
+    metaobjects(type: "${TIPO_CONFIG_2}", first: 1) {
+      nodes { fields { key value } }
+    }
+  }
+`;
+
 const GUARDAR = `
   mutation GuardarConfig($handle: MetaobjectHandleInput!, $metaobject: MetaobjectUpsertInput!) {
     metaobjectUpsert(handle: $handle, metaobject: $metaobject) {
@@ -215,17 +242,20 @@ export async function existeConfig() {
   return Boolean(d.metaobjectDefinitionByType);
 }
 
+/* Los campos que existen en la tienda, de las dos definiciones. */
 export async function camposDeConfig() {
   const d = await gql(DEFINICION);
-  return new Set((d.metaobjectDefinitionByType?.fieldDefinitions ?? []).map((f) => f.key));
+  return new Set([...clavesDe(d.metaobjectDefinitionByType), ...clavesDe(d.dos)]);
 }
 
 /* La definición pudo crearse con una versión anterior, sin todos los campos. */
 export async function faltanCamposConfig() {
   const d = await gql(DEFINICION);
   if (!d.metaobjectDefinitionByType) return [];
-  const presentes = new Set(d.metaobjectDefinitionByType.fieldDefinitions.map((f) => f.key));
-  return CAMPOS_CONFIG.filter((c) => !presentes.has(c.key)).map((c) => c.key);
+  return PARTES.flatMap(({ clave, campos }) => {
+    const presentes = clavesDe(d[clave]);
+    return campos.filter((c) => !presentes.has(c.key)).map((c) => c.key);
+  });
 }
 
 export async function asegurarConfig(pasos = []) {
@@ -245,15 +275,32 @@ export async function asegurarConfig(pasos = []) {
 
   const d2 = await gql(DEFINICION);
   if (d2.metaobjectDefinitionByType) {
-    const presentes = new Set(d2.metaobjectDefinitionByType.fieldDefinitions.map((f) => f.key));
-    const faltan = CAMPOS_CONFIG.filter((c) => !presentes.has(c.key));
-    if (faltan.length) {
-      const r = await gql(ACTUALIZAR_DEFINICION, {
-        id: d2.metaobjectDefinitionByType.id,
-        definition: { fieldDefinitions: faltan.map((c) => ({ create: c })) },
-      });
-      comprobarErrores(r, 'metaobjectDefinitionUpdate');
-      pasos.push(`Campos de configuración añadidos: ${faltan.map((c) => c.key).join(', ')}`);
+    for (const { clave, tipo, campos } of PARTES) {
+      const def = d2[clave];
+      if (!def) {
+        /* La segunda definición: se crea ya con sus campos. */
+        const r = await gql(CREAR_DEFINICION, {
+          definition: {
+            type: tipo,
+            name: 'Configuración de Color & Size Picker (2)',
+            access: { storefront: 'PUBLIC_READ' },
+            fieldDefinitions: campos,
+          },
+        });
+        comprobarErrores(r, 'metaobjectDefinitionCreate');
+        pasos.push(`Campos de configuración añadidos: ${campos.map((c) => c.key).join(', ')}`);
+        continue;
+      }
+      const presentes = clavesDe(def);
+      const faltan = campos.filter((c) => !presentes.has(c.key));
+      if (faltan.length) {
+        const r = await gql(ACTUALIZAR_DEFINICION, {
+          id: def.id,
+          definition: { fieldDefinitions: faltan.map((c) => ({ create: c })) },
+        });
+        comprobarErrores(r, 'metaobjectDefinitionUpdate');
+        pasos.push(`Campos de configuración añadidos: ${faltan.map((c) => c.key).join(', ')}`);
+      }
     }
   }
 
@@ -297,10 +344,34 @@ async function leerCrudo() {
   return Object.fromEntries((nodo?.fields ?? []).map((f) => [f.key, f.value]));
 }
 
+/* Los campos de sv_configuracion_2. Sin la definición todavía, vacío. */
+async function leerCampos2() {
+  try {
+    const d = await gql(LEER_2);
+    return Object.fromEntries((d.metaobjects.nodes[0]?.fields ?? []).map((f) => [f.key, f.value]));
+  } catch {
+    return {};
+  }
+}
+
+/* Guarda cada campo en la definición que le toca. */
+async function guardarCampos(fields) {
+  let hecho = null;
+  for (const [type, lista] of [
+    [TIPO_CONFIG, fields.filter((f) => !DE_LA_2.has(f.key))],
+    [TIPO_CONFIG_2, fields.filter((f) => DE_LA_2.has(f.key))],
+  ]) {
+    if (!lista.length) continue;
+    const r = await gql(GUARDAR, { handle: { type, handle: HANDLE }, metaobject: { fields: lista } });
+    hecho = comprobarErrores(r, 'metaobjectUpsert');
+  }
+  return hecho;
+}
+
 export async function leerConfig() {
-  const d = await gql(LEER);
+  const [d, campos2] = await Promise.all([gql(LEER), leerCampos2()]);
   const nodo = d.metaobjects.nodes[0];
-  const campos = Object.fromEntries((nodo?.fields ?? []).map((f) => [f.key, f.value]));
+  const campos = { ...Object.fromEntries((nodo?.fields ?? []).map((f) => [f.key, f.value])), ...campos2 };
 
   const crudo = (campos.orden_colores ?? '').split(',').map((s) => s.trim()).filter(Boolean);
 
@@ -342,23 +413,17 @@ function aFiltros(campos) {
 /* `presentes`: los campos que la tienda ya tiene. Uno que aún no se creó
  * («Crear lo que falta») no se manda, para que guardar no falle por él. */
 export async function guardarFiltrosConfig(f, presentes = null) {
-  const r = await gql(GUARDAR, {
-    handle: { type: TIPO_CONFIG, handle: HANDLE },
-    metaobject: {
-      fields: [
-        { key: 'filtros_activo', value: f.modo },
-        { key: 'filtros_colores', value: f.colores.join(', ') },
-        { key: 'filtros_categorias', value: f.categorias.join(', ') },
-        { key: 'filtros_tipos', value: f.tipos.join(', ') },
-        { key: 'filtros_ordenar', value: f.ordenar ? 'si' : 'no' },
-        { key: 'filtros_columnas', value: String(f.columnas) },
-        { key: 'filtros_cajon', value: f.cajon || 'prueba' },
-        { key: 'filtros_precio', value: f.precio || 'prueba' },
-        { key: 'colecciones_portada', value: f.portada || 'si' },
-      ].filter((c) => !presentes || presentes.has(c.key)),
-    },
-  });
-  return comprobarErrores(r, 'metaobjectUpsert');
+  return guardarCampos([
+    { key: 'filtros_activo', value: f.modo },
+    { key: 'filtros_colores', value: f.colores.join(', ') },
+    { key: 'filtros_categorias', value: f.categorias.join(', ') },
+    { key: 'filtros_tipos', value: f.tipos.join(', ') },
+    { key: 'filtros_ordenar', value: f.ordenar ? 'si' : 'no' },
+    { key: 'filtros_columnas', value: String(f.columnas) },
+    { key: 'filtros_cajon', value: f.cajon || 'prueba' },
+    { key: 'filtros_precio', value: f.precio || 'prueba' },
+    { key: 'colecciones_portada', value: f.portada || 'si' },
+  ].filter((c) => !presentes || presentes.has(c.key)));
 }
 
 function aTransicion(campos) {

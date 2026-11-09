@@ -221,6 +221,14 @@ se puede enseñar antes de encender.
   (pedidos del 9-nov, dos grabaciones). Tres estados;
   con el campo sin crear vale `si`.
 
+**Configuración en dos metaobjetos.** Shopify admite como mucho 40 campos por
+definición de metaobjeto, y `sv_configuracion` ya tiene los 40 (al crear
+`colecciones_portada` salía «Máximo 40 campos por definición de metaobjeto»).
+Lo nuevo va en `sv_configuracion_2` (lista `CAMPOS_CONFIG_2` de
+`admin/config.js`), con su propia entrada `general`. «Crear lo que falta» crea
+esa segunda definición; el panel lee y guarda las dos como una sola, y el
+Liquid que usa uno de esos campos lo busca en `shop.metaobjects.sv_configuracion_2`.
+
 Los dos embeds nuevos, como el de insignias, hay que encenderlos una vez por
 tema en Personalizar → Configuración → Incrustaciones de apps.
 
