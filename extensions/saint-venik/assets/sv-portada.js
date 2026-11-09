@@ -25,7 +25,9 @@
   var trazo = document.createElementNS(ns, 'path');
   trazo.setAttribute('d', 'm6 14.5 6-6 6 6');
   flecha.appendChild(trazo);
-  caja.appendChild(flecha);
+  var titulo = caja.querySelector('.collection-description h2');
+  if (titulo) titulo.insertAdjacentElement('afterend', flecha);
+  else caja.querySelector('.collection-description').appendChild(flecha);
 
   function abierta() { return caja.classList.contains('sv-abierto'); }
   function poner(abrir) {
