@@ -1,0 +1,12 @@
+{%- comment -%} Menu del telefono como gasper.co: ver docs/tema.md. {%- endcomment -%}
+{%- liquid
+  assign m = 'prueba'
+  for e in shop.metaobjects.sv_configuracion_2.values
+    assign m = e.menu_tarjetas.value | default: 'prueba' | append: ''
+    break
+  endfor
+-%}
+{%- if m != 'no' -%}
+<script>window.svMenu={m:{{ m | json }},f:{ {%- for l in linklists['main-menu'].links -%}{%- if l.type == 'collection_link' and l.object.image -%}{{ l.url | json }}:{{ l.object.image | image_url: width: 240 | json }},{%- endif -%}{%- endfor -%}"":""}};</script>
+<link rel="stylesheet" href="{{ 'sv-menu.css' | asset_url }}"><script src="{{ 'sv-menu.js' | asset_url }}" defer></script>
+{%- endif -%}

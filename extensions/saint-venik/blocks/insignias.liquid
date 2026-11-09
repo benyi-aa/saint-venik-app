@@ -114,16 +114,7 @@
   assign p_fondo = p_fondo | color_modify: 'alpha', p_alfa | append: ''
 
   comment
-    El descuento: el porcentaje a secas, como en Lost Gen Club, en vez del
-    «AHORRA 14%» del tema. No se calcula aqui: el tema ya pone el porcentaje
-    en la tarjeta y junto al precio, y lo cambia al elegir otra variante, asi
-    que el script lo lee de ahi. Aqui solo se decide si sale, donde y como.
-
-    Tres estados en texto y no un booleano, por lo mismo que foto_activo:
-      'si'     -> lo ve todo el mundo
-      'prueba' -> solo quien abre la tienda con ?sv-vista=1 (para ensenarlo
-                  antes de encenderlo)
-      'no'     -> nada; el tema sigue con lo suyo
+    Descuento: ver docs/tema.md, «El descuento en insignias».
   endcomment
   assign d_modo = cfg.desc_activo.value | default: 'no' | append: ''
   assign d_tarjetas = true
@@ -138,9 +129,6 @@
   if cfg.desc_precio.value == 'no'
     assign d_precio = false
   endif
-  comment
-    En el computador, en la ficha: 'segunda' (solo la segunda foto; reunion 9-nov) o 'todas'. Vive en sv_configuracion_2.
-  endcomment
   assign d_compu = 'segunda'
   for e in shop.metaobjects.sv_configuracion_2.values
     if e.desc_foto_compu.value == 'todas'

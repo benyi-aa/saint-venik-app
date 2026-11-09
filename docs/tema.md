@@ -531,3 +531,13 @@ En 'prueba' manda la clase que pone sv-descuento.js, solo con ?sv-vista=1.
 Recibe `cfg`, la entrada de sv_configuracion.
 
 Colores de los precios (reunión del 9-nov): precio tachado en gris y precio de oferta en rojo, en las tarjetas (`.grid-product__price--original` / `--original2`) y en la ficha (`.product__price--compare` / `.product__price.on-sale`). Viven en `sv_configuracion_2` (`precio_colores` si/no, `precio_oferta`, `precio_tachado`); se cambian en la app, Insignias → Descuento. Vacío o 'no' = los colores del tema.
+
+## El descuento en insignias (bloque insignias)
+
+El porcentaje a secas, como en Lost Gen Club, en vez del «AHORRA 14%» del tema. No se calcula en Liquid: el tema ya pone el porcentaje en la tarjeta y junto al precio, y lo cambia al elegir otra variante, así que el script lo lee de ahí. El bloque solo decide si sale, dónde y cómo. Tres estados en texto (`desc_activo`): 'si' lo ve todo el mundo; 'prueba' solo quien abre la tienda con ?sv-vista=1; 'no' nada, el tema sigue con lo suyo.
+
+En la ficha, en el computador (`desc_foto_compu` en sv_configuracion_2): 'segunda' = el descuento solo en la segunda foto (reunión 9-nov, como Lost Gen); 'todas' = en todas. En el teléfono va siempre en todas. sv-badges.js marca con `.sv-tag--movil` las que no son la segunda y sv-badges.css las esconde desde 769 px.
+
+## Menú del teléfono (snippet sv-menu)
+
+Como gasper.co (reunión 9-nov): cada colección del menú principal (`main-menu`) en una tarjeta gris #f2f2f2 de 80 px con la foto de la colección a la derecha; lo que no es colección (Contacto, Ingresar) queda como enlace simple. Arriba, el logo de la cabecera a la izquierda y la X sin recuadro. El snippet solo pasa el estado (`menu_tarjetas` en sv_configuracion_2: si/no/prueba, vacío = prueba) y el mapa ruta → foto; el resto vive en assets/sv-menu.css y sv-menu.js, que arman el cajón #NavDrawer de Impulse sin tocar el tema. Las fotos se piden al tocar el botón del menú (o un rato después de cargar), no con cada página.

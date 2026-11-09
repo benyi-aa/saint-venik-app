@@ -1,48 +1,48 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611091421';
+import { estaEmbebida } from './api.js?v=202611091430';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611091421';
+} from './colores.js?v=202611091430';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
-  guardarDescuento, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
+  guardarDescuento, guardarMenu, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611091421';
+} from './config.js?v=202611091430';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611091421';
+} from './filtros.js?v=202611091430';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611091421';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611091421';
+} from './productos.js?v=202611091430';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca } from './archivos.js?v=202611091430';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611091421';
+} from './guias.js?v=202611091430';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611091421';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611091421';
+} from './vista-previa.js?v=202611091430';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611091430';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611091421';
+} from './etiquetas.js?v=202611091430';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611091421';
-import { ICONOS, svgIcono } from './iconos.js?v=202611091421';
+} from './beneficios.js?v=202611091430';
+import { ICONOS, svgIcono } from './iconos.js?v=202611091430';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611091421';
+const VERSION = '202611091430';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -837,6 +837,7 @@ async function pintarApariencia() {
     leerConfig(), revisarEstructura(), cargarColores(), camposDeConfig(),
   ]);
   const hayTransicion = camposConfig.has('trans_activo');
+  const hayMenu = camposConfig.has('menu_tarjetas');
   const trans = config.transicion ?? TRANSICION_POR_DEFECTO;
   const tienda = new URLSearchParams(location.search).get('shop') || '';
 
@@ -896,6 +897,17 @@ async function pintarApariencia() {
         <s-button slot="primary-action" variant="primary" id="guardar-transicion">Guardar</s-button>
       </s-section>` : ''}
 
+      ${hayMenu ? `
+      <s-section id="menu" heading="Menú del teléfono" subheading="Como gasper.co: cada colección del menú en una tarjeta gris con su foto a la derecha, el logo arriba a la izquierda y la X sin recuadro. La foto es la de cada colección (Productos → Colecciones); lo que no es colección (Contacto, Ingresar) queda como enlace simple debajo.">
+        <s-select label="Estado" id="m-modo">
+          <s-option value="no">Apagado: el menú del tema</s-option>
+          <s-option value="prueba">Vista previa: solo con el enlace</s-option>
+          <s-option value="si">Activo en la tienda</s-option>
+        </s-select>
+        <p class="ayuda" id="m-enlace" hidden>Para verlo antes de encenderlo: <a target="_blank" rel="noopener" href="https://${escapar(tienda)}/?sv-vista=1">abre la tienda con este enlace</a> en el teléfono y toca el menú. Solo lo ve quien entra por ahí.</p>
+        <s-button slot="primary-action" variant="primary" id="guardar-menu">Guardar</s-button>
+      </s-section>` : ''}
+
       <s-section heading="Botón de la guía de tallas" subheading="Si lo dejas vacío se usa el texto por defecto en cada idioma.">
         <s-grid gridTemplateColumns="repeat(auto-fit, minmax(220px, 1fr))" gap="base">
           <s-text-field id="boton-es" label="Texto en español" value="${escapar(config.botonGuiaEs)}" placeholder="Guía de tallas"></s-text-field>
@@ -951,6 +963,7 @@ async function pintarApariencia() {
   });
 
   if (hayTransicion) conectarTransicion(trans);
+  if (hayMenu) conectarMenu(config.menu);
 
   document.getElementById('guardar-boton').addEventListener('click', async (e) => {
     const boton = e.currentTarget;
@@ -1942,6 +1955,29 @@ function conectarTransicion(trans) {
       Object.assign(trans, v);
       avisar(v.modo === 'si' ? 'Cambio de página guardado y activo en la tienda'
         : v.modo === 'prueba' ? 'Cambio de página guardado en vista previa' : 'Cambio de página guardado (apagado)');
+    } catch (error2) {
+      avisar(error2.message, true);
+    } finally {
+      boton.loading = false;
+    }
+  });
+}
+
+/* La sección «Menú del teléfono» de Apariencia. */
+function conectarMenu(modo) {
+  const el = (id) => document.getElementById(id);
+  el('m-modo').value = modo;
+  const refrescar = () => { el('m-enlace').hidden = el('m-modo').value !== 'prueba'; };
+  el('m-modo').addEventListener('change', refrescar);
+  refrescar();
+  el('guardar-menu').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    boton.loading = true;
+    try {
+      const v = el('m-modo').value || 'prueba';
+      await guardarMenu(v);
+      avisar(v === 'si' ? 'Menú guardado y activo en la tienda'
+        : v === 'prueba' ? 'Menú guardado en vista previa' : 'Menú guardado (apagado)');
     } catch (error2) {
       avisar(error2.message, true);
     } finally {

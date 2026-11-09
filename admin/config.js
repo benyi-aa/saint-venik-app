@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611091421';
+import { gql, comprobarErrores } from './api.js?v=202611091430';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 /* Shopify admite como mucho 40 campos por definición de metaobjeto y
@@ -118,6 +118,10 @@ const CAMPOS_CONFIG_2 = [
    * en la segunda, como Lost Gen; reunión 9-nov) o 'todas'. Vacío = 'segunda'.
    * En el teléfono va en todas. */
   { key: 'desc_foto_compu', name: 'Descuento en las fotos: en el computador', type: 'single_line_text_field' },
+  /* Menú del teléfono como gasper.co (reunión 9-nov): cada colección en una
+   * tarjeta gris con su foto, el logo a la izquierda y la X sin recuadro.
+   * 'si' / 'no' / 'prueba'; vacío = 'prueba' (snippet sv-menu). */
+  { key: 'menu_tarjetas', name: 'Menú del teléfono: tarjetas con foto', type: 'single_line_text_field' },
 ];
 
 /* Lo mismo que ya pinta hoy el embed con sus ajustes de fábrica: así mover la
@@ -402,6 +406,7 @@ export async function leerConfig() {
     descuento: aDescuento(campos),
     transicion: aTransicion(campos),
     filtros: aFiltros(campos),
+    menu: ['si', 'no', 'prueba'].includes(campos.menu_tarjetas) ? campos.menu_tarjetas : 'prueba',
   };
 }
 
@@ -427,6 +432,10 @@ function aFiltros(campos) {
 
 /* `presentes`: los campos que la tienda ya tiene. Uno que aún no se creó
  * («Crear lo que falta») no se manda, para que guardar no falle por él. */
+export async function guardarMenu(modo) {
+  return guardarCampos([{ key: 'menu_tarjetas', value: modo }]);
+}
+
 export async function guardarFiltrosConfig(f, presentes = null) {
   return guardarCampos([
     { key: 'filtros_activo', value: f.modo },
