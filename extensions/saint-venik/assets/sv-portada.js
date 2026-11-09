@@ -31,7 +31,11 @@
 
   function abierta() { return caja.classList.contains('sv-abierto'); }
 
+  /* El texto crece hasta su alto exacto: con un tope generico (30em) la
+   * animacion corria al principio y se quedaba quieta el resto. */
+  var texto = caja.querySelector('.collection-description p');
   function poner(abrir) {
+    if (abrir && texto) caja.style.setProperty('--sv-texto', texto.scrollHeight + 'px');
     caja.classList.toggle('sv-abierto', abrir);
     if (telefono.matches) caja.setAttribute('aria-expanded', abrir ? 'true' : 'false');
     if (abrir) desde = window.pageYOffset;

@@ -55,64 +55,59 @@ html.sv-portada .custom-content:has(.collection-description-wrapper) [class*="ba
   }
 
   /* Abierta o cerrada, todo cabe en la foto: ni se mueve ni se tapa nada de
-   * abajo (pedido del 9-nov, dos grabaciones). */
+   * abajo (pedido del 9-nov, dos grabaciones). Y nada cambia de golpe: el
+   * bloque no se recoloca (siempre anclado abajo), el titulo no cambia de
+   * tamaño y los margenes son los mismos. Al abrir solo crece el texto, hasta
+   * su alto exacto (--sv-texto, del script), y empuja el titulo hacia arriba;
+   * el negro se funde y la flecha gira, todo con la misma curva. */
+  html.sv-portada .collection-description-wrapper:has(img) {
+    --sv-curva: cubic-bezier(.32, .72, 0, 1);
+    --sv-tiempo: .55s;
+  }
   html.sv-portada .collection-description-wrapper:has(img) .collection-description {
     position: absolute; inset: 0; z-index: 1; box-sizing: border-box; overflow: hidden;
     display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
-    text-align: center; padding: 16px 22px 9px; color: #fff;
+    text-align: center; padding: 14px 22px 9px; color: #fff;
   }
   /* El negro que entra al abrir. */
   html.sv-portada .collection-description-wrapper:has(img) .collection-description::before {
     content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; pointer-events: none;
     background: linear-gradient(to bottom, rgba(0, 0, 0, .55), rgba(0, 0, 0, .8) 45%, rgba(0, 0, 0, .9));
-    transition: opacity .45s ease;
+    transition: opacity var(--sv-tiempo) var(--sv-curva);
   }
   html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description::before { opacity: 1; }
   /* En una linea, aunque sea largo («Colgantes para hombre»). El hueco de
    * abajo es el de la flecha, que pone el script: asi nada salta al llegar. */
   html.sv-portada .collection-description-wrapper:has(img) .collection-description h2 {
     order: 0; color: #fff; font-size: clamp(19px, 6.2vw, 26px); line-height: 1.15;
-    letter-spacing: .03em; margin: 0 0 19px; white-space: nowrap;
-    transition: font-size .35s ease;
+    letter-spacing: .03em; margin: 0 0 23px; white-space: nowrap;
   }
   html.sv-portada .collection-description-wrapper:has(img) .collection-description:has(.sv-portada-flecha) h2 { margin-bottom: 0; }
   html.sv-portada .collection-description-wrapper:has(img) .collection-description p {
-    order: 2; color: #fff; font-size: 12px; line-height: 1.42; margin: 0;
-    max-height: 0; opacity: 0; overflow: hidden; transform: translateY(10px);
-    transition: max-height .45s ease, opacity .35s ease, transform .45s ease, margin .45s ease;
-  }
-  /* Abierta, el titulo sube y se achica un poco para dejarle sitio al texto.
-   * Si una descripcion aun no cupiera, se desliza dentro de la foto. */
-  html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description {
-    justify-content: flex-start; padding-top: 11px; padding-bottom: 8px; overflow-y: auto;
-  }
-  html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description h2 {
-    font-size: clamp(17px, 5.2vw, 21px);
+    order: 2; flex: 0 0 auto; color: #fff; font-size: 12px; line-height: 1.42; margin: 0;
+    max-height: 0; opacity: 0; overflow: hidden; transform: translateY(6px);
+    transition: max-height var(--sv-tiempo) var(--sv-curva), opacity .3s ease, transform var(--sv-tiempo) var(--sv-curva);
   }
   html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .collection-description p {
-    max-height: 30em; opacity: 1; transform: none; margin-top: 5px;
+    max-height: var(--sv-texto, 9em); opacity: 1; transform: none;
+    transition: max-height var(--sv-tiempo) var(--sv-curva), opacity .4s ease .12s, transform var(--sv-tiempo) var(--sv-curva);
   }
 
   /* La flecha va bajo el titulo y se enciende y apaga muy despacio: una
    * pista de que se abre, sin llamar la atencion. Abierta, apunta abajo. */
   html.sv-portada .collection-description-wrapper:has(img) .sv-portada-flecha {
-    display: block; order: 1; flex: 0 0 auto; width: 16px; height: 16px; margin-top: 3px; color: #fff;
+    display: block; order: 1; flex: 0 0 auto; width: 16px; height: 16px; margin: 3px 0 4px; color: #fff;
     animation: sv-portada-latido 3.6s ease-in-out infinite;
-    transition: transform .45s ease;
+    transition: transform var(--sv-tiempo) var(--sv-curva), opacity .4s ease;
   }
   html.sv-portada .collection-description-wrapper.sv-abierto:has(img) .sv-portada-flecha {
-    margin-top: 1px; transform: rotate(180deg); animation: none; opacity: .8;
+    transform: rotate(180deg); animation: none; opacity: .8;
   }
 }
 
-/* Colgantes y Conjuntos: la cruz esta en el borde de abajo de la foto y
- * ningun encuadre la deja libre; ahi el titulo va arriba. */
 @media (max-width: 767px) {
   html.sv-portada .collection-description-wrapper:is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"])) .collection-description {
     justify-content: flex-start; padding: 14px 22px 9px;
-  }
-  html.sv-portada .collection-description-wrapper.sv-abierto:is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"])) .collection-description {
-    padding-top: 11px;
   }
   html.sv-portada .collection-description-wrapper:is(:has(img[src*="coleccion_colgantes"]), :has(img[src*="coleccion_conjuntos"])) .collection-image-container::after {
     background: linear-gradient(to bottom, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 62%);
