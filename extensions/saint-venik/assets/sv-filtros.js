@@ -364,7 +364,17 @@
     if (!api || api.svPrecio) return;
     api.svPrecio = true;
     api.on('update.sv', function (vals) { escribir(caja, vals); });
-    escribir(caja, api.get());
+    /* Al cargar, lo que dice el filtro (45), no donde salto el slider (50). */
+    var vals = api.get();
+    var exactos = [caja.dataset.minValue, caja.dataset.maxValue];
+    var cs = casillasDe(caja);
+    var ds = [caja.querySelector('.price-range__display-min'), caja.querySelector('.price-range__display-max')];
+    for (var i = 0; i < 2; i += 1) {
+      var x = parseFloat(exactos[i]);
+      if (isNaN(x)) x = parseFloat(vals[i]) || 0;
+      else if (ds[i]) ds[i].textContent = dinero(x);
+      cs[i].value = enCasilla(x);
+    }
   }
 
   function casillasPrecio() {
