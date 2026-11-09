@@ -14,11 +14,31 @@
 
   var fotos = [];
   var cargadas = false;
-  /* Las fotos se piden al ir a abrir el menú, no con cada página. */
+  /* Las fotos se piden al ir a abrir el menú, no con cada página. Si el menú
+   * no sale de la lista de Shopify (en .com lo arman bloques de la cabecera),
+   * la foto de cada colección se busca en /collections.json, una vez. */
   function cargar() {
     if (cargadas) return;
     cargadas = true;
-    for (var i = 0; i < fotos.length; i += 1) fotos[i].src = fotos[i].getAttribute('data-src');
+    var faltan = [];
+    for (var i = 0; i < fotos.length; i += 1) {
+      var s = fotos[i].getAttribute('data-src');
+      if (s) fotos[i].src = s;
+      else faltan.push(fotos[i]);
+    }
+    if (!faltan.length || !window.fetch) return;
+    var raiz = ((window.Shopify && Shopify.routes && Shopify.routes.root) || '/').replace(/\/?$/, '/');
+    fetch(raiz + 'collections.json?limit=250').then(function (r) { return r.json(); }).then(function (j) {
+      var por = {};
+      (j.collections || []).forEach(function (c) { if (c.image && c.image.src) por[c.handle] = c.image.src; });
+      faltan.forEach(function (f) {
+        var src = por[f.getAttribute('data-h')];
+        if (src) f.src = src + (src.indexOf('?') < 0 ? '?' : '&') + 'width=240';
+        else f.parentNode.removeChild(f);
+      });
+    }).catch(function () {
+      faltan.forEach(function (f) { if (f.parentNode) f.parentNode.removeChild(f); });
+    });
   }
 
   function ruta(a) {
@@ -55,15 +75,18 @@
     for (var i = 0; i < items.length; i += 1) {
       var li = items[i];
       var link = li.querySelector('a');
-      var foto = link && !li.querySelector('.mobile-nav__sublist') ? mapa[ruta(link)] : null;
-      if (!foto) {
+      var r = link && !li.querySelector('.mobile-nav__sublist') ? ruta(link) : '';
+      var h = (/\/collections\/([^\/?#]+)$/.exec(r) || [])[1];
+      var foto = mapa[r];
+      if (!foto && (!h || h === 'all')) {
         li.classList.add('sv-menu-simple');
         continue;
       }
       li.classList.add('sv-menu-tarjeta');
       var f = document.createElement('img');
       f.className = 'sv-menu-foto';
-      f.setAttribute('data-src', foto);
+      f.setAttribute('data-src', foto || '');
+      f.setAttribute('data-h', h || '');
       f.alt = '';
       f.width = 80;
       f.height = 80;
