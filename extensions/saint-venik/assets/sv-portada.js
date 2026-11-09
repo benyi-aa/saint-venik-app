@@ -29,6 +29,21 @@
   if (titulo) titulo.insertAdjacentElement('afterend', flecha);
   else caja.querySelector('.collection-description').appendChild(flecha);
 
+  /* Un titulo muy largo («Milan Signature Collection») no cabe en una linea
+   * en un telefono angosto: se achica justo lo necesario, una vez al cargar
+   * (y al girar el telefono), nunca al abrir o cerrar. */
+  function ajustarTitulo() {
+    if (!titulo) return;
+    titulo.style.removeProperty('font-size');
+    if (!telefono.matches) return;
+    var hueco = caja.querySelector('.collection-description').clientWidth - 44;
+    if (titulo.scrollWidth > hueco && hueco > 0) {
+      titulo.style.fontSize = (parseFloat(getComputedStyle(titulo).fontSize) * hueco / titulo.scrollWidth).toFixed(1) + 'px';
+    }
+  }
+  ajustarTitulo();
+  window.addEventListener('resize', ajustarTitulo);
+
   function abierta() { return caja.classList.contains('sv-abierto'); }
 
   /* El texto crece hasta su alto exacto: con un tope generico (30em) la
