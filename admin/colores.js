@@ -5,7 +5,7 @@
  * color es la etiqueta: el producto lleva `oro` o `acero-inox`, y la entrada
  * guarda esa misma etiqueta en el campo `etiqueta`.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611091947';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611091949';
 
 export const TIPO_COLOR = 'color';
 
