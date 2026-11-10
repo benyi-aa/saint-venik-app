@@ -1,0 +1,162 @@
+{%- comment -%}
+  Saint Venik · carrito vacio nuevo (reunion 9-nov): bolsa del encabezado igual a la de la cabecera,
+  numero centrado dentro de la bolsa, titulo con la letra del tema, punto burdeo tipo radar sin fondo,
+  sin la linea de garantia y boton a Best Sellers.
+  sv_cv = false -> solo se ve con ?sv-vista=1 (vista previa); true -> para todos.
+  El boton va a Best Sellers para todos desde ya (antes no tenia enlace y dejaba en la misma pagina).
+{%- endcomment -%}
+{%- assign sv_cv = true -%}
+{%- assign sv_cv_best = collections['best-sellers'].url -%}
+{%- assign sv_cv_enlace = settings.button_link | default: sv_cv_best | default: routes.all_products_collection_url -%}
+<script>try{var v=/[?&]sv-vista(=1)?(&|$)/.test(location.search);if(v)sessionStorage.setItem('sv-vista','1');if({{ sv_cv }}||v||sessionStorage.getItem('sv-vista')==='1')document.documentElement.classList.add('sv-cv')}catch(e){}</script>
+<style>
+.shop-all-button {
+  color: #fff !important;
+}
+  .product-card span{color: #000;}
+  .embedded-products-wrapper {display: flex;flex-direction: column; justify-content: space-between; align-items: center; height: 100%; text-align: center; }
+  @media only screen and (min-width: 767px){
+    .embedded-products-wrapper { gap: 39px;
+  padding-top: 38px;}
+  }
+@media only screen and (max-width: 500px) {
+    .product-grid {
+        margin-bottom: 5px;
+        gap: 0px!important;
+        column-gap: 37px!important;
+    }
+}
+</style>
+<div class="embedded-products-wrapper">
+      <div clas="custom-top-title">
+          <h3 style="font-size: 24px; color: #000; font-family: 'Filson Pro' !important; font-weight: blod;  text-align: center; text-transform: inherit;margin-top: 5px; ">{{ settings.heading }}</h3>
+          <h3 style="font-size: 14px; color: #000; font-family: 'Filson Pro' !important;  font-weight: 500; font-style: normal; text-align: center;margin-bottom: 0;">{{ settings.subheading }}</h3>
+      </div>
+        <div class="product-grid">
+         {% assign selected_collection = collections[settings.collection] %}
+          {% assign selected_collection2 = collections[settings.collection2] %}
+           {% assign selected_collection3 = collections[settings.collection3] %}
+            {% assign selected_collection4 = collections[settings.collection4] %}
+          <div class="product-card">
+            <a href="{{selected_collection.url  }}">
+        <img src="{{ selected_collection.image | img_url: 'medium' }}" alt="{{ selected_collection.title }}">   
+              <span>{{selected_collection.title  }} </span>
+            </a>
+          </div>
+        <div class="product-card">
+            <a href="{{selected_collection2.url  }}">
+        <img src="{{ selected_collection2.image | img_url: 'medium' }}" alt="{{ selected_collection2.title }}">   
+              <span>{{selected_collection2.title  }} </span>
+            </a>
+          </div>
+       <div class="product-card">
+            <a href="{{selected_collection3.url  }}">
+        <img src="{{ selected_collection3.image | img_url: 'medium' }}" alt="{{ selected_collection3.title }}">   
+              <span>{{selected_collection3.title  }} </span>
+            </a>
+          </div>
+          <div class="product-card">
+            <a href="{{selected_collection4.url  }}">
+        <img src="{{ selected_collection4.image | img_url: 'medium' }}" alt="{{ selected_collection4.title }}">   
+              <span>{{selected_collection4.title  }} </span>
+            </a>
+          </div>
+        </div>
+        <div class="custom-bottom-data">
+            <div class="live-shopping-status">
+              <span style="font-size: 6px; display: flex; align-items: center;">🟢 </span><span style="color: #000;font-size: 13px;"> {{ settings.live_label }}</span>
+            </div>
+            <div class="custom-btnt" style="padding: 0px 12px;">
+            <a class="shop-all-button" href="{{ sv_cv_enlace }}">{{ settings.button_text }}</a>
+            </div>
+            <div class="guarantee-text">
+              
+              {{ settings.guarantee_text }}
+             </div>
+          </div>
+      </div>
+
+{%- comment -%} Version nueva: se muestra en lugar de la de arriba cuando <html> tiene .sv-cv {%- endcomment -%}
+<div class="sv-cv-vacio">
+  <div class="sv-cv-vacio__arriba">
+    <p class="sv-cv-vacio__titulo">{{ settings.heading }}</p>
+    {%- if settings.subheading != blank -%}<p class="sv-cv-vacio__sub">{{ settings.subheading }}</p>{%- endif -%}
+  </div>
+  <div class="sv-cv-vacio__grilla">
+    {%- assign sv_cv_claves = 'collection,collection2,collection3,collection4' | split: ',' -%}
+    {%- comment -%} Temporada de la app (sv_configuracion_2.temporada): en Navidad, la «Foto de Navidad» de cada coleccion. {%- endcomment -%}
+    {%- assign sv_temporada = 'normal' -%}
+    {%- for e in shop.metaobjects.sv_configuracion_2.values -%}{%- assign sv_temporada = e.temporada.value | default: 'normal' | append: '' -%}{%- break -%}{%- endfor -%}
+    {%- for k in sv_cv_claves -%}
+      {%- assign c = collections[settings[k]] -%}
+      {%- if c != blank -%}
+        {%- comment -%} La misma foto que la cuadricula del inicio (sv-inicio-<coleccion>.jpg en Archivos); si no hay, la de la coleccion. {%- endcomment -%}
+        {%- assign sv_nombre = 'sv-inicio-' | append: c.handle | append: '.jpg' -%}
+        {%- assign foto = images[sv_nombre] -%}
+        {%- if foto == blank -%}{%- assign foto = c.image -%}{%- endif -%}
+        {%- if sv_temporada == 'navidad' and c.metafields.custom.foto_navidad.value -%}{%- assign foto = c.metafields.custom.foto_navidad.value -%}{%- endif -%}
+        <a class="sv-cv-vacio__col" href="{{ c.url }}">
+          <span class="sv-cv-vacio__foto">{%- if foto -%}{{ foto | image_url: width: 480 | image_tag: loading: 'lazy', widths: '240,360,480', sizes: '(min-width: 769px) 260px, 44vw', alt: c.title }}{%- endif -%}</span>
+          <span class="sv-cv-vacio__nombre">{{ c.title }}</span>
+        </a>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+  <div class="sv-cv-vacio__abajo">
+    {%- if settings.live_label != blank -%}
+      <p class="sv-cv-vacio__vivo"><span class="sv-cv-radar" aria-hidden="true"></span>{{ settings.live_label }}</p>
+    {%- endif -%}
+    <a class="btn btn--full sv-cv-vacio__boton" href="{{ sv_cv_enlace }}">{{ settings.button_text }}</a>
+  </div>
+</div>
+<style>
+  .sv-cv-vacio, svg.sv-cv-bolsa { display: none; }
+  html.sv-cv .drawer__cart-empty > .embedded-products-wrapper { display: none; }
+  html.sv-cv .sv-cv-vacio {
+    display: flex; flex-direction: column; gap: 22px; height: 100%; box-sizing: border-box;
+    padding: 18px 20px 16px; text-align: center; color: #000;
+  }
+  .sv-cv-vacio p { margin: 0; }
+  .sv-cv-vacio__titulo {
+    font-family: var(--typeHeaderPrimary), var(--typeHeaderFallback); font-weight: var(--typeHeaderWeight, 600);
+    font-size: 26px; line-height: 1.15; letter-spacing: -0.01em;
+  }
+  .sv-cv-vacio__sub {
+    margin-top: 6px !important; font-family: var(--typeBasePrimary), var(--typeBaseFallback);
+    font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #6b6b6b;
+  }
+  .sv-cv-vacio__grilla { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+  .sv-cv-vacio__col { display: block; text-decoration: none; color: #000; }
+  .sv-cv-vacio__foto { display: block; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #f2f2f2; }
+  .sv-cv-vacio__foto img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+  .sv-cv-vacio__col:hover .sv-cv-vacio__foto img { transform: scale(1.04); }
+  .sv-cv-vacio__nombre {
+    display: block; margin-top: 8px; font-family: var(--typeBasePrimary), var(--typeBaseFallback);
+    font-size: 15px; font-weight: 600; letter-spacing: .02em;
+  }
+  .sv-cv-vacio__abajo { margin-top: auto; display: flex; flex-direction: column; gap: 14px; }
+  .sv-cv-vacio__vivo {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-family: var(--typeBasePrimary), var(--typeBaseFallback); font-size: 14px; font-weight: 400; color: #1c1d1d;
+  }
+  .sv-cv-radar { position: relative; flex: 0 0 8px; width: 8px; height: 8px; border-radius: 50%; background: #7f1d2d; }
+  .sv-cv-radar::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%; background: #7f1d2d;
+    animation: sv-cv-radar 2.4s cubic-bezier(.2,.6,.35,1) infinite;
+  }
+  @keyframes sv-cv-radar { 0% { transform: scale(1); opacity: .5; } 80%, 100% { transform: scale(3.2); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .sv-cv-radar::after { animation: none; } }
+  .sv-cv-vacio__boton { letter-spacing: .18em; }
+
+  /* Encabezado del cajon: la bolsa de la cabecera con el numero adentro, y la X sin recuadro gris */
+  html.sv-cv .drawer__title .sv-cv-viejo { display: none; }
+  html.sv-cv .drawer__title { position: relative; }
+  html.sv-cv .drawer__title .sv-cv-bolsa { display: block; width: 30px; height: 27px; }
+  html.sv-cv #cart-count {
+    left: 0 !important; top: calc(50% - 6.5px) !important; width: 30px !important; height: 15.5px !important;
+    display: flex !important; align-items: center; justify-content: center;
+    background: none !important; border-radius: 0 !important; color: #000 !important;
+    font: 600 11px/1 var(--typeBasePrimary), var(--typeBaseFallback) !important;
+  }
+  html.sv-cv .drawer__close-button .icon { background: none !important; }
+</style>

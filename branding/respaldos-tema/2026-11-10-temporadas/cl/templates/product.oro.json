@@ -1,0 +1,718 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "custom_tPmniV": {
+          "type": "custom",
+          "disabled": true,
+          "settings": {
+            "code": "<div style=\"display: inline-block; background-color: #eeeeee; color: #000000; font-weight: bold; font-size: 12px; font-family: Arial, sans-serif; padding: 8px 12px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.5px;\">\n  COMPRA 3 PRODUCTOS, LLEVA 1 GRATIS\n</div>"
+          }
+        },
+        "custom_Jbdwgw": {
+          "type": "custom",
+          "disabled": true,
+          "settings": {
+            "code": "<div class=\"custom-banner\">\n  <span class=\"radar-circle\"></span>\n  <span class=\"offer-text\"><strong>SUMMER SALE 75% OFF:</strong> Unidades Limitadas</span>\n</div>\n\n<style>\n  .custom-banner {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    background-color: #832520;\n    padding: 0px 8px; /* Padding vertical reducido a 0px y horizontal a 8px */\n    border-radius: 12px;\n    color: #FFFFFF;\n    font-weight: normal;\n    font-size: 13px;\n    white-space: nowrap;\n  }\n\n  .radar-circle {\n    width: 10px;\n    height: 10px;\n    background-color: #FFFFFF;\n    border-radius: 50%;\n    margin-right: 4px;\n    position: relative;\n    flex-shrink: 0;\n  }\n\n  .radar-circle::before {\n    content: '';\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    width: 10px;\n    height: 10px;\n    background-color: rgba(255, 255, 255, 0.3);\n    border-radius: 50%;\n    transform: translate(-50%, -50%) scale(1);\n    animation: radar-effect 2s infinite ease-out;\n  }\n\n  @keyframes radar-effect {\n    0% {\n      transform: translate(-50%, -50%) scale(1);\n      opacity: 0.8;\n    }\n    100% {\n      transform: translate(-50%, -50%) scale(2.4);\n      opacity: 0;\n    }\n  }\n</style>"
+          }
+        },
+        "loox-rating": {
+          "type": "shopify://apps/loox-reviews/blocks/loox-rating/5c3b337f-fd14-4df5-b1d6-80ec13e6e28e",
+          "disabled": true,
+          "settings": {
+            "contentSize": 17,
+            "pattern": "(4.87 / 5.0) +21.000 Clientes",
+            "hideText": false,
+            "alignment": "left",
+            "layout": "",
+            "textColor": "",
+            "starColor": "",
+            "showAllReviews": false,
+            "looxOpenFloatingWidget": false,
+            "emptyRatingWidget": false
+          }
+        },
+        "price": {
+          "type": "price",
+          "settings": {}
+        },
+        "custom_DiNjbw": {
+          "type": "custom",
+          "disabled": true,
+          "settings": {
+            "code": "<div class=\"custom-banner\">\n  <span class=\"radar-circle\"></span>\n  <span class=\"offer-text\"><strong>SUMMER SALE:</strong> Hasta 60% OFF | Stock Limitado</span>\n</div>\n\n<style>\n  .custom-banner {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    background-color: #832520;\n    padding: 1px 8px;\n    border-radius: 12px;\n    color: #FFFFFF;\n    font-weight: normal;\n    font-size: 13px;\n    white-space: nowrap;\n  }\n\n  .radar-circle {\n    width: 10px;\n    height: 10px;\n    background-color: #FFFFFF;\n    border-radius: 50%;\n    margin-right: 4px;\n    position: relative;\n    flex-shrink: 0;\n  }\n\n  .radar-circle::before {\n    content: '';\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    width: 10px;\n    height: 10px;\n    background-color: rgba(255, 255, 255, 0.3);\n    border-radius: 50%;\n    transform: translate(-50%, -50%) scale(1);\n    animation: radar-effect 2s infinite ease-out;\n  }\n\n  @keyframes radar-effect {\n    0% {\n      transform: translate(-50%, -50%) scale(1);\n      opacity: 0.8;\n    }\n    100% {\n      transform: translate(-50%, -50%) scale(2.4);\n      opacity: 0;\n    }\n  }\n</style>"
+          }
+        },
+        "separator_BqtpzB": {
+          "type": "separator",
+          "disabled": true,
+          "settings": {}
+        },
+        "sv_selector_color": {
+          "type": "shopify://apps/color-size-picker/blocks/selector-color/01a0ad1a-1990-7459-b850-45f32c50d143",
+          "settings": {
+            "orden_etiquetas": "acero-inox, oro",
+            "mostrar_encabezado": true,
+            "encabezado_es": "Color",
+            "encabezado_en": "Color",
+            "mostrar_nombre_actual": true,
+            "forma": "circulo",
+            "tamano": 34,
+            "espacio": 8,
+            "color_borde": "#111111",
+            "mostrar_etiquetas": false,
+            "marcar_agotado": true,
+            "alineacion": "izquierda",
+            "margen_superior": 8,
+            "margen_inferior": 10
+          }
+        },
+        "sv_selector_talla": {
+          "type": "shopify://apps/color-size-picker/blocks/selector-talla/01a0ad1a-1990-7459-b850-45f32c50d143",
+          "settings": {
+            "mostrar_encabezado": true,
+            "encabezado_es": "Tamaño",
+            "encabezado_en": "Size",
+            "mostrar_valor_actual": true,
+            "mostrar_agotadas": true,
+            "ocultar_opcion_unica": false,
+            "recargar_al_elegir": false,
+            "color_activo": "#111111",
+            "espacio": 8,
+            "alineacion": "izquierda",
+            "margen_superior": 8,
+            "margen_inferior": 10
+          }
+        },
+        "sv_guia_tallas": {
+          "type": "shopify://apps/color-size-picker/blocks/guia-de-tallas/01a0ad1a-1990-7459-b850-45f32c50d143",
+          "settings": {
+            "mostrar_icono": true,
+            "texto_boton_es": "Guía de tallas",
+            "texto_boton_en": "Size guide",
+            "alineacion": "izquierda",
+            "margen_superior": 8,
+            "margen_inferior": 10
+          }
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "disabled": true,
+          "settings": {
+            "variant_labels": true,
+            "picker_type": "button",
+            "product_dynamic_variants_enable": true,
+            "color_swatches": false
+          }
+        },
+        "custom_bk8egf": {
+          "type": "custom",
+          "settings": {
+            "code": "<!-- META DE PRODUCTO: Reseñas + Estado de stock -->\n<div class=\"prod-meta\" aria-label=\"Resumen de reseñas y disponibilidad\">\n  <!-- Izquierda: estrellas + texto -->\n  <div class=\"pm-left\">\n    <span class=\"pm-stars\" aria-hidden=\"true\">\n      <svg viewBox=\"0 0 20 20\" class=\"star\"><path d=\"M10 1.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2L10 13.9 5.4 16l.9-5.2L2.4 7.1l5.2-.8L10 1.6z\"/></svg>\n      <svg viewBox=\"0 0 20 20\" class=\"star\"><path d=\"M10 1.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2L10 13.9 5.4 16l.9-5.2L2.4 7.1l5.2-.8L10 1.6z\"/></svg>\n      <svg viewBox=\"0 0 20 20\" class=\"star\"><path d=\"M10 1.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2L10 13.9 5.4 16l.9-5.2L2.4 7.1l5.2-.8L10 1.6z\"/></svg>\n      <svg viewBox=\"0 0 20 20\" class=\"star\"><path d=\"M10 1.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2L10 13.9 5.4 16l.9-5.2L2.4 7.1l5.2-.8L10 1.6z\"/></svg>\n      <svg viewBox=\"0 0 20 20\" class=\"star\"><path d=\"M10 1.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2L10 13.9 5.4 16l.9-5.2L2.4 7.1l5.2-.8L10 1.6z\"/></svg>\n    </span>\n    <span class=\"pm-text\">+50.000 Clientes</span>\n  </div>\n\n  <!-- Derecha: punto radar + texto -->\n  <div class=\"pm-right\" role=\"status\" aria-live=\"polite\">\n    <span class=\"pm-dot\" aria-hidden=\"true\"></span>\n    <span class=\"pm-status\">Listo para enviar</span>\n  </div>\n</div>\n\n<style>\n/* =============== META LINE =============== */\n.prod-meta{\n  --pm-star:#000000;   /* ★ negras */\n  --pm-text:#374151;   /* ← texto reseñas MÁS OSCURO */\n  --pm-green:#16A349;  /* estado stock */\n  display:flex; align-items:center; justify-content:space-between;\n  gap:12px;\n  font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;\n  font-weight:600; font-size:12px; line-height:1.2;\n  color:#111827;\n  margin:6px 0 2px;\n}\n\n/* Izquierda */\n.pm-left{display:flex; align-items:center; gap:6px; color:var(--pm-text);}\n.pm-stars{display:inline-flex; gap:3px;}\n.pm-stars .star{width:12px; height:12px; fill:var(--pm-star); display:block;}\n.pm-text{font-size:11px; white-space:nowrap;}   /* ⬅ más pequeño */\n\n/* Derecha */\n.pm-right{display:flex; align-items:center; gap:6px; color:var(--pm-green);}\n.pm-status{white-space:nowrap;}\n\n/* Punto con efecto radar más LENTO */\n.pm-dot{\n  position:relative; width:8px; height:8px; border-radius:999px;\n  background:currentColor; flex:0 0 8px;\n  box-shadow:0 0 0 5px rgba(22,163,73,.10);\n}\n.pm-dot::before,\n.pm-dot::after{\n  content:\"\"; position:absolute; inset:0; border-radius:999px;\n  border:1px solid currentColor; opacity:.6; transform:scale(1);\n  animation:pm-ripple 3.6s ease-out infinite;     /* lento */\n}\n.pm-dot::after{ animation-delay:1.8s; opacity:.5; }\n\n@keyframes pm-ripple{\n  0%   { transform:scale(1);   opacity:.6; }\n  65%  { transform:scale(2.2); opacity:.12; }\n  100% { transform:scale(2.4); opacity:0; }\n}\n\n@media (min-width:768px){\n  .prod-meta{ font-size:13px; }\n  .pm-stars .star{ width:13px; height:13px; }\n  .pm-text{ font-size:12px; }\n}\n</style>"
+          }
+        },
+        "custom_BHrnjB": {
+          "type": "custom",
+          "settings": {
+            "code": "{%- if request.page_type == 'product' and product != blank -%}\n\n{%- liquid\n  assign img_garantia = 'https://cdn.shopify.com/s/files/1/0773/8218/9103/files/2_38dba500-5f63-4cc6-a700-a493085e724e.png?v=1786944810'\n  assign img_estuche  = 'https://cdn.shopify.com/s/files/1/0773/8218/9103/files/3_036952f7-79e7-4c83-8d5d-6e63d82ef2cb.png?v=1786944811'\n\n  assign tipo = product.type | downcase | strip\n  assign titulo = product.title | downcase\n  assign etiquetas = product.tags | join: ' ' | downcase\n  assign texto = tipo | append: ' ' | append: titulo | append: ' ' | append: etiquetas\n\n  assign categoria = 'Pieza'\n  if texto contains 'pulsera' or texto contains 'bracelet'\n    assign categoria = 'Pulsera'\n  elsif texto contains 'colgante' or texto contains 'pendant' or texto contains 'dije'\n    assign categoria = 'Colgante'\n  elsif texto contains 'anillo'\n    assign categoria = 'Anillo'\n  elsif texto contains 'cadena' or texto contains 'collar' or texto contains 'chain'\n    assign categoria = 'Cadena'\n  endif\n\n  assign v = product.selected_or_first_available_variant\n-%}\n\n<div class=\"cro-wi\" id=\"cro-wi-{{ product.id }}\" data-cro-wi-root>\n  <p class=\"cro-wi__heading\">Qué incluye</p>\n  <div class=\"cro-wi__tiles\">\n\n    <div class=\"cro-wi__tile\">\n      <span class=\"cro-wi__label\">{{ categoria }}</span>\n      <span class=\"cro-wi__media\">\n        <img src=\"{{ v.image | default: product.featured_image | image_url: width: 400 }}\" alt=\"{{ product.title | escape }}\" width=\"400\" height=\"400\" loading=\"lazy\" data-cro-wi-img>\n      </span>\n      <span class=\"cro-wi__price\" data-cro-wi-price>{{ v.price | money }}</span>\n    </div>\n\n    <div class=\"cro-wi__tile\">\n      <span class=\"cro-wi__label\">Garantía Eterna</span>\n      <span class=\"cro-wi__media\">\n        <img src=\"{{ img_garantia }}\" alt=\"Garantía Eterna\" width=\"400\" height=\"400\" loading=\"lazy\">\n      </span>\n      <span class=\"cro-wi__price cro-wi__price--free\">GRATIS <s data-cro-wi-val=\"garantia\">$20</s></span>\n    </div>\n\n    <div class=\"cro-wi__tile\">\n      <span class=\"cro-wi__label\">Packaging</span>\n      <span class=\"cro-wi__media\">\n        <img src=\"{{ img_estuche }}\" alt=\"Packaging\" width=\"400\" height=\"400\" loading=\"lazy\">\n      </span>\n      <span class=\"cro-wi__price cro-wi__price--free\">GRATIS <s data-cro-wi-val=\"estuche\">$4</s></span>\n    </div>\n\n  </div>\n\n  <p class=\"cro-wi__unlocked\">\n    Incluye <strong data-cro-wi-val=\"total\">$24</strong> en extras <strong>sin costo</strong>\n  </p>\n\n  <script type=\"application/json\" data-cro-wi-data>\n    {\n      {%- for variante in product.variants -%}\n        \"{{ variante.id }}\": {\n          \"precio\": {{ variante.price | money | json }},\n          \"img\": {{ variante.image | default: product.featured_image | image_url: width: 400 | json }}\n        }{%- unless forloop.last -%},{%- endunless -%}\n      {%- endfor -%}\n    }\n  </script>\n</div>\n\n<style>\n  #cro-wi-{{ product.id }} {\n    border: 1px solid #E3E3E3;\n    border-radius: 12px;\n    padding: 12px 12px 10px;\n    margin: 0 0 14px;\n    background: #FFFFFF;\n    box-sizing: border-box;\n    text-align: left;\n    contain: layout style;\n  }\n  #cro-wi-{{ product.id }} * {\n    box-sizing: border-box;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__heading {\n    margin: 0 0 9px;\n    font-size: 13px;\n    font-weight: 700;\n    letter-spacing: 0.06em;\n    text-transform: uppercase;\n    color: #111111;\n    line-height: 1.2;\n    text-align: left;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__tiles {\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    gap: 8px;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__tile {\n    border: 1px solid #E3E3E3;\n    border-radius: 10px;\n    padding: 9px 4px 8px;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    text-align: center;\n    gap: 6px;\n    background: #FFFFFF;\n    min-width: 0;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__label {\n    display: block;\n    width: 100%;\n    font-size: clamp(9px, 2.75vw, 13px);\n    font-weight: 700;\n    color: #111111;\n    line-height: 1.2;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__media {\n    display: block;\n    width: 100%;\n    aspect-ratio: 1 / 1;\n    background: transparent;\n    border-radius: 6px;\n    overflow: hidden;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__media img {\n    width: 100%;\n    height: 100%;\n    object-fit: contain;\n    display: block;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__price {\n    display: flex;\n    align-items: baseline;\n    justify-content: center;\n    gap: 4px;\n    white-space: nowrap;\n    font-size: clamp(9.5px, 2.9vw, 15px);\n    font-weight: 700;\n    color: #111111;\n    line-height: 1.2;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__price--free {\n    color: #0A7C3E;\n    text-transform: uppercase;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__price--free s {\n    color: #9A9A9A;\n    font-weight: 700;\n    text-decoration: line-through;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__unlocked {\n    margin: 9px 0 0;\n    text-align: center;\n    font-size: clamp(11px, 3vw, 14px);\n    color: #333333;\n    line-height: 1.3;\n  }\n  #cro-wi-{{ product.id }} .cro-wi__unlocked strong {\n    color: #111111;\n    font-weight: 700;\n  }\n</style>\n\n<script>\n(function () {\n  var raiz = document.getElementById('cro-wi-{{ product.id }}');\n  if (!raiz || raiz.dataset.croWiInit) return;\n  raiz.dataset.croWiInit = '1';\n\n  /* Solo opera en la ficha de producto */\n  if (!document.body.classList.contains('template-product') &&\n      !document.querySelector('form[action*=\"/cart/add\"] [name=\"id\"]')) {\n    return;\n  }\n\n  /* =========================================================\n     TABLA DE VALORES POR MONEDA\n     Editar aquí los montos de cada mercado.\n     ========================================================= */\n  var VALORES = {\n    USD: { garantia: '$20',      estuche: '$4',      total: '$24'      },\n    EUR: { garantia: '€17',      estuche: '€4',      total: '€21'      },\n    CLP: { garantia: '$20.000',  estuche: '$3.490',  total: '$23.490'  },\n    MXN: { garantia: '$349',     estuche: '$69',     total: '$418'     }\n  };\n  var POR_DEFECTO = 'USD';\n\n  function monedaActiva() {\n    if (window.Shopify && Shopify.currency && Shopify.currency.active) {\n      return Shopify.currency.active;\n    }\n    return POR_DEFECTO;\n  }\n\n  function pintarValores() {\n    var cod = monedaActiva();\n    var tabla = VALORES[cod] || VALORES[POR_DEFECTO];\n    var nodos = raiz.querySelectorAll('[data-cro-wi-val]');\n    for (var i = 0; i < nodos.length; i++) {\n      var clave = nodos[i].getAttribute('data-cro-wi-val');\n      if (tabla[clave]) nodos[i].textContent = tabla[clave];\n    }\n  }\n\n  pintarValores();\n\n  /* ---------- Precio e imagen de la primera tarjeta ---------- */\n  var datos = {};\n  try {\n    datos = JSON.parse(raiz.querySelector('[data-cro-wi-data]').textContent);\n  } catch (e) { return; }\n\n  var elPrecio = raiz.querySelector('[data-cro-wi-price]');\n  var elImg = raiz.querySelector('[data-cro-wi-img]');\n  var ultimoId = null;\n\n  function aplicar(id) {\n    if (!id || String(id) === String(ultimoId)) return;\n    var d = datos[String(id)];\n    if (!d) return;\n    ultimoId = id;\n    if (elPrecio && d.precio) elPrecio.innerHTML = d.precio;\n    if (elImg && d.img) elImg.src = d.img;\n  }\n\n  /* Contenedor de la ficha: nunca cae a document */\n  var seccion =\n    raiz.closest('[id^=\"ProductSection-\"]') ||\n    raiz.closest('.product-single') ||\n    raiz.closest('form[action*=\"/cart/add\"]') ||\n    raiz.parentElement;\n\n  if (seccion) {\n    seccion.addEventListener('variantChange', function (e) {\n      if (e.detail && e.detail.variant) aplicar(e.detail.variant.id);\n    });\n  }\n\n  /* Lee la variante únicamente del formulario de compra principal */\n  function leerActual() {\n    var desdeUrl = new URL(window.location.href).searchParams.get('variant');\n    if (desdeUrl && /^\\d+$/.test(desdeUrl)) return desdeUrl;\n\n    var campo =\n      document.querySelector('form[action*=\"/cart/add\"] select[name=\"id\"]') ||\n      document.querySelector('form[action*=\"/cart/add\"] input[name=\"id\"]');\n\n    if (campo && campo.value && /^\\d+$/.test(String(campo.value).trim())) {\n      return campo.value;\n    }\n    return null;\n  }\n\n  /* Se detiene solo si el bloque desaparece del DOM */\n  var reloj = setInterval(function () {\n    if (!document.body.contains(raiz)) {\n      clearInterval(reloj);\n      return;\n    }\n    aplicar(leerActual());\n  }, 500);\n\n  window.addEventListener('popstate', function () { aplicar(leerActual()); });\n})();\n</script>\n\n{%- endif -%}"
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": false,
+            "surface_pickup_enable": true,
+            "show_gift_card_recipient": false
+          }
+        },
+        "custom_ketXkH": {
+          "type": "custom",
+          "settings": {
+            "code": "<div class=\"banner-3x2-{{ section.id }}\">\n  <div class=\"bo-fila\">\n    <p class=\"bo-nombre\">BLACK FRIDAY</p>\n    <span class=\"bo-tag\">AGOTÁNDOSE RÁPIDO</span>\n  </div>\n  <p class=\"bo-principal\">3X2 + HASTA 60% OFF</p>\n  <p class=\"bo-texto\">Aprovecha nuestra mayor oferta del año mientras duran las existencias.</p>\n</div>\n\n<style>\n  .banner-3x2-{{ section.id }} {\n    background-color: #E5D9CC;\n    border-radius: 8px;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);\n    padding: 11px 20px;\n    text-align: center;\n    font-family: 'Helvetica Neue', Arial, sans-serif;\n    max-width: 800px;\n    margin: 0 auto;\n    box-sizing: border-box;\n  }\n  .banner-3x2-{{ section.id }} p {\n    margin: 0;\n    padding: 0;\n    font-family: 'Helvetica Neue', Arial, sans-serif;\n  }\n  .banner-3x2-{{ section.id }} .bo-fila {\n    display: flex;\n    flex-wrap: wrap;\n    align-items: center;\n    justify-content: center;\n    gap: 4px 10px;\n    margin-bottom: 4px;\n  }\n  .banner-3x2-{{ section.id }} .bo-nombre {\n    color: #141414;\n    font-size: 10px;\n    font-weight: 500;\n    line-height: 1.2;\n    letter-spacing: 0.28em;\n  }\n  .banner-3x2-{{ section.id }} .bo-tag {\n    display: inline-block;\n    background-color: #631D29;\n    color: #FFFFFF;\n    font-size: 9px;\n    font-weight: 600;\n    line-height: 1;\n    letter-spacing: 0.14em;\n    padding: 3px 7px 3px calc(7px + 0.14em);\n    border-radius: 4px;\n    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);\n  }\n  .banner-3x2-{{ section.id }} .bo-principal {\n    color: #141414;\n    font-size: 18px;\n    font-weight: 700;\n    line-height: 1.2;\n    letter-spacing: 0.01em;\n    margin-bottom: 3px;\n    text-wrap: balance;\n  }\n  .banner-3x2-{{ section.id }} .bo-texto {\n    color: #4A4540;\n    font-size: 11.5px;\n    font-weight: 400;\n    line-height: 1.35;\n    letter-spacing: 0.01em;\n    text-wrap: balance;\n  }\n  @media (max-width: 600px) {\n    .banner-3x2-{{ section.id }} {\n      padding: 10px 12px;\n    }\n    .banner-3x2-{{ section.id }} .bo-nombre {\n      font-size: 9.5px;\n      letter-spacing: 0.24em;\n    }\n    .banner-3x2-{{ section.id }} .bo-tag {\n      font-size: 8.5px;\n    }\n    .banner-3x2-{{ section.id }} .bo-principal {\n      font-size: 17px;\n    }\n    .banner-3x2-{{ section.id }} .bo-texto {\n      font-size: 11px;\n    }\n  }\n</style>"
+          }
+        },
+        "custom_7EBHKL": {
+          "type": "custom",
+          "disabled": true,
+          "settings": {
+            "code": "<div class=\"banner-3x2-{{ section.id }}\">\n  <p><strong>3X2 EN TODAS LAS JOYAS</strong></p>\n  <p>Añade 3 al carrito y una es gratis</p>\n</div>\n<style>\n  .banner-3x2-{{ section.id }} {\n    background-color: #e5d9cc;\n    border-radius: 0px;\n    padding: 8px 20px;\n    text-align: center;\n    font-family: 'Helvetica Neue', Arial, sans-serif;\n    max-width: 800px;\n    margin: 0 auto;\n  }\n  .banner-3x2-{{ section.id }} p {\n    color: #1a1a1a;\n    font-size: 15px;\n    font-weight: 400;\n    margin: 0 0 4px 0;\n    font-family: 'Helvetica Neue', Arial, sans-serif;\n    line-height: 1.4;\n  }\n  .banner-3x2-{{ section.id }} p:last-child {\n    margin-bottom: 0;\n  }\n  .banner-3x2-{{ section.id }} p strong {\n    font-weight: 700;\n  }\n  @media (max-width: 600px) {\n    .banner-3x2-{{ section.id }} p {\n      font-size: 14px;\n    }\n  }\n</style>"
+          }
+        },
+        "custom_w7xaet": {
+          "type": "custom",
+          "settings": {
+            "code": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n  <title>Product Features</title>\n  <style>\n    :root {\n      --text-color: #333;\n      --hover-bg-color: #f1f1f1;\n      --highlight-color: #000;\n      --transition-duration: 0.3s;\n      --font-family: 'Helvetica Neue', Arial, sans-serif;\n    }\n\n    body.bdy-a123 {\n      font-family: var(--font-family);\n      display: flex;\n      justify-content: flex-start;\n      align-items: flex-start;\n      height: 100vh;\n      margin: 0;\n      background: none;\n      padding: 20px;\n    }\n\n    .container-x987 {\n      width: 100%;\n      max-width: 600px;\n      display: flex;\n      flex-direction: column;\n      gap: 5px;\n    }\n\n    .item-z456 {\n      display: flex;\n      align-items: center;\n      padding: 5px 0;\n      border-radius: 8px;\n      transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;\n      cursor: default;\n    }\n\n    .item-z456:hover {\n      background-color: var(--hover-bg-color);\n      transform: translateX(10px);\n    }\n\n    .icon-w321 {\n      width: 24px;\n      height: 24px;\n      margin-right: 10px;\n      transition: filter var(--transition-duration) ease;\n    }\n\n    .item-z456:hover .icon-w321 {\n      filter: brightness(0) invert(0);\n    }\n\n    .text-v654 {\n      font-size: 16px;\n      color: var(--text-color);\n      transition: color var(--transition-duration) ease;\n    }\n\n    .item-z456:hover .text-v654 {\n      color: var(--highlight-color);\n    }\n\n    /* Color especial para la primera línea */\n    .first-feature {\n      color: #007E3E;\n    }\n\n    @media (max-width: 600px) {\n      .text-v654 {\n        font-size: 14px;\n      }\n    }\n  </style>\n</head>\n<body class=\"bdy-a123\">\n  <div class=\"container-x987\">\n    <!-- Línea 1 con color personalizado -->\n    <div class=\"item-z456\">\n      <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/93_7989693e-c3eb-4e28-904f-f4018e94fbfa.png?v=1750358581\" alt=\"Check Icon\" class=\"icon-w321\" />\n      <div class=\"text-v654 first-feature\">En stock - Recibe desde 60 min / 48 hrs región</div>\n    </div>\n\n    <!-- Línea 2 -->\n    <div class=\"item-z456\">\n      <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/92_200e5555-59f7-445f-ad73-827db58fe3b6.png?v=1750358580\" alt=\"Check Icon\" class=\"icon-w321\" />\n      <div class=\"text-v654\">Envío gratis en compras superiores a 80.000</div>\n    </div>\n\n    <!-- Línea 3 -->\n    <div class=\"item-z456\">\n      <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/92_200e5555-59f7-445f-ad73-827db58fe3b6.png?v=1750358580\" alt=\"Check Icon\" class=\"icon-w321\" />\n      <div class=\"text-v654\">Devoluciones y cambios fáciles</div>\n    </div>\n  </div>\n</body>\n</html>"
+          }
+        },
+        "custom_rAfDz6": {
+          "type": "custom",
+          "settings": {
+            "code": "{% assign su_handle = 'mas-vendidos' %}\n{% assign su_titulo = 'Arma tu conjunto y aprovecha el 3×2' %}\n{% assign su_boton = 'Agregar al carrito' %}\n{% assign su_max = 10 %}\n\n{% assign su_coleccion = collections[su_handle] %}\n{% if su_coleccion == blank %}{% assign su_coleccion = collections.all %}{% endif %}\n{% assign su_contador = 0 %}\n\n<div id=\"SetUpsellSV\" class=\"su-wrap\" data-boton=\"{{ su_boton | escape }}\" data-product-id=\"{{ product.id }}\" data-variante-actual=\"{{ product.selected_or_first_available_variant.id }}\" data-max=\"{{ su_max }}\" data-money=\"{{ shop.money_format | escape }}\">\n\n  <p class=\"su-titulo\">{{ su_titulo }}</p>\n\n  <div class=\"su-viewport\">\n\n    <button type=\"button\" class=\"su-nav su-nav--prev\" data-su-nav=\"prev\" aria-label=\"Ver anteriores\" hidden>\n      <svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M15 5L8 12L15 19\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n    </button>\n\n    <div class=\"su-track\" data-su-track>\n\n      {% for su_item in su_coleccion.products %}\n      {% if su_contador < su_max %}\n      {% if su_item.id != product.id and su_item.available %}\n\n      {% assign su_var = su_item.first_available_variant %}\n      {% assign su_alt = su_item.featured_image.alt | default: su_item.title %}\n\n      <div class=\"su-card\" data-su-card data-variant-id=\"{{ su_var.id }}\" data-selected=\"false\" role=\"button\" tabindex=\"0\" aria-pressed=\"false\" aria-label=\"Agregar {{ su_item.title | escape }} a la selección\">\n\n        <span class=\"su-check\" aria-hidden=\"true\">\n          <svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" focusable=\"false\"><path d=\"M4 12.5L9.5 18L20 6\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n        </span>\n\n        <div class=\"su-media\">\n          {% if su_item.featured_image %}\n          <img src=\"{{ su_item.featured_image | image_url: width: 400 }}\" alt=\"{{ su_alt | escape }}\" width=\"400\" height=\"400\" loading=\"lazy\" class=\"su-img\">\n          {% endif %}\n        </div>\n\n        <p class=\"su-nombre\" title=\"{{ su_item.title | escape }}\">{{ su_item.title }}</p>\n\n        <div class=\"su-slot\">\n        {% if su_item.variants.size > 1 %}\n          <div class=\"su-selectwrap\">\n            <select class=\"su-select\" data-su-variant aria-label=\"Elegir opción de {{ su_item.title | escape }}\">\n              {% for su_opcion in su_item.variants %}<option value=\"{{ su_opcion.id }}\" data-precio=\"{{ su_opcion.price | money }}\" data-comparar=\"{% if su_opcion.compare_at_price > su_opcion.price %}{{ su_opcion.compare_at_price | money }}{% endif %}\"{% unless su_opcion.available %} disabled{% endunless %}{% if su_opcion.id == su_var.id %} selected{% endif %}>{{ su_opcion.title }}{% unless su_opcion.available %} — Agotado{% endunless %}</option>{% endfor %}\n            </select>\n            <svg class=\"su-caret\" viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M6 9L12 15L18 9\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n          </div>\n        {% endif %}\n        </div>\n\n        <div class=\"su-precios\">\n          <span class=\"su-precio {% if su_var.compare_at_price > su_var.price %}su-precio--oferta{% else %}su-precio--normal{% endif %}\" data-su-precio>{{ su_var.price | money }}</span>\n          <span class=\"su-precio su-precio--antes\" data-su-antes{% unless su_var.compare_at_price > su_var.price %} hidden{% endunless %}>{% if su_var.compare_at_price > su_var.price %}{{ su_var.compare_at_price | money }}{% endif %}</span>\n        </div>\n\n      </div>\n\n      {% assign su_contador = su_contador | plus: 1 %}\n\n      {% endif %}\n      {% endif %}\n      {% endfor %}\n\n    </div>\n\n    <button type=\"button\" class=\"su-nav su-nav--next\" data-su-nav=\"next\" aria-label=\"Ver siguientes\" hidden>\n      <svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M9 5L16 12L9 19\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n    </button>\n\n  </div>\n\n  <button type=\"button\" class=\"su-cta\" data-su-submit disabled>\n    <span data-su-label>{{ su_boton }}</span>\n  </button>\n\n  <p class=\"su-feedback\" data-su-feedback role=\"status\" aria-live=\"polite\"></p>\n\n</div>\n\n<style>\n#SetUpsellSV{--su-tinta:#141414;--su-oferta:#C8102E;--su-gris:#9A9A9A;--su-linea:#E4E4E4;--su-fondo:#F6F6F6;display:block;margin:24px 0;font-family:inherit;text-align:left;box-sizing:border-box}\n#SetUpsellSV *{box-sizing:border-box;font-family:inherit}\n#SetUpsellSV .su-titulo{margin:0 0 14px;font-size:17px;font-weight:700;line-height:1.3;letter-spacing:0;color:var(--su-tinta);text-transform:none;text-align:left}\n#SetUpsellSV .su-viewport{position:relative}\n#SetUpsellSV .su-track{display:flex;align-items:stretch;gap:10px;padding:4px 2px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;-ms-overflow-style:none}\n#SetUpsellSV .su-track::-webkit-scrollbar{display:none}\n#SetUpsellSV .su-card{position:relative;display:flex;flex-direction:column;flex:0 0 auto;width:158px;padding:10px;background:#FFF;border:1px solid var(--su-linea);border-radius:6px;scroll-snap-align:start;cursor:pointer;user-select:none;transition:border-color .18s ease,box-shadow .18s ease}\n#SetUpsellSV .su-card.is-selected{border-color:var(--su-tinta);box-shadow:0 0 0 1px var(--su-tinta)}\n#SetUpsellSV .su-card:focus-visible{outline:2px solid var(--su-tinta);outline-offset:2px}\n#SetUpsellSV .su-check{position:absolute;top:16px;right:16px;z-index:2;display:flex;align-items:center;justify-content:center;width:22px;height:22px;background:#FFF;border:1.5px solid #C9C9C9;border-radius:4px;color:transparent;transition:all .15s ease}\n#SetUpsellSV .su-card.is-selected .su-check{background:var(--su-tinta);border-color:var(--su-tinta);color:#FFF}\n#SetUpsellSV .su-media{flex:0 0 auto;margin-bottom:10px;aspect-ratio:1/1;background:var(--su-fondo);border-radius:4px;overflow:hidden}\n#SetUpsellSV .su-img{display:block;width:100%;height:100%;object-fit:contain}\n#SetUpsellSV .su-nombre{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:0 0 auto;margin:0 0 8px;height:32px;font-size:12px;font-weight:700;line-height:16px;color:var(--su-tinta);text-transform:none;letter-spacing:0;text-align:left}\n#SetUpsellSV .su-slot{flex:1 0 auto;min-height:42px;margin-bottom:2px}\n#SetUpsellSV .su-selectwrap{position:relative}\n#SetUpsellSV .su-select{-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;height:34px;margin:0;padding:0 26px 0 10px;font-size:12px;font-weight:700;letter-spacing:.02em;line-height:34px;color:var(--su-tinta);background:#FFF;border:1px solid #D6D6D6;border-radius:4px;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.04);transition:border-color .15s ease}\n#SetUpsellSV .su-select:hover{border-color:var(--su-tinta)}\n#SetUpsellSV .su-select:focus{outline:none;border-color:var(--su-tinta)}\n#SetUpsellSV .su-select option:disabled{color:#B4B4B4}\n#SetUpsellSV .su-caret{position:absolute;top:17px;right:8px;transform:translateY(-50%);pointer-events:none;color:var(--su-tinta)}\n#SetUpsellSV .su-precios{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;flex:0 0 auto}\n#SetUpsellSV .su-precio{font-size:13px}\n#SetUpsellSV .su-precio--oferta{font-weight:700;color:var(--su-oferta)}\n#SetUpsellSV .su-precio--normal{font-weight:700;color:var(--su-tinta)}\n#SetUpsellSV .su-precio--antes{font-weight:400;color:var(--su-gris);text-decoration:line-through}\n#SetUpsellSV .su-precio--antes[hidden]{display:none}\n#SetUpsellSV .su-nav{position:absolute;top:42%;z-index:3;display:flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;min-width:0;background:var(--su-tinta);border:0;border-radius:50%;color:#FFF;cursor:pointer;transform:translateY(-50%)}\n#SetUpsellSV .su-nav--prev{left:-6px}\n#SetUpsellSV .su-nav--next{right:-6px}\n#SetUpsellSV .su-nav[hidden]{display:none}\n#SetUpsellSV .su-cta{display:flex;align-items:center;justify-content:center;width:100%;margin-top:18px;padding:18px 20px;font-family:inherit;font-size:14px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:#FFF;background:#141414;border:0;border-radius:0;box-shadow:0 10px 24px rgba(0,0,0,.18);cursor:pointer;transition:opacity .18s ease}\n#SetUpsellSV .su-cta:hover{opacity:.88}\n#SetUpsellSV .su-cta:disabled{opacity:.45;cursor:not-allowed;box-shadow:0 6px 16px rgba(0,0,0,.10)}\n#SetUpsellSV .su-feedback{margin:8px 0 0;min-height:16px;font-size:12px;text-align:center;color:#6B6B6B}\n#SetUpsellSV.is-loading .su-track{opacity:.45;transition:opacity .2s ease}\n@media screen and (min-width:750px){#SetUpsellSV .su-titulo{font-size:20px}#SetUpsellSV .su-card{width:186px}#SetUpsellSV .su-nombre{height:34px;font-size:13px;line-height:17px}#SetUpsellSV .su-nav--prev{left:-14px}#SetUpsellSV .su-nav--next{right:-14px}}\n</style>\n\n<script>\n(function(){\n  function initSetUpsell(){\n    var root = document.getElementById('SetUpsellSV');\n    if(!root || root.getAttribute('data-su-ready') === 'true') return;\n    root.setAttribute('data-su-ready','true');\n\n    var track = root.querySelector('[data-su-track]');\n    var submit = root.querySelector('[data-su-submit]');\n    var label = root.querySelector('[data-su-label]');\n    var feedback = root.querySelector('[data-su-feedback]');\n    var prev = root.querySelector('[data-su-nav=\"prev\"]');\n    var next = root.querySelector('[data-su-nav=\"next\"]');\n    var baseLabel = root.getAttribute('data-boton') || 'Agregar al carrito';\n    var productId = root.getAttribute('data-product-id');\n    var varianteBase = root.getAttribute('data-variante-actual');\n    var maxItems = parseInt(root.getAttribute('data-max'), 10) || 10;\n    var moneyFormat = root.getAttribute('data-money') || '${{amount}}';\n    var rootUrl = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';\n    var cards = [];\n    var cierreInstalado = false;\n\n    function esc(s){\n      return String(s == null ? '' : s).replace(/[&<>\"']/g, function(c){\n        return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c];\n      });\n    }\n\n    function money(cents){\n      var value = (cents || 0) / 100;\n      function group(num, dec, mil, sep){\n        var fixed = num.toFixed(dec);\n        var parts = fixed.split('.');\n        parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, mil);\n        return parts.length > 1 ? parts.join(sep) : parts[0];\n      }\n      return moneyFormat.replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, function(_, t){\n        if(t === 'amount') return group(value,2,',','.');\n        if(t === 'amount_no_decimals') return group(value,0,',','');\n        if(t === 'amount_with_comma_separator') return group(value,2,'.',',');\n        if(t === 'amount_no_decimals_with_comma_separator') return group(value,0,'.','');\n        if(t === 'amount_with_apostrophe_separator') return group(value,2,\"'\",'.');\n        if(t === 'amount_no_decimals_with_space_separator') return group(value,0,' ','');\n        return group(value,2,',','.');\n      });\n    }\n\n    function imgUrl(url){\n      if(!url) return '';\n      var full = url.indexOf('//') === 0 ? 'https:' + url : url;\n      return full + (full.indexOf('?') > -1 ? '&' : '?') + 'width=400';\n    }\n\n    function varianteDelProducto(){\n      var selectores = [\n        'form[action*=\"/cart/add\"] select[name=\"id\"]',\n        'form[action*=\"/cart/add\"] input[name=\"id\"]',\n        '[data-product-select]',\n        'select[name=\"id\"]',\n        'input[name=\"id\"]'\n      ];\n      for(var i = 0; i < selectores.length; i++){\n        var el = document.querySelector(selectores[i]);\n        if(el && el.value && /^\\d+$/.test(String(el.value).trim())){\n          return parseInt(el.value, 10);\n        }\n      }\n      var desdeUrl = new URL(window.location.href).searchParams.get('variant');\n      if(desdeUrl && /^\\d+$/.test(desdeUrl)) return parseInt(desdeUrl, 10);\n      return parseInt(varianteBase, 10);\n    }\n\n    function cardHTML(p){\n      var todas = p.variants || [];\n      var disponibles = todas.filter(function(v){ return v.available; });\n      if(!disponibles.length) return '';\n      var v = disponibles[0];\n      var oferta = v.compare_at_price && v.compare_at_price > v.price;\n\n      var slot = '';\n      if(todas.length > 1){\n        var opts = todas.map(function(o){\n          var cmp = (o.compare_at_price && o.compare_at_price > o.price) ? money(o.compare_at_price) : '';\n          return '<option value=\"' + o.id + '\" data-precio=\"' + esc(money(o.price)) + '\" data-comparar=\"' + esc(cmp) + '\"'\n            + (o.available ? '' : ' disabled')\n            + (o.id === v.id ? ' selected' : '') + '>'\n            + esc(o.title) + (o.available ? '' : ' — Agotado') + '</option>';\n        }).join('');\n        slot = '<div class=\"su-selectwrap\"><select class=\"su-select\" data-su-variant aria-label=\"Elegir opción de ' + esc(p.title) + '\">' + opts + '</select>'\n          + '<svg class=\"su-caret\" viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" aria-hidden=\"true\"><path d=\"M6 9L12 15L18 9\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>';\n      }\n\n      return '<div class=\"su-card\" data-su-card data-variant-id=\"' + v.id + '\" data-selected=\"false\" role=\"button\" tabindex=\"0\" aria-pressed=\"false\" aria-label=\"Agregar ' + esc(p.title) + ' a la selección\">'\n        + '<span class=\"su-check\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\"><path d=\"M4 12.5L9.5 18L20 6\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></span>'\n        + '<div class=\"su-media\">' + (p.featured_image ? '<img class=\"su-img\" src=\"' + esc(imgUrl(p.featured_image)) + '\" alt=\"' + esc(p.title) + '\" width=\"400\" height=\"400\" loading=\"lazy\">' : '') + '</div>'\n        + '<p class=\"su-nombre\" title=\"' + esc(p.title) + '\">' + esc(p.title) + '</p>'\n        + '<div class=\"su-slot\">' + slot + '</div>'\n        + '<div class=\"su-precios\">'\n        + '<span class=\"su-precio ' + (oferta ? 'su-precio--oferta' : 'su-precio--normal') + '\" data-su-precio>' + esc(money(v.price)) + '</span>'\n        + '<span class=\"su-precio su-precio--antes\" data-su-antes' + (oferta ? '' : ' hidden') + '>' + (oferta ? esc(money(v.compare_at_price)) : '') + '</span>'\n        + '</div></div>';\n    }\n\n    function seleccionadas(){\n      return cards.filter(function(c){ return c.getAttribute('data-selected') === 'true'; });\n    }\n\n    function refresh(){\n      var n = seleccionadas().length;\n      if(submit) submit.disabled = n === 0;\n      if(label) label.textContent = baseLabel;\n    }\n\n    function toggle(card){\n      var on = card.getAttribute('data-selected') !== 'true';\n      card.setAttribute('data-selected', on ? 'true' : 'false');\n      card.setAttribute('aria-pressed', on ? 'true' : 'false');\n      card.classList.toggle('is-selected', on);\n      refresh();\n    }\n\n    function bindCards(){\n      cards = Array.prototype.slice.call(root.querySelectorAll('[data-su-card]'));\n      cards.forEach(function(card){\n        card.addEventListener('click', function(e){\n          if(e.target.closest && e.target.closest('.su-selectwrap')) return;\n          toggle(card);\n        });\n        card.addEventListener('keydown', function(e){\n          if(e.key !== 'Enter' && e.key !== ' ') return;\n          e.preventDefault();\n          toggle(card);\n        });\n\n        var select = card.querySelector('[data-su-variant]');\n        if(!select) return;\n        select.addEventListener('click', function(e){ e.stopPropagation(); });\n        select.addEventListener('change', function(e){\n          e.stopPropagation();\n          var opt = select.options[select.selectedIndex];\n          if(opt.disabled) return;\n          var precioEl = card.querySelector('[data-su-precio]');\n          var antesEl = card.querySelector('[data-su-antes]');\n          var antes = opt.getAttribute('data-comparar') || '';\n          card.setAttribute('data-variant-id', opt.value);\n          precioEl.textContent = opt.getAttribute('data-precio') || '';\n          if(antes){\n            precioEl.className = 'su-precio su-precio--oferta';\n            antesEl.textContent = antes;\n            antesEl.hidden = false;\n          } else {\n            precioEl.className = 'su-precio su-precio--normal';\n            antesEl.textContent = '';\n            antesEl.hidden = true;\n          }\n        });\n      });\n      refresh();\n      flechas();\n    }\n\n    function pedir(intent){\n      var url = rootUrl + 'recommendations/products.json?product_id=' + productId + '&limit=' + maxItems + '&intent=' + intent;\n      return fetch(url, {headers:{'Accept':'application/json'}})\n        .then(function(r){ return r.ok ? r.json() : {products:[]}; })\n        .then(function(d){ return (d && d.products) ? d.products : []; })\n        .catch(function(){ return []; });\n    }\n\n    function cargarRecomendaciones(){\n      root.classList.add('is-loading');\n      pedir('complementary').then(function(list){\n        if(list.length >= 3) return list;\n        return pedir('related');\n      }).then(function(list){\n        root.classList.remove('is-loading');\n        var validos = list.filter(function(p){\n          return p.available && String(p.id) !== String(productId);\n        }).slice(0, maxItems);\n\n        if(validos.length >= 3){\n          var html = validos.map(cardHTML).join('');\n          if(html){ track.innerHTML = html; }\n        }\n        bindCards();\n      }).catch(function(){\n        root.classList.remove('is-loading');\n        bindCards();\n      });\n    }\n\n    function flechas(){\n      if(!track) return;\n      var over = track.scrollWidth - track.clientWidth > 4;\n      if(prev) prev.hidden = !over || track.scrollLeft <= 4;\n      if(next) next.hidden = !over || track.scrollLeft >= track.scrollWidth - track.clientWidth - 4;\n    }\n\n    if(track){\n      if(prev) prev.addEventListener('click', function(){ track.scrollBy({left: -track.clientWidth * 0.7, behavior:'smooth'}); });\n      if(next) next.addEventListener('click', function(){ track.scrollBy({left: track.clientWidth * 0.7, behavior:'smooth'}); });\n      track.addEventListener('scroll', flechas, {passive:true});\n      window.addEventListener('resize', flechas);\n    }\n\n    function cerrarCarrito(){\n      var drawer = document.getElementById('CartDrawer');\n      document.documentElement.classList.remove('js-drawer-open','js-drawer-open-right');\n      document.body.classList.remove('js-drawer-open','js-drawer-open-right');\n      if(drawer){\n        drawer.classList.remove('drawer--is-open');\n        drawer.setAttribute('aria-hidden','true');\n      }\n    }\n\n    // Solo se instala si tuvimos que abrir el cajón manualmente\n    function instalarCierreDeEmergencia(){\n      if(cierreInstalado) return;\n      cierreInstalado = true;\n\n      // Botón X del cajón y cualquier elemento de cierre del tema\n      document.addEventListener('click', function(e){\n        if(!document.documentElement.classList.contains('js-drawer-open')) return;\n        var t = e.target;\n        if(t.closest && t.closest('.js-drawer-close, .drawer__close-button, .drawer__close')){\n          cerrarCarrito();\n        }\n      }, true);\n\n      // Clic fuera del cajón\n      document.addEventListener('click', function(e){\n        if(!document.documentElement.classList.contains('js-drawer-open')) return;\n        var drawer = document.getElementById('CartDrawer');\n        if(!drawer) return;\n        if(drawer.contains(e.target)) return;\n        if(e.target.closest && e.target.closest('#SetUpsellSV')) return;\n        if(e.target.closest && e.target.closest('.site-header__cart, .js-drawer-open-cart')) return;\n        cerrarCarrito();\n      });\n\n      // Tecla Escape\n      document.addEventListener('keydown', function(e){\n        if(e.key === 'Escape' || e.key === 'Esc'){ cerrarCarrito(); }\n      });\n    }\n\n    function abrirCarrito(){\n      var drawer = document.getElementById('CartDrawer');\n\n      try{\n        if(window.theme && theme.cart){\n          if(typeof theme.cart.getCart === 'function') theme.cart.getCart();\n          else if(typeof theme.cart.buildCart === 'function') theme.cart.buildCart();\n        }\n      }catch(e){}\n\n      ['cart:build','cart:refresh','cart:updated','cart:open']\n        .forEach(function(n){ document.dispatchEvent(new CustomEvent(n, {bubbles:true, detail:{}})); });\n\n      // Vía preferente: el propio ícono del tema (abre y cierra con su lógica normal)\n      var toggle = document.querySelector(\n        '.js-drawer-open-cart, [data-drawer-toggle=\"CartDrawer\"], .site-header__cart-toggle, .site-header__cart, #CartToggle, .header__icon--cart, a[href$=\"/cart\"]'\n      );\n      if(toggle){\n        try{ toggle.click(); }catch(e){}\n      }\n\n      // Respaldo solo si el tema no lo abrió\n      setTimeout(function(){\n        var abierto = drawer && drawer.className.indexOf('drawer--is-open') !== -1;\n        if(abierto) return;\n\n        instalarCierreDeEmergencia();\n        document.documentElement.classList.add('js-drawer-open','js-drawer-open-right');\n        document.body.classList.add('js-drawer-open','js-drawer-open-right');\n        if(drawer){\n          drawer.classList.add('drawer--is-open');\n          drawer.setAttribute('aria-hidden','false');\n        }\n      }, 350);\n    }\n\n    if(submit){\n      submit.addEventListener('click', function(e){\n        e.preventDefault();\n        e.stopPropagation();\n\n        var sel = seleccionadas();\n        if(!sel.length) return;\n        submit.disabled = true;\n        if(feedback) feedback.textContent = 'Agregando...';\n\n        var items = [];\n        var actual = varianteDelProducto();\n        if(actual){ items.push({ id: actual, quantity: 1 }); }\n\n        sel.forEach(function(c){\n          var id = parseInt(c.getAttribute('data-variant-id'), 10);\n          if(id && id !== actual){ items.push({ id: id, quantity: 1 }); }\n        });\n\n        fetch(rootUrl + 'cart/add.js', {\n          method: 'POST',\n          headers: {'Content-Type':'application/json','Accept':'application/json'},\n          body: JSON.stringify({items: items})\n        })\n        .then(function(r){ return r.json().then(function(d){ return {ok: r.ok, data: d}; }); })\n        .then(function(res){\n          if(!res.ok) throw new Error((res.data && res.data.description) || 'No se pudo agregar al carrito.');\n          if(feedback) feedback.textContent = '';\n          sel.forEach(function(c){\n            c.setAttribute('data-selected','false');\n            c.setAttribute('aria-pressed','false');\n            c.classList.remove('is-selected');\n          });\n          refresh();\n          setTimeout(abrirCarrito, 150);\n        })\n        .catch(function(err){\n          if(feedback) feedback.textContent = err.message;\n          submit.disabled = false;\n        });\n      });\n    }\n\n    bindCards();\n    if(productId){ cargarRecomendaciones(); }\n  }\n\n  if(document.readyState === 'loading'){\n    document.addEventListener('DOMContentLoaded', initSetUpsell);\n  } else {\n    initSetUpsell();\n  }\n  document.addEventListener('shopify:section:load', initSetUpsell);\n})();\n</script>"
+          }
+        },
+        "custom_cgLnjY": {
+          "type": "custom",
+          "settings": {
+            "code": "<div class=\"benefit-list\">\n  <div class=\"benefit-item\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/169_4a6aa994-e988-4c71-809b-1d5ecd0ba644.png?v=1751676159\" alt=\"Garantía de por vida\">\n    <div class=\"benefit-text\">\n      <strong>Garantía de por vida</strong>\n      <p>Nuestras joyas están hechas para durar siempre, con materiales premium.</p>\n    </div>\n  </div>\n  \n  <div class=\"benefit-item\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/168_6c4f92f8-fd71-47b2-bdbe-3bf05ced72e4.png?v=1751675976\" alt=\"Resistente al agua, calor y sudor\">\n    <div class=\"benefit-text\">\n      <strong>Resistente al agua, calor y sudor</strong>\n      <p>Puedes entrenar, correr o bañarte sin preocuparte por tu joya.</p>\n    </div>\n  </div>\n\n  <div class=\"benefit-item\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/170_0906bb50-de54-46b2-ac41-7e2180919dcd.png?v=1751676159\" alt=\"Hipoalergénico\">\n    <div class=\"benefit-text\">\n      <strong>Hipoalergénico</strong>\n      <p>Acero Inoxidable 316L no se destiñe, seguro para piel sensible y sin manchas verdes.</p>\n    </div>\n  </div>\n</div>\n\n<style>\n.benefit-list {\n  display: flex;\n  flex-direction: column;\n  gap: 16px;\n  font-family: inherit;\n}\n\n.benefit-item {\n  display: flex;\n  align-items: flex-start;\n  gap: 12px;\n  background: #f9f9f9; /* gris muy tenue */\n  border-radius: 8px;\n  padding: 12px 16px;\n  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); /* efecto flotante sutil */\n}\n\n.benefit-item img {\n  width: 36px;\n  height: 36px;\n}\n\n.benefit-text {\n  text-align: left;\n}\n\n.benefit-text strong {\n  display: block;\n  font-size: 14px;\n  font-weight: bold;\n  margin-bottom: 2px;\n}\n\n.benefit-text p {\n  margin: 0;\n  font-size: 13px;\n  line-height: 1.4;\n}\n</style>"
+          }
+        },
+        "custom_UYLk9q": {
+          "type": "custom",
+          "disabled": true,
+          "settings": {
+            "code": "<div class=\"review-container\">\n  <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/freepik__genera-una-selfie-de-un-hombre-con-similar-caracte__40710_1.png?v=1756758751\" alt=\"Foto de cliente\" class=\"reviewer-image\">\n  <div class=\"review-content\">\n    <div class=\"reviewer-header\">\n      <strong class=\"reviewer-name\">Martín O.</strong>\n      <span class=\"reviewer-stars\">★★★★★</span>\n    </div>\n    <p class=\"review-text\">\n      Llevo un tiempo utilizando Saint Venik y literal superó mis expectativas. Son súper resistentes y no han perdido ni un poco el brillo. Totalmente recomendado 10/10 para destacar al mejor precio!!\n    </p>\n  </div>\n</div>\n\n<style>\n.review-container {\n  background: #f2f2f2;\n  border-radius: 6px;\n  padding: 8px 10px;\n  font-family: inherit;\n  color: #000;\n  display: flex;\n  align-items: flex-start;\n  max-width: 100%;\n}\n\n.reviewer-image {\n  width: 48px;\n  height: 48px;\n  border-radius: 4px;\n  object-fit: cover;\n  object-position: center;\n  margin-right: 8px;\n  margin-top: 6px; /* Baja un poco la imagen */\n}\n\n.review-content {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n\n.reviewer-header {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  margin-bottom: 4px;\n}\n\n.reviewer-name {\n  font-size: 13px;\n  font-weight: bold;\n}\n\n.reviewer-stars {\n  font-size: 13px;\n  color: #000;\n}\n\n.review-text {\n  font-size: 13px;\n  line-height: 1.3;\n  margin: 0;\n  text-align: left;\n}\n</style>"
+          }
+        },
+        "custom_zGnnHH": {
+          "type": "custom",
+          "disabled": true,
+          "settings": {
+            "code": "<div class=\"benefits-section\">\n  <div class=\"benefit\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/agua_1f5f61f8-c599-4c1d-bf93-4a6d2f6b5b63.png?v=1742089075\" alt=\"Resistente al Agua\">\n    <div class=\"benefit-text\">PRESISTENTE AL AGUA</div>\n  </div>\n  <div class=\"benefit\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/envio_b5f312d5-d889-4f85-bdc0-03089b663c8d.png?v=1742089074\" alt=\"Recibe desde 60 Minutos\">\n    <div class=\"benefit-text\">RECIBE DESDE 60 MINUTOS</div>\n  </div>\n  <div class=\"benefit\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/garantia_f02a7138-4782-4314-bd22-9b0cb5e73b78.png?v=1742089075\" alt=\"Garantía 6 Meses\">\n    <div class=\"benefit-text\">GARANTÍA ETERNA</div>\n  </div>\n  <div class=\"benefit\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/cambios_44ceba36-1963-4526-8b66-1f34bdc3e7c9.png?v=1742089075\" alt=\"Cambios y devoluciones fáciles\">\n    <div class=\"benefit-text\">CAMBIOS Y DEVOLUCIONES FÁCILES</div>\n  </div>\n</div>\n\n<style>\n  .benefits-section {\n    display: flex;\n    justify-content: space-evenly; /* Mantiene la versión de escritorio */\n    align-items: flex-start;\n    background-color: #f5f5f5;\n    padding: 15px 20px;\n    border-radius: 5px;\n    text-align: center;\n    margin-top: 10px;\n    gap: 10px;\n    flex-wrap: nowrap; /* Evita que los ítems se vayan a otra línea */\n  }\n\n  .benefit {\n    flex: 1;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    text-align: center;\n    min-width: 100px;\n  }\n\n  .benefit img {\n    width: 35px;\n    height: auto;\n    margin-bottom: 2px;\n    margin-top: -10px;\n  }\n\n  .benefit-text {\n    font-size: 17px;\n    font-weight: bold;\n    color: #000;\n    text-align: center;\n    min-height: 40px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }\n\n  /* 🌟 Optimización para móviles 🌟 */\n  @media (max-width: 600px) {\n    .benefits-section {\n      display: flex;\n      flex-wrap: nowrap; /* Mantiene los 4 beneficios en una sola fila */\n      justify-content: space-between;\n      padding: 10px;\n    }\n\n    .benefit {\n      flex: 1;\n      min-width: auto; /* Asegura distribución uniforme */\n    }\n\n    .benefit img {\n      width: 22px; /* Reduce el tamaño de los íconos en móvil */\n      margin-top: 0; /* Ajusta la alineación */\n    }\n\n    .benefit-text {\n      font-size: 12px; /* Reduce el tamaño del texto en móvil */\n    }\n  }\n</style>"
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "is_tab": true
+          }
+        },
+        "70e0f504-c189-4b18-8978-56fd80fd834e": {
+          "type": "tab",
+          "disabled": true,
+          "settings": {
+            "title": "Guía de tamaños",
+            "content": "",
+            "page": "{{ product.metafields.custom.chains_size_chart.value }}"
+          }
+        },
+        "b71e2273-73bb-4402-90c4-272374da39e4": {
+          "type": "tab",
+          "settings": {
+            "title": "Precio justo",
+            "content": "<p>{{ product.metafields.custom.precio | metafield_tag }}<strong> SAINT VENIK </strong>| {{ product.metafields.custom.retail_precio | metafield_tag }}<strong> ESTIMADO RETAIL</strong></p><p>A diferencia de algunas marcas en el rubro ofrecemos el mejor precio <strong>para ti</strong></p><p>Nuestro compromiso es entregarte un precio justo para <strong>tus gustos</strong></p>",
+            "page": ""
+          }
+        },
+        "e3d6c895-6e88-40c3-abd0-faa10dd024dd": {
+          "type": "tab",
+          "settings": {
+            "title": "Garantía Eterna",
+            "content": "<p>Nuestras joyas son <strong>para la eternidad.</strong></p><p>Los accidentes ocurren, por eso te otorgamos una garantía frente a defectos.</p><p><strong>✓</strong> ¿Se rompió una cadena? ¿Un colgante dañado? Nosotros lo resolvemos.</p><p>Tenga en cuenta que nuestra garantía eterna solo cubre daños accidentales.</p>",
+            "page": ""
+          }
+        },
+        "tab_wQ8QHV": {
+          "type": "tab",
+          "settings": {
+            "title": "Envíos y Devoluciones",
+            "content": "<ul><li><strong>Ultraexpress </strong>1 hora válido para 15 comunas RM</li><li><strong>Tradicional </strong>1-2 días RM / 2-4 días Regiones </li><li><strong>Cambios y Devoluciones</strong>: Hasta 20 días para cambios y 10 días para devoluciones desde que recibes tu pedido. Sin complicaciones.</li></ul>",
+            "page": ""
+          }
+        },
+        "custom_DWifkC": {
+          "type": "custom",
+          "disabled": true,
+          "settings": {
+            "code": "<!DOCTYPE html>\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Full Width Image with Enhanced Shadow</title>\n    <style>\n        /* Contenedor para la imagen */\n        .full-width-image-container {\n            width: 100%; /* Asegura que ocupe todo el ancho */\n            margin: 0; /* Elimina márgenes */\n            padding: 20px 0 0 0; /* Agrega padding superior de 20px */\n        }\n\n        /* Imagen que ocupa todo el ancho con sombra */\n        .full-width-image {\n            width: 100%; /* Asegura que la imagen ocupe todo el ancho */\n            height: auto; /* Mantiene la proporción */\n            display: block; /* Elimina espacios blancos adicionales */\n            border-radius: 8px; /* Opcional: esquinas redondeadas */\n            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */\n            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transición suave */\n        }\n\n        /* Efecto al pasar el mouse sobre la imagen */\n        .full-width-image:hover {\n            transform: translateY(-7px); /* Efecto de elevación */\n            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4); /* Sombra aún más pronunciada */\n        }\n    </style>\n</head>\n<body>\n    <!-- Contenedor de la imagen -->\n    <div class=\"full-width-image-container\">\n        <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/review.png?v=1742092894\" alt=\"Full Width Image with Enhanced Shadow\" class=\"full-width-image\">\n    </div>\n</body>\n</html>"
+          }
+        },
+        "custom_aYw8tp": {
+          "type": "custom",
+          "disabled": true,
+          "settings": {
+            "code": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Comparison Table</title>\n\n    <style>\n        /* Body styling */\n        body.unique-body-Abc123 {\n            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n            background-color: #f0f2f5;\n            display: flex;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n            margin: 0;\n            padding: 2px 0;\n        }\n\n        /* Comparison table styling */\n        .unique-comparison-table-Def456 {\n            width: 100%;\n            max-width: 700px;\n            border-collapse: separate;\n            border-spacing: 0;\n            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);\n            background-color: #fff;\n            border-radius: 10px;\n            overflow: hidden;\n            margin: 2px 0;\n        }\n\n        /* Table header and cell styling */\n        .unique-comparison-table-Def456 th,\n        .unique-comparison-table-Def456 td {\n            border: none;\n            padding: 15px;\n            text-align: center;\n            font-size: 14px;\n        }\n\n        /* Header row styling */\n        .unique-comparison-table-Def456 th {\n            background-color: #333; /* Dark gray background */\n            color: #fff; /* White text */\n            font-weight: 600;\n            text-transform: uppercase;\n        }\n\n        /* Left-align the first column */\n        .unique-comparison-table-Def456 th:first-child,\n        .unique-comparison-table-Def456 td:first-child {\n            text-align: left;\n            padding-left: 20px;\n        }\n\n        /* Row styling */\n        .unique-comparison-table-Def456 tbody tr {\n            border-bottom: 1px solid #e0e0e0;\n        }\n\n        /* Remove border from the last row */\n        .unique-comparison-table-Def456 tbody tr:last-child {\n            border-bottom: none;\n        }\n\n        /* Check icon styling */\n        .unique-check-Ghi789 {\n            color: #28a745; /* Green color */\n        }\n\n        /* Cross icon styling */\n        .unique-cross-Jkl012 {\n            color: #dc3545; /* Red color */\n        }\n\n        /* Icon size styling */\n        .unique-icon-Mno345 {\n            font-size: 18px;\n        }\n\n        /* Alternate row background color */\n        .unique-comparison-table-Def456 tbody tr:nth-child(odd) {\n            background-color: #f9f9f9;\n        }\n    </style>\n</head>\n<body class=\"unique-body-Abc123\">\n\n    <!-- Comparison table structure -->\n    <table class=\"unique-comparison-table-Def456\">\n        <thead>\n            <tr>\n                <th>Cualidad</th>\n                <th>Saint Venik</th>\n                <th>Otras marcas</th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr>\n                <td>Precio</td>\n                <td>Justo</td>\n                <td>Sobrevalorado</td>\n            </tr>\n            <tr>\n                <td>Hipoalergénico</td>\n                <td class=\"unique-icon-Mno345 unique-check-Ghi789\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" width=\"18\" height=\"18\">\n                        <path d=\"M9 19L3 13l1.41-1.41L9 16.17l10.59-10.59L21 5l-12 12z\"/>\n                    </svg>\n                </td>\n                <td class=\"unique-icon-Mno345 unique-cross-Jkl012\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" width=\"18\" height=\"18\">\n                        <path d=\"M19.41 6.58L18 5.17 12 11.17 6 5.17 4.59 6.58 10.59 12.58 4.59 18.58 6 20l6-6 6 6 1.41-1.41-6-6z\"/>\n                    </svg>\n                </td>\n            </tr>\n            <tr>\n                <td>Garantía Eterna</td>\n                <td class=\"unique-icon-Mno345 unique-check-Ghi789\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" width=\"18\" height=\"18\">\n                        <path d=\"M9 19L3 13l1.41-1.41L9 16.17l10.59-10.59L21 5l-12 12z\"/>\n                    </svg>\n                </td>\n                <td class=\"unique-icon-Mno345 unique-cross-Jkl012\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" width=\"18\" height=\"18\">\n                        <path d=\"M19.41 6.58L18 5.17 12 11.17 6 5.17 4.59 6.58 10.59 12.58 4.59 18.58 6 20l6-6 6 6 1.41-1.41-6-6z\"/>\n                    </svg>\n                </td>\n            </tr>\n            <tr>\n                <td>Moderno y Atemporal</td>\n                <td class=\"unique-icon-Mno345 unique-check-Ghi789\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" width=\"18\" height=\"18\">\n                        <path d=\"M9 19L3 13l1.41-1.41L9 16.17l10.59-10.59L21 5l-12 12z\"/>\n                    </svg>\n                </td>\n                <td class=\"unique-icon-Mno345 unique-cross-Jkl012\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" width=\"18\" height=\"18\">\n                        <path d=\"M19.41 6.58L18 5.17 12 11.17 6 5.17 4.59 6.58 10.59 12.58 4.59 18.58 6 20l6-6 6 6 1.41-1.41-6-6z\"/>\n                    </svg>\n                </td>\n            </tr>\n            <tr>\n                <td>Servicio Post-Compra</td>\n                <td class=\"unique-icon-Mno345 unique-check-Ghi789\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" width=\"18\" height=\"18\">\n                        <path d=\"M9 19L3 13l1.41-1.41L9 16.17l10.59-10.59L21 5l-12 12z\"/>\n                    </svg>\n                </td>\n                <td class=\"unique-icon-Mno345 unique-cross-Jkl012\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" width=\"18\" height=\"18\">\n                        <path d=\"M19.41 6.58L18 5.17 12 11.17 6 5.17 4.59 6.58 10.59 12.58 4.59 18.58 6 20l6-6 6 6 1.41-1.41-6-6z\"/>\n                    </svg>\n                </td>\n            </tr>\n        </tbody>\n    </table>\n\n</body>\n</html>"
+          }
+        }
+      },
+      "block_order": [
+        "custom_tPmniV",
+        "custom_Jbdwgw",
+        "loox-rating",
+        "price",
+        "custom_DiNjbw",
+        "separator_BqtpzB",
+        "sv_selector_color",
+        "sv_selector_talla",
+        "sv_guia_tallas",
+        "variant_picker",
+        "custom_bk8egf",
+        "custom_BHrnjB",
+        "buy_buttons",
+        "custom_ketXkH",
+        "custom_7EBHKL",
+        "custom_w7xaet",
+        "custom_rAfDz6",
+        "custom_cgLnjY",
+        "custom_UYLk9q",
+        "custom_zGnnHH",
+        "description",
+        "70e0f504-c189-4b18-8978-56fd80fd834e",
+        "b71e2273-73bb-4402-90c4-272374da39e4",
+        "e3d6c895-6e88-40c3-abd0-faa10dd024dd",
+        "tab_wQ8QHV",
+        "custom_DWifkC",
+        "custom_aYw8tp"
+      ],
+      "custom_css": [
+        ".product-single__title,.product-card__title,h1.product-single__title,h2.product-single__title {font-size: 18px !important; line-height: 1.2em !important; padding: 0 !important; /* Elimina el padding */ margin: 0 !important; /* Elimina el margen */}"
+      ],
+      "settings": {
+        "sku_enable": false,
+        "image_position": "left",
+        "image_size": "medium",
+        "product_zoom_enable": true,
+        "thumbnail_position": "beside",
+        "thumbnail_height": "flexible",
+        "thumbnail_arrows": false,
+        "mobile_layout": "full",
+        "enable_video_looping": true,
+        "product_video_style": "muted",
+        "media-thumb": true
+      }
+    },
+    "image_compare_rVUXUV": {
+      "type": "image-compare",
+      "blocks": {
+        "image_PzBLTg": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/freepik__genera-exactamente-esta-imagen-en-blanco-y-negro-a__61837_1.png"
+          }
+        },
+        "image_YTMKPp": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/sds.png"
+          }
+        }
+      },
+      "block_order": [
+        "image_PzBLTg",
+        "image_YTMKPp"
+      ],
+      "custom_css": [
+        "/* Quitar el padding superior de una sección específica en Shopify */.custom-class {padding-top: 0 !important; /* Quita el padding superior */}"
+      ],
+      "settings": {
+        "heading": "95% DE LOS HOMBRES SIENTEN MAYOR CONFIANZA AL USAR ACCESORIOS",
+        "heading_size": "h3",
+        "heading_position": "center",
+        "fullwidth": true,
+        "slider_style": "classic",
+        "height": 600,
+        "color": "#ffffff",
+        "lazyload_images": true
+      }
+    },
+    "1389ef79-2192-445b-9f86-84f98bd3bc92": {
+      "type": "text-columns",
+      "blocks": {
+        "template--19917222871343__1389ef79-2192-445b-9f86-84f98bd3bc92-text_block-3": {
+          "type": "text_block",
+          "settings": {
+            "enable_image": true,
+            "image": "shopify://shop_images/Fotos_editadas_Octubre_1080_e45ec975-7c5a-45d6-81c7-a4d705c338f3.png",
+            "image_mask": "none",
+            "image_width": 650,
+            "title": "Destaca y sé inolvidable",
+            "text": "<p>Lleva <strong>tu estilo al siguiente nivel</strong> y <strong>proyecta seguridad</strong> en todo lugar que vayas. Un buen accesorio habla por ti, y con nuestros diseños únicos, te asegurarás de ser el <strong>centro de atención</strong>. Además, disfruta de la comodidad de usar nuestras<strong> joyas resistentes a agua, sudor, calor y químicos</strong>, perfectas para<strong> acompañarte sin límites.</strong></p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        },
+        "template--19917222871343__1389ef79-2192-445b-9f86-84f98bd3bc92-text_block-1": {
+          "type": "text_block",
+          "disabled": true,
+          "settings": {
+            "enable_image": true,
+            "image": "shopify://shop_images/a2.png",
+            "image_mask": "none",
+            "image_width": 650,
+            "title": "Diseñado en italia",
+            "text": "<p>En Saint Venik, colaboramos con algunos de los joyeros más habilidosos de Italia para ofrecerte <strong>accesorios excepcionales</strong> que te harán destacar en cualquier lugar, siempre con el <strong>compromiso de brindarte un precio justo.</strong></p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        },
+        "template--19917222871343__1389ef79-2192-445b-9f86-84f98bd3bc92-text_block-2": {
+          "type": "text_block",
+          "disabled": true,
+          "settings": {
+            "enable_image": true,
+            "image": "shopify://shop_images/7_eb4210d7-3f1a-49be-b0b9-bca7da461ba7.png",
+            "image_mask": "square",
+            "image_width": 650,
+            "title": "uTILIZALOS 24/7",
+            "text": "<p>Puedes usar tus Accesorios<strong> 24/7</strong> sin preocupaciones, nuestras Joyas son Resistentes al Agua, Sudor, Calor y Químicos.</p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--19917222871343__1389ef79-2192-445b-9f86-84f98bd3bc92-text_block-3",
+        "template--19917222871343__1389ef79-2192-445b-9f86-84f98bd3bc92-text_block-1",
+        "template--19917222871343__1389ef79-2192-445b-9f86-84f98bd3bc92-text_block-2"
+      ],
+      "disabled": true,
+      "settings": {
+        "title": "¿Por qué usar Saint Venik?",
+        "align_text": "center",
+        "divider": false
+      }
+    },
+    "advanced_content_xEpt7C": {
+      "type": "advanced-content",
+      "blocks": {
+        "liquid_h8YKLg": {
+          "type": "liquid",
+          "settings": {
+            "code": "<video autoplay muted loop playsinline style=\"width: 100%; height: auto; display: block;\">\n  <source src=\"https://cdn.shopify.com/videos/c/o/v/7a1589584f98438194328a9a163629c6.mp4\" type=\"video/mp4\">\n  Tu navegador no soporta videos HTML5.\n</video>",
+            "width": "100%",
+            "alignment": "center"
+          }
+        },
+        "liquid_pxfDJe": {
+          "type": "liquid",
+          "disabled": true,
+          "settings": {
+            "code": "<style>\n  @media (min-width: 768px) {\n    .texto-banner h2 {\n      font-size: 40px !important;\n    }\n    .texto-banner p {\n      font-size: 18px !important;\n    }\n  }\n</style>\n\n<div class=\"texto-banner\" style=\"background: #ffffff; padding: 0px 20px; text-align: center;\">\n  <h2 style=\"font-size: 32px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px;\">NUESTRA JOYERÍA NO SE DESCOLORA</h2>\n  <p style=\"font-size: 16px; color: #000000; max-width: 500px; margin: 0 auto; line-height: 1.6;\">\n    Todas nuestras piezas están probadas para el uso diario, garantizando durabilidad frente al agua y el sudor. Toda nuestra joyería cuenta con garantía de por vida, asegurando la máxima calidad.\n  </p>\n</div>",
+            "width": "50%",
+            "alignment": "center"
+          }
+        },
+        "image_6j9UiA": {
+          "type": "image",
+          "disabled": true,
+          "settings": {
+            "image": "shopify://shop_images/dm_057e094b-eb43-4d4c-9c23-a90a42f749e6.png",
+            "link": "",
+            "width": "50%",
+            "alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "liquid_h8YKLg",
+        "liquid_pxfDJe",
+        "image_6j9UiA"
+      ],
+      "name": "t:sections.advanced-content.presets.custom_content.name",
+      "settings": {
+        "full_width": true,
+        "space_around": true,
+        "lazyload_images": true
+      }
+    },
+    "advanced_content_BFU8AB": {
+      "type": "advanced-content",
+      "blocks": {
+        "liquid_3xDYpM": {
+          "type": "liquid",
+          "disabled": true,
+          "settings": {
+            "code": "<style>\n  @media (min-width: 768px) {\n    .texto-banner h2 {\n      font-size: 40px !important;\n    }\n    .texto-banner p {\n      font-size: 18px !important;\n    }\n  }\n</style>\n\n<div class=\"texto-banner\" style=\"background: #ffffff; padding: 15px 20px; text-align: center;\">\n  <h2 style=\"font-size: 32px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px;\">ELEGANCIA ETERNA\n</h2>\n  <p style=\"font-size: 16px; color: #000000; max-width: 500px; margin: 0 auto; line-height: 1.6;\">\n    Saint Venik es un movimiento. Diseñado para el uso diario con un diseño perfectamente elaborado.\n\n  </p>\n</div>",
+            "width": "50%",
+            "alignment": "center"
+          }
+        },
+        "image_BWt8xj": {
+          "type": "image",
+          "disabled": true,
+          "settings": {
+            "image": "shopify://shop_images/comp1.png",
+            "link": "",
+            "width": "50%",
+            "alignment": "center"
+          }
+        },
+        "liquid_Xb6ALA": {
+          "type": "liquid",
+          "settings": {
+            "code": "<!-- Testimonio SOLO móvil -->\n<div class=\"mobile-only-testimonial\">\n  <div style=\"background: #f9f9f9; padding: 20px; border-radius: 10px; max-width: 500px; font-family: sans-serif; color: #1a1a1a; box-shadow: 0 2px 6px rgba(0,0,0,0.05);\">\n    \n    <div style=\"display: flex; align-items: center; margin-bottom: 15px;\">\n      <img src=\"https://cdn.shopify.com/s/files/1/0708/1626/8540/files/f9e12fedbe806dfde4674f6d8e664272.jpg?v=1728657303\"\n           alt=\"Foto cliente\"\n           style=\"width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: 12px;\">\n      <div>\n        <div style=\"color: #000; font-size: 18px; font-weight: 600;\">★★★★★</div>\n        <div style=\"font-weight: bold; font-size: 16px;\">Jorge R.</div>\n      </div>\n    </div>\n\n    <p style=\"font-size: 15px; line-height: 1.6; margin-bottom: 20px;\">\n      “Estas cadenas son excelentes realmente. Las compré en la noche y me llegaron al otro día!! he usado durante meses las que me compré y todavía están como nuevas. Calidad increíble. Las he puesto a prueba en el gimnasio, en la ducha y tirones ocasionales... siguen impecables como el primer día!”\n    </p>\n\n    <div style=\"font-size: 13px; color: #888888; display: flex; align-items: center;\">\n      <span style=\"font-size: 16px; margin-right: 5px;\">✔️</span> COMPRA VERIFICADA\n    </div>\n\n  </div>\n</div>\n\n<style>\n  /* Oculto por defecto (desktop) */\n  .mobile-only-testimonial {\n    display: none;\n  }\n\n  /* Visible SOLO en móvil */\n  @media (max-width: 768px) {\n    .mobile-only-testimonial {\n      display: block;\n      margin: 16px auto;\n    }\n  }\n</style>",
+            "width": "100%",
+            "alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "liquid_3xDYpM",
+        "image_BWt8xj",
+        "liquid_Xb6ALA"
+      ],
+      "name": "t:sections.advanced-content.presets.custom_content.name",
+      "settings": {
+        "full_width": true,
+        "space_around": true,
+        "lazyload_images": true
+      }
+    },
+    "text_and_image_xfznWi": {
+      "type": "text-and-image",
+      "disabled": true,
+      "settings": {
+        "image": "shopify://shop_images/Fotos_editadas_Octubre_1080_e45ec975-7c5a-45d6-81c7-a4d705c338f3.png",
+        "image_mask": "none",
+        "image2_mask": "none",
+        "subtitle": "",
+        "title": "Destaca y sé inolvidable",
+        "text": "<p>Lleva <strong>tu estilo al siguiente nivel</strong> y <strong>proyecta seguridad</strong> en todo lugar que vayas. Un buen accesorio habla por ti, y con nuestros diseños únicos, te asegurarás de ser el <strong>centro de atención</strong>. Además, disfruta de la comodidad de usar nuestras<strong> joyas resistentes a agua, sudor, calor y químicos</strong>, perfectas para<strong> acompañarte sin límites.</strong></p>",
+        "button_label": "",
+        "button_link": "",
+        "button_style": "primary",
+        "align_text": "left",
+        "image_width": "50",
+        "layout": "right",
+        "divider": false,
+        "top_padding": true,
+        "bottom_padding": true,
+        "lazyload_images": true
+      }
+    },
+    "text_and_image_ACF9g7": {
+      "type": "text-and-image",
+      "disabled": true,
+      "settings": {
+        "image": "shopify://shop_images/a2.png",
+        "image_mask": "none",
+        "image2_mask": "none",
+        "subtitle": "",
+        "title": "Diseñado en italia",
+        "text": "<p>En Saint Venik, colaboramos con algunos de los joyeros más habilidosos de Italia para ofrecerte <strong>accesorios excepcionales</strong> que te harán destacar en cualquier lugar, siempre con el <strong>compromiso de brindarte un precio justo.</strong></p>",
+        "button_label": "",
+        "button_link": "",
+        "button_style": "primary",
+        "align_text": "left",
+        "image_width": "50",
+        "layout": "right",
+        "divider": false,
+        "top_padding": true,
+        "bottom_padding": true,
+        "lazyload_images": true
+      }
+    },
+    "text_and_image_rxNyek": {
+      "type": "text-and-image",
+      "disabled": true,
+      "settings": {
+        "image": "shopify://shop_images/aaa_d2773b6f-9a46-476f-977d-4315123fc5df.png",
+        "image_mask": "none",
+        "image2_mask": "none",
+        "subtitle": "",
+        "title": "Elaborado con materiales de excelente calidad",
+        "text": "<p>Nuestras joyas fusionan la resistencia del acero inoxidable 316L con la elegancia del oro de 14k o 18k, enchapado en 2.5 micras para <strong>asegurar una calidad superior. </strong>A este exquisito diseño se le añade una capa de rodio, que no solo <strong>intensifica el brillo y color</strong>, sino que también<strong> protege cada pieza</strong>, garantizando una<strong> durabilidad excepcional y un estilo sofisticado </strong>para el uso diario</p>",
+        "button_label": "",
+        "button_link": "",
+        "button_style": "primary",
+        "align_text": "left",
+        "image_width": "50",
+        "layout": "right",
+        "divider": false,
+        "top_padding": true,
+        "bottom_padding": true,
+        "lazyload_images": true
+      }
+    },
+    "text_columns_8gcYEE": {
+      "type": "text-columns",
+      "blocks": {
+        "text_block_jUeWxW": {
+          "type": "text_block",
+          "disabled": true,
+          "settings": {
+            "enable_image": true,
+            "image": "shopify://shop_images/1_a67c9bd4-1501-46d1-bbab-f21f0a5ef483.png",
+            "image_mask": "none",
+            "image_width": 650,
+            "title": "Diseñado en italia",
+            "text": "<p>En Saint Venik, colaboramos con algunos de los joyeros más habilidosos de Italia para ofrecerte <strong>accesorios excepcionales</strong> que te harán destacar en cualquier lugar, siempre con el <strong>compromiso de brindarte un precio justo.</strong></p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        },
+        "text_block_kMGegP": {
+          "type": "text_block",
+          "disabled": true,
+          "settings": {
+            "enable_image": true,
+            "image": "shopify://shop_images/2_f3df835a-4319-476e-b6e9-97386fae692d.png",
+            "image_mask": "none",
+            "image_width": 650,
+            "title": "Elaborado con materiales de excelente calidad",
+            "text": "<p>Nuestras joyas fusionan la resistencia del acero inoxidable 316L con la elegancia del oro de 14k o 18k, enchapado en 2.5 micras para <strong>asegurar una calidad superior. </strong>A este exquisito diseño se le añade una capa de rodio, que no solo <strong>intensifica el brillo y color</strong>, sino que también<strong> protege cada pieza</strong>, garantizando una<strong> durabilidad excepcional y un estilo sofisticado </strong>para el uso diario</p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        },
+        "text_block_ntbRQ3": {
+          "type": "text_block",
+          "disabled": true,
+          "settings": {
+            "enable_image": true,
+            "image": "shopify://shop_images/5_3091f43d-2e9c-45f7-8942-2697d3ae880f.png",
+            "image_mask": "none",
+            "image_width": 650,
+            "title": "Acero Inoxidable 316L",
+            "text": "<p>Nuestro Acero inoxidable de la más alta calidad 316L, el cual es eternamente duradero. Nos preocupamos que sea 100% <strong>resistente al agua, sudor, perfume y calor. Además es hipoalergénico, es decir que jamás irritará tu piel o dejará tu cuello verde.</strong> </p><p>A diferencia del Acero inoxidable 316, el de 316L en su composición tiene menor porcentaje de carbono en su fabricación. Y es perfecto para utilizarlo en situaciones de mucha soldadura, especial para el mundo de la joyería.</p><p></p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        },
+        "text_block_TrCABF": {
+          "type": "text_block",
+          "disabled": true,
+          "settings": {
+            "enable_image": true,
+            "image": "shopify://shop_images/3_b8e62fd0-5947-4945-9567-9bcaa0aa9efe.png",
+            "image_mask": "none",
+            "image_width": 650,
+            "title": "RODIO",
+            "text": "<p>El Rodio que aplicamos en nuestras joyas <strong>les otorga un brillo inigualable</strong>, destacando estratégicamente en cadenas, pulseras y colgantes para crear zonas que llaman la atención. Además, ofrece <strong>máxima durabilidad </strong>y un <strong>aspecto único a cada pieza.</strong></p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        },
+        "text_block_3aUp6W": {
+          "type": "text_block",
+          "disabled": true,
+          "settings": {
+            "enable_image": true,
+            "image": "shopify://shop_images/2_0df65548-8dfd-4cda-9909-0d1914f057f5.png",
+            "image_mask": "none",
+            "image_width": 650,
+            "title": "Accesorios premium",
+            "text": "<p>Los accesorios de Saint Venik, presumen bordes lisos biselados que les brindan una <strong>apariencia llamativa.</strong> Desde el diseño hasta la producción, cada pieza es inspeccionada a mano para garantizar la más alta calidad.</p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "text_block_jUeWxW",
+        "text_block_kMGegP",
+        "text_block_ntbRQ3",
+        "text_block_TrCABF",
+        "text_block_3aUp6W"
+      ],
+      "settings": {
+        "title": "",
+        "align_text": "center",
+        "divider": false
+      }
+    },
+    "recommendation_dVfgwV": {
+      "type": "recommendation",
+      "name": "Product Recommendations",
+      "settings": {
+        "product_recommendations_heading": "TENDENCIAS DEL MES",
+        "related_count": 5,
+        "products_per_row": 5
+      }
+    },
+    "loox-product-reviews-app-section": {
+      "type": "apps",
+      "blocks": {
+        "loox-product-reviews": {
+          "type": "shopify://apps/loox-reviews/blocks/loox-dynamic-section/5c3b337f-fd14-4df5-b1d6-80ec13e6e28e",
+          "settings": {
+            "reviews_to_display": "",
+            "default_tab": "automatic",
+            "only_photos": false,
+            "aggregated": false,
+            "limit": 20,
+            "hide_thumbnails": false,
+            "maxwidth": 1080,
+            "is_sample": true
+          }
+        }
+      },
+      "block_order": [
+        "loox-product-reviews"
+      ],
+      "settings": {
+        "full_width": false,
+        "space_around": true
+      }
+    },
+    "product-recommendations": {
+      "type": "product-recommendations",
+      "disabled": true,
+      "settings": {
+        "product_recommendations_heading": "Accesorios relacionados",
+        "related_count": 5,
+        "products_per_row": 5
+      }
+    },
+    "sub": {
+      "type": "product-full-width",
+      "blocks": {
+        "f7c912d5-b03d-4151-bdde-6324305f3d74": {
+          "type": "shopify://apps/loox-reviews/blocks/loox-dynamic-section/5c3b337f-fd14-4df5-b1d6-80ec13e6e28e",
+          "settings": {
+            "reviews_to_display": "",
+            "default_tab": "automatic",
+            "only_photos": false,
+            "aggregated": false,
+            "limit": 20,
+            "hide_thumbnails": false,
+            "maxwidth": 1080,
+            "is_sample": true
+          }
+        }
+      },
+      "block_order": [
+        "f7c912d5-b03d-4151-bdde-6324305f3d74"
+      ],
+      "settings": {
+        "max_width": true
+      }
+    },
+    "recently-viewed": {
+      "type": "recently-viewed",
+      "disabled": true,
+      "settings": {
+        "recent_count": 5
+      }
+    },
+    "collection-return": {
+      "type": "collection-return",
+      "disabled": true,
+      "settings": {}
+    },
+    "17053740027440b44f": {
+      "type": "apps",
+      "settings": {
+        "full_width": false,
+        "space_around": true
+      }
+    }
+  },
+  "order": [
+    "main",
+    "image_compare_rVUXUV",
+    "1389ef79-2192-445b-9f86-84f98bd3bc92",
+    "advanced_content_xEpt7C",
+    "advanced_content_BFU8AB",
+    "text_and_image_xfznWi",
+    "text_and_image_ACF9g7",
+    "text_and_image_rxNyek",
+    "text_columns_8gcYEE",
+    "recommendation_dVfgwV",
+    "loox-product-reviews-app-section",
+    "product-recommendations",
+    "sub",
+    "recently-viewed",
+    "collection-return",
+    "17053740027440b44f"
+  ]
+}

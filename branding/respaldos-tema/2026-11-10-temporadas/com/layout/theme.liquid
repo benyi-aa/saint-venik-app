@@ -1,0 +1,798 @@
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}" dir="{{ settings.text_direction }}">
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "s1h914872l");
+</script>
+<head>
+  <meta name="google-site-verification" content="EqZyOR_bLob9h5kBc7hbxAqJ0O1sQR3iIXOBpu9nKw8" />
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="{{ settings.color_button }}">
+  <link rel="canonical" href="{{ canonical_url }}">
+  <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+  {%- comment -%}
+    Los origenes que sirven algo que BLOQUEA el dibujado van con preconnect, no
+    con dns-prefetch: con dns-prefetch el navegador resuelve el nombre pero deja
+    el TCP y el TLS para cuando el parser choca con la etiqueta.
+  {%- endcomment -%}
+  <link rel="preconnect" href="https://code.jquery.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://maps.googleapis.com">
+  <link rel="dns-prefetch" href="https://maps.gstatic.com">
+
+  {%- if settings.favicon != blank -%}
+    <link rel="shortcut icon" href="{{ settings.favicon | img_url: '32x32' }}" type="image/png" />
+  {%- endif -%}
+
+  {%- render 'seo-title' -%}
+
+  {%- if page_description -%}
+  <meta name="description" content="{{ page_description | escape }}">
+  {%- endif -%}
+
+  {%- render 'social-meta-tags' -%}
+
+  {%- render 'font-face' -%}
+  {{ 'theme.css' | asset_url | stylesheet_tag: preload: true }}
+  {%- render 'css-variables' -%}
+
+  <script>
+    document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+
+    window.theme = window.theme || {};
+    theme.routes = {
+      home: "{{ routes.root_url }}",
+      cart: "{{ routes.cart_url | append: '.js' }}",
+      cartPage: "{{ routes.cart_url }}",
+      cartAdd: "{{ routes.cart_add_url | append: '.js' }}",
+      cartChange: "{{ routes.cart_change_url | append: '.js' }}",
+      search: "{{ routes.search_url }}",
+      predictiveSearch: "{{ routes.predictive_search_url }}"
+    };
+    theme.strings = {
+      soldOut: {{ 'products.product.sold_out' | t | json }},
+      unavailable: {{ 'products.product.unavailable' | t | json }},
+      inStockLabel: {{ 'products.product.in_stock_label' | t | json }},
+      oneStockLabel: {{ 'products.product.stock_label.one' | t: count: '[count]' | json }},
+      otherStockLabel: {{ 'products.product.stock_label.other' | t: count: '[count]' | json }},
+      willNotShipUntil: {{ 'products.product.will_not_ship_until' | t: date: '[date]' | json }},
+      willBeInStockAfter: {{ 'products.product.will_be_in_stock_after' | t: date: '[date]' | json }},
+      waitingForStock: {{ 'products.product.waiting_for_stock' | t | json }},
+      savePrice: {{ 'products.general.save_html' | t: saved_amount: '[saved_amount]' | json }},
+      cartEmpty: {{ 'cart.general.empty' | t | json }},
+      cartTermsConfirmation: {{ 'cart.general.terms_confirm' | t | json }},
+      searchCollections: {{ 'general.search.collections' | t | json }},
+      searchPages: {{ 'general.search.pages' | t | json }},
+      searchArticles: {{ 'general.search.articles' | t | json }},
+      productFrom: {{ 'products.general.from_text_html' | t: price: '' | json }},
+      maxQuantity: {{ 'cart.general.max_quantity' | t: quantity: '[quantity]', title: '[title]' | json }}
+    };
+    theme.settings = {
+      cartType: {{ settings.cart_type | json }},
+      isCustomerTemplate: {% if request.page_type contains 'customers/' %}true{% else %}false{% endif %},
+      moneyFormat: {{ shop.money_format | json }},
+      saveType: {{ settings.product_save_type | json }},
+      productImageSize: {{ settings.product_grid_image_size | json }},
+      productImageCover: {{ settings.product_grid_image_fill }},
+      predictiveSearch: {{ settings.predictive_search_enabled }},
+      predictiveSearchType: {{ settings.search_type | json }},
+      predictiveSearchVendor: {{ settings.predictive_search_show_vendor | json }},
+      predictiveSearchPrice: {{ settings.predictive_search_show_price | json }},
+      quickView: {{ settings.quick_shop_enable }},
+      themeName: 'Impulse',
+      themeVersion: "7.5.1"
+    };
+  </script>
+
+  <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WFN55XPK');</script>
+<!-- End Google Tag Manager -->
+
+<style>
+.product__policies { display: none !important; }
+</style>
+
+  <!-- Pinterest Tag -->
+<script>
+!function(e){if(!window.pintrk){window.pintrk = function () {
+window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
+  n=window.pintrk;n.queue=[],n.version="3.0";var
+  t=document.createElement("script");t.async=!0,t.src=e;var
+  r=document.getElementsByTagName("script")[0];
+  r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
+pintrk('load', '2614031464300', {em: '<user_email_address>'});
+pintrk('page');
+</script>
+<noscript>
+<img height="1" width="1" style="display:none;" alt=""
+  src="https://ct.pinterest.com/v3/?event=init&tid=2614031464300&pd[em]=<hashed_email_address>&noscript=1" />
+</noscript>
+<!-- end Pinterest Tag -->
+ 
+
+  {{ content_for_header }}
+
+  <script src="{{ 'vendor-scripts-v11.js' | asset_url | split: '?' | first }}" defer="defer"></script>
+
+  {%- if shop.enabled_currencies.size > 1 -%}
+    <link rel="stylesheet" href="{{ 'country-flags.css' | asset_url | split: '?' | first }}">
+  {%- endif -%}
+
+  <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+
+  {%- if request.page_type contains 'customers/' -%}
+    <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  {% if request.design_mode %}
+    <script>theme.settings.email = {{ shop.email | json }}</script>
+    <script src="https://api.archetypethemes.co/design-mode.js" defer="defer"></script>
+  {% endif %}
+
+{%- assign sv_base = settings.type_base_font -%}
+{%- unless sv_base -%}{%- assign sv_base = settings.type_body_font -%}{%- endunless -%}
+{%- unless sv_base -%}{%- assign sv_base = settings.body_font -%}{%- endunless -%}
+<style>
+{%- if sv_base -%}
+  {%- assign sv_base_700 = sv_base | font_modify: 'weight', '700' -%}
+  {%- if sv_base_700 -%}{{ sv_base_700 | font_face: font_display: 'swap' }}{%- endif -%}
+{%- endif -%}
+  html { font-synthesis: none; }
+</style>
+
+</head>
+
+<body class="template-{{ template | replace: '.', ' ' | truncatewords: 1, '' | handle }}{% if request.path == '/challenge' %} template-challange{% endif %}" data-center-text="{{ settings.type_body_align_text }}" data-button_style="{{ settings.button_style }}" data-type_header_capitalize="{{ settings.type_header_capitalize }}" data-type_headers_align_text="{{ settings.type_headers_align_text }}" data-type_product_capitalize="{{ settings.type_product_capitalize }}" data-swatch_style="{{ settings.swatch_style }}" {% if settings.disable_animations %}data-disable-animations="true"{% endif %}>
+
+<style>
+  #svcd-1 {
+    background: #000000;
+    color: #FFFFFF;
+    width: 100%;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font-family: inherit;
+    min-height: 108px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #svcd-1 *,
+  #svcd-1 *::before,
+  #svcd-1 *::after { box-sizing: border-box; }
+  #svcd-1 .svcd__inner {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  /* El banner entero es pulsable: titulo y reloj son enlaces, pero se tienen
+     que ver igual que antes. */
+  #svcd-1 .svcd__enlace {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  #svcd-1 .svcd__titulo {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.25;
+    color: #FFFFFF;
+  }
+  #svcd-1 .svcd__fila {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  #svcd-1 .svcd__reloj {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    visibility: hidden;
+  }
+  #svcd-1.svcd--listo .svcd__reloj { visibility: visible; }
+  #svcd-1 .svcd__unidad {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 34px;
+  }
+  #svcd-1 .svcd__num {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: #FFFFFF;
+  }
+  #svcd-1 .svcd__etiqueta {
+    font-size: 11px;
+    line-height: 1.4;
+    opacity: 0.85;
+    color: #FFFFFF;
+  }
+  #svcd-1 .svcd__sep {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.25;
+    padding-top: 1px;
+    opacity: 0.7;
+    color: #FFFFFF;
+  }
+  #svcd-1 .svcd__boton {
+    display: inline-block;
+    background: #C8102E;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 11px 20px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+  }
+  #svcd-1 .svcd__boton:hover,
+  #svcd-1 .svcd__boton:focus-visible {
+    opacity: 0.88;
+    color: #FFFFFF;
+  }
+  #svcd-1 .svcd__boton:focus-visible {
+    outline: 2px solid #FFFFFF;
+    outline-offset: 2px;
+  }
+  @media screen and (min-width: 769px) {
+    #svcd-1 {
+      padding: 10px 24px;
+      min-height: 68px;
+    }
+    #svcd-1 .svcd__inner {
+      flex-direction: row;
+      justify-content: center;
+      gap: 28px;
+    }
+    #svcd-1 .svcd__titulo { font-size: 16px; }
+    #svcd-1 .svcd__fila { gap: 24px; }
+    #svcd-1 .svcd__reloj { gap: 6px; }
+    #svcd-1 .svcd__unidad { min-width: 40px; }
+    #svcd-1 .svcd__num { font-size: 22px; }
+    #svcd-1 .svcd__etiqueta { font-size: 12px; }
+    #svcd-1 .svcd__sep { font-size: 20px; }
+  }
+
+  /* --- Interruptor de idioma (SIEMPRE AL FINAL) --- */
+  #svcd-1 .svcd__txt--en { display: none !important; }
+  #svcd-1 .svcd__txt--es { display: inline !important; }
+  html[data-sv-locale="en"] #svcd-1 .svcd__txt--es { display: none !important; }
+  html[data-sv-locale="en"] #svcd-1 .svcd__txt--en { display: inline !important; }
+</style>
+
+{%- comment -%}
+  El destino del banner, en el idioma que toque. routes.root_url vale "/" en el
+  idioma principal y "/en" (SIN barra final) en los demas, asi que concatenar a
+  pelo daba "/encollections/...". Por eso se arma segun el caso.
+{%- endcomment -%}
+{%- assign url_banner = '/collections/best-sellers' -%}
+{%- if routes.root_url != '/' -%}
+  {%- assign url_banner = routes.root_url | append: '/collections/best-sellers' -%}
+{%- endif -%}
+<div class="svcd" id="svcd-1" data-hora-fin="23" data-minuto-fin="59" style="background:#000000;color:#FFFFFF;">
+  <div class="svcd__inner">
+    <a class="svcd__titulo svcd__enlace" href="{{ url_banner }}">
+      <span class="svcd__txt svcd__txt--es">BLACK FRIDAY: 3X2 + HASTA 75% OFF</span>
+      <span class="svcd__txt svcd__txt--en">BLACK FRIDAY: BUY 2, GET 1 FREE + UP TO 75% OFF</span>
+    </a>
+    <div class="svcd__fila">
+      <a class="svcd__reloj svcd__enlace" href="{{ url_banner }}">
+        <div class="svcd__unidad">
+          <span class="svcd__num" data-svcd-dias>00</span>
+          <span class="svcd__etiqueta">
+            <span class="svcd__txt svcd__txt--es">Días</span>
+            <span class="svcd__txt svcd__txt--en">Days</span>
+          </span>
+        </div>
+        <span class="svcd__sep" aria-hidden="true">:</span>
+        <div class="svcd__unidad">
+          <span class="svcd__num" data-svcd-horas>00</span>
+          <span class="svcd__etiqueta">
+            <span class="svcd__txt svcd__txt--es">Horas</span>
+            <span class="svcd__txt svcd__txt--en">Hours</span>
+          </span>
+        </div>
+        <span class="svcd__sep" aria-hidden="true">:</span>
+        <div class="svcd__unidad">
+          <span class="svcd__num" data-svcd-min>00</span>
+          <span class="svcd__etiqueta">
+            <span class="svcd__txt svcd__txt--es">Min</span>
+            <span class="svcd__txt svcd__txt--en">Min</span>
+          </span>
+        </div>
+        <span class="svcd__sep" aria-hidden="true">:</span>
+        <div class="svcd__unidad">
+          <span class="svcd__num" data-svcd-seg>00</span>
+          <span class="svcd__etiqueta">
+            <span class="svcd__txt svcd__txt--es">Seg</span>
+            <span class="svcd__txt svcd__txt--en">Sec</span>
+          </span>
+        </div>
+      </a>
+      <a class="svcd__boton" href="{{ url_banner }}" data-svcd-cta>
+        <span class="svcd__txt svcd__txt--es">VER REBAJAS</span>
+        <span class="svcd__txt svcd__txt--en">SHOP THE SALE</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var raiz = document.getElementById('svcd-1');
+  if (!raiz || raiz.dataset.svcdInit) return;
+  raiz.dataset.svcdInit = '1';
+
+  /* --- Ajuste de URL según idioma --- */
+  var esIngles = document.documentElement.getAttribute('data-sv-locale') === 'en';
+  var cta = raiz.querySelector('[data-svcd-cta]');
+  if (cta && esIngles) {
+    cta.setAttribute('href', '/en/collections/best-sellers');
+  }
+
+  var horaFin = parseInt(raiz.dataset.horaFin, 10);
+  var minutoFin = parseInt(raiz.dataset.minutoFin, 10);
+  if (isNaN(horaFin)) horaFin = 23;
+  if (isNaN(minutoFin)) minutoFin = 59;
+
+  var elDias  = raiz.querySelector('[data-svcd-dias]');
+  var elHoras = raiz.querySelector('[data-svcd-horas]');
+  var elMin   = raiz.querySelector('[data-svcd-min]');
+  var elSeg   = raiz.querySelector('[data-svcd-seg]');
+
+  function objetivo() {
+    var ahora = new Date();
+    var meta = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), horaFin, minutoFin, 59, 999);
+    if (meta.getTime() <= ahora.getTime()) {
+      meta = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1, horaFin, minutoFin, 59, 999);
+    }
+    return meta;
+  }
+
+  function dd(n) { return n < 10 ? '0' + n : String(n); }
+
+  var meta = objetivo();
+
+  function pintar() {
+    var restante = meta.getTime() - Date.now();
+    if (restante <= 0) {
+      meta = objetivo();
+      restante = meta.getTime() - Date.now();
+    }
+    var t = Math.floor(restante / 1000);
+    if (elDias)  elDias.textContent  = dd(Math.floor(t / 86400));
+    if (elHoras) elHoras.textContent = dd(Math.floor((t % 86400) / 3600));
+    if (elMin)   elMin.textContent   = dd(Math.floor((t % 3600) / 60));
+    if (elSeg)   elSeg.textContent   = dd(t % 60);
+  }
+
+  pintar();
+  raiz.classList.add('svcd--listo');
+  setInterval(pintar, 1000);
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) { meta = objetivo(); pintar(); }
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var p = window.location.pathname;
+  var isEN = (p === '/en' || p.indexOf('/en/') === 0);
+  document.documentElement.setAttribute('data-sv-locale', isEN ? 'en' : 'es');
+})();
+</script>
+  
+  <a class="in-page-link visually-hidden skip-link" href="#MainContent">{{ 'general.accessibility.skip_to_content' | t }}</a>
+  <div class="ms-quick-view-overlay"></div>
+  <div id="PageContainer" class="page-container">
+
+    {%- sections 'header-group' -%}
+    {%- sections 'popup-group' -%}
+
+      <main class="main-content" id="MainContent">
+        {{ content_for_layout }}
+      </main>
+
+    {%- sections 'footer-group' -%}
+
+  </div>
+
+  {%- liquid
+    render 'video-modal'
+    render 'photoswipe-template'
+    render 'tool-tip'
+  -%}
+
+  {% comment %} Image markup used when building product grid item via JS {% endcomment %}
+  <template id="naturalImageMarkup">
+    <div class="image-wrap" style="height: 0;">
+      <image-element data-aos="image-fade-in" data-aos-offset="150">
+        <img class="grid-product__image image-element" width height src srcset loading="lazy" alt>
+      </image-element>
+    </div>
+  </template>
+  <template id="fixedRatioImageMarkup">
+    <div class="grid__image-ratio">
+      <image-element data-aos="image-fade-in" data-aos-offset="150">
+        <img class="image-element" width height src srcset loading="lazy" alt>
+      </image-element>
+    </div>
+  </template>
+  <script>
+    document.addEventListener('click', function(event) {
+      var modal = document.querySelector('.ms-quick-view-modal-view');
+      if (modal) {
+        if (!modal.contains(event.target) || event.target.closest('button.add-to-cart')) {
+          modal.classList.remove('ms-quick-view-modal-view');
+        }
+      }
+    });
+    document.querySelector('.ms-quick-view-overlay').addEventListener('click', function() {
+      var abierto = document.querySelector('.ms-quick-view-modal-open');
+      if (abierto) { abierto.classList.remove("ms-quick-view-modal-open"); }
+      document.querySelector('body').classList.remove("ms-quick-view-modal-view2");
+    });
+    document.addEventListener('click', function(event) {
+      const button = event.target.closest('.ms-quick-view-btn-add');
+      if (button) {
+        const btnSectionID = button.dataset.id;
+        const productGrid = button.closest('.grid-product');
+        const msQuickView = productGrid.querySelector('.ms-quick-view-modal');
+        if (window.innerWidth <= 700) {
+          if (msQuickView) {
+            if (!msQuickView.classList.contains('ms-quick-view-modal-init')) {
+              document.body.insertBefore(msQuickView, document.body.firstChild);
+              msQuickView.classList.add("ms-quick-view-modal-init");
+              var sectionID = msQuickView.dataset.sectionId;
+              var sectionType = msQuickView.dataset.sectionType;
+              theme.sections.register(sectionType, theme.MSQuickViewModal);
+            }
+            document.getElementById(btnSectionID).classList.add("ms-quick-view-modal-open");
+            setTimeout(function() {
+              document.querySelector('body').classList.add("ms-quick-view-modal-view2");
+            }, 200);
+          } else if (document.getElementById(btnSectionID)) {
+            document.getElementById(btnSectionID).classList.add("ms-quick-view-modal-open");
+            setTimeout(function() {
+              document.querySelector('body').classList.add("ms-quick-view-modal-view2");
+            }, 200);
+          }
+        } else {
+          if (msQuickView) {
+            if (!productGrid.classList.contains('ms-quick-view-modal-init')) {
+              productGrid.classList.add("ms-quick-view-modal-init");
+              var sectionID = msQuickView.dataset.sectionId;
+              var sectionType = msQuickView.dataset.sectionType;
+              theme.sections.register(sectionType, theme.MSQuickViewModal);
+            }
+            productGrid.classList.add("ms-quick-view-modal-view");
+          }
+        }
+      }
+    });
+  </script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.body.addEventListener("click", function (event) {
+
+      const closeBtn = event.target.closest(".closebtn");
+
+      if (closeBtn) {
+        const prohandleClass = closeBtn.getAttribute("prohandle");
+
+        if (!prohandleClass) return;
+
+        // Find the modal using the class from prohandle attribute
+        const modal = document.querySelector(`.${prohandleClass}`);
+
+        if (modal) {
+          modal.classList.add("custom-refresh-class");
+          modal.classList.remove("activemodel");
+        } else {
+          console.warn(`No element found with class: ${prohandleClass}`);
+        }
+      }
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.body.addEventListener("click", function (event) {
+      const clickedBtn = event.target.closest(".ms-quick-view-btn-add");
+
+      if (clickedBtn) {
+        const prohandleClass = clickedBtn.getAttribute("prohandle");
+        if (!prohandleClass) return;
+
+      
+
+        // Use prohandleClass as the selector to find the target element
+        const modals = document.querySelector(`.${prohandleClass}`);
+
+        if (modals) {
+
+          setTimeout(function () {
+            modals.classList.add("activemodel");
+          }, 500);
+        } else {
+          console.warn(`No element found with class: ${prohandleClass}`);
+        }
+      }
+    });
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.body.addEventListener("click", function (event) {
+      const addToCartBtn = event.target.closest(".add-to-cart");
+
+      if (addToCartBtn) {
+        // Delay before triggering .closebtn
+        setTimeout(function () {
+          const closeBtn = document.querySelector(".closebtn");
+          if (closeBtn) {
+            closeBtn.click(); // Simulate the click after delay
+          }
+        }, 500); // Delay in milliseconds (500ms = 0.5s)
+      }
+    });
+  });
+</script>
+
+
+
+
+
+{% if request.locale.iso_code == 'en' %}
+<script>
+  (function () {
+    var WORDS = {
+      'dorado': 'Gold',
+      'plateado': 'Silver',
+      'guía de tallas': 'Size Chart'
+    };
+    var FIND = /\b(dorado|plateado|gu[ií]a\s+de\s+tallas)\b/gi;
+    var SKIP = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEXTAREA: 1 };
+    var watched = new WeakSet();
+
+    function swap(match) {
+      var key = match.toLowerCase().replace(/\s+/g, ' ').replace('guia', 'guía');
+      var en = WORDS[key];
+      if (!en) return match;
+      return match === match.toUpperCase() ? en.toUpperCase() : en;
+    }
+
+    function fixText(node) {
+      var parent = node.parentNode;
+      if (!node.nodeValue || (parent && SKIP[parent.nodeName])) return;
+      var updated = node.nodeValue.replace(FIND, swap);
+      if (updated !== node.nodeValue) node.nodeValue = updated;
+    }
+
+    function scan(root) {
+      if (root.nodeType === 3) return fixText(root);
+      if (root.nodeType !== 1 && root.nodeType !== 11) return;
+      if (SKIP[root.nodeName]) return;
+      var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      var node;
+      while ((node = walker.nextNode())) fixText(node);
+    }
+
+    function watch(root) {
+      if (watched.has(root)) return;
+      watched.add(root);
+      scan(root);
+      new MutationObserver(function (records) {
+        records.forEach(function (r) {
+          if (r.type === 'characterData') fixText(r.target);
+          else r.addedNodes.forEach(scan);
+        });
+      }).observe(root, { childList: true, characterData: true, subtree: true });
+    }
+
+    function watchShadowRoots() {
+      document.querySelectorAll('*').forEach(function (el) {
+        if (el.shadowRoot) watch(el.shadowRoot);
+      });
+    }
+
+    watch(document.body);
+    watchShadowRoots();
+    setInterval(watchShadowRoots, 1500);
+  })();
+</script>
+{% endif %}
+<style>
+{% if request.locale.iso_code == 'en' %}
+  .sv-es { display: none !important; }
+{% else %}
+  .sv-en { display: none !important; }
+{% endif %}
+</style>
+{% if request.locale.iso_code == 'en' %}
+<style>
+  [src*="CHW8yG48rc4"],
+  [href*="CHW8yG48rc4"],
+  [data-src*="CHW8yG48rc4"],
+  [data-id*="CHW8yG48rc4"],
+  [data-video-id*="CHW8yG48rc4"],
+  [data-youtube-id*="CHW8yG48rc4"],
+  [style*="CHW8yG48rc4"],
+  [src*="CHW8yG48rc4"] ~ *,
+    .ks-video-thumbnail,
+  .ks-video-play-button,
+  .ks-video-container,
+  .ks-video-wrapper,
+  [class*="ks-video"] { display: none !important; }
+</style>
+<script>
+  (function () {
+    var ID = 'CHW8yG48rc4';
+    var ATTRS = ['src', 'href', 'data-src', 'data-id', 'data-video-id', 'data-youtube-id', 'style'];
+
+    function matches(el) {
+      if (!el.getAttribute) return false;
+      for (var i = 0; i < ATTRS.length; i++) {
+        var v = el.getAttribute(ATTRS[i]);
+        if (v && v.indexOf(ID) !== -1) return true;
+      }
+      return false;
+    }
+
+    function hide(el) {
+      el.style.setProperty('display', 'none', 'important');
+      if (el.tagName === 'IFRAME' || el.tagName === 'IMG') el.removeAttribute('src');
+      var p = el;
+      for (var i = 0; i < 4 && p.parentElement; i++) {
+        p = p.parentElement;
+        if (p.children.length === 1) p.style.setProperty('display', 'none', 'important');
+        else break;
+      }
+    }
+
+    function scan(root) {
+      if (!root.querySelectorAll) return;
+      Array.prototype.forEach.call(root.querySelectorAll('*'), function (el) {
+        if (matches(el)) hide(el);
+      });
+    }
+
+    scan(document);
+    new MutationObserver(function (records) {
+      records.forEach(function (r) {
+        r.addedNodes.forEach(function (n) {
+          if (n.nodeType !== 1) return;
+          if (matches(n)) hide(n);
+          scan(n);
+        });
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  })();
+</script>
+{% endif %}
+</body>
+
+<style>
+/* ===== SOLO BOTÓN PRINCIPAL DE PRODUCT PAGE =====
+   Aplica únicamente al botón submit dentro del bloque de formulario del producto.
+   No toca .add-to-cart de quick add ni botones en listados. */
+body.template-product
+  :is(.product-form, [id^="ProductForm"], [data-product-form])
+  :is(button[type="submit"], input[type="submit"]){
+  --atc-bg:#111;
+  --atc-bg-hover:#0d0d0d;
+  --atc-text:#fff;
+  --atc-shadow:0 10px 22px rgba(0,0,0,.20), 0 4px 8px rgba(0,0,0,.10);
+  --atc-radius:2px;
+  --atc-font-size-mobile:16px;
+  --atc-font-size-desktop:18px;
+  --atc-letter-spacing:.02em;
+  --atc-font-weight:800;
+  --atc-pad-y-mobile:16px;
+  --atc-pad-y-desktop:18px;
+  --atc-pad-x:24px;
+
+  background:var(--atc-bg) !important;
+  color:var(--atc-text) !important;
+  border:none !important;
+  border-radius:var(--atc-radius) !important;
+  box-shadow:var(--atc-shadow) !important;
+
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:var(--atc-pad-y-mobile) var(--atc-pad-x) !important;
+  font-size:var(--atc-font-size-mobile) !important;
+  font-weight:var(--atc-font-weight) !important;
+  letter-spacing:var(--atc-letter-spacing) !important;
+  text-transform:uppercase !important;
+  line-height:1.2 !important;
+  cursor:pointer;
+}
+
+body.template-product
+  :is(.product-form, [id^="ProductForm"], [data-product-form])
+  :is(button[type="submit"], input[type="submit"]):hover{
+  background:var(--atc-bg-hover) !important;
+  transform:translateY(-0.5px);
+}
+
+body.template-product
+  :is(.product-form, [id^="ProductForm"], [data-product-form])
+  :is(button[type="submit"], input[type="submit"]):focus-visible{
+  outline:2px solid rgba(255,255,255,.6) !important;
+  outline-offset:2px !important;
+}
+
+body.template-product
+  :is(.product-form, [id^="ProductForm"], [data-product-form])
+  :is(button[type="submit"][disabled], input[type="submit"][disabled]){
+  opacity:.65 !important;
+  cursor:not-allowed !important;
+  filter:saturate(.9);
+}
+
+@media (min-width:768px){
+  body.template-product
+    :is(.product-form, [id^="ProductForm"], [data-product-form])
+    :is(button[type="submit"], input[type="submit"]){
+    font-size:var(--atc-font-size-desktop) !important;
+    padding-top:var(--atc-pad-y-desktop) !important;
+    padding-bottom:var(--atc-pad-y-desktop) !important;
+  }
+}
+
+/* ===== Salvaguarda explícita: NO estilizar quick add =====
+   Tu quick add usa un <span class="add-to-cart"> dentro de .mobile__form.
+   No lo seleccionamos arriba (solo botones submit), pero dejamos esto
+   por claridad para evitar futuras colisiones. */
+body.template-product .mobile__form > .add-to-cart{ box-shadow:none; }
+</style>
+
+
+
+
+
+
+
+
+
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WFN55XPK"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<style>
+  .shopify-payment-terms {
+    display: none !important;
+  }
+</style>
+
+</html>

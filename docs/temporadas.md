@@ -50,8 +50,9 @@ sus fotos y con los textos de la barra de arriba (cuenta regresiva), del bloque
 
 Con el tercer argumento (clave) el snippet fuerza esa temporada: así está el
 tema de vista previa de .cl (#189939188015, siempre Navidad). Respaldo de los
-archivos de antes: el tema «ANTERIOR (respaldo 8-nov)» de cada tienda y los
-originales bajados el 10-nov.
+archivos de antes: `branding/respaldos-tema/2026-11-10-temporadas/` (cl y com,
+tal como estaban justo antes del cambio) y el tema «ANTERIOR (respaldo 8-nov)»
+de cada tienda.
 
 ## Fotos de una temporada
 

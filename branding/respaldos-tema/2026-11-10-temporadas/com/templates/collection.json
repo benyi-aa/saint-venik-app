@@ -1,0 +1,136 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "collection-header": {
+      "type": "collection-header",
+      "custom_css": [],
+      "settings": {
+        "enable": false,
+        "collection_image_enable": false,
+        "parallax": true,
+        "parallax_direction": "top"
+      }
+    },
+    "advanced_content_bpAddx": {
+      "type": "advanced-content",
+      "blocks": {
+        "liquid_impbtB": {
+          "type": "liquid",
+          "settings": {
+            "code": "<div class=\"collection-description-wrapper\">\n  <div class=\"collection-description\">\n    {%- comment -%} Esta plantilla la usan Best Sellers, Essentials y otras colecciones: el título sigue a la colección (antes decía Essentials'26 en todas) y el texto es la primera frase de su descripción de Google. {%- endcomment -%}\n    {%- liquid\n      assign t_es = collection.title\n      assign t_en = collection.title\n      assign d_es = page_description | split: ' | ' | first | strip\n      assign d_en = d_es\n      if collection.handle contains 'essentials'\n        assign t_es = \"Essentials'26\"\n        assign t_en = \"Essentials'26\"\n        assign d_es = 'Descubre nuestras piezas más icónicas. Explora la colección Essentials de Saint Venik, incluyendo diseños auténticos que definen un estilo atemporal y versátil.'\n        assign d_en = 'Discover our most iconic pieces. Explore the Saint Venik Essentials collection, featuring authentic designs that define a timeless, versatile style.'\n      elsif collection.handle == 'best-sellers'\n        assign t_es = 'Best Sellers'\n        assign t_en = 'Best Sellers'\n        assign d_es = 'Descubre nuestras piezas más vendidas. Explora los Best Sellers de Saint Venik: las cadenas, colgantes, pulseras y anillos que más eligen nuestros clientes.'\n        assign d_en = \"Discover our best-selling pieces. Explore Saint Venik's Best Sellers: the chains, pendants, bracelets and rings our customers choose most.\"\n      endif\n    -%}\n    <h2>\n      <span class=\"sv-es\">{{ t_es }}</span><span class=\"sv-en\">{{ t_en }}</span>\n    </h2>\n    {%- if d_es != blank -%}\n    <p>\n      <span class=\"sv-es\">{{ d_es }}</span><span class=\"sv-en\">{{ d_en }}</span>\n    </p>\n    {%- endif -%}\n  </div>\n  <div class=\"collection-image-container\">\n    <img class=\"sv-es\" src=\"https://cdn.shopify.com/s/files/1/0773/8218/9103/files/coleccion_cadena.jpg?v=1789267351\" alt=\"Imagen colección\">\n    <img class=\"sv-en\" src=\"https://cdn.shopify.com/s/files/1/0773/8218/9103/files/coleccion_cadena.jpg?v=1789267351\" alt=\"Collection image\">\n  </div>\n</div>\n\n<style>\n.collection-description-wrapper {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  background: #fff;\n  padding: 0 !important;\n  margin: 0 !important;\n  border: none;\n  box-sizing: border-box;\n}\n\n.collection-description {\n  flex: 2;\n  padding: 12px 20px 0 20px;\n  margin: 0 !important;\n  color: #000;\n  font-family: inherit;\n  box-sizing: border-box;\n}\n\n.collection-description h2 {\n  font-size: 18px;\n  font-weight: bold;\n  text-transform: uppercase;\n  margin: 0 0 6px 0;\n}\n\n.collection-description p {\n  font-size: 14px;\n  line-height: 1.5;\n  margin: 0;\n}\n\n.collection-image-container {\n  display: none;\n}\n\n.collection-image-container img {\n  width: 100%;\n  max-width: 595px;\n  height: auto;\n  object-fit: cover;\n  margin: 0 auto;\n}\n\n@media (min-width: 768px) {\n  .collection-description-wrapper {\n    flex-wrap: nowrap;\n  }\n\n  .collection-description {\n    padding: 12px 20px;\n  }\n\n  .collection-image-container {\n    display: block;\n    flex: 1;\n    padding: 0 !important;\n    margin: 0 !important;\n  }\n}\n\nhtml[data-sv-locale=\"en\"] .collection-image-container img.sv-en,\nhtml:not([data-sv-locale=\"en\"]) .collection-image-container img.sv-es {\n  display: block;\n}\n</style>",
+            "width": "100%",
+            "alignment": "center"
+          }
+        },
+        "liquid_9VdgPG": {
+          "type": "liquid",
+          "settings": {
+            "code": "<script>\n(function(){\n  var p = window.location.pathname;\n  var isEN = (p === '/en' || p.indexOf('/en/') === 0);\n  document.documentElement.setAttribute('data-sv-locale', isEN ? 'en' : 'es');\n})();\n</script>\n\n<!-- ===== VERSIÓN ESPAÑOL ===== -->\n<div class=\"sv-benefits sv-benefits--es\">\n  <div class=\"sv-benefits__item\">\n    <img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 17' fill='none' stroke='white' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 14C3 8 7 4 13 4C13 10 9 14 3 14Z'/%3E%3Cpath d='M3 14L9.5 7.5'/%3E%3C/svg%3E\" alt=\"Hipoalergénicos\" width=\"16\" height=\"17\">\n    <span>Hipoalergénicos</span>\n  </div>\n  <div class=\"sv-benefits__item\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/mdi_heart-outline.svg?v=1751135986\" alt=\"50.000+ clientes felices\">\n    <span>50.000+ clientes felices</span>\n  </div>\n  <div class=\"sv-benefits__item\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/mdi_gold.svg?v=1751135986\" alt=\"Oro real 18K\">\n    <span>Oro real 18K</span>\n  </div>\n  <div class=\"sv-benefits__item\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/material-symbols_diamond-outline.svg?v=1751135986\" alt=\"Garantía de por vida\">\n    <span>Garantía de por vida</span>\n  </div>\n</div>\n\n<!-- ===== VERSIÓN INGLÉS ===== -->\n<div class=\"sv-benefits sv-benefits--en\">\n  <div class=\"sv-benefits__item\">\n    <img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 17' fill='none' stroke='white' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 14C3 8 7 4 13 4C13 10 9 14 3 14Z'/%3E%3Cpath d='M3 14L9.5 7.5'/%3E%3C/svg%3E\" alt=\"Hypoallergenic\" width=\"16\" height=\"17\">\n    <span>Hypoallergenic</span>\n  </div>\n  <div class=\"sv-benefits__item\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/mdi_heart-outline.svg?v=1751135986\" alt=\"50,000+ happy customers\">\n    <span>50,000+ happy customers</span>\n  </div>\n  <div class=\"sv-benefits__item\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/mdi_gold.svg?v=1751135986\" alt=\"Real 18K gold\">\n    <span>Real 18K gold</span>\n  </div>\n  <div class=\"sv-benefits__item\">\n    <img src=\"https://cdn.shopify.com/s/files/1/0717/3006/9807/files/material-symbols_diamond-outline.svg?v=1751135986\" alt=\"Lifetime warranty\">\n    <span>Lifetime warranty</span>\n  </div>\n</div>\n\n<style>\n/* --- Estructura --- */\n.sv-benefits {\n  display: flex;\n  flex-wrap: wrap;\n  justify-content: space-between;\n  align-items: center;\n  background: #000;\n  color: #fff;\n  font-family: inherit;\n  padding: 0;\n  margin: 0;\n}\n.sv-benefits__item {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  font-size: 12px;\n  text-transform: uppercase;\n  padding: 4px 6px;\n  box-sizing: border-box;\n}\n.sv-benefits__item img {\n  width: 12px;\n  height: auto;\n}\n\n/* --- Móvil --- */\n@media (max-width: 767px) {\n  .sv-benefits {\n    flex-direction: column;\n    align-items: center;\n  }\n  .sv-benefits__item {\n    width: auto;\n    justify-content: center;\n    padding: 6px 8px;\n  }\n}\n\n/* --- Escritorio --- */\n@media (min-width: 768px) {\n  .sv-benefits {\n    flex-direction: row;\n    justify-content: space-around;\n  }\n  .sv-benefits__item {\n    flex: 0 0 auto;\n    font-size: 15px;\n    padding: 6px 10px;\n  }\n  .sv-benefits__item img {\n    width: 14px;\n  }\n}\n\n/* --- Interruptor de idioma (SIEMPRE AL FINAL) --- */\n.sv-benefits--en { display: none !important; }\n.sv-benefits--es { display: flex !important; }\nhtml[data-sv-locale=\"en\"] .sv-benefits--es { display: none !important; }\nhtml[data-sv-locale=\"en\"] .sv-benefits--en { display: flex !important; }\n</style>",
+            "width": "100%",
+            "alignment": "center"
+          }
+        },
+        "liquid_i76cR4": {
+          "type": "liquid",
+          "settings": {
+            "code": "{%- liquid\n  assign sv_locale = request.locale.iso_code\n-%}\n\n<div class=\"banner-3x2-{{ section.id }}\">\n  {%- if sv_locale == 'en' -%}\n    <p><strong>BUY 2, GET 1 FREE</strong></p>\n    <p>ADD 3 PIECES TO YOUR CART — THE LOWEST PRICED ONE IS FREE</p>\n  {%- else -%}\n    <p><strong>3X2 EN TODO</strong></p>\n    <p>AÑADE 3 JOYAS AL CARRITO Y 1 ES GRATIS</p>\n  {%- endif -%}\n</div>\n\n<style>\n  .banner-3x2-{{ section.id }} {\n    background-color: #E2D8CE;\n    border-radius: 0;\n    padding: 8px 20px;\n    text-align: center;\n    font-family: 'Helvetica Neue', Arial, sans-serif;\n    width: 100vw;\n    position: relative;\n    left: 50%;\n    right: 50%;\n    margin-left: -50vw;\n    margin-right: -50vw;\n    margin-top: -30px;\n    margin-bottom: 0px;\n    box-sizing: border-box;\n  }\n  .banner-3x2-{{ section.id }} p {\n    color: #5B5147;\n    font-size: 16px;\n    font-weight: 400;\n    margin: 0;\n    padding: 0;\n    font-family: 'Helvetica Neue', Arial, sans-serif;\n    line-height: 1.4;\n    letter-spacing: 0.5px;\n  }\n  .banner-3x2-{{ section.id }} p + p {\n    margin-top: 2px;\n  }\n  .banner-3x2-{{ section.id }} p strong {\n    color: #33291F;\n    font-weight: 700;\n    font-size: 17px;\n  }\n  @media (max-width: 600px) {\n    .banner-3x2-{{ section.id }} p {\n      font-size: 13px;\n    }\n    .banner-3x2-{{ section.id }} p strong {\n      font-size: 15px;\n    }\n  }\n</style>",
+            "width": "100%",
+            "alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "liquid_impbtB",
+        "liquid_9VdgPG",
+        "liquid_i76cR4"
+      ],
+      "custom_css": [],
+      "name": "t:sections.advanced-content.presets.custom_content.name",
+      "settings": {
+        "full_width": true,
+        "space_around": false,
+        "lazyload_images": false
+      }
+    },
+    "main-collection": {
+      "type": "main-collection",
+      "blocks": {
+        "subcollections": {
+          "type": "subcollections",
+          "settings": {
+            "subcollections_per_row": 5
+          }
+        },
+        "product_grid": {
+          "type": "product_grid",
+          "settings": {
+            "enable_collection_count": true,
+            "per_row": 4,
+            "rows_per_page": 20,
+            "mobile_flush_grid": true
+          }
+        }
+      },
+      "block_order": [
+        "subcollections",
+        "product_grid"
+      ],
+      "custom_css": [
+        "@media only screen and (max-width: 767px) {.grid-product__content ~ div {padding-left: 8px; padding-right: 8px; box-sizing: border-box; } .grid-product__meta, .grid-product__title {text-align: left; } .grid-product__price {text-align: left; justify-content: flex-start; }}"
+      ],
+      "settings": {
+        "enable_sidebar": true,
+        "collapsed": true,
+        "filter_style": "sidebar",
+        "enable_color_swatches": false,
+        "enable_swatch_labels": true,
+        "enable_sort": true
+      }
+    },
+    "advanced_content_3nh8DD": {
+      "type": "advanced-content",
+      "blocks": {
+        "liquid_c7yR4b": {
+          "type": "liquid",
+          "settings": {
+            "code": "<script>\n(function(){\n  var p = window.location.pathname;\n  var isEN = (p === '/en' || p.indexOf('/en/') === 0);\n  document.documentElement.setAttribute('data-sv-locale', isEN ? 'en' : 'es');\n})();\n</script>\n\n<div class=\"sv-beneficios\" id=\"sv-beneficios\">\n  <div class=\"sv-beneficios__viewport\" id=\"sv-viewport\">\n    <div class=\"sv-beneficios__track\" id=\"sv-track\">\n\n      <div class=\"sv-beneficios__item\">\n        <div class=\"sv-beneficios__icono\">\n          <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0\"/><path d=\"M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0\"/><path d=\"M5 17h-2v-11a1 1 0 0 1 1 -1h9v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5\"/></svg>\n        </div>\n        <p class=\"sv-beneficios__titulo\">\n          <span class=\"sv-txt sv-txt--es\">ENVÍO GRATIS</span>\n          <span class=\"sv-txt sv-txt--en\">FREE SHIPPING</span>\n        </p>\n      </div>\n\n      <div class=\"sv-beneficios__item\">\n        <div class=\"sv-beneficios__icono\">\n          <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 14l-4 -4l4 -4\"/><path d=\"M5 10h11a4 4 0 1 1 0 8h-1\"/></svg>\n        </div>\n        <p class=\"sv-beneficios__titulo\">\n          <span class=\"sv-txt sv-txt--es\">14 DÍAS DEVOLUCIÓN</span>\n          <span class=\"sv-txt sv-txt--en\">14-DAY RETURNS</span>\n        </p>\n      </div>\n\n      <div class=\"sv-beneficios__item\">\n        <div class=\"sv-beneficios__icono\">\n          <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1.002l3.093 -6.253l3.093 6.253l6.9 1.002l-5 4.867l1.179 6.873z\"/></svg>\n        </div>\n        <p class=\"sv-beneficios__titulo\">\n          <span class=\"sv-txt sv-txt--es\">+3.000 RESEÑAS</span>\n          <span class=\"sv-txt sv-txt--en\">3,000+ REVIEWS</span>\n        </p>\n      </div>\n\n    </div>\n  </div>\n\n  <div class=\"sv-beneficios__dots\" id=\"sv-dots\" aria-hidden=\"true\">\n    <span class=\"sv-beneficios__dot\"><span class=\"sv-beneficios__fill\"></span></span>\n    <span class=\"sv-beneficios__dot\"><span class=\"sv-beneficios__fill\"></span></span>\n    <span class=\"sv-beneficios__dot\"><span class=\"sv-beneficios__fill\"></span></span>\n  </div>\n</div>\n\n<style>\n  #sv-beneficios {\n    --sv-fondo: #E7E6E6;\n    --sv-titulo: #111111;\n    --sv-icono: 26px;\n    --sv-duracion: 4s;\n    max-width: 100%;\n    margin: 0 auto;\n    background: var(--sv-fondo);\n  }\n\n  #sv-beneficios .sv-beneficios__viewport {\n    overflow: hidden;\n    background: var(--sv-fondo);\n  }\n\n  /* ---------- ESCRITORIO ---------- */\n  #sv-beneficios .sv-beneficios__track {\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    background: var(--sv-fondo);\n  }\n\n  #sv-beneficios .sv-beneficios__item {\n    padding: 22px 28px;\n    text-align: center;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    gap: 10px;\n    box-sizing: border-box;\n    background: var(--sv-fondo);\n  }\n\n  #sv-beneficios .sv-beneficios__icono {\n    line-height: 0;\n    color: var(--sv-titulo);\n  }\n  #sv-beneficios .sv-beneficios__icono svg {\n    width: var(--sv-icono);\n    height: var(--sv-icono);\n  }\n\n  #sv-beneficios .sv-beneficios__titulo {\n    margin: 0;\n    font-size: 14px;\n    font-weight: 500;\n    letter-spacing: 0.04em;\n    text-transform: uppercase;\n    color: var(--sv-titulo);\n  }\n\n  #sv-beneficios .sv-beneficios__dots { display: none; }\n\n  /* ---------- MÓVIL: carrusel automático ---------- */\n  @media (max-width: 749px) {\n    #sv-beneficios .sv-beneficios__track {\n      grid-template-columns: none;\n      display: flex;\n      transition: transform 0.6s ease-in-out;\n      will-change: transform;\n    }\n    #sv-beneficios .sv-beneficios__item {\n      flex: 0 0 100%;\n      padding: 22px 24px;\n    }\n    #sv-beneficios .sv-beneficios__dots {\n      display: flex;\n      gap: 6px;\n      justify-content: center;\n      background: var(--sv-fondo);\n      padding: 0 0 14px;\n    }\n\n    #sv-beneficios .sv-beneficios__dot {\n      position: relative;\n      width: 24px;\n      height: 3px;\n      background: rgba(0,0,0,0.2);\n      overflow: hidden;\n      display: block;\n    }\n    #sv-beneficios .sv-beneficios__fill {\n      position: absolute;\n      top: 0;\n      left: 0;\n      height: 100%;\n      width: 0%;\n      background: var(--sv-titulo);\n    }\n    #sv-beneficios .sv-beneficios__dot.is-done .sv-beneficios__fill {\n      width: 100%;\n      transition: none;\n    }\n    #sv-beneficios .sv-beneficios__dot.is-idle .sv-beneficios__fill {\n      width: 0%;\n      transition: none;\n    }\n    #sv-beneficios .sv-beneficios__dot.is-active .sv-beneficios__fill {\n      width: 100%;\n      transition: width var(--sv-duracion) linear;\n    }\n  }\n\n  /* --- Interruptor de idioma (SIEMPRE AL FINAL) --- */\n  #sv-beneficios .sv-txt--en { display: none !important; }\n  #sv-beneficios .sv-txt--es { display: inline !important; }\n  html[data-sv-locale=\"en\"] #sv-beneficios .sv-txt--es { display: none !important; }\n  html[data-sv-locale=\"en\"] #sv-beneficios .sv-txt--en { display: inline !important; }\n</style>\n\n<script>\n  (function () {\n    var root = document.getElementById('sv-beneficios');\n    if (!root) return;\n    var track = document.getElementById('sv-track');\n    var dots  = document.querySelectorAll('#sv-dots .sv-beneficios__dot');\n    var total = track.children.length;\n    var DURACION = 4000;\n    var index = 0;\n    var timer = null;\n\n    function esMovil() {\n      return window.matchMedia('(max-width: 749px)').matches;\n    }\n\n    function pintarBarras(activo) {\n      for (var d = 0; d < dots.length; d++) {\n        dots[d].classList.remove('is-active', 'is-done', 'is-idle');\n        if (d < activo) {\n          dots[d].classList.add('is-done');\n        } else if (d === activo) {\n          dots[d].classList.add('is-idle');\n        } else {\n          dots[d].classList.add('is-idle');\n        }\n      }\n      void dots[activo].offsetWidth;\n      dots[activo].classList.remove('is-idle');\n      dots[activo].classList.add('is-active');\n    }\n\n    function mostrar(i) {\n      track.style.transform = 'translateX(-' + (i * 100) + '%)';\n      pintarBarras(i);\n    }\n\n    function iniciar() {\n      detener();\n      if (!esMovil() || total < 2) {\n        track.style.transform = '';\n        return;\n      }\n      index = 0;\n      mostrar(0);\n      timer = setInterval(function () {\n        index = (index + 1) % total;\n        mostrar(index);\n      }, DURACION);\n    }\n\n    function detener() {\n      if (timer) {\n        clearInterval(timer);\n        timer = null;\n      }\n    }\n\n    iniciar();\n    window.addEventListener('resize', iniciar);\n  })();\n</script>",
+            "width": "100%",
+            "alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "liquid_c7yR4b"
+      ],
+      "custom_css": [],
+      "name": "t:sections.advanced-content.presets.custom_content.name",
+      "settings": {
+        "full_width": true,
+        "space_around": false,
+        "lazyload_images": false
+      }
+    },
+    "17722566340a32bf78": {
+      "type": "apps",
+      "settings": {
+        "full_width": false,
+        "space_around": true
+      }
+    }
+  },
+  "order": [
+    "collection-header",
+    "advanced_content_bpAddx",
+    "main-collection",
+    "advanced_content_3nh8DD",
+    "17722566340a32bf78"
+  ]
+}
