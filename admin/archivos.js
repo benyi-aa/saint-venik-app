@@ -10,7 +10,7 @@
  * Por eso se comprueba el host ANTES de intentarlo y, si no es de los conocidos,
  * se explica que paso en vez de dejar un error mudo.
  */
-import { gql, comprobarErrores } from './api.js?v=202611101521';
+import { gql, comprobarErrores } from './api.js?v=202611101540';
 
 const HOSTS_CON_CORS = /(storage\.googleapis\.com|s3\.amazonaws\.com)$/;
 
@@ -61,7 +61,9 @@ async function esperarListo(id, intentos = 25) {
   throw new Error('El archivo tarda más de lo normal en procesarse. Recarga en un momento.');
 }
 
-export async function subirArchivo(file, { onPaso = () => {} } = {}) {
+/* Sube el archivo a un destino temporal de Shopify y devuelve su resourceUrl,
+ * que sirve como originalSource para crear un archivo o cambiar uno que ya existe. */
+export async function subirAlDestino(file, onPaso = () => {}) {
   /* Un SVG tiene mime image/svg+xml pero Shopify NO lo acepta como imagen: si
    * se pide por la rama IMAGE, fileCreate devuelve un userError justo con el
    * formato que mas sentido tiene para un icono. Va por la de archivo generico,
@@ -104,6 +106,13 @@ export async function subirArchivo(file, { onPaso = () => {} } = {}) {
   if (!respuesta.ok) {
     throw new Error(`${host} rechazó la subida (HTTP ${respuesta.status}).`);
   }
+
+  return { resourceUrl: destino.resourceUrl, esImagen };
+}
+
+export async function subirArchivo(file, { onPaso = () => {} } = {}) {
+  const { resourceUrl, esImagen } = await subirAlDestino(file, onPaso);
+  const destino = { resourceUrl };
 
   onPaso('Registrando…');
   const d2 = await gql(REGISTRAR, {
@@ -221,4 +230,14 @@ export async function traerArchivo(url, opciones) {
   const mismo = files.nodes.find((n) => nombreDe(n) === nombre);
   if (mismo) return { ...(await reemplazarArchivo(mismo.id, absoluta)), reemplazado: true };
   return copiarArchivo(absoluta, opciones);
+}
+
+/* Crea un archivo con un nombre exacto (el que pide el tema) desde una URL. */
+export async function crearConNombre(url, nombre) {
+  const d = await gql(REGISTRAR, {
+    files: [{ originalSource: url, contentType: 'IMAGE', filename: nombre, alt: nombre }],
+  });
+  const creado = comprobarErrores(d, 'fileCreate').files[0];
+  const listo = await esperarListo(creado.id);
+  return { id: listo.id, url: listo.image?.url ?? listo.url ?? null };
 }

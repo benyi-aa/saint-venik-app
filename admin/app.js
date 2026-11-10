@@ -1,50 +1,51 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611101521';
+import { estaEmbebida } from './api.js?v=202611101540';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611101521';
+} from './colores.js?v=202611101540';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611101521';
+} from './config.js?v=202611101540';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611101521';
+} from './filtros.js?v=202611101540';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611101521';
-import { prepararNavidad } from './inicio.js?v=202611101521';
-import { quitarAguaDeColecciones } from './textos.js?v=202611101521';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611101521';
+} from './productos.js?v=202611101540';
+import { prepararNavidad } from './inicio.js?v=202611101540';
+import { quitarAguaDeColecciones } from './textos.js?v=202611101540';
+import { GRUPOS as GRUPOS_FOTOS, cargarFotos, cambiarFoto } from './fotos.js?v=202611101540';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611101540';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611101521';
+} from './guias.js?v=202611101540';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611101521';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611101521';
+} from './vista-previa.js?v=202611101540';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611101540';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611101521';
+} from './etiquetas.js?v=202611101540';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611101521';
-import { ICONOS, svgIcono } from './iconos.js?v=202611101521';
+} from './beneficios.js?v=202611101540';
+import { ICONOS, svgIcono } from './iconos.js?v=202611101540';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611101521';
+const VERSION = '202611101540';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -3161,8 +3162,83 @@ const PANTALLAS = {
   beneficios: pintarBeneficios,
   guias: pintarGuias,
   apariencia: pintarApariencia,
+  fotos: pintarFotos,
   filtros: pintarFiltros,
 };
+
+/* Pestaña «Fotos»: cada foto de temporada con su miniatura y botones para
+ * cambiarla (subir del computador o elegir de Archivos). Ver fotos.js. */
+function tarjetaFoto(nombre, titulo, forma, actual) {
+  const [a, b] = forma;
+  const medida = actual?.ancho ? ` · ${actual.ancho} × ${actual.alto}` : '';
+  return `
+    <div class="foto" data-foto="${escapar(nombre)}" data-titulo="${escapar(titulo)}" data-forma="${a}/${b}" style="--ar:${a} / ${b}">
+      <div class="foto__marco" data-marco>${actual?.url ? `<img src="${escapar(actual.url)}&width=480" alt="" loading="lazy" />` : '<span class="ayuda">Todavía no existe</span>'}</div>
+      <p class="foto__titulo">${escapar(titulo)}</p>
+      <p class="ayuda foto__nombre" data-medida>${escapar(nombre)}${medida}</p>
+      <p class="ayuda">Formato ${a === b ? 'cuadrado' : `${a}:${b}`}</p>
+      <div class="acciones acciones--envolver">
+        <label class="secundario como-boton">Subir…<input type="file" accept="image/*" data-subir hidden /></label>
+        ${hayBiblioteca() ? '<button type="button" class="secundario" data-biblioteca>Elegir de la biblioteca</button>' : ''}
+      </div>
+      <p class="ayuda" data-estado></p>
+    </div>`;
+}
+
+async function pintarFotos() {
+  pantalla.innerHTML = '<p class="cargando">Cargando…</p>';
+  const fotos = await cargarFotos();
+  pantalla.innerHTML = `
+    <s-page>
+      <div class="titular">
+        <h1>Fotos</h1>
+        <p class="subtitulo">Las fotos de temporada de la tienda. Cambias una aquí y se actualiza en todos los lugares donde sale, en unos segundos; no hay que tocar el tema. Si la foto nueva no tiene el formato indicado, la tienda la recorta.</p>
+      </div>
+      <s-banner tone="warning"><p>Ojo: los botones de Apariencia «Traer las fotos nuevas a Archivos» y «Preparar las fotos de Navidad» vuelven a poner las fotos que trae la app y pisan las que cambies aquí.</p></s-banner>
+      ${GRUPOS_FOTOS.map((g) => `
+        <s-section heading="${escapar(g.titulo)}">
+          <p class="ayuda fotos__texto">${escapar(g.texto)}</p>
+          <div class="fotos">${g.fotos.map(([n, t, forma]) => tarjetaFoto(n, t, forma || g.forma, fotos[n])).join('')}</div>
+        </s-section>`).join('')}
+    </s-page>`;
+
+  pantalla.querySelectorAll('[data-foto]').forEach((tarjeta) => {
+    const nombre = tarjeta.dataset.foto;
+    const titulo = tarjeta.dataset.titulo;
+    const [a, b] = tarjeta.dataset.forma.split('/').map(Number);
+    const estado = tarjeta.querySelector('[data-estado]');
+    const decir = (texto) => { estado.textContent = texto; };
+
+    async function aplicar(obtener) {
+      try {
+        const origen = await obtener();
+        if (!origen) { decir(''); return; }
+        const r = await cambiarFoto(nombre, origen, fotos[nombre], decir);
+        fotos[nombre] = { id: r.id, url: r.url, ancho: r.ancho, alto: r.alto };
+        tarjeta.querySelector('[data-marco]').innerHTML = `<img src="${escapar(r.url)}&width=480" alt="" />`;
+        tarjeta.querySelector('[data-medida]').textContent = `${nombre} · ${r.ancho} × ${r.alto}`;
+        const desvio = Math.abs((r.ancho / r.alto) / (a / b) - 1);
+        decir(desvio > 0.12
+          ? `Lista. Ojo: mide ${r.ancho} × ${r.alto} y aquí conviene ${a === b ? 'cuadrada' : `${a}:${b}`}; la tienda la va a recortar.`
+          : 'Lista. En la tienda se ve en unos segundos.');
+        avisar(`Foto cambiada: ${titulo}`);
+      } catch (error) {
+        decir('');
+        avisar(error.message, true);
+      }
+    }
+
+    tarjeta.querySelector('[data-subir]').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      e.target.value = '';
+      if (file) aplicar(async () => file);
+    });
+    tarjeta.querySelector('[data-biblioteca]')?.addEventListener('click', () => {
+      decir('Abriendo la biblioteca…');
+      aplicar(async () => (await elegirDeBiblioteca({ tipo: 'MediaImage' }))?.url);
+    });
+  });
+}
 
 async function ir(nombre) {
   pintado += 1;
