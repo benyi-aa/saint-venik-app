@@ -343,6 +343,21 @@ su descripción de Google (`page_description` hasta el primer « | »); Best
 Sellers y Essentials conservan su texto propio. `page_description` ya viene
 escapado: no pasarle `escape` o el apóstrofo sale como `&#39;`.
 
+### Banners de Navidad: teléfono centrado y Best Sellers entero en el computador (10-nov)
+
+Revisión del usuario en el tema de vista previa: en el teléfono las joyas no
+quedaban al centro y el título tapaba varias; en el computador el banner de Best
+Sellers cortaba las joyas. Ahora:
+- Las 7 versiones `sv-navidad-portada-<k>-movil.jpg` (también Anillos, nueva)
+  tienen las joyas al centro y en el 58 % de arriba (el título ocupa de 61 % a
+  92 % del alto del banner de 165 px). Anillos es un recorte; las demás se
+  ampliaron con Nano Banana y se pegó la original encima. Se muestran enteras
+  (`--sv-encuadre: 50% 50%` en `sv-portada.css`).
+- `sv-navidad-portada-bestsellers.jpg` (computador) es una toma más abierta con
+  las joyas en ~35 % del alto, a la derecha; `--sv-y: 54%`. Cabe entera de 1280
+  a 1512 px; a 1920 se corta apenas arriba.
+- Las anteriores quedaron en `branding/colecciones-inicio/navidad/portadas/respaldo-10nov/`.
+
 ### Tema de vista previa de Navidad en .cl (10-nov)
 
 La temporada se sigue cambiando desde la app (Apariencia → «Inicio:
