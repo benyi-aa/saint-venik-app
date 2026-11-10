@@ -615,3 +615,14 @@ Corregidas tras el feedback del usuario. Las de la segunda versión quedaron en 
 - **Colgantes:** acostados sobre negro brillante, cámara baja, en orden oro–plata–oro.
 
 La foto de Navidad de Colgantes del inicio ahora tiene los mismos tres (Vault Blue Oro, Crucifix y Cross Minimal Oro).
+
+## Menú del teléfono: fotos de Daniella (9-nov, noche)
+
+Siguiendo el feedback de Benjamín («fotos icónicas de producto en uso, de las de moda que subió Daniella»), cuatro tarjetas del menú ahora usan recortes cuadrados de las fotos en uso de las fichas de producto (archivos con «USO» en el nombre):
+
+- **Essentials:** Vault Red Pendant.
+- **Best Sellers:** Faith Pendant Oro.
+- **Pulseras:** Red Clover Oro.
+- **Colgantes:** Florence Pendant.
+
+Daniella no tiene fotos en uso de Cadenas, Anillos ni Conjuntos, así que esas tres siguen con los recortes de las fotos de modelo en el barco. Las versiones anteriores quedaron en `branding/menu/v1/`.
