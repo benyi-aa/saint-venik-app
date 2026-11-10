@@ -6,10 +6,10 @@
  * es cambiar el contenido de ese mismo archivo (mismo id, mismo nombre), así
  * que se actualiza en todos lados a la vez. Para que el nombre no cambie, la
  * foto nueva se pasa a JPG en el navegador antes de subirla. */
-import { gql } from './api.js?v=202611101540';
+import { gql } from './api.js?v=202611101544';
 import {
   subirAlDestino, reemplazarArchivo, crearConNombre, elegirDeBiblioteca, hayBiblioteca,
-} from './archivos.js?v=202611101540';
+} from './archivos.js?v=202611101544';
 
 const nav = (k, t) => [`sv-navidad-portada-${k}.jpg`, t];
 export const GRUPOS = [
@@ -111,7 +111,7 @@ async function aJpg(origen, nombre) {
     if (!r.ok) throw new Error('No se pudo leer la foto elegida.');
     blob = await r.blob();
   }
-  const bmp = await createImageBitmap(blob);
+  const bmp = await window.createImageBitmap(blob);
   const k = Math.min(1, 3200 / Math.max(bmp.width, bmp.height));
   const lienzo = document.createElement('canvas');
   lienzo.width = Math.round(bmp.width * k);
