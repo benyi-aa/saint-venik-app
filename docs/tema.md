@@ -332,6 +332,17 @@ sale la foto del velero. Best Sellers las usa fuera de Navidad desde
 `sv-portada` (clase `sv-pd` en el computador, `sv-pm` en el teléfono); en
 Navidad sigue su banner de terciopelo.
 
+### Título del encabezado en la plantilla por defecto de colección (9-nov)
+
+`templates/collection.json` (bloque Liquid de `advanced_content_bpAddx`) es la
+plantilla de Best Sellers y de las colecciones sin plantilla propia (Oro, Sale,
+Aros, Tendencia, Inferior a $…, Winner's, y en .com también Essentials e Ice).
+Tenía el título fijo («Bestsellers» en .cl, «Essentials'26» en .com) y salía en
+todas. Ahora el título es el de la colección y el texto es la primera frase de
+su descripción de Google (`page_description` hasta el primer « | »); Best
+Sellers y Essentials conservan su texto propio. `page_description` ya viene
+escapado: no pasarle `escape` o el apóstrofo sale como `&#39;`.
+
 ### «Resistente al agua» fuera de los lugares generales (9-nov)
 
 Benjamín: solo los brillantes no son resistentes al agua, así que la frase
