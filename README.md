@@ -1,4 +1,4 @@
-# Saint Venik · Color & Size Picker
+# Panel Saint Venik (antes «Color & Size Picker»)
 
 App de Shopify para saintvenik.com. Sustituye a OPTIS Color Swatch y a Kiwi Size
 Chart por algo propio, editable desde un panel y sin depender del soporte de
@@ -240,8 +240,8 @@ organización. Por eso el mismo código está registrado dos veces:
 
 | Tienda | Organización | App en el Dev Dashboard | Configuración |
 |---|---|---|---|
-| saintvenik.com (`vd9tn0-et`) | Saint Venik World (224321345) | Color & Size Picker | `shopify.app.toml` |
-| saintvenik.cl (`saint-venik`) | Saint Venik (73555994) | Color & Size Picker | `shopify.app.cl.toml` |
+| saintvenik.com (`vd9tn0-et`) | Saint Venik World (224321345) | Panel Saint Venik | `shopify.app.toml` |
+| saintvenik.cl (`saint-venik`) | Saint Venik (73555994) | Panel Saint Venik | `shopify.app.cl.toml` |
 
 El panel es uno solo: `admin/index.html` elige el client id según la tienda que
 lo abre. Los bloques de cada tienda llevan el uuid de su propio registro, así

@@ -113,7 +113,7 @@ forzar = f"\n    assign k = '{forzada}'" if forzada else ''
 aviso_forzada = (f"\n  ESTE TEMA ES DE VISTA PREVIA: siempre muestra la temporada «{forzada}».") if forzada else ''
 
 snippet = f'''{{%- comment -%}}
-  Saint Venik · textos de temporada. Se editan en la app Color & Size Picker → pestaña
+  Saint Venik · textos de temporada. Se editan en la app Panel Saint Venik → pestaña
   «Temporadas» (metaobjeto sv_configuracion_2: «temporada» = la activa, «temporadas» = los
   textos de cada una, en JSON). Un campo vacío en la temporada activa usa el de «Normal»; uno
   vacío en Normal usa el texto de abajo (el que había en el tema). «-» deja ese texto vacío.

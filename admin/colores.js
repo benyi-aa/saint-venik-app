@@ -5,7 +5,7 @@
  * color es la etiqueta: el producto lleva `oro` o `acero-inox`, y la entrada
  * guarda esa misma etiqueta en el campo `etiqueta`.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611101652';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611101713';
 
 export const TIPO_COLOR = 'color';
 
@@ -279,7 +279,7 @@ export async function asegurarEstructuraColor(pasos = []) {
         name: 'Hermano de color',
         namespace: 'custom',
         key: 'hermano_de_color',
-        description: 'El mismo modelo en otro color. Lo usa Color & Size Picker.',
+        description: 'El mismo modelo en otro color. Lo usa Panel Saint Venik.',
         type: 'list.product_reference',
         ownerType: 'PRODUCT',
         access: { storefront: 'PUBLIC_READ' },

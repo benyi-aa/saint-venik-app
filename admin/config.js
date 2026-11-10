@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611101652';
+import { gql, comprobarErrores } from './api.js?v=202611101713';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 /* Shopify admite como mucho 40 campos por definición de metaobjeto y
@@ -294,7 +294,7 @@ export async function asegurarConfig(pasos = []) {
     const r = await gql(CREAR_DEFINICION, {
       definition: {
         type: TIPO_CONFIG,
-        name: 'Configuración de Color & Size Picker',
+        name: 'Configuración de Panel Saint Venik',
         access: { storefront: 'PUBLIC_READ' },
         fieldDefinitions: CAMPOS_CONFIG,
       },
@@ -312,7 +312,7 @@ export async function asegurarConfig(pasos = []) {
         const r = await gql(CREAR_DEFINICION, {
           definition: {
             type: tipo,
-            name: 'Configuración de Color & Size Picker (2)',
+            name: 'Configuración de Panel Saint Venik (2)',
             access: { storefront: 'PUBLIC_READ' },
             fieldDefinitions: campos,
           },

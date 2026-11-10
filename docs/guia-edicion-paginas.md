@@ -35,7 +35,7 @@ la memoria del proyecto) y decirle: «Lee `docs/guia-edicion-paginas.md`,
 1. **Archivos del tema** (secciones, plantillas JSON, assets): se editan con la CLI
    (punto 3). Ej.: `templates/index.json`, `templates/collection.json`,
    `templates/page.arma-tu-3x2.json`, `sections/sv3-*.liquid`, `assets/sv-3x2.css/js`.
-2. **App «Color & Size Picker»** (este repo):
+2. **App «Panel Saint Venik»** (antes «Color & Size Picker»; este repo):
    - `extensions/saint-venik/` = bloques y embeds que la app pone en el tema
      (`blocks/*.liquid`, `snippets/*.liquid`, `assets/*`). Ej.: `sv-inicio`
      (estilos del inicio), `sv-portada` (banners de colección), `filtros`,

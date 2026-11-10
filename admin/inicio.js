@@ -1,7 +1,7 @@
 /* Inicio de la tienda: la cuadrícula de colecciones sobre negro (reunión
  * 9-nov). En Navidad, cada foto es la del metacampo de colección
  * custom.foto_navidad, que esta app crea. */
-import { gql, comprobarErrores } from './api.js?v=202611101652';
+import { gql, comprobarErrores } from './api.js?v=202611101713';
 
 const METACAMPO_NAVIDAD = `
   query MetacampoNavidad {
@@ -33,7 +33,7 @@ export async function asegurarEstructuraInicio(pasos) {
       name: 'Foto de Navidad',
       namespace: 'custom',
       key: 'foto_navidad',
-      description: 'La foto de esta colección en la cuadrícula del inicio cuando la temporada es Navidad (estilo terciopelo rojo). La usa Color & Size Picker.',
+      description: 'La foto de esta colección en la cuadrícula del inicio cuando la temporada es Navidad (estilo terciopelo rojo). La usa Panel Saint Venik.',
       type: 'file_reference',
       ownerType: 'COLLECTION',
       validations: [{ name: 'file_type_options', value: '["Image"]' }],

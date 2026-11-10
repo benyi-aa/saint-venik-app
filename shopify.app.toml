@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-name = "Color & Size Picker"
+name = "Panel Saint Venik"
 handle = "saint-venik"
 application_url = "https://benyi-aa.github.io/saint-venik-app/admin/"
 embedded = true

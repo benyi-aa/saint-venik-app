@@ -13,7 +13,7 @@
 # Lo unico que cambia respecto de .com es el client_id y el handle.
 # El panel elige el client_id segun la tienda que lo abre (admin/index.html).
 
-name = "Color & Size Picker"
+name = "Panel Saint Venik"
 handle = "color-size-picker"
 application_url = "https://benyi-aa.github.io/saint-venik-app/admin/"
 embedded = true
