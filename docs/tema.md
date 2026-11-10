@@ -343,6 +343,27 @@ su descripción de Google (`page_description` hasta el primer « | »); Best
 Sellers y Essentials conservan su texto propio. `page_description` ya viene
 escapado: no pasarle `escape` o el apóstrofo sale como `&#39;`.
 
+### «Arma tu 3x2» como página de anuncios (video de Benjamín, 10-nov)
+
+Benjamín quiere usar `/pages/arma-tu-3x2` como advertorial de todos los anuncios.
+Cambios, en las dos tiendas:
+- **Barra fija de arriba** (`sv3-contador`): fondo blanco, texto y progreso en
+  negro, sin el dorado/naranjo, línea gris abajo, y en vez del reloj un punto
+  burdeo #7f1d2d que late (como el del carrito vacío). Ajustes nuevos «Punto de
+  urgencia» y «Línea de abajo». Sin «Envío gratis sobre $80.000» (envío en 0).
+- **Portada en el celular** (`sv3-hero`): formato nuevo «Horizontal» (alto en %
+  del ancho, 50 = 2:1) con la foto en uso de Pulseras (`coleccion_pulsera.jpg`,
+  la joya al centro), y el bloque «Elige 3. Paga 2.» sobre blanco con letra y
+  botón negros (ajustes «Fondo del texto en celular» y «Color del texto»). El
+  computador no cambia.
+- **Bandeja de abajo** (`sv3-bandeja`): «+50.000 clientes» con un ticket ✓ en vez
+  de «Envío gratis sobre $80.000» (ajuste «Ícono antes del texto»).
+- **Filtros**: la primera fila de botones de la app (Dorado, Plateado,
+  Brillantes) debajo de las pestañas. El embed «Filtros rápidos» deja la lista
+  en `#sv-filtros-3x2` y `sv-filtros-3x2.js` filtra la grilla en el sitio: color
+  por las muestras de metal de cada tarjeta (y la pasa a ese metal), tipo por las
+  etiquetas del producto (`brillantes`).
+
 ### «Resistente al agua» fuera de los lugares generales (9-nov)
 
 Benjamín: solo los brillantes no son resistentes al agua, así que la frase

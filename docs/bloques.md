@@ -304,3 +304,29 @@ marcar_agotado   (boolean)
 **sv-inicio.liquid:** Banner «Tu cadena de cada dia» (reunion 9-nov): foto mas cerca de la cadena, texto sobre degradado, boton chico redondeado, sin espacios blancos y el texto entra suave. Ver docs/tema.md.
 
 **sv-portada.liquid:** Navidad (9-nov): banners de terciopelo rojo, sv-navidad-portada-<foto>.jpg en Archivos, uno por cada foto de verano (coleccion_<foto>.jpg); Best Sellers tiene el suyo (sv-navidad-portada-bestsellers.jpg) en vez del de cadena. Con la temporada en Navidad, o con ?sv-navidad=1 para verlo antes (=0 lo quita). Ver docs/tema.md.
+
+## Más notas movidas el 10-nov (para dejar sitio a los filtros del 3x2)
+
+**selector-talla.liquid:** Si no queda ninguna variante disponible -los dos Cuban Set estan asi- el filtro devuelve vacio, y sin este respaldo no habria con que comparar y todos los botones saldrian como inexistentes.
+
+**selector-talla.liquid:** La apariencia la manda la app. El ajuste del editor de temas queda de respaldo por si la configuracion todavia no existe.
+
+**selector-talla.liquid:** Se coge con un bucle y no con `.first`. La lista que devuelve shop.metaobjects.<tipo>.values dice que tiene una entrada, pero `.first` sobre ella devuelve vacio: no es un array normal. Con `.first` la configuracion de la app se ignoraba entera y todo caia en los valores de respaldo del tema.
+
+**selector-talla.liquid:** Para comparar combinaciones se juntan los valores en una cadena. El separador es raro a proposito: un valor con espacios o guiones no puede producir una coincidencia falsa.
+
+**selector-talla.liquid:** Con una sola opcion manda el encabezado del bloque ("Talla" / "Size"). Con varias, cada fila se llama como su opcion, que es lo unico que las distingue.
+
+**selector-talla.liquid:** La combinacion buscada es la elegida ahora mismo, cambiando solo esta opcion. Asi cada fila respeta lo que haya elegido el cliente en las otras.
+
+**selector-talla.liquid:** El filtro t va aparte: encadenado detras del append se aplicaria a la frase entera, y se imprimiria "Translation missing: es.8 US — sold_out".
+
+**insignias.liquid:** Los beneficios de ESTA ficha, para pintarlos sobre las fotos. Es el mismo dato que usa el bloque de la ficha, pero aqui hay que resolverlo otra vez: el bloque dibuja donde el tema le deja, y sobre una foto solo se puede llegar por javascript.
+
+**insignias.liquid:** La configuracion de la app manda sobre los ajustes del tema, igual que en los otros tres bloques. Se coge con un bucle y no con `.first`, que sobre shop.metaobjects.<tipo>.values devuelve vacio.
+
+**insignias.liquid:** Los booleanos no se pueden resolver con `default`: `false | default: true` da true, asi que apagarlo desde la app no apagaria nada. Van como 'si'/'no'.
+
+**insignias.liquid:** El tipo de campo `color` de Shopify es hexadecimal de seis digitos y no admite alfa, asi que la opacidad va en su propio campo de 0 a 100 y el rgba se compone aqui. Ojo con el 100.0: `80 | divided_by: 100` con dos enteros da 0, y dejaria todo invisible sin dar ningun error.
+
+**insignias.liquid:** Un campo de tipo `color` no devuelve una cadena, devuelve un objeto Color, y `json` sobre un objeto no da "#111111". El append lo pasa por to_s, que si da el hexadecimal.

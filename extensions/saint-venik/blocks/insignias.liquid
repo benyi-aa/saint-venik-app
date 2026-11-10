@@ -11,12 +11,6 @@
     endif
   endfor
 
-  comment
-    Los beneficios de ESTA ficha, para pintarlos sobre las fotos. Es el mismo
-    dato que usa el bloque de la ficha, pero aqui hay que resolverlo otra vez:
-    el bloque dibuja donde el tema le deja, y sobre una foto solo se puede
-    llegar por javascript.
-  endcomment
   assign beneficios = shop.metaobjects.sv_beneficio.values
   assign marca = product.id | prepend: '|' | append: '|'
   assign marca_handle = product.handle | prepend: '|' | append: '|'
@@ -44,21 +38,12 @@
     assign hay_algo = true
   endif
 
-  comment
-    La configuracion de la app manda sobre los ajustes del tema, igual que en
-    los otros tres bloques. Se coge con un bucle y no con `.first`, que sobre
-    shop.metaobjects.<tipo>.values devuelve vacio.
-  endcomment
   assign cfg = null
   for sv_entrada in shop.metaobjects.sv_configuracion.values
     assign cfg = sv_entrada
     break
   endfor
 
-  comment
-    Los booleanos no se pueden resolver con `default`: `false | default: true`
-    da true, asi que apagarlo desde la app no apagaria nada. Van como 'si'/'no'.
-  endcomment
   assign p_activo = block.settings.benef_en_fotos
   if cfg.foto_activo.value == 'si'
     assign p_activo = true
@@ -75,12 +60,6 @@
   assign p_letra = cfg.foto_letra.value | default: block.settings.benef_letra
   assign p_margen = cfg.foto_margen.value | default: block.settings.benef_margen
 
-  comment
-    El tipo de campo `color` de Shopify es hexadecimal de seis digitos y no
-    admite alfa, asi que la opacidad va en su propio campo de 0 a 100 y el rgba
-    se compone aqui. Ojo con el 100.0: `80 | divided_by: 100` con dos enteros
-    da 0, y dejaria todo invisible sin dar ningun error.
-  endcomment
   assign p_alfa = cfg.foto_opacidad.value | default: 100 | divided_by: 100.0
   assign p_fondo = cfg.foto_fondo.value | default: block.settings.benef_fondo
   assign p_fondo = p_fondo | color_modify: 'alpha', p_alfa | append: ''
@@ -146,11 +125,6 @@
                 assign texto = e.nombre_en.value
               endif
 
-              comment
-                Un campo de tipo `color` no devuelve una cadena, devuelve un
-                objeto Color, y `json` sobre un objeto no da "#111111". El
-                append lo pasa por to_s, que si da el hexadecimal.
-              endcomment
               assign alfa = e.opacidad.value | default: 100 | divided_by: 100.0
               assign fondo = e.color_fondo.value | default: '#111111'
               assign fondo = fondo | color_modify: 'alpha', alfa | append: ''

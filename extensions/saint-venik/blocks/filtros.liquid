@@ -17,6 +17,30 @@
   endif
 -%}
 
+{%- comment -%} Arma tu 3x2: la primera fila de botones, para sv-filtros-3x2.js (docs/tema.md). {%- endcomment -%}
+{%- if template.suffix == 'arma-tu-3x2' and f_modo != 'no' -%}
+<script type="application/json" id="sv-filtros-3x2" data-modo="{{ f_modo }}">[{%- for b in shop.metaobjects.sv_boton_filtro.values -%}{%- assign bf = b.fila.value | default: 1 -%}{%- if bf == 1 and b.activo.value != false -%}{%- liquid
+  assign ic = b.icono.value | strip
+  assign mu = ''
+  if ic contains 'color:'
+    assign etq = ic | remove_first: 'color:' | downcase | strip
+    for e in shop.metaobjects.color.values
+      assign ee = e.etiqueta.value | downcase | strip
+      if ee == etq
+        if e.imagen_muestra.value != blank
+          assign mu = e.imagen_muestra.value | image_url: width: 48 | prepend: 'url(' | append: ')'
+        else
+          assign mu = e.muestra.value | append: ''
+        endif
+        break
+      endif
+    endfor
+    assign ic = ''
+  endif
+-%}{%- capture svg -%}{%- if ic != blank -%}{%- render 'sv-icono', nombre: ic -%}{%- endif -%}{%- endcapture -%}{"o":{{ b.orden.value | default: 0 }},"n":{{ b.nombre.value | json }},"f":{{ b.filtro.value | json }},"v":{{ b.valor.value | json }},"m":{{ mu | json }},"i":{{ svg | strip | json }}},{%- endif -%}{%- endfor -%}null]</script>
+<script src="{{ 'sv-filtros-3x2.js' | asset_url }}" defer></script>
+{%- endif -%}
+
 {%- if f_on -%}
   {%- liquid
     assign lang = localization.language.iso_code | slice: 0, 2 | downcase

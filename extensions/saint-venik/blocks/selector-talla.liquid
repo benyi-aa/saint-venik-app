@@ -11,26 +11,10 @@
     endif
 
     assign seleccionada = product.selected_or_first_available_variant
-    comment
-      Si no queda ninguna variante disponible -los dos Cuban Set estan asi-
-      el filtro devuelve vacio, y sin este respaldo no habria con que comparar
-      y todos los botones saldrian como inexistentes.
-    endcomment
     if seleccionada == blank
       assign seleccionada = product.variants.first
     endif
 
-    comment
-      La apariencia la manda la app. El ajuste del editor de temas queda de
-      respaldo por si la configuracion todavia no existe.
-    endcomment
-    comment
-      Se coge con un bucle y no con `.first`. La lista que devuelve
-      shop.metaobjects.<tipo>.values dice que tiene una entrada, pero `.first`
-      sobre ella devuelve vacio: no es un array normal. Con `.first` la
-      configuracion de la app se ignoraba entera y todo caia en los valores de
-      respaldo del tema.
-    endcomment
     assign sv_cfg = null
     for sv_entrada in shop.metaobjects.sv_configuracion.values
       assign sv_cfg = sv_entrada
@@ -44,11 +28,6 @@
       assign varias = true
     endif
 
-    comment
-      Para comparar combinaciones se juntan los valores en una cadena. El
-      separador es raro a proposito: un valor con espacios o guiones no puede
-      producir una coincidencia falsa.
-    endcomment
     assign sep = ' ~|~ '
 
     assign filas = 0
@@ -73,11 +52,6 @@
           {%- liquid
             assign idx = forloop.index0
 
-            comment
-              Con una sola opcion manda el encabezado del bloque ("Talla" /
-              "Size"). Con varias, cada fila se llama como su opcion, que es lo
-              unico que las distingue.
-            endcomment
             assign encabezado = opcion.name
             unless varias
               if encabezado_cfg != blank
@@ -100,11 +74,6 @@
             <div class="sv-sizes__list" role="group" aria-label="{{ encabezado | escape }}">
               {%- for valor in opcion.values -%}
                 {%- liquid
-                  comment
-                    La combinacion buscada es la elegida ahora mismo, cambiando
-                    solo esta opcion. Asi cada fila respeta lo que haya elegido
-                    el cliente en las otras.
-                  endcomment
                   assign objetivo = ''
                   for puesto in seleccionada.options
                     assign parte = puesto
@@ -155,11 +124,6 @@
                   endif
 
                   assign nombre_accesible = valor
-                  comment
-                    El filtro t va aparte: encadenado detras del append se
-                    aplicaria a la frase entera, y se imprimiria
-                    "Translation missing: es.8 US — sold_out".
-                  endcomment
                   if agotada
                     assign txt_estado = 'sold_out' | t
                     assign nombre_accesible = valor | append: ' — ' | append: txt_estado
