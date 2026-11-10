@@ -348,7 +348,7 @@ escapado: no pasarle `escape` o el apóstrofo sale como `&#39;`.
 El video del inicio (4K) trae franjas negras grabadas en el archivo: hasta 7
 líneas arriba y 6 abajo de cada 1080 (≈0,65 % del alto), en casi todas las
 escenas. En un computador de 1440 px eso es una línea negra de 4–5 px justo
-debajo del menú. `sv-inicio` agranda el video 2,5 % dentro de `.sv-hero__media`
+debajo del menú. `sv-inicio` agranda el video 4 % (2 % por lado, el triple de la franja más gruesa) dentro de `.sv-hero__media`
 (que recorta), así las franjas quedan fuera. Si se cambia el video por uno sin
 franjas, se puede quitar esa regla.
 
