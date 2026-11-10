@@ -404,7 +404,11 @@ estrella, Compass II set, Vault Green, Faith Oro + Vault Blue).
   brillante que se funde con el fondo burdeo, caída natural en S («estilo serpiente»), nunca
   círculos. Essentials = colgante Vault Green Oro + Pulsera Eclissi. Colgantes y Best Sellers
   quedaron como estaban (aprobados). Las vueltas de círculos: `v3-circulos/`.
-- Encuadre en el computador (`sv-portada.liquid`): cadena 50 %, pulsera 50 %,
+- Quinta vuelta: en Cadenas y Pulseras Nano Banana había fundido la pieza dorada con la plateada
+  (una cadena que cambia de color, eslabones plateados dentro de la dorada). Rehechas con las piezas
+  SEPARADAS, sin tocarse, cada una de un solo metal, y revisadas con lupa antes de subir. Si dos
+  piezas de distinto metal se cruzan, la IA tiende a mezclarlas: pedirlas separadas.
+- Encuadre en el computador (`sv-portada.liquid`): cadena 50 %, pulsera 53 %,
   colgantes 54 %, conjuntos 48 %, essentials 54 %, bestsellers 56 %, anillos 48 %.
 - Originales en `branding/colecciones-inicio/navidad/portadas/estudio-10nov/`; los de
   terciopelo, en `respaldo-10nov-terciopelo/`. Costo: ~27 imágenes, unos US$2,40.

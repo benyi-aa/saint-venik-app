@@ -4,7 +4,7 @@
  * frase de Google («… | Garantía de por vida | Resistentes al Agua, Sudor y
  * Calor | No se destiñen»), y una app de anuncios la copia dentro de cada ficha
  * de producto. Aquí se saca «agua» y queda «Resistentes al Sudor y Calor». */
-import { gql, comprobarErrores } from './api.js?v=202611101956';
+import { gql, comprobarErrores } from './api.js?v=202611102007';
 
 const LISTA = `query ColeccionesTexto($despues: String) {
   collections(first: 100, after: $despues) {
