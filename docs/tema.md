@@ -343,6 +343,15 @@ su descripción de Google (`page_description` hasta el primer « | »); Best
 Sellers y Essentials conservan su texto propio. `page_description` ya viene
 escapado: no pasarle `escape` o el apóstrofo sale como `&#39;`.
 
+### Franja negra arriba del video del inicio (10-nov)
+
+El video del inicio (4K) trae franjas negras grabadas en el archivo: hasta 7
+líneas arriba y 6 abajo de cada 1080 (≈0,65 % del alto), en casi todas las
+escenas. En un computador de 1440 px eso es una línea negra de 4–5 px justo
+debajo del menú. `sv-inicio` agranda el video 2,5 % dentro de `.sv-hero__media`
+(que recorta), así las franjas quedan fuera. Si se cambia el video por uno sin
+franjas, se puede quitar esa regla.
+
 ### «Arma tu 3x2» como página de anuncios (video de Benjamín, 10-nov)
 
 Benjamín quiere usar `/pages/arma-tu-3x2` como advertorial de todos los anuncios.
