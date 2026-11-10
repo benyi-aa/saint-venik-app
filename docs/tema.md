@@ -385,6 +385,21 @@ duplicar. Abrir: `saintvenik.cl/?preview_theme_id=189939188015`; salir:
 `saintvenik.cl/?preview_theme_id=` (o «Salir de la vista previa» en la barra de
 abajo). Si no se sale, ese navegador sigue viendo la copia.
 
+**Salida automática (10-nov).** Shopify guarda la vista previa en la cookie
+`_shopify_essential` por **un año** y quita `?preview_theme_id` de la dirección con
+un 302. Por eso el usuario seguía viendo Navidad al buscar «saint venik» días
+después. El `layout/theme.liquid` de ESTE tema (no el en vivo) ahora:
+- deja la vista previa si se entró por el enlace (la página llega con
+  `redirectCount > 0`, o viniendo del admin), en esa misma pestaña
+  (sessionStorage `sv-prev-tema`), o en otra pestaña antes de 30 min (localStorage
+  `sv-prev-visto`);
+- si no, va a `?preview_theme_id=` y Shopify la borra: se ve el tema en vivo;
+- muestra arriba una barra amarilla «VISTA PREVIA DE NAVIDAD · no es la tienda
+  actual · Salir». Nada de esto corre en el editor de temas (`request.design_mode`).
+Probado: entrar con el enlace (queda), seguir navegando (queda), volver sin el
+enlace pasada media hora (sale al tema en vivo y se queda ahí). Si se vuelve a
+duplicar el tema de vista previa, copiar este trozo.
+
 ### Franja negra arriba del video del inicio (10-nov)
 
 El video del inicio (4K) trae franjas negras grabadas en el archivo: hasta 7
