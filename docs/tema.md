@@ -478,6 +478,18 @@ Cambios, en las dos tiendas:
   por las muestras de metal de cada tarjeta (y la pasa a ese metal), tipo por las
   etiquetas del producto (`brillantes`).
 
+### Brillantes: «Apto para pieles sensibles» en vez de «Hipoalergénico» (10-nov)
+
+Pedido del usuario: en los 9 productos con brillantes, el beneficio de la ficha no debe decir
+que es de acero ni que no se destiñe. En la lista de beneficios de su plantilla
+(.cl `product.brillantes`, bloque `custom_dzRbmL`; .com `product.ice`, `custom_7qn9dU`, y la
+copia de vista previa de .cl) «Hipoalergénico — Acero Inoxidable 316L no se destiñe…» quedó
+«Apto para pieles sensibles — Puedes usarla todos los días sin irritaciones y no deja marcas
+verdes en la piel.» (inglés: «Safe for sensitive skin — Wear it every day without irritation,
+and it won't leave green marks on your skin.»). El resto de las plantillas no se tocó.
+Respaldo: `branding/respaldos-tema/2026-11-10-piel-sensible/`. Queda la píldora
+«Hipoalergénico» sobre las fotos (beneficio de la app, sin texto de acero).
+
 ### «Resistente al agua» fuera de los lugares generales (9-nov)
 
 Benjamín: solo los brillantes no son resistentes al agua, así que la frase
