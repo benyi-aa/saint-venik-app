@@ -6,10 +6,10 @@
  * es cambiar el contenido de ese mismo archivo (mismo id, mismo nombre), así
  * que se actualiza en todos lados a la vez. Para que el nombre no cambie, la
  * foto nueva se pasa a JPG en el navegador antes de subirla. */
-import { gql } from './api.js?v=202611101650';
+import { gql } from './api.js?v=202611101652';
 import {
   subirAlDestino, reemplazarArchivo, crearConNombre, elegirDeBiblioteca, hayBiblioteca,
-} from './archivos.js?v=202611101650';
+} from './archivos.js?v=202611101652';
 
 /* Las colecciones con banner propio, con su clave en el nombre del archivo. */
 const BANNERS = [['cadena', 'Cadenas'], ['pulsera', 'Pulseras'], ['anillos', 'Anillos'], ['colgantes', 'Colgantes'],
