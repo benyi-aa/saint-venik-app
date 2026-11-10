@@ -20,9 +20,9 @@
 {%- comment -%} Va aqui por ser lo unico en <head>: ver el snippet. {%- endcomment -%}
 {%- render 'sv-desc-estilo', cfg: cfg -%}
 {%- render 'sv-cajon', cfg: cfg -%}
-{%- render 'sv-portada', cfg: cfg -%}
+{%- render 'sv-portada', cfg: cfg, tt: block.settings.temporada_tema -%}
 {%- render 'sv-menu' -%}
-{%- render 'sv-inicio' -%}
+{%- render 'sv-inicio', tt: block.settings.temporada_tema -%}
 
 {%- if t_modo == 'si' or t_modo == 'prueba' -%}
   <style>
@@ -284,6 +284,18 @@
     {
       "type": "paragraph",
       "content": "La barra de carga, el fundido entre páginas y la precarga se configuran en la app Color & Size Picker → Apariencia. Aquí solo se enciende el embed."
+    },
+    {
+      "type": "select",
+      "id": "temporada_tema",
+      "label": "Temporada de este tema",
+      "info": "Normalmente «La del panel». «Navidad» deja ESTE tema siempre en Navidad (para un tema de vista previa).",
+      "default": "panel",
+      "options": [
+        { "value": "panel", "label": "La del panel" },
+        { "value": "normal", "label": "Normal" },
+        { "value": "navidad", "label": "Navidad" }
+      ]
     }
   ]
 }

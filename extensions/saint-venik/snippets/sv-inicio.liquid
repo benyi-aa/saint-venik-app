@@ -8,6 +8,9 @@
     assign tm = e.temporada.value | default: 'normal' | append: ''
     break
   endfor
+  if tt == 'normal' or tt == 'navidad'
+    assign tm = tt
+  endif
   assign p = 'html'
   if m == 'prueba'
     assign p = 'html.sv-ini'
@@ -15,7 +18,7 @@
   assign g = '[id$="__promo-grid2"]'
 -%}
 {%- assign sv_hs = 'cadenas,pulseras,colgantes,anillos,conjuntos,best-sellers' | split: ',' -%}<!-- sv-navidad listas: {% for h in sv_hs %}{% if collections[h].metafields.custom.foto_navidad.value %}{{ h }} {% endif %}{% endfor %}· temporada {{ tm }} -->
-{%- unless tm == 'navidad' -%}<script>try{(function(){var s=sessionStorage,q=location.search.match(/[?&]sv-navidad=([01])/);if(q)q[1]==='1'?s.setItem('sv-navidad','1'):s.removeItem('sv-navidad');if(s.getItem('sv-navidad')==='1')document.documentElement.classList.add('sv-nav')})()}catch(e){}</script>{%- endunless -%}
+{%- if tm == 'navidad' -%}<script>document.documentElement.classList.add('sv-nav')</script>{%- endif -%}{%- unless tm == 'navidad' -%}<script>try{(function(){var s=sessionStorage,q=location.search.match(/[?&]sv-navidad=([01])/);if(q)q[1]==='1'?s.setItem('sv-navidad','1'):s.removeItem('sv-navidad');if(s.getItem('sv-navidad')==='1')document.documentElement.classList.add('sv-nav')})()}catch(e){}</script>{%- endunless -%}
 {%- if m == 'prueba' -%}<script>try{/[?&]sv-vista(=1)?(&|$)/.test(location.search)&&sessionStorage.setItem('sv-vista','1');sessionStorage.getItem('sv-vista')==='1'&&document.documentElement.classList.add('sv-ini')}catch(e){}</script>{%- endif -%}
 <style>
 {%- if m != 'no' -%}{{ p }} {{ g }}{background:#000}{{ p }} {{ g }} .promo-grid{padding-top:15px;padding-bottom:15px}@media (min-width:590px){ {{ p }} {{ g }} .promo-grid{padding-top:30px;padding-bottom:30px}}{{ p }} {{ g }}+.shopify-section{margin-top:0!important;margin-bottom:0!important}{%- endif -%}

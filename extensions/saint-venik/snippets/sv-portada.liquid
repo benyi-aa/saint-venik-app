@@ -15,6 +15,9 @@
     assign tm = e.temporada.value | default: 'normal' | append: ''
     break
   endfor
+  if tt == 'normal' or tt == 'navidad'
+    assign tm = tt
+  endif
   assign ks = 'cadena,pulsera,anillos,colgantes,conjuntos,essentials' | split: ','
   assign hay = ''
 -%}
