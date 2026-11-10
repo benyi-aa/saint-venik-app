@@ -1,50 +1,50 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611100114';
+import { estaEmbebida } from './api.js?v=202611100159';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611100114';
+} from './colores.js?v=202611100159';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611100114';
+} from './config.js?v=202611100159';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611100114';
+} from './filtros.js?v=202611100159';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611100114';
-import { prepararNavidad } from './inicio.js?v=202611100114';
-import { quitarAguaDeColecciones } from './textos.js?v=202611100114';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611100114';
+} from './productos.js?v=202611100159';
+import { prepararNavidad } from './inicio.js?v=202611100159';
+import { quitarAguaDeColecciones } from './textos.js?v=202611100159';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611100159';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611100114';
+} from './guias.js?v=202611100159';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611100114';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611100114';
+} from './vista-previa.js?v=202611100159';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611100159';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611100114';
+} from './etiquetas.js?v=202611100159';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611100114';
-import { ICONOS, svgIcono } from './iconos.js?v=202611100114';
+} from './beneficios.js?v=202611100159';
+import { ICONOS, svgIcono } from './iconos.js?v=202611100159';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611100114';
+const VERSION = '202611100159';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -925,7 +925,7 @@ async function pintarApariencia() {
           </s-select>
         </s-grid>
         <p class="ayuda" id="i-enlace" hidden>Para verlo antes de encenderlo: <a target="_blank" rel="noopener" href="https://${escapar(tienda)}/?sv-vista=1">abre la tienda con este enlace</a>. Solo lo ve quien entra por ahí.</p>
-        <p class="ayuda">Fotos de colección estilo Jaxxon (9-nov, Nano Banana): este botón las deja en Contenido → Archivos de la tienda como sv-inicio-cadenas.jpg, -pulseras, -colgantes y -anillos. Después se eligen en cada tarjeta de la cuadrícula. Si ya estaban, las cambia por la versión más nueva en el mismo archivo, y la tienda la muestra sola. También trae las fotos en uso de las tarjetas del menú del teléfono (sv-menu-cadenas.jpg, etc.).</p>
+        <p class="ayuda">Fotos de colección estilo Jaxxon (9-nov, Nano Banana): este botón las deja en Contenido → Archivos de la tienda como sv-inicio-cadenas.jpg, -pulseras, -colgantes y -anillos. Después se eligen en cada tarjeta de la cuadrícula. Si ya estaban, las cambia por la versión más nueva en el mismo archivo, y la tienda la muestra sola. También trae las fotos en uso de las tarjetas del menú del teléfono (sv-menu-cadenas.jpg, etc.), la foto de «Tu cadena de cada día» (sv-inicio-cadena-dia.jpg) y el banner de Best Sellers fuera de Navidad (sv-portada-bestsellers.jpg).</p>
         <p class="ayuda">«Preparar las fotos de Navidad» deja la foto de terciopelo rojo en cada colección y los banners de Navidad de las páginas de colección (Cadenas, Pulseras, Anillos, Colgantes, Conjuntos, Essentials y Best Sellers, con otras joyas). Si ya estaban, los cambia por la versión más nueva en el mismo archivo, sin crear copias. También la foto de la sección «El regalo Nº1 para él», que aparece en el inicio, donde estaba el 3x2, con un botón a Best Sellers. Todo se ve al poner la temporada en Navidad; para mirarlo antes, abre la tienda con ?sv-navidad=1 al final de la dirección (sirve en el inicio y en las colecciones).</p>
         <s-stack direction="inline" gap="base">
           <s-button id="i-fotos">Traer las fotos nuevas a Archivos</s-button>
@@ -2038,6 +2038,13 @@ function conectarInicio(inicio) {
         await traerArchivo(`${base}sv-portada-movil-${n}.jpg?v=${v}`);
       }
       hechas.push('banners del teléfono');
+      /* Fotos que eligió el usuario (9-nov): «Tu cadena de cada día» del inicio y
+       * el banner de Best Sellers fuera de Navidad, cada una con su versión para
+       * el teléfono (ampliada hacia abajo para que el texto no tape la cadena). */
+      for (const n of ['sv-inicio-cadena-dia', 'sv-inicio-cadena-dia-movil', 'sv-portada-bestsellers', 'sv-portada-bestsellers-movil']) {
+        await traerArchivo(`${base}${n}.jpg?v=${v}`);
+      }
+      hechas.push('«Tu cadena de cada día» y banner de Best Sellers');
       avisar(`Fotos en Archivos: ${hechas.join(', ')}`);
     } catch (error2) {
       avisar(`${hechas.length ? `Se copiaron ${hechas.join(', ')}. ` : ''}${error2.message}`, true);

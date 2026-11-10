@@ -44,6 +44,7 @@ html.sv-portada .custom-content:has(:is(.collection-description-wrapper,[class^=
   /* --sv-alto agranda la foto (anclada abajo) cuando la joya esta muy abajo
    * en la imagen: asi sube por encima del titulo. */
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="bestsellers"] { --sv-encuadre: 62% 88%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="sv-portada-bestsellers"] { --sv-alto: 100%; --sv-encuadre: 50% 0%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_cadena"] { --sv-alto: 178%; --sv-encuadre: 58% 100%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_pulsera"] { --sv-alto: 128%; --sv-encuadre: 40% 100%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_anillos"] { --sv-encuadre: 50% 100%; }
@@ -147,6 +148,7 @@ html.sv-portada .custom-content:has(:is(.collection-description-wrapper,[class^=
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_essentials"] { --sv-y: 72%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_colgantes"] { --sv-y: 92%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_conjuntos"] { --sv-y: 78%; }
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="sv-portada-bestsellers"] { --sv-y: 68%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) :is(.collection-image-container,[class$="__image"])::after {
     content: ''; position: absolute; inset: 0; z-index: 1;
     background: linear-gradient(90deg, rgba(0, 0, 0, .62) 0%, rgba(0, 0, 0, .32) 34%, rgba(0, 0, 0, 0) 58%);

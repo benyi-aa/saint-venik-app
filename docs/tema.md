@@ -316,6 +316,22 @@ delante (`-brillantes`) resta. La resta la aplica el panel al calcular, al
 final y sobre todo lo reunido, así que da igual el orden y también quita lo
 que hubiera entrado por colección o a mano.
 
+### Fotos del usuario: «Tu cadena de cada día» y Best Sellers (9-nov)
+
+El usuario mandó dos fotos: la cadena cubana de oro con camisa de punto para el
+banner «Tu cadena de cada día» del inicio y la cadena tennis con camisa negra
+para el banner de Best Sellers. En el computador van tal cual
+(`sv-inicio-cadena-dia.jpg`, `sv-portada-bestsellers.jpg`). En el teléfono el
+texto va encima de la foto y tapaba la cadena, así que cada una tiene una versión
+`-movil` ampliada con Nano Banana (más camisa abajo y a los lados, nunca más
+arriba de los labios) con la foto original pegada encima, así la cadena y la mano
+son exactamente las del usuario. Las trae el botón «Traer las fotos nuevas a
+Archivos». El inicio las busca por nombre en el bloque Liquid del
+`advanced_content_9QkUY9` (las dos versiones de idioma de .com); si no están,
+sale la foto del velero. Best Sellers las usa fuera de Navidad desde
+`sv-portada` (clase `sv-pd` en el computador, `sv-pm` en el teléfono); en
+Navidad sigue su banner de terciopelo.
+
 ### «Resistente al agua» fuera de los lugares generales (9-nov)
 
 Benjamín: solo los brillantes no son resistentes al agua, así que la frase
