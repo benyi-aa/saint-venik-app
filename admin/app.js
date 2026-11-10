@@ -1,51 +1,55 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611101550';
+import { estaEmbebida } from './api.js?v=202611101647';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611101550';
+} from './colores.js?v=202611101647';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
-  guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611101550';
+  guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
+} from './config.js?v=202611101647';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611101550';
+} from './filtros.js?v=202611101647';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611101550';
-import { prepararNavidad } from './inicio.js?v=202611101550';
-import { quitarAguaDeColecciones } from './textos.js?v=202611101550';
-import { GRUPOS as GRUPOS_FOTOS, cargarFotos, cambiarFoto } from './fotos.js?v=202611101550';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611101550';
+} from './productos.js?v=202611101647';
+import { prepararNavidad } from './inicio.js?v=202611101647';
+import { quitarAguaDeColecciones } from './textos.js?v=202611101647';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611101647';
+import {
+  leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
+  efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
+} from './temporadas.js?v=202611101647';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611101647';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611101550';
+} from './guias.js?v=202611101647';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611101550';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611101550';
+} from './vista-previa.js?v=202611101647';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611101647';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611101550';
+} from './etiquetas.js?v=202611101647';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611101550';
-import { ICONOS, svgIcono } from './iconos.js?v=202611101550';
+} from './beneficios.js?v=202611101647';
+import { ICONOS, svgIcono } from './iconos.js?v=202611101647';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611101550';
+const VERSION = '202611101647';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -920,11 +924,8 @@ async function pintarApariencia() {
             <s-option value="prueba">Vista previa: solo con el enlace</s-option>
             <s-option value="si">Activo en la tienda</s-option>
           </s-select>
-          <s-select label="Temporada" id="i-temporada">
-            <s-option value="normal">Normal</s-option>
-            <s-option value="navidad">Navidad</s-option>
-          </s-select>
         </s-grid>
+        <p class="ayuda">La temporada (Normal, Navidad u otra) se elige en la pestaña «Temporadas»; sus fotos, en «Fotos».</p>
         <p class="ayuda" id="i-enlace" hidden>Para verlo antes de encenderlo: <a target="_blank" rel="noopener" href="https://${escapar(tienda)}/?sv-vista=1">abre la tienda con este enlace</a>. Solo lo ve quien entra por ahí.</p>
         <p class="ayuda">Fotos de colección estilo Jaxxon (9-nov, Nano Banana): este botón las deja en Contenido → Archivos de la tienda como sv-inicio-cadenas.jpg, -pulseras, -colgantes y -anillos. Después se eligen en cada tarjeta de la cuadrícula. Si ya estaban, las cambia por la versión más nueva en el mismo archivo, y la tienda la muestra sola. También trae las fotos en uso de las tarjetas del menú del teléfono (sv-menu-cadenas.jpg, etc.), la foto de «Tu cadena de cada día» (sv-inicio-cadena-dia.jpg) y el banner de Best Sellers fuera de Navidad (sv-portada-bestsellers.jpg).</p>
         <p class="ayuda">«Preparar las fotos de Navidad» deja la foto de terciopelo rojo en cada colección y los banners de Navidad de las páginas de colección (Cadenas, Pulseras, Anillos, Colgantes, Conjuntos, Essentials y Best Sellers, con otras joyas). Si ya estaban, los cambia por la versión más nueva en el mismo archivo, sin crear copias. También la foto de la sección «El regalo Nº1 para él», que aparece en el inicio, donde estaba el 3x2, con un botón a Best Sellers. Todo se ve al poner la temporada en Navidad; para mirarlo antes, abre la tienda con ?sv-navidad=1 al final de la dirección (sirve en el inicio y en las colecciones).</p>
@@ -2013,7 +2014,6 @@ function conectarTransicion(trans) {
 function conectarInicio(inicio) {
   const el = (id) => document.getElementById(id);
   el('i-modo').value = inicio.modo;
-  el('i-temporada').value = inicio.temporada;
   const refrescar = () => { el('i-enlace').hidden = el('i-modo').value !== 'prueba'; };
   el('i-modo').addEventListener('change', refrescar);
   refrescar();
@@ -2071,12 +2071,11 @@ function conectarInicio(inicio) {
     const boton = e.currentTarget;
     boton.loading = true;
     try {
-      const v = { modo: el('i-modo').value || 'prueba', temporada: el('i-temporada').value || 'normal' };
+      const v = { modo: el('i-modo').value || 'prueba' };
       await guardarInicio(v);
       Object.assign(inicio, v);
-      const t = v.temporada === 'navidad' ? ' (Navidad)' : '';
-      avisar(v.modo === 'si' ? `Fondo negro activo en la tienda${t}`
-        : v.modo === 'prueba' ? `Fondo negro en vista previa${t}` : `Fondo negro apagado${t}`);
+      avisar(v.modo === 'si' ? 'Fondo negro activo en la tienda'
+        : v.modo === 'prueba' ? 'Fondo negro en vista previa' : 'Fondo negro apagado');
     } catch (error2) {
       avisar(error2.message, true);
     } finally {
@@ -3164,6 +3163,7 @@ const PANTALLAS = {
   guias: pintarGuias,
   apariencia: pintarApariencia,
   fotos: pintarFotos,
+  temporadas: pintarTemporadas,
   filtros: pintarFiltros,
 };
 
@@ -3186,22 +3186,44 @@ function tarjetaFoto(nombre, titulo, forma, actual) {
     </div>`;
 }
 
+/* Qué temporada muestra «Fotos». La pestaña Temporadas la fija antes de abrirla. */
+let temporadaFotos = null;
+
 async function pintarFotos() {
+  const miPintado = pintado;
   pantalla.innerHTML = '<p class="cargando">Cargando…</p>';
-  const fotos = await cargarFotos();
+  const { activa, datos } = await leerTemporadas();
+  const lista = listaDe(datos);
+  const clave = lista.some((t) => t.clave === temporadaFotos) ? temporadaFotos : (lista.some((t) => t.clave === activa) ? activa : 'normal');
+  const nombre = lista.find((t) => t.clave === clave)?.nombre || clave;
+  const grupos = gruposDe(clave, nombre);
+  const fotos = await cargarFotos(grupos);
+  if (miPintado !== pintado) return;
   pantalla.innerHTML = `
     <s-page>
       <div class="titular">
         <h1>Fotos</h1>
-        <p class="subtitulo">Las fotos de temporada de la tienda. Cambias una aquí y se actualiza en todos los lugares donde sale, en unos segundos; no hay que tocar el tema. Si la foto nueva no tiene el formato indicado, la tienda la recorta.</p>
+        <p class="subtitulo">Las fotos de cada temporada. Cambias una aquí y se actualiza en todos los lugares donde sale, en unos segundos; no hay que tocar el tema. Si la foto nueva no tiene el formato indicado, la tienda la recorta.</p>
       </div>
+      <s-section>
+        <s-select label="Temporada" id="f-temporada" data-valor="${escapar(clave)}">
+          ${lista.map((t) => `<s-option value="${escapar(t.clave)}" ${t.clave === clave ? 'selected' : ''}>${escapar(t.nombre)}${t.clave === activa ? ' (activa)' : ''}</s-option>`).join('')}
+        </s-select>
+        <p class="ayuda">${clave === 'normal' ? 'Normal: las fotos de siempre. «Tu cadena de cada día» y el menú del teléfono salen en todas las temporadas.' : `Las fotos de ${escapar(nombre)} se ven cuando esa temporada está activa (pestaña Temporadas). Las que falten se ven como en Normal.`}</p>
+      </s-section>
       <s-banner tone="warning"><p>Ojo: los botones de Apariencia «Traer las fotos nuevas a Archivos» y «Preparar las fotos de Navidad» vuelven a poner las fotos que trae la app y pisan las que cambies aquí.</p></s-banner>
-      ${GRUPOS_FOTOS.map((g) => `
+      ${grupos.map((g) => `
         <s-section heading="${escapar(g.titulo)}">
           <p class="ayuda fotos__texto">${escapar(g.texto)}</p>
           <div class="fotos">${g.fotos.map(([n, t, forma]) => tarjetaFoto(n, t, forma || g.forma, fotos[n])).join('')}</div>
         </s-section>`).join('')}
     </s-page>`;
+
+  pantalla.querySelectorAll('s-select[data-valor]').forEach((e) => { e.value = e.dataset.valor; });
+  document.getElementById('f-temporada').addEventListener('change', (e) => {
+    temporadaFotos = e.currentTarget.value;
+    ir('fotos');
+  });
 
   pantalla.querySelectorAll('[data-foto]').forEach((tarjeta) => {
     const nombre = tarjeta.dataset.foto;
@@ -3239,6 +3261,233 @@ async function pintarFotos() {
       aplicar(async () => (await elegirDeBiblioteca({ tipo: 'MediaImage' }))?.url);
     });
   });
+}
+
+/* Pestaña «Temporadas»: la activa, crear y borrar, y los textos de cada una
+ * (barra de arriba, bloque 3X2, caja de oferta). Ver temporadas.js. */
+let temporadaEditor = null;
+
+function campoTemporada(c, clave, propios, datos, tienda, ingles) {
+  const normal = clave === 'normal';
+  const hoy = textosDeHoy(tienda);
+  const deNormal = (k) => datos.normal?.[k] || hoy[k] || '';
+  const valor = (k) => (normal ? (propios[k] ?? hoy[k] ?? '') : (propios[k] ?? ''));
+  const ayuda = c.ayuda ? ` details="${escapar(c.ayuda)}"` : '';
+  if (c.tipo === 'mostrar') {
+    const v = propios[c.k] || (normal ? 'si' : '__igual');
+    const n = deNormal(c.k) === 'no' ? 'No' : 'Sí';
+    return `<s-select label="Se muestra" data-c="${c.k}" data-valor="${v}">
+      ${normal ? '' : `<s-option value="__igual" ${v === '__igual' ? 'selected' : ''}>Igual que Normal (${n})</s-option>`}
+      <s-option value="si" ${v === 'si' ? 'selected' : ''}>Sí</s-option>
+      <s-option value="no" ${v === 'no' ? 'selected' : ''}>No</s-option>
+    </s-select>`;
+  }
+  if (c.tipo === 'fecha') {
+    return `<div class="campo-fecha">
+      <label><span>${escapar(c.etiqueta)}</span><input type="datetime-local" data-c="${c.k}" value="${escapar(aLocal(propios[c.k]))}" /></label>
+      <button type="button" class="secundario" data-quitar-fecha>Sin fecha</button>
+      <p class="ayuda">${escapar(c.ayuda)}</p>
+    </div>`;
+  }
+  if (c.tipo === 'color') {
+    const ph = normal ? '' : ` placeholder="${escapar(deNormal(c.k) || 'Como siempre')}"`;
+    const det = normal ? (c.ayuda || '') : `Vacío: igual que Normal${deNormal(c.k) ? ` (${deNormal(c.k)})` : ''}.`;
+    return `<s-color-field label="${escapar(c.etiqueta)}" data-c="${c.k}" value="${escapar(valor(c.k))}"${ph} details="${escapar(det)}"></s-color-field>`;
+  }
+  const uno = (k, etiqueta) => {
+    const ph = normal ? '' : ` placeholder="${escapar(deNormal(k) ? `Igual que Normal: ${deNormal(k)}` : 'Igual que Normal')}"`;
+    return `<s-text-field label="${escapar(etiqueta)}" data-c="${k}" value="${escapar(valor(k))}"${ph}${k === c.k ? ayuda : ''}></s-text-field>`;
+  };
+  return uno(c.k, c.etiqueta) + (c.en && ingles ? uno(`${c.k}_en`, `${c.etiqueta} (inglés)`) : '');
+}
+
+async function pintarTemporadas() {
+  const miPintado = pintado;
+  pantalla.innerHTML = '<p class="cargando">Cargando temporadas…</p>';
+  const tienda = new URLSearchParams(location.search).get('shop') || '';
+  const ingles = conIngles(tienda);
+
+  /* El campo «temporadas» es nuevo: si la tienda aún no lo tiene, se crea (lo
+   * mismo que «Crear lo que falta»). */
+  if (!(await camposDeConfig()).has('temporadas')) {
+    pantalla.innerHTML = '<p class="cargando">Preparando el lugar donde se guardan las temporadas…</p>';
+    await asegurarConfig();
+  }
+  const { activa, datos } = await leerTemporadas();
+  if (miPintado !== pintado) return;
+  const lista = listaDe(datos);
+  if (!lista.some((t) => t.clave === temporadaEditor)) temporadaEditor = lista.some((t) => t.clave === activa) ? activa : 'normal';
+  const clave = temporadaEditor;
+  const nombre = lista.find((t) => t.clave === clave)?.nombre || clave;
+  const propios = { ...(datos[clave] || {}) };
+
+  pantalla.innerHTML = `
+    <s-page>
+      <div class="titular">
+        <h1>Temporadas</h1>
+        <p class="subtitulo">Cada temporada es una apariencia de la tienda: sus fotos (pestaña «Fotos») y los textos de la barra de arriba con la cuenta regresiva, del bloque «3X2» de las colecciones y de la caja de oferta de los productos. Normal y Navidad existen siempre; puedes crear otras (Cyber, San Valentín, Día del Padre…).</p>
+      </div>
+
+      <s-section heading="Temporada activa">
+        <s-select label="La tienda muestra" id="t-activa" data-valor="${escapar(activa)}">
+          ${lista.map((t) => `<s-option value="${escapar(t.clave)}" ${t.clave === activa ? 'selected' : ''}>${escapar(t.nombre)}</s-option>`).join('')}
+        </s-select>
+        <p class="ayuda">Al guardar, la tienda cambia en unos segundos: fotos, barra, bloque 3X2 y caja de oferta. Lo que una temporada no tenga (una foto, un texto) se ve como en Normal.</p>
+        <s-button slot="primary-action" variant="primary" id="t-guardar-activa">Guardar</s-button>
+      </s-section>
+
+      <s-section heading="Temporadas">
+        <div class="temporadas">
+          ${lista.map((t) => `
+            <div class="temporada${t.clave === clave ? ' is-elegida' : ''}">
+              <div>
+                <p class="temporada__nombre">${escapar(t.nombre)}${t.clave === activa ? ' <span class="chip">Activa</span>' : ''}</p>
+                <p class="ayuda">Clave: ${escapar(t.clave)}${t.clave === 'normal' ? '' : ` · fotos sv-${escapar(t.clave)}-…`}</p>
+              </div>
+              <div class="acciones acciones--envolver">
+                <button type="button" class="secundario" data-editar="${escapar(t.clave)}">Textos</button>
+                <button type="button" class="secundario" data-fotos="${escapar(t.clave)}">Fotos</button>
+                ${t.fija ? '' : `<button type="button" class="secundario secundario--peligro" data-borrar="${escapar(t.clave)}">Borrar</button>`}
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="temporada-nueva">
+          <s-text-field label="Nueva temporada" id="t-nueva" placeholder="Por ejemplo: Cyber, San Valentín" details="Se crea con todo igual que Normal; después cambias sus textos aquí y sus fotos en «Fotos»."></s-text-field>
+          <s-button id="t-crear">Crear</s-button>
+        </div>
+      </s-section>
+
+      <div id="t-editor">
+        <div class="titular"><h2>Textos de «${escapar(nombre)}»</h2>
+          <p class="subtitulo">${clave === 'normal'
+    ? 'Normal es la base: lo que otra temporada deje vacío se ve como aquí. Escribe «-» para dejar un texto sin nada.'
+    : 'Lo que dejes vacío se ve igual que en Normal (lo gris de cada casilla). Escribe «-» para dejar un texto sin nada.'}</p>
+        </div>
+        ${clave === 'normal' ? '' : `<s-section><s-text-field label="Nombre de la temporada" data-c="nombre" value="${escapar(propios.nombre || nombre)}"></s-text-field></s-section>`}
+        ${PARTES_TEMPORADA.map((p) => `
+          <s-section heading="${escapar(p.titulo)}">
+            <p class="ayuda">${escapar(p.texto)}</p>
+            <s-grid gridTemplateColumns="repeat(auto-fit, minmax(220px, 1fr))" gap="base">
+              ${p.campos.map((c) => campoTemporada(c, clave, propios, datos, tienda, ingles)).join('')}
+            </s-grid>
+            <p class="ayuda tv-rotulo">Así se ve${ingles ? ' (español)' : ''}:</p>
+            <div class="tv" data-vista="${p.clave}"></div>
+            ${ingles ? `<p class="ayuda tv-rotulo">En inglés:</p><div class="tv" data-vista="${p.clave}" data-ingles></div>` : ''}
+            <s-button slot="primary-action" variant="primary" data-guardar-textos>Guardar los textos</s-button>
+          </s-section>`).join('')}
+      </div>
+    </s-page>`;
+
+  pantalla.querySelectorAll('s-select[data-valor]').forEach((e) => { e.value = e.dataset.valor; });
+  const editor = document.getElementById('t-editor');
+  const leer = () => {
+    const v = {};
+    editor.querySelectorAll('[data-c]').forEach((e) => {
+      const k = e.dataset.c;
+      let x = String(e.value ?? '').trim();
+      if (e.tagName === 'S-SELECT' && x === '__igual') x = '';
+      else if (e.tagName === 'S-COLOR-FIELD') x = colorValido(x);
+      else if (e.type === 'datetime-local') x = aUtc(x);
+      if (x) v[k] = x;
+    });
+    return v;
+  };
+  const repintar = () => {
+    const v = leer();
+    const d = { ...datos, [clave]: v };
+    editor.querySelectorAll('[data-vista]').forEach((caja) => {
+      caja.innerHTML = vistaPrevia(caja.dataset.vista, (k) => efectivo(d, clave, k, tienda), caja.hasAttribute('data-ingles'));
+    });
+  };
+  editor.addEventListener('input', repintar);
+  editor.addEventListener('change', repintar);
+  editor.querySelector('[data-quitar-fecha]')?.addEventListener('click', () => {
+    editor.querySelector('[data-c="barra_fin"]').value = '';
+    repintar();
+  });
+  repintar();
+
+  editor.querySelectorAll('[data-guardar-textos]').forEach((b) => b.addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    boton.loading = true;
+    try {
+      const v = leer();
+      if (clave !== 'normal' && !v.nombre) v.nombre = nombre;
+      /* Se vuelve a leer justo antes: así no se pisa lo que otra persona haya
+       * guardado de otra temporada mientras esta pantalla estaba abierta. */
+      const { datos: ahora } = await leerTemporadas();
+      ahora[clave] = v;
+      await guardarTemporadas(ahora);
+      Object.assign(datos, ahora);
+      avisar(`Textos de «${v.nombre || nombre}» guardados.${clave === activa ? ' La tienda los muestra en unos segundos.' : ' Se ven cuando esa temporada esté activa.'}`);
+    } catch (error) {
+      avisar(error.message, true);
+    } finally {
+      boton.loading = false;
+    }
+  }));
+
+  document.getElementById('t-guardar-activa').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    const nueva = document.getElementById('t-activa').value || 'normal';
+    boton.loading = true;
+    try {
+      await guardarTemporadaActiva(nueva);
+      avisar(`La tienda ahora muestra «${lista.find((t) => t.clave === nueva)?.nombre || nueva}».`);
+      temporadaEditor = nueva;
+      ir('temporadas');
+    } catch (error) {
+      avisar(error.message, true);
+    } finally {
+      boton.loading = false;
+    }
+  });
+
+  document.getElementById('t-crear').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    const nombreNuevo = String(document.getElementById('t-nueva').value || '').trim();
+    const claveNueva = claveDe(nombreNuevo);
+    boton.loading = true;
+    try {
+      const { datos: ahora } = await leerTemporadas();
+      const problema = validarClave(claveNueva, ahora);
+      if (problema) throw new Error(problema);
+      ahora[claveNueva] = { nombre: nombreNuevo };
+      await guardarTemporadas(ahora);
+      avisar(`Temporada «${nombreNuevo}» creada. Cambia sus textos abajo y sus fotos en «Fotos».`);
+      temporadaEditor = claveNueva;
+      ir('temporadas');
+    } catch (error) {
+      avisar(error.message, true);
+    } finally {
+      boton.loading = false;
+    }
+  });
+
+  pantalla.querySelectorAll('[data-editar]').forEach((b) => b.addEventListener('click', () => {
+    temporadaEditor = b.dataset.editar;
+    ir('temporadas');
+  }));
+  pantalla.querySelectorAll('[data-fotos]').forEach((b) => b.addEventListener('click', () => {
+    temporadaFotos = b.dataset.fotos;
+    ir('fotos');
+  }));
+  pantalla.querySelectorAll('[data-borrar]').forEach((b) => b.addEventListener('click', async () => {
+    const k = b.dataset.borrar;
+    const n = lista.find((t) => t.clave === k)?.nombre || k;
+    if (k === activa) { avisar(`«${n}» es la temporada activa: elige otra antes de borrarla.`, true); return; }
+    if (!window.confirm(`¿Borrar la temporada «${n}»? Se pierden sus textos; sus fotos quedan en Contenido → Archivos.`)) return;
+    try {
+      const { datos: ahora } = await leerTemporadas();
+      delete ahora[k];
+      await guardarTemporadas(ahora);
+      avisar(`Temporada «${n}» borrada.`);
+      if (temporadaEditor === k) temporadaEditor = null;
+      ir('temporadas');
+    } catch (error) {
+      avisar(error.message, true);
+    }
+  }));
 }
 
 async function ir(nombre) {

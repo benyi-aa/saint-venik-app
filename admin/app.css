@@ -665,3 +665,37 @@ body { padding-bottom: calc(48px + var(--shopify-safe-area-inset-bottom, 0px)); 
 .foto__titulo { margin: 8px 0 0; font-weight: 600; font-size: 13px; }
 .foto__nombre { word-break: break-all; }
 .foto .acciones { margin-top: 8px; }
+
+/* Pestaña «Temporadas» */
+.temporadas { display: flex; flex-direction: column; gap: 8px; }
+.temporada { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid var(--borde); border-radius: 10px; padding: 10px 12px; background: #fff; }
+.temporada.is-elegida { border-color: var(--tinta); }
+.temporada__nombre { margin: 0; font-weight: 600; }
+.temporada .ayuda { margin: 2px 0 0; }
+.chip { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #e3f1df; color: #0c5132; font-size: 12px; font-weight: 600; vertical-align: 1px; }
+.temporada-nueva { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin-top: 14px; }
+.temporada-nueva s-text-field { flex: 1 1 240px; }
+.campo-fecha label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.campo-fecha input { font: inherit; padding: 6px 8px; border: 1px solid #8a8a8a; border-radius: 8px; background: #fff; }
+.campo-fecha button { margin-top: 6px; }
+.tv-rotulo { margin: 14px 0 4px; }
+.tv { border: 1px solid var(--borde); border-radius: 10px; overflow: hidden; background: #fff; }
+.tv > .ayuda { margin: 10px 12px; }
+.tv-barra { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 16px; text-align: center; }
+.tv-barra__t { font-weight: 700; font-size: 14px; letter-spacing: .03em; text-transform: uppercase; }
+.tv-barra__f { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; }
+.tv-barra__r { display: flex; align-items: flex-start; gap: 4px; }
+.tv-barra__u { display: flex; flex-direction: column; align-items: center; min-width: 30px; }
+.tv-barra__u b { font-size: 18px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tv-barra__u small { font-size: 10px; opacity: .85; }
+.tv-barra__s { font-weight: 700; opacity: .7; }
+.tv-barra__b { padding: 9px 16px; border-radius: 3px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.tv-bloque { padding: 8px 20px; text-align: center; font-family: 'Helvetica Neue', Arial, sans-serif; }
+.tv-bloque p { margin: 0; font-size: 13px; line-height: 1.4; letter-spacing: .5px; }
+.tv-bloque strong { font-size: 15px; letter-spacing: 1px; }
+.tv-oferta { margin: 12px; padding: 10px 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0, 0, 0, .14); text-align: center; font-family: 'Helvetica Neue', Arial, sans-serif; }
+.tv-oferta__fila { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px; margin-bottom: 4px; }
+.tv-oferta__n { color: #141414; font-size: 9.5px; font-weight: 500; letter-spacing: .24em; }
+.tv-oferta__e { color: #fff; font-size: 8.5px; font-weight: 600; letter-spacing: .14em; padding: 3px 7px; border-radius: 4px; }
+.tv-oferta__p { margin: 0 0 3px; color: #141414; font-size: 17px; font-weight: 700; line-height: 1.2; }
+.tv-oferta__x { margin: 0; color: #4a4540; font-size: 11px; line-height: 1.35; }

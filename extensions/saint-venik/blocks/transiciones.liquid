@@ -35,7 +35,6 @@
       animation-duration: {{ t_fundido }}ms;
       animation-timing-function: ease;
     }
-    /* La barra pasa por encima del cambio tal cual esta, sin fundirse. */
     ::view-transition-group(sv-barra),
     ::view-transition-new(sv-barra) { animation: none; }
     ::view-transition-old(sv-barra) { display: none; }
@@ -77,11 +76,10 @@
       'use strict';
       var modo = {{ t_modo | json }};
       var CLAVE = 'sv-barra';
-      var guardar = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* privado */ } };
+      var guardar = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } };
       var leer = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
 
       if (/[?&]sv-vista(=1)?(&|$)/.test(location.search)) guardar('sv-vista', '1');
-      /* Safari sin precarga: ver docs/tema.md, «La barra en el iPhone». */
       var hs = window.HTMLScriptElement, ua = navigator.userAgent;
       var lento = (leer('sv-lento') === '1' || !(hs && hs.supports && hs.supports('speculationrules'))
         || /AppleWebKit/.test(ua) && !/Chrom|Edg|OPR|Android/.test(ua));
@@ -89,14 +87,12 @@
 
       if (modo === 'prueba') {
         if (leer('sv-vista') !== '1') return;
-        /* En vista previa el fundido se enciende desde aqui. */
         var st = document.createElement('style');
         st.textContent = '@view-transition { navigation: auto; }';
         document.head.appendChild(st);
       }
 
       var barra = null;
-      /* Bajo la cabecera (logo, buscador, carrito) si se ve; si no, arriba. */
       function laBarra() {
         if (!barra) {
           barra = document.createElement('div');
@@ -104,8 +100,6 @@
           barra.setAttribute('aria-hidden', 'true');
           document.body.appendChild(barra);
         }
-        /* Con el menu o el carrito abiertos, bajo el encabezado del cajon y de su
-           ancho: si no, cruza el menu por la mitad (video del 9-nov). */
         var dr = document.querySelector('.drawer.drawer--is-open');
         if (dr) {
           var rd = dr.getBoundingClientRect(), dh = dr.querySelector('.drawer__header');
@@ -128,7 +122,7 @@
         var b = laBarra();
         b.style.transform = '';
         b.className = 'sv-barra';
-        void b.offsetWidth; /* que arranque desde cero aunque ya estuviera */
+        void b.offsetWidth;
         clearTimeout(paso);
         if (lento) {
           var t0 = Date.now();
@@ -141,7 +135,6 @@
         } else {
           b.className = 'sv-barra is-cargando';
         }
-        /* Si la navegacion no ocurre, que no se quede colgada. */
         clearTimeout(tope);
         tope = setTimeout(terminar, 10000);
       }
@@ -154,23 +147,18 @@
         barra.style.transform = '';
         barra.className = 'sv-barra is-listo';
       }
-
-      /* Al irse: por donde iba la barra, para que la pagina nueva siga de ahi. */
       function alIrse() {
         var p = 0;
         if (barra && /is-cargando/.test(barra.className)) {
           var cs = getComputedStyle(barra);
           var m = /matrix\(([^,]+)/.exec(cs.transform);
           if (cs.opacity !== '0' && m) p = Number(m[1]);
-          /* Minimo 30 %: con precarga la pagina llega antes de que salga. */
           if (p < .3) p = .3;
         } else if (paso) {
           p = Math.max(prog, .3);
         }
         guardar(CLAVE, p > 0.02 ? Date.now() + ':' + p.toFixed(3) : '');
       }
-
-      /* Solo navegaciones de verdad a otra pagina de la tienda. */
       function cuenta(url) {
         try {
           var u = new URL(url, location.href);
@@ -183,7 +171,6 @@
       }
 
       if (window.navigation && window.navigation.addEventListener) {
-        /* Captura tambien las que hace un script (location.href = ...). */
         window.navigation.addEventListener('navigate', function (e) {
           if (e.hashChange || e.downloadRequest || (e.destination && e.destination.sameDocument)) return;
           if (e.navigationType === 'reload' || e.navigationType === 'traverse') return;
@@ -191,7 +178,6 @@
         });
       }
       if (!window.navigation || lento) {
-        /* Al final de la burbuja: si el tema cancelo el clic, no hay navegacion. */
         window.addEventListener('click', function (e) {
           if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
           var a = e.target.closest && e.target.closest('a[href]');
@@ -199,8 +185,6 @@
           if (cuenta(a.href)) empezar();
         });
       }
-
-      /* La pagina nueva recoge la barra donde quedo y la acaba. */
       var dato = (leer(CLAVE) || '').split(':');
       var viene = Number(dato[1]) || 0;
       guardar(CLAVE, '');
@@ -217,10 +201,7 @@
       }
       window.addEventListener('pagereveal', recoger);
       document.addEventListener('DOMContentLoaded', recoger);
-      /* Si se pinto antes de existir la cabecera, se recoloca. */
       document.addEventListener('DOMContentLoaded', function () { if (barra) laBarra(); });
-
-      /* Lo que no se mueve al cambiar de pagina, si esta a la vista. */
       var QUIETOS = [['.svcd', 'sv-aviso'], ['#SiteHeader', 'sv-cabecera']];
       function nombrar(poner) {
         QUIETOS.forEach(function (q) {
@@ -230,7 +211,6 @@
           el.style.viewTransitionName = poner && r.height && r.bottom > 0 && r.top < innerHeight ? q[1] : '';
         });
       }
-      /* Si el navegador se salta el cambio, que el rechazo no salga en la consola. */
       function callar(vt) {
         [vt.ready, vt.updateCallbackDone].forEach(function (p) {
           if (p && p.catch) p.catch(function () {});
@@ -249,8 +229,6 @@
         nombrar(true);
         e.viewTransition.finished.then(function () { nombrar(false); }, function () { nombrar(false); });
       });
-
-      /* Volver atras restaura la pagina tal cual estaba, con la barra a medias. */
       window.addEventListener('pageshow', function (e) {
         if (e.persisted) terminar();
       });
@@ -286,16 +264,11 @@
       "content": "La barra de carga, el fundido entre páginas y la precarga se configuran en la app Color & Size Picker → Apariencia. Aquí solo se enciende el embed."
     },
     {
-      "type": "select",
+      "type": "text",
       "id": "temporada_tema",
       "label": "Temporada de este tema",
-      "info": "Normalmente «La del panel». «Navidad» deja ESTE tema siempre en Navidad (para un tema de vista previa).",
-      "default": "panel",
-      "options": [
-        { "value": "panel", "label": "La del panel" },
-        { "value": "normal", "label": "Normal" },
-        { "value": "navidad", "label": "Navidad" }
-      ]
+      "info": "Normalmente «panel»: la que se elige en la app (Temporadas). Para un tema de vista previa, la clave de una temporada (navidad, normal…): ESTE tema la muestra siempre.",
+      "default": "panel"
     }
   ]
 }

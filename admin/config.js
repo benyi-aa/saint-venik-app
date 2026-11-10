@@ -8,7 +8,7 @@
  * el mecanismo que ya está probado de punta a punta en esta app (se escribe
  * desde el panel, se lee desde Liquid), y no añade permisos nuevos.
  */
-import { gql, comprobarErrores } from './api.js?v=202611101550';
+import { gql, comprobarErrores } from './api.js?v=202611101647';
 
 export const TIPO_CONFIG = 'sv_configuracion';
 /* Shopify admite como mucho 40 campos por definición de metaobjeto y
@@ -126,9 +126,13 @@ const CAMPOS_CONFIG_2 = [
    * vez de blanco, misma disposición (snippet sv-inicio). 'si' / 'no' /
    * 'prueba'; vacío = 'prueba'. */
   { key: 'categorias_inicio', name: 'Inicio: colecciones sobre negro', type: 'single_line_text_field' },
-  /* 'normal' o 'navidad': en Navidad las fotos de la cuadrícula del inicio
-   * son la «Foto de Navidad» de cada colección. Vacío = 'normal'. */
+  /* La clave de la temporada activa: 'normal', 'navidad' o una creada en la
+   * pestaña Temporadas. Vacío = 'normal'. */
   { key: 'temporada', name: 'Temporada de la tienda', type: 'single_line_text_field' },
+  /* Pestaña «Temporadas» (10-nov): los textos de cada temporada (barra de
+   * arriba, bloque 3X2, caja de oferta), en JSON { clave: { nombre, … } }. Lo
+   * lee snippets/sv-temporada.liquid del tema. Ver admin/temporadas.js. */
+  { key: 'temporadas', name: 'Temporadas: textos de cada una', type: 'json' },
 ];
 
 /* Lo mismo que ya pinta hoy el embed con sus ajustes de fábrica: así mover la
@@ -416,7 +420,7 @@ export async function leerConfig() {
     menu: ['si', 'no', 'prueba'].includes(campos.menu_tarjetas) ? campos.menu_tarjetas : 'prueba',
     inicio: {
       modo: ['si', 'no', 'prueba'].includes(campos.categorias_inicio) ? campos.categorias_inicio : 'prueba',
-      temporada: campos.temporada === 'navidad' ? 'navidad' : 'normal',
+      temporada: campos.temporada || 'normal',
     },
   };
 }
@@ -444,10 +448,28 @@ function aFiltros(campos) {
 /* `presentes`: los campos que la tienda ya tiene. Uno que aún no se creó
  * («Crear lo que falta») no se manda, para que guardar no falle por él. */
 export async function guardarInicio(v) {
-  return guardarCampos([
-    { key: 'categorias_inicio', value: v.modo },
-    { key: 'temporada', value: v.temporada },
-  ]);
+  return guardarCampos([{ key: 'categorias_inicio', value: v.modo }]);
+}
+
+/* Pestaña «Temporadas»: la activa y los textos de cada una. */
+export async function leerTemporadas() {
+  const c = await leerCampos2();
+  let datos = {};
+  try {
+    const j = JSON.parse(c.temporadas || '{}');
+    if (j && typeof j === 'object' && !Array.isArray(j)) datos = j;
+  } catch {
+    datos = {};
+  }
+  return { activa: c.temporada || 'normal', datos };
+}
+
+export async function guardarTemporadas(datos) {
+  return guardarCampos([{ key: 'temporadas', value: JSON.stringify(datos) }]);
+}
+
+export async function guardarTemporadaActiva(clave) {
+  return guardarCampos([{ key: 'temporada', value: clave }]);
 }
 
 export async function guardarMenu(modo) {

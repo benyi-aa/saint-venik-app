@@ -350,8 +350,9 @@ miniatura, dónde se ve, el formato que conviene y dos botones («Subir…» des
 computador y «Elegir de la biblioteca»). Cambia el contenido del MISMO archivo
 (mismo id y nombre, `fileUpdate`), así que el tema, la extensión y los
 metacampos lo siguen encontrando. La foto se pasa a JPG en el navegador antes de
-subirla para que el nombre no cambie (`admin/fotos.js`). La lista de fotos está
-en `GRUPOS` de ese archivo. Ojo: «Traer las fotos nuevas…» y «Preparar las fotos
+subirla para que el nombre no cambie (`admin/fotos.js`). La lista de fotos de
+cada temporada la arma `gruposDe()` de ese archivo (arriba se elige la temporada:
+ver `docs/temporadas.md`). Ojo: «Traer las fotos nuevas…» y «Preparar las fotos
 de Navidad» las vuelven a poner desde la app y pisan los cambios hechos a mano.
 
 ### Banners de Navidad: teléfono centrado y Best Sellers entero en el computador (10-nov)
@@ -371,13 +372,14 @@ Sellers cortaba las joyas. Ahora:
 
 ### Tema de vista previa de Navidad en .cl (10-nov)
 
-La temporada se sigue cambiando desde la app (Apariencia → «Inicio:
-colecciones» → Temporada). Aparte, en .cl hay un tema **sin publicar** solo para
+La temporada se cambia desde la app (pestaña «Temporadas», desde el 10-nov;
+antes Apariencia → «Inicio: colecciones»). Aparte, en .cl hay un tema **sin publicar** solo para
 mirar y compartir la Navidad: «Saint Venik · NAVIDAD (vista previa)»
 #189939188015, copia del tema en vivo del 10-nov. Tiene el embed
-«Transiciones» con el ajuste nuevo **Temporada de este tema = Navidad** (en el
-tema en vivo queda en «La del panel») y el carrito vacío fijo en Navidad
-(`snippets/custom-collecion-cart-page.liquid`). Es una foto del día: lo que se
+«Transiciones» con el ajuste **Temporada de este tema = navidad** (ahora es un
+texto con la clave; en el tema en vivo queda «panel»), el carrito vacío fijo en
+Navidad (`snippets/custom-collecion-cart-page.liquid`) y `snippets/sv-temporada.liquid`
+forzado a Navidad (barra, bloque 3X2 y caja de oferta). Es una foto del día: lo que se
 cambie después en el tema en vivo no pasa solo a esta copia; se puede volver a
 duplicar. Abrir: `saintvenik.cl/?preview_theme_id=189939188015`; salir:
 `saintvenik.cl/?preview_theme_id=` (o «Salir de la vista previa» en la barra de
@@ -630,6 +632,26 @@ el teléfono, 182 en el computador, con la cuenta regresiva y el aviso
 encima). Si la cabecera no se ve porque se bajó en la página, va arriba del
 todo. En la página nueva se recoloca en `DOMContentLoaded`, por si se pintó
 antes de que existiera la cabecera. Vale para todos, no solo para el iPhone.
+
+### Notas del código de «Transiciones» (sacadas del Liquid el 10-nov para ahorrar espacio)
+
+- La barra pasa por encima del cambio de página tal cual está, sin fundirse.
+- `guardar()` ignora el error de sessionStorage en navegación privada.
+- En vista previa el fundido se enciende desde el propio embed.
+- Con el menú o el carrito abiertos, la barra va bajo el encabezado del cajón y
+  de su ancho: si no, cruza el menú por la mitad (video del 9-nov).
+- `void b.offsetWidth`: que la animación arranque desde cero aunque ya estuviera.
+- Si la navegación no ocurre, la barra no se queda colgada (tiempo máximo).
+- Al irse se guarda por dónde iba la barra, para que la página nueva siga de ahí;
+  mínimo 30 %, porque con precarga la página llega antes de que salga.
+- Solo cuentan navegaciones de verdad a otra página de la tienda; también las que
+  hace un script (`location.href = …`). Se mira al final de la burbuja: si el
+  tema canceló el clic, no hay navegación.
+- La página nueva recoge la barra donde quedó y la acaba; si se pintó antes de
+  existir la cabecera, se recoloca.
+- Lo que no se mueve al cambiar de página, si está a la vista, no se funde.
+- Si el navegador se salta la transición, el rechazo no sale en la consola.
+- Volver atrás restaura la página tal cual estaba, con la barra a medias.
 
 ## Estilo del descuento (snippet sv-desc-estilo)
 

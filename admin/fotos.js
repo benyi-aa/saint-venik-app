@@ -6,55 +6,67 @@
  * es cambiar el contenido de ese mismo archivo (mismo id, mismo nombre), así
  * que se actualiza en todos lados a la vez. Para que el nombre no cambie, la
  * foto nueva se pasa a JPG en el navegador antes de subirla. */
-import { gql } from './api.js?v=202611101550';
+import { gql } from './api.js?v=202611101647';
 import {
   subirAlDestino, reemplazarArchivo, crearConNombre, elegirDeBiblioteca, hayBiblioteca,
-} from './archivos.js?v=202611101550';
+} from './archivos.js?v=202611101647';
 
-const nav = (k, t) => [`sv-navidad-portada-${k}.jpg`, t];
-export const GRUPOS = [
-  {
-    titulo: 'Navidad · Inicio',
-    texto: 'Las cuatro tarjetas de colecciones del inicio cuando la temporada es Navidad (también el carrito vacío). Cuadradas, la joya al centro.',
-    forma: [1, 1],
-    fotos: [['sv-navidad-cadenas.jpg', 'Cadenas'], ['sv-navidad-pulseras.jpg', 'Pulseras'],
-      ['sv-navidad-colgantes.jpg', 'Colgantes'], ['sv-navidad-anillos.jpg', 'Anillos']],
-  },
-  {
-    titulo: 'Navidad · Banners de colección (computador)',
-    texto: 'Franja ancha arriba de cada colección. El título va a la izquierda: la joya, de la mitad hacia la derecha y a media altura (se ve una franja, no la foto entera). Formato 21:9.',
-    forma: [21, 9],
-    fotos: [nav('cadena', 'Cadenas'), nav('pulsera', 'Pulseras'), nav('anillos', 'Anillos'), nav('colgantes', 'Colgantes'),
-      nav('conjuntos', 'Conjuntos'), nav('essentials', 'Essentials'), nav('bestsellers', 'Best Sellers')],
-  },
-  {
-    titulo: 'Navidad · Banners de colección (teléfono)',
-    texto: 'La versión del teléfono de cada banner. El título va abajo y al centro, encima de la foto: la joya al centro y en la mitad de arriba. Formato 2,4:1 (por ejemplo 2400 × 1000).',
-    forma: [12, 5],
-    fotos: ['cadena', 'pulsera', 'anillos', 'colgantes', 'conjuntos', 'essentials', 'bestsellers']
-      .map((k, i) => [`sv-navidad-portada-${k}-movil.jpg`, ['Cadenas', 'Pulseras', 'Anillos', 'Colgantes', 'Conjuntos', 'Essentials', 'Best Sellers'][i]]),
-  },
-  {
-    titulo: 'Navidad · «El regalo Nº1 para él»',
-    texto: 'La foto de la sección de regalo del inicio. Cuadrada; en el computador se funde por la izquierda con el fondo burdeo, así que lo importante va al centro y a la derecha.',
-    forma: [1, 1],
-    fotos: [['sv-regalo-navidad.jpg', 'Regalo Nº1']],
-  },
+/* Las colecciones con banner propio, con su clave en el nombre del archivo. */
+const BANNERS = [['cadena', 'Cadenas'], ['pulsera', 'Pulseras'], ['anillos', 'Anillos'], ['colgantes', 'Colgantes'],
+  ['conjuntos', 'Conjuntos'], ['essentials', 'Essentials'], ['bestsellers', 'Best Sellers']];
+
+/* Las fotos de una temporada que no es Normal: sv-<clave>-<colección>.jpg en el
+ * inicio, sv-<clave>-portada-<k>.jpg en los banners (y -movil). Las que falten
+ * se ven como en Normal. Navidad además tiene la foto del regalo. */
+function gruposDeTemporada(clave, nombre) {
+  const g = [
+    {
+      titulo: `${nombre} · Inicio`,
+      texto: `Las cuatro tarjetas de colecciones del inicio (y del carrito vacío) cuando la temporada es ${nombre}. Cuadradas, la joya al centro. Si falta una, se ve la normal.`,
+      forma: [1, 1],
+      fotos: [['cadenas', 'Cadenas'], ['pulseras', 'Pulseras'], ['colgantes', 'Colgantes'], ['anillos', 'Anillos']]
+        .map(([h, t]) => [`sv-${clave}-${h}.jpg`, t]),
+    },
+    {
+      titulo: `${nombre} · Banners de colección (computador)`,
+      texto: 'Franja ancha arriba de cada colección. El título va a la izquierda: la joya, de la mitad hacia la derecha y a media altura (se ve una franja, no la foto entera). Formato 21:9. Si falta una, se ve la normal.',
+      forma: [21, 9],
+      fotos: BANNERS.map(([k, t]) => [`sv-${clave}-portada-${k}.jpg`, t]),
+    },
+    {
+      titulo: `${nombre} · Banners de colección (teléfono)`,
+      texto: 'La versión del teléfono de cada banner. El título va abajo y al centro, encima de la foto: la joya al centro y en la mitad de arriba. Formato 2,4:1 (por ejemplo 2400 × 1000). Si falta, se usa la del computador.',
+      forma: [12, 5],
+      fotos: BANNERS.map(([k, t]) => [`sv-${clave}-portada-${k}-movil.jpg`, t]),
+    },
+  ];
+  if (clave === 'navidad') {
+    g.push({
+      titulo: 'Navidad · «El regalo Nº1 para él»',
+      texto: 'La foto de la sección de regalo del inicio. Cuadrada; en el computador se funde por la izquierda con el fondo burdeo, así que lo importante va al centro y a la derecha.',
+      forma: [1, 1],
+      fotos: [['sv-regalo-navidad.jpg', 'Regalo Nº1']],
+    });
+  }
+  return g;
+}
+
+const NORMAL = [
   {
     titulo: 'Inicio · Colecciones',
-    texto: 'Las cuatro tarjetas de colecciones del inicio fuera de Navidad (y el carrito vacío). Cuadradas, la joya al centro.',
+    texto: 'Las cuatro tarjetas de colecciones del inicio (y el carrito vacío). Cuadradas, la joya al centro.',
     forma: [1, 1],
     fotos: [['sv-inicio-cadenas.jpg', 'Cadenas'], ['sv-inicio-pulseras.jpg', 'Pulseras'],
       ['sv-inicio-colgantes.jpg', 'Colgantes'], ['sv-inicio-anillos.jpg', 'Anillos']],
   },
   {
     titulo: 'Inicio · «Tu cadena de cada día»',
-    texto: 'Computador: horizontal, la cadena de la mitad hacia la derecha (el texto va a la izquierda). Teléfono: cuadrada, la cadena arriba (el texto va abajo).',
+    texto: 'Computador: horizontal, la cadena de la mitad hacia la derecha (el texto va a la izquierda). Teléfono: cuadrada, la cadena arriba (el texto va abajo). Sale en todas las temporadas.',
     forma: [16, 9],
     fotos: [['sv-inicio-cadena-dia.jpg', 'Computador'], ['sv-inicio-cadena-dia-movil.jpg', 'Teléfono', [1, 1]]],
   },
   {
-    titulo: 'Banners de colección (fuera de Navidad)',
+    titulo: 'Banners de colección',
     texto: 'Computador: franja ancha con el título a la izquierda. Best Sellers tiene la suya; las demás son las fotos de cada colección. Las «teléfono» van con la joya arriba y al centro.',
     forma: [16, 9],
     fotos: [['coleccion_cadena.jpg', 'Cadenas'], ['coleccion_pulsera.jpg', 'Pulseras'], ['coleccion_anillos.jpg', 'Anillos'],
@@ -65,13 +77,18 @@ export const GRUPOS = [
   },
   {
     titulo: 'Menú del teléfono',
-    texto: 'Las fotos de las tarjetas del menú desplegable. Cuadradas, en uso y con la joya al centro.',
+    texto: 'Las fotos de las tarjetas del menú desplegable. Cuadradas, en uso y con la joya al centro. Salen en todas las temporadas.',
     forma: [1, 1],
     fotos: [['sv-menu-best-sellers.jpg', 'Best Sellers'], ['sv-menu-essentials.jpg', 'Essentials'], ['sv-menu-anillos.jpg', 'Anillos'],
       ['sv-menu-colgantes.jpg', 'Colgantes'], ['sv-menu-pulseras.jpg', 'Pulseras'], ['sv-menu-cadenas.jpg', 'Cadenas'],
       ['sv-menu-conjuntos.jpg', 'Conjuntos']],
   },
 ];
+
+/* Los grupos de fotos de una temporada. */
+export function gruposDe(clave, nombre) {
+  return clave === 'normal' ? NORMAL : gruposDeTemporada(clave, nombre);
+}
 
 const BUSCAR = `
   query FotosPorNombre($q: String!, $despues: String) {
@@ -84,9 +101,9 @@ const BUSCAR = `
 
 const nombreDe = (url) => decodeURIComponent((url || '').split('?')[0].split('/').pop());
 
-/* Todos los archivos de la lista, por nombre exacto: { nombre: {id, url, ancho, alto} }. */
-export async function cargarFotos() {
-  const nombres = GRUPOS.flatMap((g) => g.fotos.map((f) => f[0]));
+/* Los archivos de esos grupos, por nombre exacto: { nombre: {id, url, ancho, alto} }. */
+export async function cargarFotos(grupos) {
+  const nombres = grupos.flatMap((g) => g.fotos.map((f) => f[0]));
   const q = nombres.map((n) => `filename:${n}`).join(' OR ');
   const mapa = {};
   let despues = null;
