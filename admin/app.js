@@ -1,55 +1,55 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611101647';
+import { estaEmbebida } from './api.js?v=202611101650';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611101647';
+} from './colores.js?v=202611101650';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611101647';
+} from './config.js?v=202611101650';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611101647';
+} from './filtros.js?v=202611101650';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611101647';
-import { prepararNavidad } from './inicio.js?v=202611101647';
-import { quitarAguaDeColecciones } from './textos.js?v=202611101647';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611101647';
+} from './productos.js?v=202611101650';
+import { prepararNavidad } from './inicio.js?v=202611101650';
+import { quitarAguaDeColecciones } from './textos.js?v=202611101650';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611101650';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611101647';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611101647';
+} from './temporadas.js?v=202611101650';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611101650';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611101647';
+} from './guias.js?v=202611101650';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611101647';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611101647';
+} from './vista-previa.js?v=202611101650';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611101650';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611101647';
+} from './etiquetas.js?v=202611101650';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611101647';
-import { ICONOS, svgIcono } from './iconos.js?v=202611101647';
+} from './beneficios.js?v=202611101650';
+import { ICONOS, svgIcono } from './iconos.js?v=202611101650';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611101647';
+const VERSION = '202611101650';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -3476,7 +3476,15 @@ async function pintarTemporadas() {
     const k = b.dataset.borrar;
     const n = lista.find((t) => t.clave === k)?.nombre || k;
     if (k === activa) { avisar(`«${n}» es la temporada activa: elige otra antes de borrarla.`, true); return; }
-    if (!window.confirm(`¿Borrar la temporada «${n}»? Se pierden sus textos; sus fotos quedan en Contenido → Archivos.`)) return;
+    /* Dos pasos en el mismo botón: el confirm() del navegador no siempre se
+     * muestra dentro del admin. */
+    if (!b.dataset.seguro) {
+      b.dataset.seguro = '1';
+      b.textContent = '¿Seguro? Borrar';
+      avisar(`Vuelve a pulsar para borrar «${n}». Se pierden sus textos; sus fotos quedan en Contenido → Archivos.`);
+      setTimeout(() => { delete b.dataset.seguro; b.textContent = 'Borrar'; }, 6000);
+      return;
+    }
     try {
       const { datos: ahora } = await leerTemporadas();
       delete ahora[k];
