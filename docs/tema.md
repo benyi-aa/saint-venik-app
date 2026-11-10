@@ -641,4 +641,4 @@ El usuario mandó siete fotos en uso, una por tarjeta del menú, que valen igual
 | Cadenas | tennis |
 | Conjuntos | dos Cuban plateadas |
 
-Se recortaron en cuadrado (480 px), con la joya al centro, como `sv-menu-<clave>.jpg`. Los originales están en `branding/menu/originales/` y la versión anterior en `branding/menu/v2/`.
+Se recortaron en cuadrado (480 px), con la joya al centro, como `sv-menu-<clave>.jpg`. La de Anillos va con más zoom (420 px, recorte de 210 px de la foto original) para que el anillo se vea bien en la tarjeta de 80 px. Los originales están en `branding/menu/originales/` y la versión anterior en `branding/menu/v2/`.
