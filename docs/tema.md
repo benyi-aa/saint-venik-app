@@ -384,8 +384,14 @@ estrella, Compass II set, Vault Green, Faith Oro + Vault Blue).
   la joya: para el computador se achicó la foto con `scripts/imagenes/achicar-fondo.py`
   (fondo = la misma foto sin la joya y desenfocada, unión en elipse). En el teléfono
   sí sirvió ampliar con gris (`pegar.py`) para subir la joya sobre el título.
-- Encuadre en el computador (`sv-portada.liquid`): cadena 80 %, pulsera 44 %,
-  colgantes 18 %, conjuntos 68 %, essentials 24 %, bestsellers 50 %, anillos 48 %.
+- Segunda vuelta (mismo día): el usuario las encontró chicas y poco atractivas en el
+  computador. Se rehicieron Pulseras, Colgantes, Conjuntos, Essentials y Best Sellers con
+  composición HORIZONTAL y muy cerca (cada una con su pose: placas en diagonal, pulseras
+  acostadas, piedras grandes, cruz y piedra azul, medallones lado a lado), porque la
+  franja del computador es ancha y baja. Colgantes y Pulseras corridas 13 % a la derecha
+  para no tocar el título largo a 1280 px. Las colgando quedaron en `estudio-10nov/v1-colgando/`.
+- Encuadre en el computador (`sv-portada.liquid`): cadena 80 %, pulsera 55 %,
+  colgantes 59 %, conjuntos 76 %, essentials 74 %, bestsellers 68 %, anillos 48 %.
 - Originales en `branding/colecciones-inicio/navidad/portadas/estudio-10nov/`; los de
   terciopelo, en `respaldo-10nov-terciopelo/`. Costo: ~27 imágenes, unos US$2,40.
 
