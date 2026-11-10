@@ -424,6 +424,8 @@ estrella, Compass II set, Vault Green, Faith Oro + Vault Blue).
   Teléfono de P3 armado desde la del computador. Descartadas: C1 y P1 (dos cubanas oro/plata).
   La ronda anterior: `v6-burdeo-plano/`. El usuario las subió «por mientras» y pidió otro
   concepto más fluido, menos rígido.
+  Mismo día: el usuario pidió volver en CADENAS a la de la sexta vuelta (cubanas oro y plata sueltas
+  sobre burdeo); Pulseras se queda con P3. C4 guardada en `v7-colgando/`.
 - Descargas del generador (10-nov): el servidor entregaba a pocos KB/s y `erp.sh BAJAR` corta a los
   300 s (archivo truncado). Se completaron pidiendo lo que faltaba por rangos (`curl -r`) en trozos
   paralelos; la API acepta Range.
