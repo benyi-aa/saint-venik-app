@@ -1,49 +1,49 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611100006';
+import { estaEmbebida } from './api.js?v=202611100017';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611100006';
+} from './colores.js?v=202611100017';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611100006';
+} from './config.js?v=202611100017';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611100006';
+} from './filtros.js?v=202611100017';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611100006';
-import { prepararNavidad } from './inicio.js?v=202611100006';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611100006';
+} from './productos.js?v=202611100017';
+import { prepararNavidad } from './inicio.js?v=202611100017';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611100017';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611100006';
+} from './guias.js?v=202611100017';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611100006';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611100006';
+} from './vista-previa.js?v=202611100017';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611100017';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611100006';
+} from './etiquetas.js?v=202611100017';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611100006';
-import { ICONOS, svgIcono } from './iconos.js?v=202611100006';
+} from './beneficios.js?v=202611100017';
+import { ICONOS, svgIcono } from './iconos.js?v=202611100017';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611100006';
+const VERSION = '202611100017';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');

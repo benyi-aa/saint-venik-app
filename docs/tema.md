@@ -626,3 +626,19 @@ Siguiendo el feedback de Benjamín («fotos icónicas de producto en uso, de las
 - **Colgantes:** Florence Pendant.
 
 Daniella no tiene fotos en uso de Cadenas, Anillos ni Conjuntos, así que esas tres siguen con los recortes de las fotos de modelo en el barco. Las versiones anteriores quedaron en `branding/menu/v1/`.
+
+## Menú del teléfono: fotos elegidas por el usuario (9-nov, noche)
+
+El usuario mandó siete fotos en uso, una por tarjeta del menú, que valen igual en verano y en Navidad:
+
+| Tarjeta | Foto |
+|---|---|
+| Best Sellers | colgante brújula dorado y anillo Eros |
+| Essentials | placa dorada sobre fondo oscuro |
+| Anillos | Roman en la mano |
+| Colgantes | colgante verde |
+| Pulseras | pulsera de cruz |
+| Cadenas | tennis |
+| Conjuntos | dos Cuban plateadas |
+
+Se recortaron en cuadrado (480 px), con la joya al centro, como `sv-menu-<clave>.jpg`. Los originales están en `branding/menu/originales/` y la versión anterior en `branding/menu/v2/`.
