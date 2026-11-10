@@ -343,6 +343,20 @@ su descripción de Google (`page_description` hasta el primer « | »); Best
 Sellers y Essentials conservan su texto propio. `page_description` ya viene
 escapado: no pasarle `escape` o el apóstrofo sale como `&#39;`.
 
+### Tema de vista previa de Navidad en .cl (10-nov)
+
+La temporada se sigue cambiando desde la app (Apariencia → «Inicio:
+colecciones» → Temporada). Aparte, en .cl hay un tema **sin publicar** solo para
+mirar y compartir la Navidad: «Saint Venik · NAVIDAD (vista previa)»
+#189939188015, copia del tema en vivo del 10-nov. Tiene el embed
+«Transiciones» con el ajuste nuevo **Temporada de este tema = Navidad** (en el
+tema en vivo queda en «La del panel») y el carrito vacío fijo en Navidad
+(`snippets/custom-collecion-cart-page.liquid`). Es una foto del día: lo que se
+cambie después en el tema en vivo no pasa solo a esta copia; se puede volver a
+duplicar. Abrir: `saintvenik.cl/?preview_theme_id=189939188015`; salir:
+`saintvenik.cl/?preview_theme_id=` (o «Salir de la vista previa» en la barra de
+abajo). Si no se sale, ese navegador sigue viendo la copia.
+
 ### Franja negra arriba del video del inicio (10-nov)
 
 El video del inicio (4K) trae franjas negras grabadas en el archivo: hasta 7
