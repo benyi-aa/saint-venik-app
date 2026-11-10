@@ -390,8 +390,17 @@ estrella, Compass II set, Vault Green, Faith Oro + Vault Blue).
   acostadas, piedras grandes, cruz y piedra azul, medallones lado a lado), porque la
   franja del computador es ancha y baja. Colgantes y Pulseras corridas 13 % a la derecha
   para no tocar el título largo a 1280 px. Las colgando quedaron en `estudio-10nov/v1-colgando/`.
-- Encuadre en el computador (`sv-portada.liquid`): cadena 80 %, pulsera 55 %,
-  colgantes 59 %, conjuntos 76 %, essentials 74 %, bestsellers 68 %, anillos 48 %.
+- Tercera vuelta (mismo día, feedback del usuario con capturas): en el computador se veían
+  demasiado cerca y cortadas, Conjuntos mezclaba cadenas rope y cuban, y en el teléfono salía la
+  foto del computador. Ahora cada colección tiene UN concepto en dos composiciones: computador
+  (producto entero, horizontal, a la derecha) y teléfono (el mismo, centrado y arriba del título).
+  Conjuntos = Cuban Set oro y plata (collar + pulsera, solo cuban). La franja de los banners de
+  temporada en el computador crece con el ancho: `clamp(300px, 22vw, 440px)` (`sv-portada.css`,
+  solo con `html.sv-nav` y foto cambiada), así se ve ~la mitad del alto de la foto en cualquier
+  pantalla. El cambio de foto teléfono/computador ahora sigue al tamaño de la ventana
+  (`matchMedia` change), no solo al cargar. Las vueltas anteriores: `v1-colgando/` y `v2-horizontal/`.
+- Encuadre en el computador (`sv-portada.liquid`): cadena 49 %, pulsera 50 %,
+  colgantes 54 %, conjuntos 53 %, essentials 61 %, bestsellers 56 %, anillos 48 %.
 - Originales en `branding/colecciones-inicio/navidad/portadas/estudio-10nov/`; los de
   terciopelo, en `respaldo-10nov-terciopelo/`. Costo: ~27 imágenes, unos US$2,40.
 
