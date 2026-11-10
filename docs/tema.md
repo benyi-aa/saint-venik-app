@@ -408,8 +408,13 @@ estrella, Compass II set, Vault Green, Faith Oro + Vault Blue).
   (una cadena que cambia de color, eslabones plateados dentro de la dorada). Rehechas con las piezas
   SEPARADAS, sin tocarse, cada una de un solo metal, y revisadas con lupa antes de subir. Si dos
   piezas de distinto metal se cruzan, la IA tiende a mezclarlas: pedirlas separadas.
-- Encuadre en el computador (`sv-portada.liquid`): cadena 50 %, pulsera 53 %,
-  colgantes 54 %, conjuntos 48 %, essentials 54 %, bestsellers 56 %, anillos 48 %.
+- Sexta vuelta: «pésimo diseño, no se ven naturales (las S) y ninguno tiene los colores de navidad».
+  Cadenas, Pulseras, Essentials y Conjuntos rehechos con superficie y fondo BURDEO (se le pasó a Nano
+  Banana el banner aprobado de Colgantes como referencia de color) y piezas apoyadas con naturalidad
+  (pulseras cerradas como óvalos, cadenas sueltas), separadas y de un solo metal. Cadenas teléfono se
+  armó desde la del computador (la generada para teléfono volvió a unir oro y plata).
+- Encuadre en el computador (`sv-portada.liquid`): cadena 58 %, pulsera 50 %, essentials 50 %, conjuntos 50 %,
+  colgantes 54 %, bestsellers 56 %, anillos 48 %.
 - Originales en `branding/colecciones-inicio/navidad/portadas/estudio-10nov/`; los de
   terciopelo, en `respaldo-10nov-terciopelo/`. Costo: ~27 imágenes, unos US$2,40.
 
