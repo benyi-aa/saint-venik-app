@@ -343,6 +343,17 @@ su descripción de Google (`page_description` hasta el primer « | »); Best
 Sellers y Essentials conservan su texto propio. `page_description` ya viene
 escapado: no pasarle `escape` o el apóstrofo sale como `&#39;`.
 
+### Pestaña «Fotos» del panel (10-nov)
+
+Para que el usuario cambie las fotos de temporada sin código: cada foto con su
+miniatura, dónde se ve, el formato que conviene y dos botones («Subir…» desde el
+computador y «Elegir de la biblioteca»). Cambia el contenido del MISMO archivo
+(mismo id y nombre, `fileUpdate`), así que el tema, la extensión y los
+metacampos lo siguen encontrando. La foto se pasa a JPG en el navegador antes de
+subirla para que el nombre no cambie (`admin/fotos.js`). La lista de fotos está
+en `GRUPOS` de ese archivo. Ojo: «Traer las fotos nuevas…» y «Preparar las fotos
+de Navidad» las vuelven a poner desde la app y pisan los cambios hechos a mano.
+
 ### Banners de Navidad: teléfono centrado y Best Sellers entero en el computador (10-nov)
 
 Revisión del usuario en el tema de vista previa: en el teléfono las joyas no

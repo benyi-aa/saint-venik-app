@@ -6,10 +6,10 @@
  * es cambiar el contenido de ese mismo archivo (mismo id, mismo nombre), así
  * que se actualiza en todos lados a la vez. Para que el nombre no cambie, la
  * foto nueva se pasa a JPG en el navegador antes de subirla. */
-import { gql } from './api.js?v=202611101547';
+import { gql } from './api.js?v=202611101550';
 import {
   subirAlDestino, reemplazarArchivo, crearConNombre, elegirDeBiblioteca, hayBiblioteca,
-} from './archivos.js?v=202611101547';
+} from './archivos.js?v=202611101550';
 
 const nav = (k, t) => [`sv-navidad-portada-${k}.jpg`, t];
 export const GRUPOS = [
