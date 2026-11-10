@@ -399,8 +399,13 @@ estrella, Compass II set, Vault Green, Faith Oro + Vault Blue).
   solo con `html.sv-nav` y foto cambiada), así se ve ~la mitad del alto de la foto en cualquier
   pantalla. El cambio de foto teléfono/computador ahora sigue al tamaño de la ventana
   (`matchMedia` change), no solo al cargar. Las vueltas anteriores: `v1-colgando/` y `v2-horizontal/`.
-- Encuadre en el computador (`sv-portada.liquid`): cadena 49 %, pulsera 50 %,
-  colgantes 54 %, conjuntos 53 %, essentials 61 %, bestsellers 56 %, anillos 48 %.
+- Cuarta vuelta (mismo día): Cadenas, Pulseras y Conjuntos se veían tiesos y falsos (círculos),
+  Essentials con dos colgantes iguales. Rehechos como foto real: apoyados sobre superficie negra
+  brillante que se funde con el fondo burdeo, caída natural en S («estilo serpiente»), nunca
+  círculos. Essentials = colgante Vault Green Oro + Pulsera Eclissi. Colgantes y Best Sellers
+  quedaron como estaban (aprobados). Las vueltas de círculos: `v3-circulos/`.
+- Encuadre en el computador (`sv-portada.liquid`): cadena 50 %, pulsera 50 %,
+  colgantes 54 %, conjuntos 48 %, essentials 54 %, bestsellers 56 %, anillos 48 %.
 - Originales en `branding/colecciones-inicio/navidad/portadas/estudio-10nov/`; los de
   terciopelo, en `respaldo-10nov-terciopelo/`. Costo: ~27 imágenes, unos US$2,40.
 
