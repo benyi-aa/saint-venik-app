@@ -413,6 +413,20 @@ estrella, Compass II set, Vault Green, Faith Oro + Vault Blue).
   Banana el banner aprobado de Colgantes como referencia de color) y piezas apoyadas con naturalidad
   (pulseras cerradas como óvalos, cadenas sueltas), separadas y de un solo metal. Cadenas teléfono se
   armó desde la del computador (la generada para teléfono volvió a unir oro y plata).
+- Séptima vuelta (Cadenas y Pulseras): «muy planas, no comunican». Se pidieron conceptos sin gastar
+  y el usuario corrigió: el fondo NO cambia (negro con borde/halo burdeo como Colgantes), solo la
+  pose de la joya. Eligió C4 (tres cadenas distintas colgando: cubana oro 8 mm, tennis 5 mm, rope oro
+  4 mm, cada una en su espacio) y P3 (tres pulseras DE PIE con reflejo: cubana oro, tennis 5 mm,
+  Eclissi). Nano Banana cruza las cadenas colgantes si no se le da a cada una su franja de ancho
+  («stays entirely between 50% and 63% of the width…») y dibuja las pulseras de pie enormes: se
+  achicaron con `scripts/imagenes/achicar-borde.py` (estira los bordes de la foto achicada, así el
+  horizonte del piso sigue parejo; `achicar-fondo.py` dejaba el piso como una repisa flotando).
+  Teléfono de P3 armado desde la del computador. Descartadas: C1 y P1 (dos cubanas oro/plata).
+  La ronda anterior: `v6-burdeo-plano/`. El usuario las subió «por mientras» y pidió otro
+  concepto más fluido, menos rígido.
+- Descargas del generador (10-nov): el servidor entregaba a pocos KB/s y `erp.sh BAJAR` corta a los
+  300 s (archivo truncado). Se completaron pidiendo lo que faltaba por rangos (`curl -r`) en trozos
+  paralelos; la API acepta Range.
 - Encuadre en el computador (`sv-portada.liquid`): cadena 58 %, pulsera 50 %, essentials 50 %, conjuntos 50 %,
   colgantes 54 %, bestsellers 56 %, anillos 48 %.
 - Originales en `branding/colecciones-inicio/navidad/portadas/estudio-10nov/`; los de
