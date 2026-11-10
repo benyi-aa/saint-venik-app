@@ -124,8 +124,15 @@
         if (boton && !boton.classList.contains('is-on')) boton.click();
       }
     });
+    /* Se apaga el botón que, junto con lo elegido en los otros grupos, no
+     * dejaría ninguna joya (Brillantes con Dorado, por ejemplo). */
     botones.forEach(function (b, i) {
-      var vacio = cards.length > 0 && !cards.some(function (c) { return cumple(c, b, tags); });
+      var otros = nombres.filter(function (g) { return g !== grupo(b); });
+      var vacio = cards.length > 0 && !cards.some(function (c) {
+        return cumple(c, b, tags) && otros.every(function (g) {
+          return grupos[g].some(function (x) { return cumple(c, x, tags); });
+        });
+      });
       pastillas[i].classList.toggle('is-vacio', vacio && activos.indexOf(i) < 0);
       pastillas[i].setAttribute('aria-disabled', vacio ? 'true' : 'false');
     });
