@@ -45,6 +45,8 @@ html.sv-portada .custom-content:has(:is(.collection-description-wrapper,[class^=
    * en la imagen: asi sube por encima del titulo. */
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="bestsellers"] { --sv-encuadre: 62% 88%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="sv-portada-bestsellers"] { --sv-alto: 100%; --sv-encuadre: 50% 0%; }
+  /* Navidad en el teléfono (10-nov): las versiones -movil ya traen las joyas al centro y sobre el título; se muestran enteras. */
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="sv-navidad-portada"][src*="-movil."] { --sv-alto: 100%; --sv-encuadre: 50% 50%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_cadena"] { --sv-alto: 178%; --sv-encuadre: 58% 100%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_pulsera"] { --sv-alto: 128%; --sv-encuadre: 40% 100%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_anillos"] { --sv-encuadre: 50% 100%; }
