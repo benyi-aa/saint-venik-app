@@ -316,6 +316,21 @@ delante (`-brillantes`) resta. La resta la aplica el panel al calcular, al
 final y sobre todo lo reunido, así que da igual el orden y también quita lo
 que hubiera entrado por colección o a mano.
 
+### «Resistente al agua» fuera de los lugares generales (9-nov)
+
+Benjamín: solo los brillantes no son resistentes al agua, así que la frase
+puede ir en la ficha de un producto de oro o plata, pero nunca en un lugar
+general (inicio, colecciones, páginas), porque hace creer que toda la tienda lo
+es. Se sacó de: el «Arma tu 3x2» (bloque i5 desactivado y la reseña de Camilo
+C. fuera), el alt de las fotos de product.brillantes en .cl, la página
+Materiales de las dos tiendas («resistente al sudor, perfume y calor»), la
+colección Lentes de sol de .cl, y la descripción de Google de todas las
+colecciones. Esta última la arregla el botón de Apariencia → «Textos de las
+colecciones» (`admin/textos.js`): deja «Resistentes al Sudor y Calor». Una app
+de anuncios (essentialAnnouncementMeta) copia la descripción de cada colección
+dentro de las fichas, por eso la frase aparecía en el código de los brillantes.
+Respaldo de los textos de antes en `branding/respaldos/`.
+
 ### Insignias
 
 «Novedad» / «New», fondo `#111111`, texto `#FFFFFF`, posición 1, asignada a la
