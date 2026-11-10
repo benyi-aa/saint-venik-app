@@ -1,50 +1,50 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611100106';
+import { estaEmbebida } from './api.js?v=202611100114';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611100106';
+} from './colores.js?v=202611100114';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO,
-} from './config.js?v=202611100106';
+} from './config.js?v=202611100114';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611100106';
+} from './filtros.js?v=202611100114';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611100106';
-import { prepararNavidad } from './inicio.js?v=202611100106';
-import { quitarAguaDeColecciones } from './textos.js?v=202611100106';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611100106';
+} from './productos.js?v=202611100114';
+import { prepararNavidad } from './inicio.js?v=202611100114';
+import { quitarAguaDeColecciones } from './textos.js?v=202611100114';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611100114';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611100106';
+} from './guias.js?v=202611100114';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611100106';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611100106';
+} from './vista-previa.js?v=202611100114';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611100114';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611100106';
+} from './etiquetas.js?v=202611100114';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611100106';
-import { ICONOS, svgIcono } from './iconos.js?v=202611100106';
+} from './beneficios.js?v=202611100114';
+import { ICONOS, svgIcono } from './iconos.js?v=202611100114';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611100106';
+const VERSION = '202611100114';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -936,7 +936,7 @@ async function pintarApariencia() {
 
       <s-section heading="Textos de las colecciones" subheading="«Resistente al agua» no va en lugares generales: hace creer que toda la tienda lo es, y las joyas con brillantes no lo son. Las fichas de productos sin brillantes sí pueden decirlo.">
         <p class="ayuda">Este botón lo saca de la descripción de todas las colecciones (la frase que muestra Google y que una app de anuncios copia en cada ficha): «Resistentes al Agua, Sudor y Calor» queda «Resistentes al Sudor y Calor». Lo demás del texto no se toca, y apretarlo de nuevo no cambia nada.</p>
-        <s-button id="t-agua">Quitar «resistente al agua» de las colecciones</s-button>
+        <s-button id="t-agua">Quitar «agua» de las colecciones</s-button>
       </s-section>
 
       <s-section heading="Botón de la guía de tallas" subheading="Si lo dejas vacío se usa el texto por defecto en cada idioma.">
