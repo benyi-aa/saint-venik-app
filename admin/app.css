@@ -201,7 +201,8 @@ button.principal:disabled { opacity: .5; cursor: default; }
 
 .bloque__acciones { display: flex; gap: 6px; }
 
-button.secundario {
+button.secundario,
+label.secundario.como-boton {
   padding: 6px 10px;
   border: 1px solid #b5b5b5;
   border-radius: 8px;
@@ -210,7 +211,8 @@ button.secundario {
   font-size: 13px;
   cursor: pointer;
 }
-button.secundario:hover:not(:disabled) { border-color: var(--tinta); }
+button.secundario:hover:not(:disabled),
+label.secundario.como-boton:hover { border-color: var(--tinta); }
 button.secundario:disabled { opacity: .35; cursor: default; }
 button.secundario--peligro { color: var(--peligro); border-color: #e0b4ab; }
 
