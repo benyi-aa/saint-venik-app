@@ -12,7 +12,7 @@ import {
   CAMPOS_COMUNES, aObjetoComun, cargarEntradas, camposComunes, crearEntrada,
   guardarEntrada, borrarEntrada, faltaEstructura, asegurarEstructura,
   resolverHandles, camposDeTipo, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611101713';
+} from './asignacion.js?v=202611101851';
 
 export const TIPO_ETIQUETA = 'sv_etiqueta';
 export const TOPE_ETIQUETAS = TOPE_ENTRADAS;

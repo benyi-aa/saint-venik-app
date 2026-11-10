@@ -370,6 +370,25 @@ Sellers cortaba las joyas. Ahora:
   a 1512 px; a 1920 se corta apenas arriba.
 - Las anteriores quedaron en `branding/colecciones-inicio/navidad/portadas/respaldo-10nov/`.
 
+### Banners de Navidad estilo estudio (feedback de Benjamín, 10-nov, tarde)
+
+Video de Benjamín: el inicio de Navidad, perfecto; los banners de colección eran
+tomas lejanas sobre terciopelo. Pidió planos cercanos e icónicos, como la foto de
+Daniela de las placas con estrella (`branding/referencias/navidad-estilo-placas-estrella.jpg`),
+sin terciopelo: fondo de estudio en degradado de negro a burdeo con un halo de luz.
+Anillos se queda como estaba. Los otros seis (Cadenas, Pulseras, Colgantes,
+Conjuntos, Essentials, Best Sellers) se rehicieron en computador y teléfono, con
+piezas reales en oro y plateado (Cuban Link 8 mm, Pulsera Cuban 8 mm, placas con
+estrella, Compass II set, Vault Green, Faith Oro + Vault Blue).
+- Nano Banana no aleja la cámara aunque se le pida, y al ampliar con gris redibuja
+  la joya: para el computador se achicó la foto con `scripts/imagenes/achicar-fondo.py`
+  (fondo = la misma foto sin la joya y desenfocada, unión en elipse). En el teléfono
+  sí sirvió ampliar con gris (`pegar.py`) para subir la joya sobre el título.
+- Encuadre en el computador (`sv-portada.liquid`): cadena 80 %, pulsera 44 %,
+  colgantes 18 %, conjuntos 68 %, essentials 24 %, bestsellers 50 %, anillos 48 %.
+- Originales en `branding/colecciones-inicio/navidad/portadas/estudio-10nov/`; los de
+  terciopelo, en `respaldo-10nov-terciopelo/`. Costo: ~27 imágenes, unos US$2,40.
+
 ### Tema de vista previa de Navidad en .cl (10-nov)
 
 La temporada se cambia desde la app (pestaña «Temporadas», desde el 10-nov;

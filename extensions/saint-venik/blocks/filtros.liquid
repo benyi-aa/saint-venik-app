@@ -137,6 +137,12 @@
                   assign url = v_hallado.url_to_remove
                 endif
                 assign ic = b.icono.value | strip
+                if ic == blank and b.filtro.value == 'categoria'
+                  assign ic = b.valor.value | downcase | strip | remove_last: 's'
+                  if ic == 'lente'
+                    assign ic = 'lentes'
+                  endif
+                endif
                 assign ic_pre = ic | slice: 0, 6
                 assign vacio = false
                 if v_hallado.count == 0 and v_hallado.active == false
@@ -180,7 +186,7 @@
           assign cols = f_cols_max
         endif
       -%}
-      {%- capture filas -%}{{ filas }}<div class="sv-filtros__fila{% if cols >= 4 %} sv-filtros__fila--apilada{% endif %}" style="--cols: {{ cols }}">{{ html_fila }}</div>{%- endcapture -%}
+      {%- capture filas -%}{{ filas }}<div class="sv-filtros__fila{% if cols >= 4 %} sv-filtros__fila--apilada{% endif %}" style="--cols: {{ cols }}; --n: {{ en_fila }}">{{ html_fila }}</div>{%- endcapture -%}
     {%- endif -%}
   {%- endfor -%}
 

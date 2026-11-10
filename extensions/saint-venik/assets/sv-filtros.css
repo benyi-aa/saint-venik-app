@@ -33,15 +33,23 @@
 .sv-filtros__fila--apilada .sv-filtro:not(:has(svg, .sv-filtro__muestra)) {
   flex-direction: row; min-height: 38px; padding: 6px 4px; border-radius: 999px; font-size: 12px;
 }
+/* Computador (feedback de Benjamín, 10-nov): como en el teléfono, los botones llenan
+ * todo el ancho del contenido, pero en una sola línea: cada fila ocupa lo que le toca
+ * según cuántos botones tiene, así todos quedan del mismo ancho. Más altos y con letra
+ * algo mayor, al tamaño de la web. */
 @media (min-width: 769px) {
-  .sv-filtros__dentro { flex-direction: row; flex-wrap: wrap; }
-  .sv-filtros__fila { display: contents; }
+  .sv-filtros { margin: 18px 0 8px; }
+  .sv-filtros__dentro { flex-direction: row; flex-wrap: nowrap; gap: 12px; }
+  .sv-filtros__fila { flex: var(--n, var(--cols, 3)) 1 0; min-width: 0; gap: 12px; grid-template-columns: repeat(var(--n, var(--cols, 3)), minmax(0, 1fr)); }
   .sv-filtro,
-  .sv-filtros__fila--apilada .sv-filtro {
-    flex-direction: row; gap: 7px; min-height: 38px; padding: 6px 16px;
-    border-radius: 999px; font-size: 12.5px;
+  .sv-filtros__fila--apilada .sv-filtro,
+  .sv-filtros__fila--apilada .sv-filtro:not(:has(svg, .sv-filtro__muestra)) {
+    flex-direction: row; gap: 9px; min-height: 46px; padding: 8px 14px;
+    border-radius: 999px; font-size: 13.5px; letter-spacing: .02em;
   }
-  .sv-filtros__fila--apilada .sv-filtro svg { width: 16px; height: 16px; }
+  .sv-filtro svg,
+  .sv-filtros__fila--apilada .sv-filtro svg { width: 18px; height: 18px; }
+  .sv-filtro__muestra { width: 17px; height: 17px; }
 }
 /* «Ordenar» dentro de Filtrar: se viste como los grupos del tema. */
 .sv-orden__boton {
