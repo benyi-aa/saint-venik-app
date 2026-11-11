@@ -4,383 +4,373 @@
 
 {%- if product != blank and hermanos != blank and hermanos.size > 0 -%}
 
-  {%- liquid
-    assign lang = localization.language.iso_code | slice: 0, 2 | downcase
+ {%- liquid
+  assign lang = localization.language.iso_code | slice: 0, 2 | downcase
 
-    assign encabezado = block.settings.encabezado_es
-    if lang == 'en' and block.settings.encabezado_en != blank
-      assign encabezado = block.settings.encabezado_en
-    endif
+  assign encabezado = block.settings.encabezado_es
+  if lang == 'en' and block.settings.encabezado_en != blank
+   assign encabezado = block.settings.encabezado_en
+  endif
 
-    assign etiqueta_grupo = encabezado
-    if etiqueta_grupo == blank
-      assign etiqueta_grupo = 'color' | t
-    endif
+  assign etiqueta_grupo = encabezado
+  if etiqueta_grupo == blank
+   assign etiqueta_grupo = 'color' | t
+  endif
 
-    assign colores = shop.metaobjects.color.values
-    assign etiquetas_actuales = product.tags | join: '|' | downcase | prepend: '|' | append: '|'
-    comment
-      El orden lo manda la configuracion de la app, para que el panel y la ficha
-      no puedan discrepar. El ajuste del editor de temas queda solo de respaldo
-      por si la configuracion todavia no existe.
-    endcomment
-    comment
-      Se coge con un bucle y no con `.first`. La lista que devuelve
-      shop.metaobjects.<tipo>.values dice que tiene una entrada, pero `.first`
-      sobre ella devuelve vacio: no es un array normal. Con `.first` la
-      configuracion de la app se ignoraba entera y todo caia en los valores de
-      respaldo del tema.
-    endcomment
-    assign config = null
-    for sv_entrada in shop.metaobjects.sv_configuracion.values
-      assign config = sv_entrada
-      break
-    endfor
-    assign sv_alin = config.alineacion.value | default: block.settings.alineacion
-    assign sv_escala = config.escala.value | default: 'normal'
-    assign sv_tam = config.tamano_muestra.value | default: block.settings.tamano
-    assign orden_crudo = config.orden_colores.value
-    if orden_crudo == blank
-      assign orden_crudo = block.settings.orden_etiquetas
-    endif
-    assign orden = orden_crudo | downcase | split: ','
-    assign dibujadas = '|'
-    assign nombre_actual = ''
-  -%}
+  assign colores = shop.metaobjects.color.values
+  assign etiquetas_actuales = product.tags | join: '|' | downcase | prepend: '|' | append: '|'
+  # nota 1: docs/bloques.md
+  # nota 2: docs/bloques.md
+  assign config = null
+  for sv_entrada in shop.metaobjects.sv_configuracion.values
+   assign config = sv_entrada
+   break
+  endfor
+  assign sv_alin = config.alineacion.value | default: block.settings.alineacion
+  assign sv_escala = config.escala.value | default: 'normal'
+  assign sv_tam = config.tamano_muestra.value | default: block.settings.tamano
+  assign orden_crudo = config.orden_colores.value
+  if orden_crudo == blank
+   assign orden_crudo = block.settings.orden_etiquetas
+  endif
+  assign orden = orden_crudo | downcase | split: ','
+  assign dibujadas = '|'
+  assign nombre_actual = ''
+ -%}
 
-  {%- comment -%} docs/bloques.md: «selector-color.liquid · 2» {%- endcomment -%}
-  {%- assign etiqueta_propia = '' -%}
-  {%- for etiqueta_pedida in orden -%}
-    {%- assign etq = etiqueta_pedida | downcase | strip -%}
-    {%- if etq != blank and etiqueta_propia == blank -%}
-      {%- assign aguja_propia = etq | prepend: '|' | append: '|' -%}
-      {%- if etiquetas_actuales contains aguja_propia -%}
-        {%- assign etiqueta_propia = etq -%}
-      {%- endif -%}
+ {%- comment -%} docs/bloques.md: «selector-color.liquid · 2» {%- endcomment -%}
+ {%- assign etiqueta_propia = '' -%}
+ {%- for etiqueta_pedida in orden -%}
+  {%- assign etq = etiqueta_pedida | downcase | strip -%}
+  {%- if etq != blank and etiqueta_propia == blank -%}
+   {%- assign aguja_propia = etq | prepend: '|' | append: '|' -%}
+   {%- if etiquetas_actuales contains aguja_propia -%}
+    {%- assign etiqueta_propia = etq -%}
+   {%- endif -%}
+  {%- endif -%}
+ {%- endfor -%}
+ {%- if etiqueta_propia == blank -%}
+  {%- for entrada in colores -%}
+   {%- assign etq = entrada.etiqueta.value | downcase | strip -%}
+   {%- if etq != blank and etiqueta_propia == blank -%}
+    {%- assign aguja_propia = etq | prepend: '|' | append: '|' -%}
+    {%- if etiquetas_actuales contains aguja_propia -%}
+     {%- assign etiqueta_propia = etq -%}
     {%- endif -%}
+   {%- endif -%}
   {%- endfor -%}
-  {%- if etiqueta_propia == blank -%}
-    {%- for entrada in colores -%}
-      {%- assign etq = entrada.etiqueta.value | downcase | strip -%}
-      {%- if etq != blank and etiqueta_propia == blank -%}
-        {%- assign aguja_propia = etq | prepend: '|' | append: '|' -%}
-        {%- if etiquetas_actuales contains aguja_propia -%}
-          {%- assign etiqueta_propia = etq -%}
-        {%- endif -%}
-      {%- endif -%}
-    {%- endfor -%}
+ {%- endif -%}
+
+
+ {%- comment -%} docs/bloques.md: «selector-color.liquid · 3» {%- endcomment -%}
+ {%- assign propias_hermanos = '|' -%}
+ {%- for hermano in hermanos -%}
+  {%- assign etq_h = hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
+  {%- assign propia_h = '' -%}
+  {%- for etiqueta_pedida in orden -%}
+   {%- assign etq = etiqueta_pedida | downcase | strip -%}
+   {%- if etq != blank and propia_h == blank -%}
+    {%- assign aguja_h = etq | prepend: '|' | append: '|' -%}
+    {%- if etq_h contains aguja_h -%}{%- assign propia_h = etq -%}{%- endif -%}
+   {%- endif -%}
+  {%- endfor -%}
+  {%- if propia_h == blank -%}
+   {%- for entrada in colores -%}
+    {%- assign etq = entrada.etiqueta.value | downcase | strip -%}
+    {%- if etq != blank and propia_h == blank -%}
+     {%- assign aguja_h = etq | prepend: '|' | append: '|' -%}
+     {%- if etq_h contains aguja_h -%}{%- assign propia_h = etq -%}{%- endif -%}
+    {%- endif -%}
+   {%- endfor -%}
+  {%- endif -%}
+  {%- if propia_h != blank -%}
+   {%- assign propias_hermanos = propias_hermanos | append: hermano.id | append: ':' | append: propia_h | append: '|' -%}
+  {%- endif -%}
+ {%- endfor -%}
+
+ {%- for entrada in colores -%}
+  {%- assign etiqueta = entrada.etiqueta.value | downcase | strip -%}
+  {%- if etiqueta != blank -%}
+   {%- assign aguja = etiqueta | prepend: '|' | append: '|' -%}
+   {%- if etiqueta == etiqueta_propia or etiqueta_propia == blank and etiquetas_actuales contains aguja -%}
+    {%- assign nombre_actual = entrada.nombre.value -%}
+    {%- if lang == 'en' and entrada.nombre_en.value != blank -%}
+     {%- assign nombre_actual = entrada.nombre_en.value -%}
+    {%- endif -%}
+    {%- break -%}
+   {%- endif -%}
+  {%- endif -%}
+ {%- endfor -%}
+
+ {%- comment -%} Dos filas (metal arriba; cordón, gema... abajo) si el producto lleva un color con «Fila». {%- endcomment -%}
+ {%- assign sv_dos_filas = false -%}
+ {%- for entrada in colores -%}
+  {%- assign sv_f = entrada.fila.value | strip -%}
+  {%- if sv_f != blank -%}
+   {%- assign sv_e = entrada.etiqueta.value | downcase | strip -%}
+   {%- assign sv_ag = sv_e | prepend: '|' | append: '|' -%}
+   {%- if sv_e != blank and etiquetas_actuales contains sv_ag -%}{%- assign sv_dos_filas = true -%}{%- break -%}{%- endif -%}
+  {%- endif -%}
+ {%- endfor -%}
+
+ <div
+  class="sv-colors{% if sv_dos_filas %} sv-colors--dos-filas{% endif %} sv-colors--{{ block.settings.forma }} sv-colors--al-{{ sv_alin }} sv-colors--{{ sv_escala }}"
+  style="--sv-size: {{ sv_tam }}px; --sv-gap: {{ block.settings.espacio }}px; --sv-ring: {{ block.settings.color_borde }}; --sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
+  {{ block.shopify_attributes }}
+ >
+  {%- if sv_dos_filas -%}
+   {%- render 'sv-color-filas', producto: product, hermanos: hermanos, colores: colores, orden: orden, idioma: lang,
+    encabezado: encabezado, etiqueta_grupo: etiqueta_grupo,
+    mostrar_encabezado: block.settings.mostrar_encabezado, mostrar_nombre_actual: block.settings.mostrar_nombre_actual,
+    mostrar_etiqueta: block.settings.mostrar_etiquetas, marcar_agotado: block.settings.marcar_agotado -%}
+  {%- else -%}
+  {%- if block.settings.mostrar_encabezado and encabezado != blank -%}
+   <div class="sv-colors__heading">
+    <span class="sv-colors__label">{{ encabezado }}</span>
+    {%- if block.settings.mostrar_nombre_actual and nombre_actual != blank -%}
+     {%- comment -%} El guion es solo visual, como en saintvenik.cl: un lector de pantalla lee "Color Oro". {%- endcomment -%}
+     <span class="sv-colors__sep" aria-hidden="true">-</span>
+     <span class="sv-colors__current">{{ nombre_actual }}</span>
+    {%- endif -%}
+   </div>
   {%- endif -%}
 
+  <div class="sv-colors__list" role="group" aria-label="{{ etiqueta_grupo | escape }}">
 
-  {%- comment -%} docs/bloques.md: «selector-color.liquid · 3» {%- endcomment -%}
-  {%- assign propias_hermanos = '|' -%}
-  {%- for hermano in hermanos -%}
-    {%- assign etq_h = hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
-    {%- assign propia_h = '' -%}
-    {%- for etiqueta_pedida in orden -%}
-      {%- assign etq = etiqueta_pedida | downcase | strip -%}
-      {%- if etq != blank and propia_h == blank -%}
-        {%- assign aguja_h = etq | prepend: '|' | append: '|' -%}
-        {%- if etq_h contains aguja_h -%}{%- assign propia_h = etq -%}{%- endif -%}
-      {%- endif -%}
-    {%- endfor -%}
-    {%- if propia_h == blank -%}
-      {%- for entrada in colores -%}
-        {%- assign etq = entrada.etiqueta.value | downcase | strip -%}
-        {%- if etq != blank and propia_h == blank -%}
-          {%- assign aguja_h = etq | prepend: '|' | append: '|' -%}
-          {%- if etq_h contains aguja_h -%}{%- assign propia_h = etq -%}{%- endif -%}
-        {%- endif -%}
-      {%- endfor -%}
-    {%- endif -%}
-    {%- if propia_h != blank -%}
-      {%- assign propias_hermanos = propias_hermanos | append: hermano.id | append: ':' | append: propia_h | append: '|' -%}
-    {%- endif -%}
-  {%- endfor -%}
-
-  {%- for entrada in colores -%}
-    {%- assign etiqueta = entrada.etiqueta.value | downcase | strip -%}
+   {%- comment -%} 1) En el orden que fija el ajuste. {%- endcomment -%}
+   {%- for etiqueta_pedida in orden -%}
+    {%- assign etiqueta = etiqueta_pedida | strip -%}
     {%- if etiqueta != blank -%}
-      {%- assign aguja = etiqueta | prepend: '|' | append: '|' -%}
-      {%- if etiqueta == etiqueta_propia or etiqueta_propia == blank and etiquetas_actuales contains aguja -%}
-        {%- assign nombre_actual = entrada.nombre.value -%}
-        {%- if lang == 'en' and entrada.nombre_en.value != blank -%}
-          {%- assign nombre_actual = entrada.nombre_en.value -%}
-        {%- endif -%}
-        {%- break -%}
+     {%- for entrada in colores -%}
+      {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
+      {%- if etiqueta_entrada == etiqueta -%}
+       {%- assign dibujadas = dibujadas | append: etiqueta | append: '|' -%}
+       {%- render 'sv-color-entry',
+        entrada: entrada,
+        producto_actual: product,
+        hermanos: hermanos,
+        etiquetas_actuales: etiquetas_actuales,
+        etiqueta_propia: etiqueta_propia,
+        propias_hermanos: propias_hermanos,
+        idioma: lang,
+        mostrar_etiqueta: block.settings.mostrar_etiquetas,
+        marcar_agotado: block.settings.marcar_agotado
+       -%}
+       {%- break -%}
       {%- endif -%}
+     {%- endfor -%}
     {%- endif -%}
-  {%- endfor -%}
+   {%- endfor -%}
 
-  {%- comment -%} Dos filas (metal arriba; cordón, gema... abajo) si el producto lleva un color con «Fila». {%- endcomment -%}
-  {%- assign sv_dos_filas = false -%}
-  {%- for entrada in colores -%}
-    {%- assign sv_f = entrada.fila.value | strip -%}
-    {%- if sv_f != blank -%}
-      {%- assign sv_e = entrada.etiqueta.value | downcase | strip -%}
-      {%- assign sv_ag = sv_e | prepend: '|' | append: '|' -%}
-      {%- if sv_e != blank and etiquetas_actuales contains sv_ag -%}{%- assign sv_dos_filas = true -%}{%- break -%}{%- endif -%}
+   {%- for entrada in colores -%}
+    {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
+    {%- if etiqueta_entrada != blank -%}
+     {%- assign aguja = etiqueta_entrada | prepend: '|' | append: '|' -%}
+     {%- unless dibujadas contains aguja -%}
+      {%- assign dibujadas = dibujadas | append: etiqueta_entrada | append: '|' -%}
+      {%- render 'sv-color-entry',
+       entrada: entrada,
+       producto_actual: product,
+       hermanos: hermanos,
+       etiquetas_actuales: etiquetas_actuales,
+       etiqueta_propia: etiqueta_propia,
+       propias_hermanos: propias_hermanos,
+       idioma: lang,
+       mostrar_etiqueta: block.settings.mostrar_etiquetas,
+       marcar_agotado: block.settings.marcar_agotado
+      -%}
+     {%- endunless -%}
     {%- endif -%}
-  {%- endfor -%}
+   {%- endfor -%}
 
-  <div
-    class="sv-colors{% if sv_dos_filas %} sv-colors--dos-filas{% endif %} sv-colors--{{ block.settings.forma }} sv-colors--al-{{ sv_alin }} sv-colors--{{ sv_escala }}"
-    style="--sv-size: {{ sv_tam }}px; --sv-gap: {{ block.settings.espacio }}px; --sv-ring: {{ block.settings.color_borde }}; --sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
-    {{ block.shopify_attributes }}
-  >
-    {%- if sv_dos_filas -%}
-      {%- render 'sv-color-filas', producto: product, hermanos: hermanos, colores: colores, orden: orden, idioma: lang,
-        encabezado: encabezado, etiqueta_grupo: etiqueta_grupo,
-        mostrar_encabezado: block.settings.mostrar_encabezado, mostrar_nombre_actual: block.settings.mostrar_nombre_actual,
-        mostrar_etiqueta: block.settings.mostrar_etiquetas, marcar_agotado: block.settings.marcar_agotado -%}
-    {%- else -%}
-    {%- if block.settings.mostrar_encabezado and encabezado != blank -%}
-      <div class="sv-colors__heading">
-        <span class="sv-colors__label">{{ encabezado }}</span>
-        {%- if block.settings.mostrar_nombre_actual and nombre_actual != blank -%}
-          {%- comment -%} El guion es solo visual, como en saintvenik.cl: un lector de pantalla lee "Color Oro". {%- endcomment -%}
-          <span class="sv-colors__sep" aria-hidden="true">-</span>
-          <span class="sv-colors__current">{{ nombre_actual }}</span>
-        {%- endif -%}
-      </div>
+   {%- assign actual_tiene_color = false -%}
+   {%- for entrada in colores -%}
+    {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
+    {%- if etiqueta_entrada != blank -%}
+     {%- assign aguja = etiqueta_entrada | prepend: '|' | append: '|' -%}
+     {%- if etiquetas_actuales contains aguja -%}
+      {%- assign actual_tiene_color = true -%}
+      {%- break -%}
+     {%- endif -%}
     {%- endif -%}
+   {%- endfor -%}
+   {%- unless actual_tiene_color -%}
+    {%- render 'sv-color-swatch',
+     producto: product,
+     nombre: product.title,
+     imagen: product.featured_image,
+     actual: true,
+     mostrar_etiqueta: block.settings.mostrar_etiquetas,
+     marcar_agotado: block.settings.marcar_agotado
+    -%}
+   {%- endunless -%}
 
-    <div class="sv-colors__list" role="group" aria-label="{{ etiqueta_grupo | escape }}">
+   {%- for hermano in hermanos -%}
+    {%- assign etiquetas_hermano = hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
+    {%- assign hermano_tiene_color = false -%}
+    {%- for entrada in colores -%}
+     {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
+     {%- if etiqueta_entrada != blank -%}
+      {%- assign aguja = etiqueta_entrada | prepend: '|' | append: '|' -%}
+      {%- if etiquetas_hermano contains aguja -%}
+       {%- assign hermano_tiene_color = true -%}
+       {%- break -%}
+      {%- endif -%}
+     {%- endif -%}
+    {%- endfor -%}
+    {%- unless hermano_tiene_color -%}
+     {%- render 'sv-color-swatch',
+      producto: hermano,
+      nombre: hermano.title,
+      imagen: hermano.featured_image,
+      actual: false,
+      mostrar_etiqueta: block.settings.mostrar_etiquetas,
+      marcar_agotado: block.settings.marcar_agotado
+     -%}
+    {%- endunless -%}
+   {%- endfor -%}
 
-      {%- comment -%} 1) En el orden que fija el ajuste. {%- endcomment -%}
-      {%- for etiqueta_pedida in orden -%}
-        {%- assign etiqueta = etiqueta_pedida | strip -%}
-        {%- if etiqueta != blank -%}
-          {%- for entrada in colores -%}
-            {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
-            {%- if etiqueta_entrada == etiqueta -%}
-              {%- assign dibujadas = dibujadas | append: etiqueta | append: '|' -%}
-              {%- render 'sv-color-entry',
-                entrada: entrada,
-                producto_actual: product,
-                hermanos: hermanos,
-                etiquetas_actuales: etiquetas_actuales,
-                etiqueta_propia: etiqueta_propia,
-                propias_hermanos: propias_hermanos,
-                idioma: lang,
-                mostrar_etiqueta: block.settings.mostrar_etiquetas,
-                marcar_agotado: block.settings.marcar_agotado
-              -%}
-              {%- break -%}
-            {%- endif -%}
-          {%- endfor -%}
-        {%- endif -%}
-      {%- endfor -%}
-
-      {%- for entrada in colores -%}
-        {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
-        {%- if etiqueta_entrada != blank -%}
-          {%- assign aguja = etiqueta_entrada | prepend: '|' | append: '|' -%}
-          {%- unless dibujadas contains aguja -%}
-            {%- assign dibujadas = dibujadas | append: etiqueta_entrada | append: '|' -%}
-            {%- render 'sv-color-entry',
-              entrada: entrada,
-              producto_actual: product,
-              hermanos: hermanos,
-              etiquetas_actuales: etiquetas_actuales,
-              etiqueta_propia: etiqueta_propia,
-              propias_hermanos: propias_hermanos,
-              idioma: lang,
-              mostrar_etiqueta: block.settings.mostrar_etiquetas,
-              marcar_agotado: block.settings.marcar_agotado
-            -%}
-          {%- endunless -%}
-        {%- endif -%}
-      {%- endfor -%}
-
-      {%- assign actual_tiene_color = false -%}
-      {%- for entrada in colores -%}
-        {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
-        {%- if etiqueta_entrada != blank -%}
-          {%- assign aguja = etiqueta_entrada | prepend: '|' | append: '|' -%}
-          {%- if etiquetas_actuales contains aguja -%}
-            {%- assign actual_tiene_color = true -%}
-            {%- break -%}
-          {%- endif -%}
-        {%- endif -%}
-      {%- endfor -%}
-      {%- unless actual_tiene_color -%}
-        {%- render 'sv-color-swatch',
-          producto: product,
-          nombre: product.title,
-          imagen: product.featured_image,
-          actual: true,
-          mostrar_etiqueta: block.settings.mostrar_etiquetas,
-          marcar_agotado: block.settings.marcar_agotado
-        -%}
-      {%- endunless -%}
-
-      {%- for hermano in hermanos -%}
-        {%- assign etiquetas_hermano = hermano.tags | join: '|' | downcase | prepend: '|' | append: '|' -%}
-        {%- assign hermano_tiene_color = false -%}
-        {%- for entrada in colores -%}
-          {%- assign etiqueta_entrada = entrada.etiqueta.value | downcase | strip -%}
-          {%- if etiqueta_entrada != blank -%}
-            {%- assign aguja = etiqueta_entrada | prepend: '|' | append: '|' -%}
-            {%- if etiquetas_hermano contains aguja -%}
-              {%- assign hermano_tiene_color = true -%}
-              {%- break -%}
-            {%- endif -%}
-          {%- endif -%}
-        {%- endfor -%}
-        {%- unless hermano_tiene_color -%}
-          {%- render 'sv-color-swatch',
-            producto: hermano,
-            nombre: hermano.title,
-            imagen: hermano.featured_image,
-            actual: false,
-            mostrar_etiqueta: block.settings.mostrar_etiquetas,
-            marcar_agotado: block.settings.marcar_agotado
-          -%}
-        {%- endunless -%}
-      {%- endfor -%}
-
-    </div>
-    {%- endif -%}
   </div>
+  {%- endif -%}
+ </div>
 {%- endif -%}
 
 {% schema %}
 {
-  "name": "Selector de color",
-  "target": "section",
-  "stylesheet": "sv-color-selector.css",
-  "enabled_on": {
-    "templates": ["product"]
+ "name": "Selector de color",
+ "target": "section",
+ "stylesheet": "sv-color-selector.css",
+ "enabled_on": {
+  "templates": ["product"]
+ },
+ "settings": [
+  {
+   "type": "paragraph",
+   "content": "Lee el metacampo custom.hermano_de_color y el metaobjeto color. Si el producto no tiene hermano de color, el bloque no se muestra."
   },
-  "settings": [
-    {
-      "type": "paragraph",
-      "content": "Lee el metacampo custom.hermano_de_color y el metaobjeto color. Si el producto no tiene hermano de color, el bloque no se muestra."
-    },
-    {
-      "type": "text",
-      "id": "orden_etiquetas",
-      "label": "Orden de los colores",
-      "default": "acero-inox, oro",
-      "info": "Etiquetas de producto separadas por comas. Manda sobre el orden del metaobjeto, así el orden es el mismo en todas las fichas. Un color que no esté en la lista se dibuja detrás."
-    },
-    {
-      "type": "header",
-      "content": "Encabezado"
-    },
-    {
-      "type": "checkbox",
-      "id": "mostrar_encabezado",
-      "label": "Mostrar encabezado",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "encabezado_es",
-      "label": "Encabezado en español",
-      "default": "Color"
-    },
-    {
-      "type": "text",
-      "id": "encabezado_en",
-      "label": "Encabezado en inglés",
-      "default": "Color"
-    },
-    {
-      "type": "checkbox",
-      "id": "mostrar_nombre_actual",
-      "label": "Mostrar el nombre del color actual",
-      "default": true
-    },
-    {
-      "type": "header",
-      "content": "Muestras"
-    },
-    {
-      "type": "select",
-      "id": "forma",
-      "label": "Forma",
-      "options": [
-        { "value": "circulo", "label": "Círculo" },
-        { "value": "cuadrado", "label": "Cuadrado" }
-      ],
-      "default": "circulo"
-    },
-    {
-      "type": "range",
-      "id": "tamano",
-      "label": "Tamaño",
-      "min": 20,
-      "max": 72,
-      "step": 2,
-      "unit": "px",
-      "default": 34
-    },
-    {
-      "type": "range",
-      "id": "espacio",
-      "label": "Separación",
-      "info": "8 px es la separación de saintvenik.cl.",
-      "min": 4,
-      "max": 32,
-      "step": 2,
-      "unit": "px",
-      "default": 8
-    },
-    {
-      "type": "color",
-      "id": "color_borde",
-      "label": "Color del indicador activo",
-      "default": "#111111"
-    },
-    {
-      "type": "checkbox",
-      "id": "mostrar_etiquetas",
-      "label": "Mostrar el nombre bajo cada muestra",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "marcar_agotado",
-      "label": "Atenuar y tachar los colores agotados",
-      "default": true
-    },
-    {
-      "type": "header",
-      "content": "Diseño"
-    },
-    {
-      "type": "select",
-      "id": "alineacion",
-      "label": "Alineación",
-      "options": [
-        { "value": "izquierda", "label": "Izquierda" },
-        { "value": "centro", "label": "Centro" },
-        { "value": "derecha", "label": "Derecha" }
-      ],
-      "default": "izquierda"
-    },
-    {
-      "type": "range",
-      "id": "margen_superior",
-      "label": "Margen superior",
-      "min": 0,
-      "max": 48,
-      "step": 2,
-      "unit": "px",
-      "default": 8
-    },
-    {
-      "type": "range",
-      "id": "margen_inferior",
-      "label": "Margen inferior",
-      "min": 0,
-      "max": 48,
-      "step": 2,
-      "unit": "px",
-      "default": 10
-    }
-  ]
+  {
+   "type": "text",
+   "id": "orden_etiquetas",
+   "label": "Orden de los colores",
+   "default": "acero-inox, oro",
+   "info": "Etiquetas de producto separadas por comas. Manda sobre el orden del metaobjeto, así el orden es el mismo en todas las fichas. Un color que no esté en la lista se dibuja detrás."
+  },
+  {
+   "type": "header",
+   "content": "Encabezado"
+  },
+  {
+   "type": "checkbox",
+   "id": "mostrar_encabezado",
+   "label": "Mostrar encabezado",
+   "default": true
+  },
+  {
+   "type": "text",
+   "id": "encabezado_es",
+   "label": "Encabezado en español",
+   "default": "Color"
+  },
+  {
+   "type": "text",
+   "id": "encabezado_en",
+   "label": "Encabezado en inglés",
+   "default": "Color"
+  },
+  {
+   "type": "checkbox",
+   "id": "mostrar_nombre_actual",
+   "label": "Mostrar el nombre del color actual",
+   "default": true
+  },
+  {
+   "type": "header",
+   "content": "Muestras"
+  },
+  {
+   "type": "select",
+   "id": "forma",
+   "label": "Forma",
+   "options": [
+    { "value": "circulo", "label": "Círculo" },
+    { "value": "cuadrado", "label": "Cuadrado" }
+   ],
+   "default": "circulo"
+  },
+  {
+   "type": "range",
+   "id": "tamano",
+   "label": "Tamaño",
+   "min": 20,
+   "max": 72,
+   "step": 2,
+   "unit": "px",
+   "default": 34
+  },
+  {
+   "type": "range",
+   "id": "espacio",
+   "label": "Separación",
+   "info": "8 px es la separación de saintvenik.cl.",
+   "min": 4,
+   "max": 32,
+   "step": 2,
+   "unit": "px",
+   "default": 8
+  },
+  {
+   "type": "color",
+   "id": "color_borde",
+   "label": "Color del indicador activo",
+   "default": "#111111"
+  },
+  {
+   "type": "checkbox",
+   "id": "mostrar_etiquetas",
+   "label": "Mostrar el nombre bajo cada muestra",
+   "default": false
+  },
+  {
+   "type": "checkbox",
+   "id": "marcar_agotado",
+   "label": "Atenuar y tachar los colores agotados",
+   "default": true
+  },
+  {
+   "type": "header",
+   "content": "Diseño"
+  },
+  {
+   "type": "select",
+   "id": "alineacion",
+   "label": "Alineación",
+   "options": [
+    { "value": "izquierda", "label": "Izquierda" },
+    { "value": "centro", "label": "Centro" },
+    { "value": "derecha", "label": "Derecha" }
+   ],
+   "default": "izquierda"
+  },
+  {
+   "type": "range",
+   "id": "margen_superior",
+   "label": "Margen superior",
+   "min": 0,
+   "max": 48,
+   "step": 2,
+   "unit": "px",
+   "default": 8
+  },
+  {
+   "type": "range",
+   "id": "margen_inferior",
+   "label": "Margen inferior",
+   "min": 0,
+   "max": 48,
+   "step": 2,
+   "unit": "px",
+   "default": 10
+  }
+ ]
 }
 {% endschema %}

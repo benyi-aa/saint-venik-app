@@ -1,254 +1,250 @@
-{%- comment -%} Saint Venik · Filtros rapidos: las pastillas y el menu «Filtrar». Explicacion completa en el README (Filtros). {%- endcomment -%}
+{%- comment -%} nota 1: docs/bloques.md {%- endcomment -%}
 
 {%- liquid
-  assign f_cfg = null
-  for sv_entrada in shop.metaobjects.sv_configuracion.values
-    assign f_cfg = sv_entrada
-    break
-  endfor
+ assign f_cfg = null
+ for sv_entrada in shop.metaobjects.sv_configuracion.values
+  assign f_cfg = sv_entrada
+  break
+ endfor
 
-  assign f_modo = f_cfg.filtros_activo.value | default: 'no' | append: ''
-  render 'sv-cajon', cfg: f_cfg
-  assign f_on = false
-  if template.name == 'collection' and collection.handle != blank
-    if f_modo == 'si' or f_modo == 'prueba'
-      assign f_on = true
-    endif
+ assign f_modo = f_cfg.filtros_activo.value | default: 'no' | append: ''
+ render 'sv-cajon', cfg: f_cfg
+ assign f_on = false
+ if template.name == 'collection' and collection.handle != blank
+  if f_modo == 'si' or f_modo == 'prueba'
+   assign f_on = true
   endif
+ endif
 -%}
 
-{%- comment -%} Arma tu 3x2: los mismos botones que salen en Best Sellers (todas sus filas),
-  para sv-filtros-3x2.js (docs/tema.md). Se manejan en el panel → Filtros marcando Best Sellers. {%- endcomment -%}
+{%- comment -%} nota 2: docs/bloques.md {%- endcomment -%}
 {%- if template.suffix == 'arma-tu-3x2' and f_modo != 'no' -%}
 <script type="application/json" id="sv-filtros-3x2" data-modo="{{ f_modo }}">[{%- for b in shop.metaobjects.sv_boton_filtro.values -%}{%- assign bf = b.fila.value | default: 1 -%}{%- liquid
-  assign en_bs = true
-  if b.donde.value == 'elegidas'
-    assign en_bs = false
-    for c in b.colecciones.value
-      if c.handle == 'best-sellers'
-        assign en_bs = true
-        break
-      endif
-    endfor
-  endif
+ assign en_bs = true
+ if b.donde.value == 'elegidas'
+  assign en_bs = false
+  for c in b.colecciones.value
+   if c.handle == 'best-sellers'
+    assign en_bs = true
+    break
+   endif
+  endfor
+ endif
 -%}{%- if en_bs and b.activo.value != false -%}{%- liquid
-  assign ic = b.icono.value | strip
-  if ic == blank and b.filtro.value == 'categoria'
-    assign ic = b.valor.value | downcase | strip | remove_last: 's'
-    if ic == 'lente'
-      assign ic = 'lentes'
+ assign ic = b.icono.value | strip
+ if ic == blank and b.filtro.value == 'categoria'
+  assign ic = b.valor.value | downcase | strip | remove_last: 's'
+  if ic == 'lente'
+   assign ic = 'lentes'
+  endif
+ endif
+ assign mu = ''
+ if ic contains 'color:'
+  assign etq = ic | remove_first: 'color:' | downcase | strip
+  for e in shop.metaobjects.color.values
+   assign ee = e.etiqueta.value | downcase | strip
+   if ee == etq
+    if e.imagen_muestra.value != blank
+     assign mu = e.imagen_muestra.value | image_url: width: 48 | prepend: 'url(' | append: ')'
+    else
+     assign mu = e.muestra.value | append: ''
     endif
-  endif
-  assign mu = ''
-  if ic contains 'color:'
-    assign etq = ic | remove_first: 'color:' | downcase | strip
-    for e in shop.metaobjects.color.values
-      assign ee = e.etiqueta.value | downcase | strip
-      if ee == etq
-        if e.imagen_muestra.value != blank
-          assign mu = e.imagen_muestra.value | image_url: width: 48 | prepend: 'url(' | append: ')'
-        else
-          assign mu = e.muestra.value | append: ''
-        endif
-        break
-      endif
-    endfor
-    assign ic = ''
-  endif
+    break
+   endif
+  endfor
+  assign ic = ''
+ endif
 -%}{%- capture svg -%}{%- if ic != blank -%}{%- render 'sv-icono', nombre: ic -%}{%- endif -%}{%- endcapture -%}{"o":{{ b.orden.value | default: 0 }},"r":{{ bf }},"n":{{ b.nombre.value | json }},"f":{{ b.filtro.value | json }},"v":{{ b.valor.value | json }},"m":{{ mu | json }},"i":{{ svg | strip | json }}},{%- endif -%}{%- endfor -%}null]</script>
 <script src="{{ 'sv-filtros-3x2.js' | asset_url }}" defer></script>
 {%- endif -%}
 
 {%- if f_on -%}
-  {%- liquid
-    assign lang = localization.language.iso_code | slice: 0, 2 | downcase
-    assign f_cols_max = f_cfg.filtros_columnas.value | default: 4
-    assign f_ordenar = true
-    if f_cfg.filtros_ordenar.value == 'no'
-      assign f_ordenar = false
-    endif
+ {%- liquid
+  assign lang = localization.language.iso_code | slice: 0, 2 | downcase
+  assign f_cols_max = f_cfg.filtros_columnas.value | default: 4
+  assign f_ordenar = true
+  if f_cfg.filtros_ordenar.value == 'no'
+   assign f_ordenar = false
+  endif
 
-    comment
-      Los tres filtros de la tienda que entienden las pastillas. Si alguno no
-      esta encendido en Search & Discovery, sus pastillas no salen.
-    endcomment
-    assign fil_color = nil
-    assign fil_categoria = nil
-    assign fil_tipo = nil
-    for f in collection.filters
-      if f.param_name == 'filter.p.m.custom.sv_color'
-        assign fil_color = f
-      elsif f.param_name == 'filter.p.m.custom.sv_categoria'
-        assign fil_categoria = f
-      elsif f.param_name == 'filter.p.m.custom.sv_tipo'
-        assign fil_tipo = f
-      endif
-    endfor
+  # nota 3: docs/bloques.md
+  assign fil_color = nil
+  assign fil_categoria = nil
+  assign fil_tipo = nil
+  for f in collection.filters
+   if f.param_name == 'filter.p.m.custom.sv_color'
+    assign fil_color = f
+   elsif f.param_name == 'filter.p.m.custom.sv_categoria'
+    assign fil_categoria = f
+   elsif f.param_name == 'filter.p.m.custom.sv_tipo'
+    assign fil_tipo = f
+   endif
+  endfor
 
-    assign botones = shop.metaobjects.sv_boton_filtro.values
-    assign colores = shop.metaobjects.color.values
-    assign tope = 0
-    for b in botones
-      assign pos = b.orden.value | default: 0
-      if pos > tope
-        assign tope = pos
-      endif
-    endfor
-    assign filas = ''
-    assign hay = false
-  -%}
+  assign botones = shop.metaobjects.sv_boton_filtro.values
+  assign colores = shop.metaobjects.color.values
+  assign tope = 0
+  for b in botones
+   assign pos = b.orden.value | default: 0
+   if pos > tope
+    assign tope = pos
+   endif
+  endfor
+  assign filas = ''
+  assign hay = false
+ -%}
 
-  {%- for fila in (1..3) -%}
-    {%- assign en_fila = 0 -%}
-    {%- capture html_fila -%}
-      {%- comment -%} Por posicion: el orden de la lista de Shopify no esta garantizado. {%- endcomment -%}
-      {%- for i in (1..tope) -%}
-        {%- for b in botones -%}
-          {%- assign b_fila = b.fila.value | default: 1 -%}
-          {%- if b.orden.value == i and b.activo.value != false and b_fila == fila -%}
-            {%- liquid
-              assign sale = true
-              if b.donde.value == 'elegidas'
-                assign sale = false
-                for c in b.colecciones.value
-                  if c.id == collection.id
-                    assign sale = true
-                    break
-                  endif
-                endfor
-              endif
-
-              assign fil = nil
-              assign param = ''
-              if b.filtro.value == 'categoria'
-                assign fil = fil_categoria
-                assign param = 'filter.p.m.custom.sv_categoria'
-              elsif b.filtro.value == 'tipo'
-                assign fil = fil_tipo
-                assign param = 'filter.p.m.custom.sv_tipo'
-              else
-                assign fil = fil_color
-                assign param = 'filter.p.m.custom.sv_color'
-              endif
-
-              assign valor_b = b.valor.value | downcase | strip
-              assign v_hallado = nil
-              if sale and fil
-                for v in fil.values
-                  assign v_val = v.value | downcase | strip
-                  if v_val == valor_b
-                    assign v_hallado = v
-                    break
-                  endif
-                endfor
-              endif
-            -%}
-            {%- if v_hallado -%}
-              {%- liquid
-                assign en_fila = en_fila | plus: 1
-                assign texto = b.nombre.value
-                if lang == 'en' and b.nombre_en.value != blank
-                  assign texto = b.nombre_en.value
-                endif
-                assign url = v_hallado.url_to_add
-                if v_hallado.active
-                  assign url = v_hallado.url_to_remove
-                endif
-                assign ic = b.icono.value | strip
-                if ic == blank and b.filtro.value == 'categoria'
-                  assign ic = b.valor.value | downcase | strip | remove_last: 's'
-                  if ic == 'lente'
-                    assign ic = 'lentes'
-                  endif
-                endif
-                assign ic_pre = ic | slice: 0, 6
-                assign vacio = false
-                if v_hallado.count == 0 and v_hallado.active == false
-                  assign vacio = true
-                endif
-              -%}
-              <a class="sv-filtro{% if v_hallado.active %} is-activo{% endif %}{% if vacio %} is-vacio{% endif %}"
-                 href="{{ url }}"
-                 data-param="{{ param }}"
-                 data-valor="{{ v_hallado.value | escape }}"
-                 aria-pressed="{{ v_hallado.active }}"
-                 {% if vacio %}aria-disabled="true" {% endif %}rel="nofollow">
-                {%- if ic_pre == 'color:' -%}
-                  {%- assign etq = ic | remove_first: 'color:' | downcase | strip -%}
-                  {%- for entrada in colores -%}
-                    {%- assign etq_e = entrada.etiqueta.value | downcase | strip -%}
-                    {%- if etq_e == etq -%}
-                      {%- if entrada.imagen_muestra.value != blank -%}
-                        <span class="sv-filtro__muestra" style="background-image: url({{ entrada.imagen_muestra.value | image_url: width: 48 }})"></span>
-                      {%- elsif entrada.muestra.value != blank -%}
-                        <span class="sv-filtro__muestra" style="background-color: {{ entrada.muestra.value }}"></span>
-                      {%- endif -%}
-                      {%- break -%}
-                    {%- endif -%}
-                  {%- endfor -%}
-                {%- elsif ic != blank -%}
-                  {%- render 'sv-icono', nombre: ic -%}
-                {%- endif -%}
-                <span>{{ texto | escape }}</span>
-              </a>
-            {%- endif -%}
-          {%- endif -%}
-        {%- endfor -%}
-      {%- endfor -%}
-    {%- endcapture -%}
-    {%- if en_fila > 0 -%}
+ {%- for fila in (1..3) -%}
+  {%- assign en_fila = 0 -%}
+  {%- capture html_fila -%}
+   {%- comment -%} Por posicion: el orden de la lista de Shopify no esta garantizado. {%- endcomment -%}
+   {%- for i in (1..tope) -%}
+    {%- for b in botones -%}
+     {%- assign b_fila = b.fila.value | default: 1 -%}
+     {%- if b.orden.value == i and b.activo.value != false and b_fila == fila -%}
       {%- liquid
-        assign hay = true
-        assign cols = en_fila
-        if cols > f_cols_max
-          assign cols = f_cols_max
-        endif
+       assign sale = true
+       if b.donde.value == 'elegidas'
+        assign sale = false
+        for c in b.colecciones.value
+         if c.id == collection.id
+          assign sale = true
+          break
+         endif
+        endfor
+       endif
+
+       assign fil = nil
+       assign param = ''
+       if b.filtro.value == 'categoria'
+        assign fil = fil_categoria
+        assign param = 'filter.p.m.custom.sv_categoria'
+       elsif b.filtro.value == 'tipo'
+        assign fil = fil_tipo
+        assign param = 'filter.p.m.custom.sv_tipo'
+       else
+        assign fil = fil_color
+        assign param = 'filter.p.m.custom.sv_color'
+       endif
+
+       assign valor_b = b.valor.value | downcase | strip
+       assign v_hallado = nil
+       if sale and fil
+        for v in fil.values
+         assign v_val = v.value | downcase | strip
+         if v_val == valor_b
+          assign v_hallado = v
+          break
+         endif
+        endfor
+       endif
       -%}
-      {%- capture filas -%}{{ filas }}<div class="sv-filtros__fila{% if cols >= 4 %} sv-filtros__fila--apilada{% endif %}" style="--cols: {{ cols }}; --n: {{ en_fila }}">{{ html_fila }}</div>{%- endcapture -%}
-    {%- endif -%}
-  {%- endfor -%}
+      {%- if v_hallado -%}
+       {%- liquid
+        assign en_fila = en_fila | plus: 1
+        assign texto = b.nombre.value
+        if lang == 'en' and b.nombre_en.value != blank
+         assign texto = b.nombre_en.value
+        endif
+        assign url = v_hallado.url_to_add
+        if v_hallado.active
+         assign url = v_hallado.url_to_remove
+        endif
+        assign ic = b.icono.value | strip
+        if ic == blank and b.filtro.value == 'categoria'
+         assign ic = b.valor.value | downcase | strip | remove_last: 's'
+         if ic == 'lente'
+          assign ic = 'lentes'
+         endif
+        endif
+        assign ic_pre = ic | slice: 0, 6
+        assign vacio = false
+        if v_hallado.count == 0 and v_hallado.active == false
+         assign vacio = true
+        endif
+       -%}
+       <a class="sv-filtro{% if v_hallado.active %} is-activo{% endif %}{% if vacio %} is-vacio{% endif %}"
+        href="{{ url }}"
+        data-param="{{ param }}"
+        data-valor="{{ v_hallado.value | escape }}"
+        aria-pressed="{{ v_hallado.active }}"
+        {% if vacio %}aria-disabled="true" {% endif %}rel="nofollow">
+        {%- if ic_pre == 'color:' -%}
+         {%- assign etq = ic | remove_first: 'color:' | downcase | strip -%}
+         {%- for entrada in colores -%}
+          {%- assign etq_e = entrada.etiqueta.value | downcase | strip -%}
+          {%- if etq_e == etq -%}
+           {%- if entrada.imagen_muestra.value != blank -%}
+            <span class="sv-filtro__muestra" style="background-image: url({{ entrada.imagen_muestra.value | image_url: width: 48 }})"></span>
+           {%- elsif entrada.muestra.value != blank -%}
+            <span class="sv-filtro__muestra" style="background-color: {{ entrada.muestra.value }}"></span>
+           {%- endif -%}
+           {%- break -%}
+          {%- endif -%}
+         {%- endfor -%}
+        {%- elsif ic != blank -%}
+         {%- render 'sv-icono', nombre: ic -%}
+        {%- endif -%}
+        <span>{{ texto | escape }}</span>
+       </a>
+      {%- endif -%}
+     {%- endif -%}
+    {%- endfor -%}
+   {%- endfor -%}
+  {%- endcapture -%}
+  {%- if en_fila > 0 -%}
+   {%- liquid
+    assign hay = true
+    assign cols = en_fila
+    if cols > f_cols_max
+     assign cols = f_cols_max
+    endif
+   -%}
+   {%- capture filas -%}{{ filas }}<div class="sv-filtros__fila{% if cols >= 4 %} sv-filtros__fila--apilada{% endif %}" style="--cols: {{ cols }}; --n: {{ en_fila }}">{{ html_fila }}</div>{%- endcapture -%}
+  {%- endif -%}
+ {%- endfor -%}
 
-  {{ 'sv-filtros.css' | asset_url | stylesheet_tag }}
+ {{ 'sv-filtros.css' | asset_url | stylesheet_tag }}
 
-  <nav id="sv-filtros" class="sv-filtros" data-modo="{{ f_modo }}"
-       data-en="{% if lang == 'en' %}1{% endif %}" data-ordenar="{% if f_ordenar %}1{% endif %}"
-       data-precio="{{ f_cfg.filtros_precio.value | default: 'prueba' }}"
-       aria-label="{% if lang == 'en' %}Quick filters{% else %}Filtros rápidos{% endif %}"
-       {% unless hay %}data-vacio{% endunless %} hidden>
-    <div class="sv-filtros__dentro page-width">{{ filas }}</div>
-  </nav>
-  <script>
-    (function () {
-      var nav = document.getElementById('sv-filtros');
-      if (!nav) return;
-      if (nav.dataset.modo === 'prueba') {
-        var vista = false;
-        try {
-          if (/[?&]sv-vista(=1)?(&|$)/.test(location.search)) sessionStorage.setItem('sv-vista', '1');
-          vista = sessionStorage.getItem('sv-vista') === '1';
-        } catch (e) { /* privado */ }
-        if (!vista) { nav.remove(); return; }
-      }
-      document.documentElement.classList.add('sv-filtros-on');
-      var ancla = document.querySelector('.collection-content') || document.getElementById('CollectionAjaxContent');
-      if (ancla && !nav.hasAttribute('data-vacio')) {
-        ancla.parentNode.insertBefore(nav, ancla);
-        nav.hidden = false;
-      }
-    }());
-  </script>
-  <script src="{{ 'sv-filtros.js' | asset_url }}" defer></script>
+ <nav id="sv-filtros" class="sv-filtros" data-modo="{{ f_modo }}"
+   data-en="{% if lang == 'en' %}1{% endif %}" data-ordenar="{% if f_ordenar %}1{% endif %}"
+   data-precio="{{ f_cfg.filtros_precio.value | default: 'prueba' }}"
+   aria-label="{% if lang == 'en' %}Quick filters{% else %}Filtros rápidos{% endif %}"
+   {% unless hay %}data-vacio{% endunless %} hidden>
+  <div class="sv-filtros__dentro page-width">{{ filas }}</div>
+ </nav>
+ <script>
+  (function () {
+   var nav = document.getElementById('sv-filtros');
+   if (!nav) return;
+   if (nav.dataset.modo === 'prueba') {
+    var vista = false;
+    try {
+     if (/[?&]sv-vista(=1)?(&|$)/.test(location.search)) sessionStorage.setItem('sv-vista', '1');
+     vista = sessionStorage.getItem('sv-vista') === '1';
+    } catch (e) { /* privado */ }
+    if (!vista) { nav.remove(); return; }
+   }
+   document.documentElement.classList.add('sv-filtros-on');
+   var ancla = document.querySelector('.collection-content') || document.getElementById('CollectionAjaxContent');
+   if (ancla && !nav.hasAttribute('data-vacio')) {
+    ancla.parentNode.insertBefore(nav, ancla);
+    nav.hidden = false;
+   }
+  }());
+ </script>
+ <script src="{{ 'sv-filtros.js' | asset_url }}" defer></script>
 {%- endif -%}
 
 {% schema %}
 {
-  "name": "Filtros rápidos",
-  "target": "body",
-  "settings": [
-    {
-      "type": "paragraph",
-      "content": "Los botones, en qué colecciones salen y cómo se ven se manejan en la app Panel Saint Venik → Filtros. Aquí solo se enciende el embed."
-    }
-  ]
+ "name": "Filtros rápidos",
+ "target": "body",
+ "settings": [
+  {
+   "type": "paragraph",
+   "content": "Los botones, en qué colecciones salen y cómo se ven se manejan en la app Panel Saint Venik → Filtros. Aquí solo se enciende el embed."
+  }
+ ]
 }
 {% endschema %}

@@ -349,3 +349,72 @@ marcar_agotado   (boolean)
 **insignias.liquid:** El tipo de campo `color` de Shopify es hexadecimal de seis digitos y no admite alfa, asi que la opacidad va en su propio campo de 0 a 100 y el rgba se compone aqui. Ojo con el 100.0: `80 | divided_by: 100` con dos enteros da 0, y dejaria todo invisible sin dar ningun error.
 
 **insignias.liquid:** Un campo de tipo `color` no devuelve una cadena, devuelve un objeto Color, y `json` sobre un objeto no da "#111111". El append lo pasa por to_s, que si da el hexadecimal.
+
+## Notas trasladadas del código (11-nov)
+
+Shopify limita a 100 KB todo el Liquid de la extensión. Para que cupiera el selector de dos filas,
+los comentarios largos de los bloques se movieron aquí, tal cual; en el código queda «nota N».
+
+### beneficios.liquid
+
+- **Nota 1.** Se empareja por el id del producto y no por el handle: en ingles el
+handle esta traducido ("anillo-signet" es "signet-ring"), asi que por
+handle la tienda en ingles no encontraba nada. El handle se mira
+igualmente de respaldo, por si la cadena la escribio una version
+anterior de la app.
+
+- **Nota 2.** Se coge con un bucle y no con `.first`: la lista que devuelve
+shop.metaobjects.<tipo>.values dice que tiene una entrada, pero `.first`
+sobre ella devuelve vacio. Ya nos dejo sin leer la configuracion entera.
+
+- **Nota 3.** Cuantos saldrian, y hasta que posicion hay que contar. Se mira antes de
+dibujar nada para no dejar un contenedor vacio ocupando margen.
+
+### filtros.liquid
+
+- **Nota 1.** Saint Venik · Filtros rapidos: las pastillas y el menu «Filtrar». Explicacion completa en el README (Filtros).
+
+- **Nota 2.** Arma tu 3x2: los mismos botones que salen en Best Sellers (todas sus filas),
+para sv-filtros-3x2.js (docs/tema.md). Se manejan en el panel → Filtros marcando Best Sellers.
+
+- **Nota 3.** Los tres filtros de la tienda que entienden las pastillas. Si alguno no
+esta encendido en Search & Discovery, sus pastillas no salen.
+
+### guia-de-tallas.liquid
+
+- **Nota 1.** Cuantos bloques saldrian en este idioma. Se cuenta antes de dibujar nada
+para no acabar con un boton que abre una ventana vacia.
+
+- **Nota 2.** Se coge con un bucle y no con `.first`. La lista que devuelve
+shop.metaobjects.<tipo>.values dice que tiene una entrada, pero `.first`
+sobre ella devuelve vacio: no es un array normal. Con `.first` la
+configuracion de la app se ignoraba entera y todo caia en los valores de
+respaldo del tema.
+
+### selector-color.liquid
+
+- **Nota 1.** El orden lo manda la configuracion de la app, para que el panel y la ficha
+no puedan discrepar. El ajuste del editor de temas queda solo de respaldo
+por si la configuracion todavia no existe.
+
+- **Nota 2.** Se coge con un bucle y no con `.first`. La lista que devuelve
+shop.metaobjects.<tipo>.values dice que tiene una entrada, pero `.first`
+sobre ella devuelve vacio: no es un array normal. Con `.first` la
+configuracion de la app se ignoraba entera y todo caia en los valores de
+respaldo del tema.
+
+### sv-color-entry.liquid
+
+- **Nota 1.** Solo la etiqueta propia hace "actual". Antes bastaba con que el producto
+llevara la etiqueta, y uno con dos colores se quedaba las dos muestras
+sin enlace: el selector quedaba muerto y no se podia cambiar de color.
+
+### sv-desc-estilo.liquid
+
+- **Nota 1.** Descuento y colores de precio en la ficha antes del primer pintado: ver docs/tema.md, «Estilo del descuento». Recibe `cfg`.
+
+### sv-icono.liquid
+
+- **Nota 1.** Las categorias de los filtros. Misma familia: un trazo de
+1.5 sobre 24, sin relleno. Cadena, colgante, pulsera y anillo salen de
+los productos (eslabones en trazo cortado, broche, placa).

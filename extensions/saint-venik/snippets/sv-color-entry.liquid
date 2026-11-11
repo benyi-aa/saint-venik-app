@@ -9,11 +9,7 @@
     assign sv_es_actual = false
     assign sv_producto = null
 
-    comment
-      Solo la etiqueta propia hace "actual". Antes bastaba con que el producto
-      llevara la etiqueta, y uno con dos colores se quedaba las dos muestras
-      sin enlace: el selector quedaba muerto y no se podia cambiar de color.
-    endcomment
+    # nota 1: docs/bloques.md
     assign sv_propia = etiqueta_propia | downcase | strip
     if sv_propia != blank
       if sv_etq == sv_propia

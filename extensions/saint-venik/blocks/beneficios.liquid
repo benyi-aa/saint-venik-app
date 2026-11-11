@@ -4,21 +4,11 @@
   {%- liquid
     assign lang = localization.language.iso_code | slice: 0, 2 | downcase
 
-    comment
-      Se empareja por el id del producto y no por el handle: en ingles el
-      handle esta traducido ("anillo-signet" es "signet-ring"), asi que por
-      handle la tienda en ingles no encontraba nada. El handle se mira
-      igualmente de respaldo, por si la cadena la escribio una version
-      anterior de la app.
-    endcomment
+    # nota 1: docs/bloques.md
     assign marca = product.id | prepend: '|' | append: '|'
     assign marca_handle = product.handle | prepend: '|' | append: '|'
 
-    comment
-      Se coge con un bucle y no con `.first`: la lista que devuelve
-      shop.metaobjects.<tipo>.values dice que tiene una entrada, pero `.first`
-      sobre ella devuelve vacio. Ya nos dejo sin leer la configuracion entera.
-    endcomment
+    # nota 2: docs/bloques.md
     assign config = null
     for sv_entrada in shop.metaobjects.sv_configuracion.values
       assign config = sv_entrada
@@ -28,10 +18,7 @@
 
     assign todos = shop.metaobjects.sv_beneficio.values
 
-    comment
-      Cuantos saldrian, y hasta que posicion hay que contar. Se mira antes de
-      dibujar nada para no dejar un contenedor vacio ocupando margen.
-    endcomment
+    # nota 3: docs/bloques.md
     assign visibles = 0
     assign tope = 0
     for b in todos

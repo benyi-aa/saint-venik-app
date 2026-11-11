@@ -1,390 +1,390 @@
 {%- comment -%} docs/bloques.md: «insignias.liquid · 1» {%- endcomment -%}
 
 {%- liquid
-  assign lang = localization.language.iso_code | slice: 0, 2 | downcase
-  assign etiquetas = shop.metaobjects.sv_etiqueta.values
+ assign lang = localization.language.iso_code | slice: 0, 2 | downcase
+ assign etiquetas = shop.metaobjects.sv_etiqueta.values
 
-  assign cuantas = 0
-  for e in etiquetas
-    if e.activo.value != false
-      assign cuantas = cuantas | plus: 1
+ assign cuantas = 0
+ for e in etiquetas
+  if e.activo.value != false
+   assign cuantas = cuantas | plus: 1
+  endif
+ endfor
+
+ assign beneficios = shop.metaobjects.sv_beneficio.values
+ assign marca = product.id | prepend: '|' | append: '|'
+ assign marca_handle = product.handle | prepend: '|' | append: '|'
+ assign cuantos_benef = 0
+ assign tope_benef = 0
+ if product.id
+  for b in beneficios
+   assign hs = b.handles.value | default: ''
+   assign alcanza = false
+   if hs contains marca or hs contains marca_handle
+    assign alcanza = true
+   endif
+   if b.activo.value != false and alcanza
+    assign cuantos_benef = cuantos_benef | plus: 1
+    assign pos = b.orden.value | default: 0
+    if pos > tope_benef
+     assign tope_benef = pos
     endif
+   endif
   endfor
+ endif
 
-  assign beneficios = shop.metaobjects.sv_beneficio.values
-  assign marca = product.id | prepend: '|' | append: '|'
-  assign marca_handle = product.handle | prepend: '|' | append: '|'
-  assign cuantos_benef = 0
-  assign tope_benef = 0
-  if product.id
-    for b in beneficios
-      assign hs = b.handles.value | default: ''
-      assign alcanza = false
-      if hs contains marca or hs contains marca_handle
-        assign alcanza = true
-      endif
-      if b.activo.value != false and alcanza
-        assign cuantos_benef = cuantos_benef | plus: 1
-        assign pos = b.orden.value | default: 0
-        if pos > tope_benef
-          assign tope_benef = pos
-        endif
-      endif
-    endfor
-  endif
+ assign hay_algo = false
+ if cuantas > 0 or cuantos_benef > 0
+  assign hay_algo = true
+ endif
 
-  assign hay_algo = false
-  if cuantas > 0 or cuantos_benef > 0
-    assign hay_algo = true
-  endif
+ assign cfg = null
+ for sv_entrada in shop.metaobjects.sv_configuracion.values
+  assign cfg = sv_entrada
+  break
+ endfor
 
-  assign cfg = null
-  for sv_entrada in shop.metaobjects.sv_configuracion.values
-    assign cfg = sv_entrada
-    break
-  endfor
+ assign p_activo = block.settings.benef_en_fotos
+ if cfg.foto_activo.value == 'si'
+  assign p_activo = true
+ elsif cfg.foto_activo.value == 'no'
+  assign p_activo = false
+ endif
 
-  assign p_activo = block.settings.benef_en_fotos
-  if cfg.foto_activo.value == 'si'
-    assign p_activo = true
-  elsif cfg.foto_activo.value == 'no'
-    assign p_activo = false
-  endif
+ assign p_esquina = cfg.foto_esquina.value | default: block.settings.benef_esquina
+ assign p_cuantas = cfg.foto_cuantas.value | default: block.settings.benef_cuantas_fotos
+ assign p_texto = cfg.foto_texto.value | default: block.settings.benef_texto | append: ''
+ assign p_borde = cfg.foto_borde.value | default: '#E4DFD7' | append: ''
+ assign p_grosor = cfg.foto_grosor.value | default: 0
+ assign p_radio = cfg.foto_radio.value | default: block.settings.benef_radio
+ assign p_letra = cfg.foto_letra.value | default: block.settings.benef_letra
+ assign p_margen = cfg.foto_margen.value | default: block.settings.benef_margen
 
-  assign p_esquina = cfg.foto_esquina.value | default: block.settings.benef_esquina
-  assign p_cuantas = cfg.foto_cuantas.value | default: block.settings.benef_cuantas_fotos
-  assign p_texto = cfg.foto_texto.value | default: block.settings.benef_texto | append: ''
-  assign p_borde = cfg.foto_borde.value | default: '#E4DFD7' | append: ''
-  assign p_grosor = cfg.foto_grosor.value | default: 0
-  assign p_radio = cfg.foto_radio.value | default: block.settings.benef_radio
-  assign p_letra = cfg.foto_letra.value | default: block.settings.benef_letra
-  assign p_margen = cfg.foto_margen.value | default: block.settings.benef_margen
+ assign p_alfa = cfg.foto_opacidad.value | default: 100 | divided_by: 100.0
+ assign p_fondo = cfg.foto_fondo.value | default: block.settings.benef_fondo
+ assign p_fondo = p_fondo | color_modify: 'alpha', p_alfa | append: ''
 
-  assign p_alfa = cfg.foto_opacidad.value | default: 100 | divided_by: 100.0
-  assign p_fondo = cfg.foto_fondo.value | default: block.settings.benef_fondo
-  assign p_fondo = p_fondo | color_modify: 'alpha', p_alfa | append: ''
-
-  comment
-    Descuento: ver docs/tema.md, «El descuento en insignias».
-  endcomment
-  assign d_modo = cfg.desc_activo.value | default: 'no' | append: ''
-  assign d_tarjetas = true
-  if cfg.desc_tarjetas.value == 'no'
-    assign d_tarjetas = false
+ comment
+  Descuento: ver docs/tema.md, «El descuento en insignias».
+ endcomment
+ assign d_modo = cfg.desc_activo.value | default: 'no' | append: ''
+ assign d_tarjetas = true
+ if cfg.desc_tarjetas.value == 'no'
+  assign d_tarjetas = false
+ endif
+ assign d_foto = true
+ if cfg.desc_foto.value == 'no'
+  assign d_foto = false
+ endif
+ assign d_precio = true
+ if cfg.desc_precio.value == 'no'
+  assign d_precio = false
+ endif
+ assign d_compu = 'segunda'
+ for e in shop.metaobjects.sv_configuracion_2.values
+  if e.desc_foto_compu.value == 'todas'
+   assign d_compu = 'todas'
   endif
-  assign d_foto = true
-  if cfg.desc_foto.value == 'no'
-    assign d_foto = false
-  endif
-  assign d_precio = true
-  if cfg.desc_precio.value == 'no'
-    assign d_precio = false
-  endif
-  assign d_compu = 'segunda'
-  for e in shop.metaobjects.sv_configuracion_2.values
-    if e.desc_foto_compu.value == 'todas'
-      assign d_compu = 'todas'
-    endif
-    break
-  endfor
-  assign d_formato = cfg.desc_formato.value | default: 'pct' | append: ''
-  assign d_fondo = cfg.desc_fondo.value | default: '#C4161C' | append: ''
-  assign d_texto = cfg.desc_texto.value | default: '#FFFFFF' | append: ''
-  assign d_radio = cfg.desc_radio.value | default: 2
-  assign d_hay = false
-  if d_modo == 'si' or d_modo == 'prueba'
-    assign d_hay = true
-    assign hay_algo = true
-  endif
+  break
+ endfor
+ assign d_formato = cfg.desc_formato.value | default: 'pct' | append: ''
+ assign d_fondo = cfg.desc_fondo.value | default: '#C4161C' | append: ''
+ assign d_texto = cfg.desc_texto.value | default: '#FFFFFF' | append: ''
+ assign d_radio = cfg.desc_radio.value | default: 2
+ assign d_hay = false
+ if d_modo == 'si' or d_modo == 'prueba'
+  assign d_hay = true
+  assign hay_algo = true
+ endif
 -%}
 
 {%- if d_modo == 'si' -%}
-  {%- comment -%} docs/bloques.md: «insignias.liquid · 2» {%- endcomment -%}
-  <style>
-    {%- if d_tarjetas %} .grid-product__tag--sale { display: none !important; } {% endif -%}
-    {%- if d_precio %} .product__price-savings[data-save-price] { display: none !important; } {% endif -%}
-  </style>
+ {%- comment -%} docs/bloques.md: «insignias.liquid · 2» {%- endcomment -%}
+ <style>
+  {%- if d_tarjetas %} .grid-product__tag--sale { display: none !important; } {% endif -%}
+  {%- if d_precio %} .product__price-savings[data-save-price] { display: none !important; } {% endif -%}
+ </style>
 {%- endif -%}
 {%- render 'sv-desc-estilo', cfg: cfg -%}
 
 {%- if hay_algo -%}
-  {%- if d_hay -%}
-    <script src="{{ 'sv-descuento.js' | asset_url }}" defer></script>
-  {%- endif -%}
-  <script type="application/json" id="sv-insignias-datos">
-    {
-      "etiquetas": [
-        {%- assign primera = true -%}
-        {%- for e in etiquetas -%}
-          {%- if e.activo.value != false -%}
-            {%- unless primera -%},{%- endunless -%}
-            {%- assign primera = false -%}
-            {%- liquid
-              assign texto = e.nombre.value
-              if lang == 'en' and e.nombre_en.value != blank
-                assign texto = e.nombre_en.value
-              endif
+ {%- if d_hay -%}
+  <script src="{{ 'sv-descuento.js' | asset_url }}" defer></script>
+ {%- endif -%}
+ <script type="application/json" id="sv-insignias-datos">
+  {
+   "etiquetas": [
+    {%- assign primera = true -%}
+    {%- for e in etiquetas -%}
+     {%- if e.activo.value != false -%}
+      {%- unless primera -%},{%- endunless -%}
+      {%- assign primera = false -%}
+      {%- liquid
+       assign texto = e.nombre.value
+       if lang == 'en' and e.nombre_en.value != blank
+        assign texto = e.nombre_en.value
+       endif
 
-              assign alfa = e.opacidad.value | default: 100 | divided_by: 100.0
-              assign fondo = e.color_fondo.value | default: '#111111'
-              assign fondo = fondo | color_modify: 'alpha', alfa | append: ''
-              assign tinta = e.color_texto.value | default: '#FFFFFF' | append: ''
-              assign borde = e.color_borde.value | default: '#FFFFFF' | append: ''
-            -%}
-            {
-              "texto": {{ texto | json }},
-              "fondo": {{ fondo | json }},
-              "color": {{ tinta | json }},
-              "borde": {{ borde | json }},
-              "grosor": {{ e.borde_grosor.value | default: 0 }},
-              "orden": {{ e.orden.value | default: 0 }},
-              "handles": {{ e.handles.value | default: '' | json }},
-              "colecciones": [
-                {%- assign pc = true -%}
-                {%- for c in e.colecciones.value limit: 50 -%}
-                  {%- unless pc -%},{%- endunless -%}{%- assign pc = false -%}
-                  {{ c.handle | json }}
-                {%- endfor -%}
-              ]
-            }
-          {%- endif -%}
+       assign alfa = e.opacidad.value | default: 100 | divided_by: 100.0
+       assign fondo = e.color_fondo.value | default: '#111111'
+       assign fondo = fondo | color_modify: 'alpha', alfa | append: ''
+       assign tinta = e.color_texto.value | default: '#FFFFFF' | append: ''
+       assign borde = e.color_borde.value | default: '#FFFFFF' | append: ''
+      -%}
+      {
+       "texto": {{ texto | json }},
+       "fondo": {{ fondo | json }},
+       "color": {{ tinta | json }},
+       "borde": {{ borde | json }},
+       "grosor": {{ e.borde_grosor.value | default: 0 }},
+       "orden": {{ e.orden.value | default: 0 }},
+       "handles": {{ e.handles.value | default: '' | json }},
+       "colecciones": [
+        {%- assign pc = true -%}
+        {%- for c in e.colecciones.value limit: 50 -%}
+         {%- unless pc -%},{%- endunless -%}{%- assign pc = false -%}
+         {{ c.handle | json }}
         {%- endfor -%}
-      ],
-      "beneficios": [
-        {%- assign pb = true -%}
-        {%- for i in (1..tope_benef) -%}
-          {%- for b in beneficios -%}
-            {%- if b.orden.value == i -%}
-              {%- assign hs = b.handles.value | default: '' -%}
-              {%- if hs contains marca or hs contains marca_handle -%}
-                {%- if b.activo.value != false -%}
-                  {%- liquid
-                    assign texto_b = b.nombre.value
-                    if lang == 'en' and b.nombre_en.value != blank
-                      assign texto_b = b.nombre_en.value
-                    endif
-                  -%}
-                  {%- capture svg_b -%}{%- render 'sv-beneficio-icono', b: b, clase: 'sv-benef-foto__img' -%}{%- endcapture -%}
-                  {%- unless pb -%},{%- endunless -%}{%- assign pb = false -%}
-                  { "texto": {{ texto_b | json }}, "icono": {{ svg_b | strip | json }} }
-                {%- endif -%}
-              {%- endif -%}
-            {%- endif -%}
-          {%- endfor -%}
-        {%- endfor -%}
-      ],
-      "coleccion": {%- if collection.handle != blank %} {{ collection.handle | json }} {%- else %} null {%- endif %},
-      "ficha": {%- if product.handle != blank %} {{ product.handle | json }} {%- else %} null {%- endif %},
-      "fichaId": {%- if product.id %} {{ product.id | json }} {%- else %} null {%- endif %},
-      "tarjetas": {{ block.settings.en_tarjetas | json }},
-      "fichas": {{ block.settings.en_ficha | json }},
-      "esquinaTarjeta": {{ block.settings.esquina_tarjeta | json }},
-      "esquinaFicha": {{ block.settings.esquina_ficha | json }},
-      "fotos": {{ p_activo | json }},
-      "esquinaFoto": {{ p_esquina | json }},
-      "maxFotos": {{ p_cuantas }},
-      "maximo": {{ block.settings.maximo }},
-      "descuento": {%- if d_hay %} {
-        "modo": {{ d_modo | json }},
-        "tarjetas": {{ d_tarjetas | json }},
-        "foto": {{ d_foto | json }},
-        "fotoCompu": {{ d_compu | json }},
-        "precio": {{ d_precio | json }},
-        "formato": {{ d_formato | json }},
-        "fondo": {{ d_fondo | json }},
-        "texto": {{ d_texto | json }},
-        "radio": {{ d_radio | json }}
-      } {%- else %} null {%- endif %},
-      "editor": {{ request.design_mode | json }}
-    }
-  </script>
+       ]
+      }
+     {%- endif -%}
+    {%- endfor -%}
+   ],
+   "beneficios": [
+    {%- assign pb = true -%}
+    {%- for i in (1..tope_benef) -%}
+     {%- for b in beneficios -%}
+      {%- if b.orden.value == i -%}
+       {%- assign hs = b.handles.value | default: '' -%}
+       {%- if hs contains marca or hs contains marca_handle -%}
+        {%- if b.activo.value != false -%}
+         {%- liquid
+          assign texto_b = b.nombre.value
+          if lang == 'en' and b.nombre_en.value != blank
+           assign texto_b = b.nombre_en.value
+          endif
+         -%}
+         {%- capture svg_b -%}{%- render 'sv-beneficio-icono', b: b, clase: 'sv-benef-foto__img' -%}{%- endcapture -%}
+         {%- unless pb -%},{%- endunless -%}{%- assign pb = false -%}
+         { "texto": {{ texto_b | json }}, "icono": {{ svg_b | strip | json }} }
+        {%- endif -%}
+       {%- endif -%}
+      {%- endif -%}
+     {%- endfor -%}
+    {%- endfor -%}
+   ],
+   "coleccion": {%- if collection.handle != blank %} {{ collection.handle | json }} {%- else %} null {%- endif %},
+   "ficha": {%- if product.handle != blank %} {{ product.handle | json }} {%- else %} null {%- endif %},
+   "fichaId": {%- if product.id %} {{ product.id | json }} {%- else %} null {%- endif %},
+   "tarjetas": {{ block.settings.en_tarjetas | json }},
+   "fichas": {{ block.settings.en_ficha | json }},
+   "esquinaTarjeta": {{ block.settings.esquina_tarjeta | json }},
+   "esquinaFicha": {{ block.settings.esquina_ficha | json }},
+   "fotos": {{ p_activo | json }},
+   "esquinaFoto": {{ p_esquina | json }},
+   "maxFotos": {{ p_cuantas }},
+   "maximo": {{ block.settings.maximo }},
+   "descuento": {%- if d_hay %} {
+    "modo": {{ d_modo | json }},
+    "tarjetas": {{ d_tarjetas | json }},
+    "foto": {{ d_foto | json }},
+    "fotoCompu": {{ d_compu | json }},
+    "precio": {{ d_precio | json }},
+    "formato": {{ d_formato | json }},
+    "fondo": {{ d_fondo | json }},
+    "texto": {{ d_texto | json }},
+    "radio": {{ d_radio | json }}
+   } {%- else %} null {%- endif %},
+   "editor": {{ request.design_mode | json }}
+  }
+ </script>
 
-  <style>
-    .sv-tags {
-      --sv-tags-radio: {{ block.settings.radio }}px;
-      --sv-tags-letra: {{ block.settings.tamano }}px;
-      --sv-tags-top: {{ block.settings.margen }}px;
-      --sv-tags-lado: {{ block.settings.margen }}px;
-    }
-    .sv-benef-foto, .sv-desc-precio {
-      --sv-foto-fondo: {{ p_fondo }};
-      --sv-foto-texto: {{ p_texto }};
-      --sv-foto-borde: {{ p_borde }};
-      --sv-foto-grosor: {{ p_grosor }}px;
-      --sv-foto-radio: {{ p_radio }}px;
-      --sv-foto-letra: {{ p_letra }}px;
-      --sv-foto-lado: {{ p_margen }}px;
-    }
-  </style>
+ <style>
+  .sv-tags {
+   --sv-tags-radio: {{ block.settings.radio }}px;
+   --sv-tags-letra: {{ block.settings.tamano }}px;
+   --sv-tags-top: {{ block.settings.margen }}px;
+   --sv-tags-lado: {{ block.settings.margen }}px;
+  }
+  .sv-benef-foto, .sv-desc-precio {
+   --sv-foto-fondo: {{ p_fondo }};
+   --sv-foto-texto: {{ p_texto }};
+   --sv-foto-borde: {{ p_borde }};
+   --sv-foto-grosor: {{ p_grosor }}px;
+   --sv-foto-radio: {{ p_radio }}px;
+   --sv-foto-letra: {{ p_letra }}px;
+   --sv-foto-lado: {{ p_margen }}px;
+  }
+ </style>
 {%- endif -%}
 
 {% schema %}
 {
-  "name": "Insignias de producto",
-  "target": "body",
-  "stylesheet": "sv-badges.css",
-  "javascript": "sv-badges.js",
-  "settings": [
-    {
-      "type": "paragraph",
-      "content": "Las insignias y a qué productos alcanza cada una se eligen en la app, en la pantalla «Insignias»."
-    },
-    {
-      "type": "checkbox",
-      "id": "en_tarjetas",
-      "label": "Mostrar en las tarjetas de las colecciones",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "en_ficha",
-      "label": "Mostrar sobre la foto de la ficha",
-      "default": true
-    },
-    {
-      "type": "range",
-      "id": "maximo",
-      "label": "Cuántas apilar como mucho",
-      "min": 1,
-      "max": 3,
-      "step": 1,
-      "default": 2
-    },
-    {
-      "type": "header",
-      "content": "Posición"
-    },
-    {
-      "type": "select",
-      "id": "esquina_tarjeta",
-      "label": "Esquina en la tarjeta",
-      "info": "El tema ya pone «AHORRA 57%» y «Agotado» arriba a la izquierda. Si eliges esa esquina, la insignia se coloca debajo de la del tema en vez de encima.",
-      "options": [
-        { "value": "izquierda", "label": "Arriba a la izquierda" },
-        { "value": "derecha", "label": "Arriba a la derecha" }
-      ],
-      "default": "izquierda"
-    },
-    {
-      "type": "select",
-      "id": "esquina_ficha",
-      "label": "Esquina en la ficha",
-      "options": [
-        { "value": "derecha", "label": "Arriba a la derecha" },
-        { "value": "izquierda", "label": "Arriba a la izquierda" }
-      ],
-      "default": "derecha"
-    },
-    {
-      "type": "range",
-      "id": "margen",
-      "label": "Separación del borde",
-      "min": 0,
-      "max": 24,
-      "step": 2,
-      "unit": "px",
-      "default": 8
-    },
-    {
-      "type": "header",
-      "content": "Beneficios sobre las fotos"
-    },
-    {
-      "type": "paragraph",
-      "content": "Una ventaja sobre cada foto de la ficha, empezando por la segunda: la primera se deja limpia. Todo esto se configura en la app, en la pantalla «Beneficios»; lo de aquí solo se usa mientras la app no lo haya guardado nunca."
-    },
-    {
-      "type": "checkbox",
-      "id": "benef_en_fotos",
-      "label": "Mostrar los beneficios sobre las fotos",
-      "default": true
-    },
-    {
-      "type": "select",
-      "id": "benef_esquina",
-      "label": "Esquina sobre la foto",
-      "options": [
-        { "value": "arriba-derecha", "label": "Arriba a la derecha" },
-        { "value": "abajo-izquierda", "label": "Abajo a la izquierda" }
-      ],
-      "default": "abajo-izquierda"
-    },
-    {
-      "type": "range",
-      "id": "benef_cuantas_fotos",
-      "label": "Cuántas fotos llevan beneficio",
-      "min": 1,
-      "max": 5,
-      "step": 1,
-      "default": 3
-    },
-    {
-      "type": "color",
-      "id": "benef_fondo",
-      "label": "Fondo de la píldora",
-      "default": "#FFFFFF"
-    },
-    {
-      "type": "color",
-      "id": "benef_texto",
-      "label": "Texto e icono",
-      "default": "#111111"
-    },
-    {
-      "type": "range",
-      "id": "benef_radio",
-      "label": "Redondeo",
-      "min": 0,
-      "max": 20,
-      "step": 1,
-      "unit": "px",
-      "default": 7
-    },
-    {
-      "type": "range",
-      "id": "benef_letra",
-      "label": "Tamaño del texto",
-      "min": 9,
-      "max": 16,
-      "step": 1,
-      "unit": "px",
-      "default": 12
-    },
-    {
-      "type": "range",
-      "id": "benef_margen",
-      "label": "Separación del borde",
-      "min": 0,
-      "max": 24,
-      "step": 2,
-      "unit": "px",
-      "default": 10
-    },
-    {
-      "type": "header",
-      "content": "Aspecto de las insignias"
-    },
-    {
-      "type": "range",
-      "id": "radio",
-      "label": "Redondeo",
-      "info": "0 es la esquina viva de la referencia.",
-      "min": 0,
-      "max": 16,
-      "step": 1,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "tamano",
-      "label": "Tamaño del texto",
-      "min": 8,
-      "max": 16,
-      "step": 1,
-      "unit": "px",
-      "default": 11
-    }
-  ]
+ "name": "Insignias de producto",
+ "target": "body",
+ "stylesheet": "sv-badges.css",
+ "javascript": "sv-badges.js",
+ "settings": [
+  {
+   "type": "paragraph",
+   "content": "Las insignias y a qué productos alcanza cada una se eligen en la app, en la pantalla «Insignias»."
+  },
+  {
+   "type": "checkbox",
+   "id": "en_tarjetas",
+   "label": "Mostrar en las tarjetas de las colecciones",
+   "default": true
+  },
+  {
+   "type": "checkbox",
+   "id": "en_ficha",
+   "label": "Mostrar sobre la foto de la ficha",
+   "default": true
+  },
+  {
+   "type": "range",
+   "id": "maximo",
+   "label": "Cuántas apilar como mucho",
+   "min": 1,
+   "max": 3,
+   "step": 1,
+   "default": 2
+  },
+  {
+   "type": "header",
+   "content": "Posición"
+  },
+  {
+   "type": "select",
+   "id": "esquina_tarjeta",
+   "label": "Esquina en la tarjeta",
+   "info": "El tema ya pone «AHORRA 57%» y «Agotado» arriba a la izquierda. Si eliges esa esquina, la insignia se coloca debajo de la del tema en vez de encima.",
+   "options": [
+    { "value": "izquierda", "label": "Arriba a la izquierda" },
+    { "value": "derecha", "label": "Arriba a la derecha" }
+   ],
+   "default": "izquierda"
+  },
+  {
+   "type": "select",
+   "id": "esquina_ficha",
+   "label": "Esquina en la ficha",
+   "options": [
+    { "value": "derecha", "label": "Arriba a la derecha" },
+    { "value": "izquierda", "label": "Arriba a la izquierda" }
+   ],
+   "default": "derecha"
+  },
+  {
+   "type": "range",
+   "id": "margen",
+   "label": "Separación del borde",
+   "min": 0,
+   "max": 24,
+   "step": 2,
+   "unit": "px",
+   "default": 8
+  },
+  {
+   "type": "header",
+   "content": "Beneficios sobre las fotos"
+  },
+  {
+   "type": "paragraph",
+   "content": "Una ventaja sobre cada foto de la ficha, empezando por la segunda: la primera se deja limpia. Todo esto se configura en la app, en la pantalla «Beneficios»; lo de aquí solo se usa mientras la app no lo haya guardado nunca."
+  },
+  {
+   "type": "checkbox",
+   "id": "benef_en_fotos",
+   "label": "Mostrar los beneficios sobre las fotos",
+   "default": true
+  },
+  {
+   "type": "select",
+   "id": "benef_esquina",
+   "label": "Esquina sobre la foto",
+   "options": [
+    { "value": "arriba-derecha", "label": "Arriba a la derecha" },
+    { "value": "abajo-izquierda", "label": "Abajo a la izquierda" }
+   ],
+   "default": "abajo-izquierda"
+  },
+  {
+   "type": "range",
+   "id": "benef_cuantas_fotos",
+   "label": "Cuántas fotos llevan beneficio",
+   "min": 1,
+   "max": 5,
+   "step": 1,
+   "default": 3
+  },
+  {
+   "type": "color",
+   "id": "benef_fondo",
+   "label": "Fondo de la píldora",
+   "default": "#FFFFFF"
+  },
+  {
+   "type": "color",
+   "id": "benef_texto",
+   "label": "Texto e icono",
+   "default": "#111111"
+  },
+  {
+   "type": "range",
+   "id": "benef_radio",
+   "label": "Redondeo",
+   "min": 0,
+   "max": 20,
+   "step": 1,
+   "unit": "px",
+   "default": 7
+  },
+  {
+   "type": "range",
+   "id": "benef_letra",
+   "label": "Tamaño del texto",
+   "min": 9,
+   "max": 16,
+   "step": 1,
+   "unit": "px",
+   "default": 12
+  },
+  {
+   "type": "range",
+   "id": "benef_margen",
+   "label": "Separación del borde",
+   "min": 0,
+   "max": 24,
+   "step": 2,
+   "unit": "px",
+   "default": 10
+  },
+  {
+   "type": "header",
+   "content": "Aspecto de las insignias"
+  },
+  {
+   "type": "range",
+   "id": "radio",
+   "label": "Redondeo",
+   "info": "0 es la esquina viva de la referencia.",
+   "min": 0,
+   "max": 16,
+   "step": 1,
+   "unit": "px",
+   "default": 0
+  },
+  {
+   "type": "range",
+   "id": "tamano",
+   "label": "Tamaño del texto",
+   "min": 8,
+   "max": 16,
+   "step": 1,
+   "unit": "px",
+   "default": 11
+  }
+ ]
 }
 {% endschema %}

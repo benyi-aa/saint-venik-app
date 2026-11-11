@@ -27,10 +27,7 @@
     {%- liquid
       assign bloques = guia.bloques.value
 
-      comment
-        Cuantos bloques saldrian en este idioma. Se cuenta antes de dibujar nada
-        para no acabar con un boton que abre una ventana vacia.
-      endcomment
+      # nota 1: docs/bloques.md
       assign visibles = 0
       assign tope = 0
       for bloque in bloques
@@ -51,13 +48,7 @@
 
     {%- if visibles > 0 -%}
       {%- liquid
-        comment
-          Se coge con un bucle y no con `.first`. La lista que devuelve
-          shop.metaobjects.<tipo>.values dice que tiene una entrada, pero `.first`
-          sobre ella devuelve vacio: no es un array normal. Con `.first` la
-          configuracion de la app se ignoraba entera y todo caia en los valores de
-          respaldo del tema.
-        endcomment
+        # nota 2: docs/bloques.md
         assign config = null
         for sv_entrada in shop.metaobjects.sv_configuracion.values
           assign config = sv_entrada
