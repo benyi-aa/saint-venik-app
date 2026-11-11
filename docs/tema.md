@@ -975,6 +975,17 @@ Archivos), en las dos tiendas.
   Capri, pedido del usuario). Colores nuevos en el panel → Colores, etiquetas `trebol-negro`
   #171717, `trebol-rojo` #7c3738, `trebol-azul` #2b4f7a, `trebol-blanco` #e3e1e0 (nácar),
   `trebol-verde` #1d6651, sacados de las fotos de producto.
+- **Muestras metalizadas de las Clover (11-nov, segunda vuelta):** el usuario pidió que las cinco
+  se vieran metalizadas, y que la blanca y la verde copiaran el diseño de la cara del trébol.
+  - Negro, rojo y azul: el brillo del dorado (GOLD.webp) pasado a cada color, como las gemas Vault.
+  - Verde: malaquita con rayas rectas y paralelas, algo inclinadas, en verde esmeralda y verde
+    oscuro, como en la foto.
+  - Blanco: nácar lechoso con nubes grises y un tornasol suave (rosa, lila, celeste, menta, durazno).
+  - Archivos: `admin/muestras/TREBOL-<NEGRO|ROJO|AZUL|VERDE|BLANCO>.webp`. Copia y vista
+    comparada con las fotos en `branding/muestras-trebol/`.
+  - Se cargaron en las dos tiendas con panel → Colores → «Desde un enlace…» y
+    `https://benyi-aa.github.io/saint-venik-app/admin/muestras/TREBOL-….webp`.
+  - El color liso queda debajo como respaldo: si se quita la imagen, vuelve a verse.
 - **Green Gem / Red Gem** (4 pulseras): abajo «Gema» con las mismas muestras degradadas de los
   Vault (`gema-verde`, `gema-roja`).
 - En .cl la Red Gem de plata tenía también la etiqueta `oro` por error: se le quitó.
