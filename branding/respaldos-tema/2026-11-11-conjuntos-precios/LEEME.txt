@@ -1,0 +1,3 @@
+Precios de los conjuntos ANTES del precio automático (11-nov-2026), tal como se veían en la tienda.
+Todas las variantes de cada conjunto tenían el mismo precio. «antes» = precio tachado (vacío = sin tachado).
+Para volver atrás: poner estos valores en cada producto y apagar el Flow «Conjuntos: precio automático».

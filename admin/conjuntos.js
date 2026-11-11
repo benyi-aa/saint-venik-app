@@ -12,7 +12,7 @@
  * conjunto lleva la etiqueta sv-conjunto y cada joya sv-conjunto-parte (Flow los busca así).
  * Detalle: docs/conjuntos.md.
  */
-import { gql, comprobarErrores } from './api.js?v=202611111344';
+import { gql, comprobarErrores } from './api.js?v=202611111347';
 
 export const CLAVE_JOYAS = 'conjunto_joyas';
 export const CLAVE_DESCUENTO = 'conjunto_descuento';
@@ -71,7 +71,7 @@ const CONJUNTOS = `
         products(first: 100) {
           nodes {
             ${PRODUCTO}
-            description
+            descriptionHtml
             variants(first: 50) { nodes { id title price compareAtPrice } }
             joyas: metafield(namespace: "custom", key: "${CLAVE_JOYAS}") {
               references(first: 4) { nodes { ... on Product { ${PRODUCTO} } } }
@@ -93,6 +93,14 @@ const CATALOGO = `
   }
 `;
 
+/* HTML de la descripción → texto con un salto por párrafo (como se lee en la tienda). */
+function aTexto(html) {
+  const conSaltos = String(html ?? '').replace(/<\/(p|li|div|h\d)>|<br\s*\/?>/gi, '\n');
+  const caja = document.createElement('textarea');
+  caja.innerHTML = conSaltos.replace(/<[^>]*>/g, ' ');
+  return caja.value;
+}
+
 function aJoya(n) {
   return {
     id: n.id, titulo: n.title, handle: n.handle, activo: n.status === 'ACTIVE',
@@ -108,7 +116,7 @@ export async function cargarConjuntos() {
   if (!col) return [];
   return col.products.nodes.map((n) => ({
     ...aJoya(n),
-    descripcion: n.description ?? '',
+    descripcion: aTexto(n.descriptionHtml),
     variantes: n.variants.nodes.map((v) => ({
       id: v.id, titulo: v.title, precio: Number(v.price), antes: v.compareAtPrice == null ? null : Number(v.compareAtPrice),
     })),
@@ -161,8 +169,8 @@ export function estaAlDia(conjunto, calculo) {
 
 /* ---------------------------------------------------------------------------
  * Detectar las dos joyas desde la descripción: «Incluye: - Cadena Miami Cuban 5mm 50cm
- * - Hermés Pendant + Cadena Rope 2.5mm». De cada línea vale lo que va antes del «+» (el
- * colgante trae su propia cadena fina), y gana la joya cuyo nombre entero aparece en la
+ * - Hermés Pendant + Cadena Rope 2.5mm». De cada línea vale lo que va antes del «+» o «:» (el
+ * colgante trae su propia cadena fina; tras «:» viene su ficha), y gana la joya cuyo nombre entero aparece en la
  * línea (con más palabras; ver OPCIONALES). El metal tiene que coincidir: un conjunto «Oro» lleva joyas «Oro».
  * ------------------------------------------------------------------------- */
 const SINONIMOS = { pendiente: 'pendant', colgante: 'pendant', pendientes: 'pendant', cubans: 'cuban', cuban: 'cuban' };
@@ -184,7 +192,7 @@ export function sugerirJoyas(conjunto, catalogo) {
   const i = llano(texto).indexOf('incluye');
   if (i < 0) return [];
   const parte = texto.slice(i + 7).replace(/^[\s:]+/, '');
-  const lineas = parte.split(/\s+-\s+|\n|•/).map((l) => l.split('+')[0].trim()).filter((l) => l.length > 3).slice(0, 4);
+  const lineas = parte.split(/\s+-\s+|\n|•/).map((l) => l.split(/[+:]/)[0].trim()).filter((l) => l.length > 3).slice(0, 4);
   const oro = esOro(conjunto.titulo);
   const candidatas = catalogo.filter((p) => p.activo && !p.etiquetas.includes(ETIQUETA_CONJUNTO)
     && !/\bset\b|conjunto/i.test(p.titulo) && esOro(p.titulo) === oro);
