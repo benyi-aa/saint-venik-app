@@ -12,7 +12,7 @@
  * conjunto lleva la etiqueta sv-conjunto y cada joya sv-conjunto-parte (Flow los busca así).
  * Detalle: docs/conjuntos.md.
  */
-import { gql, comprobarErrores } from './api.js?v=202611111342';
+import { gql, comprobarErrores } from './api.js?v=202611111344';
 
 export const CLAVE_JOYAS = 'conjunto_joyas';
 export const CLAVE_DESCUENTO = 'conjunto_descuento';
@@ -163,18 +163,21 @@ export function estaAlDia(conjunto, calculo) {
  * Detectar las dos joyas desde la descripción: «Incluye: - Cadena Miami Cuban 5mm 50cm
  * - Hermés Pendant + Cadena Rope 2.5mm». De cada línea vale lo que va antes del «+» (el
  * colgante trae su propia cadena fina), y gana la joya cuyo nombre entero aparece en la
- * línea (con más palabras). El metal tiene que coincidir: un conjunto «Oro» lleva joyas «Oro».
+ * línea (con más palabras; ver OPCIONALES). El metal tiene que coincidir: un conjunto «Oro» lleva joyas «Oro».
  * ------------------------------------------------------------------------- */
 const SINONIMOS = { pendiente: 'pendant', colgante: 'pendant', pendientes: 'pendant', cubans: 'cuban', cuban: 'cuban' };
 function llano(s) {
   return String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 function palabras(s) {
-  return llano(s).replace(/['’]s\b/g, '').replace(/[^a-z0-9.]+/g, ' ').split(' ')
+  return llano(s).replace(/['’]s\b/g, '').replace(/\.(?!\d)/g, ' ').replace(/[^a-z0-9.]+/g, ' ').split(' ')
     .filter((p) => p && p !== 'de' && p !== 'la' && p !== 'el' && p !== 'y' && p !== 'con')
     .map((p) => SINONIMOS[p] || p);
 }
 const esOro = (t) => palabras(t).includes('oro');
+/* Palabras que la descripción a veces omite («Compass» por «Compass Pendant», «Cadena Cuban
+ * 3mm» por «Cadena Miami Cuban Oro 3mm»): no hace falta que estén, pero suman si están. */
+const OPCIONALES = new Set(['pendant', 'cadena', 'miami']);
 
 export function sugerirJoyas(conjunto, catalogo) {
   const texto = conjunto.descripcion || '';
@@ -193,10 +196,12 @@ export function sugerirJoyas(conjunto, catalogo) {
     let puntos = 0;
     for (const p of candidatas) {
       const suyas = palabras(p.titulo);
-      if (!suyas.length || !suyas.every((w) => enLinea.has(w))) continue;
-      if (suyas.length > puntos) { mejor = p; puntos = suyas.length; }
+      const fijas = suyas.filter((w) => !OPCIONALES.has(w));
+      if (!fijas.some((w) => w !== 'oro') || !fijas.every((w) => enLinea.has(w))) continue;
+      const n = fijas.length + suyas.filter((w) => OPCIONALES.has(w) && enLinea.has(w)).length / 2;
+      if (n > puntos) { mejor = p; puntos = n; }
     }
-    if (mejor && puntos >= 2 && !elegidas.some((e) => e.id === mejor.id)) elegidas.push(mejor);
+    if (mejor && !elegidas.some((e) => e.id === mejor.id)) elegidas.push(mejor);
     if (elegidas.length === 2) break;
   }
   return elegidas;
