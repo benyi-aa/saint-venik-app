@@ -1,55 +1,59 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611111318';
+import { estaEmbebida } from './api.js?v=202611111342';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611111318';
+} from './colores.js?v=202611111342';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611111318';
+} from './config.js?v=202611111342';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611111318';
+} from './filtros.js?v=202611111342';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611111318';
-import { prepararNavidad } from './inicio.js?v=202611111318';
-import { quitarAguaDeColecciones } from './textos.js?v=202611111318';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111318';
+} from './productos.js?v=202611111342';
+import { prepararNavidad } from './inicio.js?v=202611111342';
+import {
+  prepararConjuntos, cargarConjuntos, cargarCatalogo, sugerirJoyas, calcular, estaAlDia, formatear, guardarConjunto,
+  DESCUENTO_POR_DEFECTO as DESCUENTO_CONJUNTOS,
+} from './conjuntos.js?v=202611111342';
+import { quitarAguaDeColecciones } from './textos.js?v=202611111342';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111342';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611111318';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111318';
+} from './temporadas.js?v=202611111342';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111342';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611111318';
+} from './guias.js?v=202611111342';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611111318';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111318';
+} from './vista-previa.js?v=202611111342';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111342';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611111318';
+} from './etiquetas.js?v=202611111342';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611111318';
-import { ICONOS, svgIcono } from './iconos.js?v=202611111318';
+} from './beneficios.js?v=202611111342';
+import { ICONOS, svgIcono } from './iconos.js?v=202611111342';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611111318';
+const VERSION = '202611111342';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -3187,6 +3191,7 @@ const PANTALLAS = {
   fotos: pintarFotos,
   temporadas: pintarTemporadas,
   filtros: pintarFiltros,
+  conjuntos: pintarConjuntos,
 };
 
 /* Pestaña «Fotos»: cada foto de temporada con su miniatura y botones para
@@ -3287,6 +3292,150 @@ async function pintarFotos() {
 
 /* Pestaña «Temporadas»: la activa, crear y borrar, y los textos de cada una
  * (barra de arriba, bloque 3X2, caja de oferta). Ver temporadas.js. */
+/* Pestaña «Conjuntos» (11-nov): el precio de cada conjunto sale de sus dos joyas en vivo
+ * (suma − descuento, terminado en 990 / ,90). Ver conjuntos.js y docs/conjuntos.md. */
+async function pintarConjuntos() {
+  const miPintado = pintado;
+  pantalla.innerHTML = '<p class="cargando">Cargando conjuntos…</p>';
+  const moneda = await prepararConjuntos();
+  const [conjuntos, catalogo] = await Promise.all([cargarConjuntos(), cargarCatalogo()]);
+  if (miPintado !== pintado) return;
+  let descuento = conjuntos.find((c) => c.descuento != null)?.descuento ?? DESCUENTO_CONJUNTOS;
+  const estado = new Map(conjuntos.map((c) => [c.id, {
+    joyas: c.joyas.length ? [...c.joyas] : sugerirJoyas(c, catalogo),
+    sugeridas: !c.joyas.length,
+  }]));
+  const fmt = (v) => formatear(v, moneda);
+
+  const calculoHtml = (c) => {
+    const e = estado.get(c.id);
+    const r = calcular(e.joyas, descuento, moneda);
+    if (!r) return `<p class="ayuda conj__falta">Faltan joyas: este conjunto necesita dos (${e.joyas.length} elegida${e.joyas.length === 1 ? '' : 's'}).</p>`;
+    const alDia = !e.sugeridas && estaAlDia(c, r) && c.descuento === descuento;
+    return `<p class="conj__calculo">${fmt(e.joyas[0].precio)} + ${fmt(e.joyas[1].precio)} = ${fmt(r.suma)} − ${descuento} % → <b>${fmt(r.precio)}</b> (antes ${fmt(r.suma)})
+      ${alDia ? '<span class="chip">Al día</span>' : '<span class="chip chip--cambia">Por guardar</span>'}</p>
+      ${e.sugeridas ? '<p class="ayuda">Joyas detectadas desde la descripción del conjunto: revísalas y guarda.</p>' : ''}`;
+  };
+  const joyasHtml = (c) => estado.get(c.id).joyas.map((j) => `
+    <span class="conj__joya">${j.imagen ? `<img src="${escapar(j.imagen)}&width=60" alt="">` : ''}${escapar(j.titulo)} · ${fmt(j.precio)}
+      <button type="button" class="conj__quitar" data-quitar="${escapar(j.id)}" aria-label="Quitar ${escapar(j.titulo)}">×</button></span>`).join('');
+  const tarjeta = (c) => {
+    const v = c.variantes[0];
+    return `
+    <s-section heading="${escapar(c.titulo)}" data-conjunto="${escapar(c.id)}">
+      <div class="conj">
+        ${c.imagen ? `<img class="conj__foto" src="${escapar(c.imagen)}&width=120" alt="">` : '<div class="conj__foto"></div>'}
+        <div class="conj__cuerpo">
+          <p class="ayuda">Hoy en la tienda: <b>${fmt(v?.precio ?? 0)}</b>${v?.antes ? ` (antes ${fmt(v.antes)})` : ''}${c.activo ? '' : ' · borrador'}</p>
+          <div class="conj__joyas" data-joyas>${joyasHtml(c)}</div>
+          <div class="conj__buscar"><input type="search" placeholder="Buscar una joya para agregar…" data-buscar>
+            <div class="conj__resultados" data-resultados></div></div>
+          <div data-calculo>${calculoHtml(c)}</div>
+        </div>
+      </div>
+      <s-button slot="primary-action" variant="primary" data-guardar>Guardar y poner precio</s-button>
+    </s-section>`;
+  };
+  const porGuardar = () => conjuntos.filter((c) => {
+    const e = estado.get(c.id);
+    const r = calcular(e.joyas, descuento, moneda);
+    return r && (e.sugeridas || !estaAlDia(c, r) || c.descuento !== descuento);
+  });
+
+  pantalla.innerHTML = `
+    <s-page>
+      <div class="titular">
+        <h1>Conjuntos</h1>
+        <p class="subtitulo">El precio de cada conjunto sale de sus dos joyas: se suman sus precios de hoy, se descuenta el porcentaje de abajo y se redondea para que termine en ${moneda === 'CLP' ? '990 (por ejemplo, $62.990)' : ',90 (por ejemplo, $102.90)'}. El precio tachado («antes») es la suma de las dos joyas. Si sube el precio de una joya, el del conjunto sube solo: una automatización de Shopify Flow lo revisa cada hora con estos mismos datos.</p>
+      </div>
+      <s-section heading="Descuento de los conjuntos">
+        <s-number-field label="Descuento sobre la suma de las dos joyas" id="c-descuento" value="${descuento}" min="0" max="60" step="1" suffix="%"></s-number-field>
+        <p class="ayuda" id="c-resumen"></p>
+        <s-button slot="primary-action" variant="primary" id="c-todos">Guardar todos</s-button>
+      </s-section>
+      ${conjuntos.length ? conjuntos.map(tarjeta).join('') : '<div class="vacio">No hay una colección «conjuntos» o está vacía.</div>'}
+    </s-page>`;
+
+  const resumen = () => {
+    const n = porGuardar().length;
+    const faltan = conjuntos.filter((c) => estado.get(c.id).joyas.length !== 2).length;
+    document.getElementById('c-resumen').textContent = `${conjuntos.length} conjuntos · ${n} por guardar${faltan ? ` · ${faltan} sin sus dos joyas` : ''}.`;
+  };
+  const refrescar = (c) => {
+    const t = [...pantalla.querySelectorAll('[data-conjunto]')].find((x) => x.dataset.conjunto === c.id);
+    t.querySelector('[data-joyas]').innerHTML = joyasHtml(c);
+    t.querySelector('[data-calculo]').innerHTML = calculoHtml(c);
+    resumen();
+  };
+  resumen();
+
+  const cambiarDescuento = (e) => {
+    const n = Number(e.currentTarget.value);
+    if (Number.isFinite(n) && n >= 0 && n <= 60 && n !== descuento) { descuento = n; conjuntos.forEach(refrescar); }
+  };
+  ['input', 'change'].forEach((t) => document.getElementById('c-descuento').addEventListener(t, cambiarDescuento));
+
+  pantalla.querySelectorAll('[data-conjunto]').forEach((t) => {
+    const c = conjuntos.find((x) => x.id === t.dataset.conjunto);
+    const e = estado.get(c.id);
+    t.addEventListener('click', (ev) => {
+      const quitar = ev.target.closest('[data-quitar]');
+      if (quitar) { e.joyas = e.joyas.filter((j) => j.id !== quitar.dataset.quitar); e.sugeridas = false; refrescar(c); return; }
+      const poner = ev.target.closest('[data-poner]');
+      if (poner) {
+        const j = catalogo.find((x) => x.id === poner.dataset.poner);
+        if (j && !e.joyas.some((x) => x.id === j.id)) e.joyas.push(j);
+        if (e.joyas.length > 2) e.joyas.shift();
+        e.sugeridas = false;
+        t.querySelector('[data-buscar]').value = '';
+        t.querySelector('[data-resultados]').innerHTML = '';
+        refrescar(c);
+      }
+    });
+    t.querySelector('[data-buscar]').addEventListener('input', (ev) => {
+      const q = ev.currentTarget.value.trim().toLowerCase();
+      const caja = t.querySelector('[data-resultados]');
+      if (q.length < 2) { caja.innerHTML = ''; return; }
+      caja.innerHTML = catalogo.filter((p) => p.titulo.toLowerCase().includes(q)).slice(0, 8)
+        .map((p) => `<button type="button" class="secundario" data-poner="${escapar(p.id)}">${escapar(p.titulo)} · ${fmt(p.precio)}</button>`).join('')
+        || '<p class="ayuda">Ninguna joya con ese nombre.</p>';
+    });
+    t.querySelector('[data-guardar]').addEventListener('click', async (ev) => {
+      const boton = ev.currentTarget;
+      boton.loading = true;
+      try {
+        const r = await guardarConjunto(c, e.joyas, descuento, moneda);
+        e.sugeridas = false;
+        avisar(`«${c.titulo}» queda en ${fmt(r.precio)}`);
+        refrescar(c);
+      } catch (error) {
+        avisar(error.message, true);
+      }
+      boton.loading = false;
+    });
+  });
+
+  document.getElementById('c-todos').addEventListener('click', async (ev) => {
+    const boton = ev.currentTarget;
+    const lista = porGuardar();
+    if (!lista.length) { avisar('Todos los conjuntos ya están al día'); return; }
+    boton.loading = true;
+    let hechos = 0;
+    try {
+      for (const c of lista) {
+        await guardarConjunto(c, estado.get(c.id).joyas, descuento, moneda);
+        estado.get(c.id).sugeridas = false;
+        hechos += 1;
+        refrescar(c);
+      }
+      avisar(`${hechos} conjuntos guardados con su precio nuevo`);
+    } catch (error) {
+      avisar(`Se guardaron ${hechos}. ${error.message}`, true);
+    }
+    boton.loading = false;
+  });
+}
+
 let temporadaEditor = null;
 
 function campoTemporada(c, clave, propios, datos, tienda, ingles) {
