@@ -967,3 +967,23 @@ el dorado, en los colores sacados de las fotos reales (rubí, zafiro, ónix, esm
 `branding/muestras-gemas/` y publicadas en `admin/muestras/`. Se pusieron con el panel →
 Colores → «Desde un enlace…» (nuevo: pegas la dirección de una imagen y Shopify la trae a
 Archivos), en las dos tiendas.
+
+### Selector en dos filas para Clover y Green/Red Gem (11-nov)
+
+- **Clover** (10 pulseras: negro, rojo, azul, blanco y verde, cada una en plata y oro, en las dos
+  tiendas): arriba el metal, abajo «Trébol» / «Clover» con **color liso** (como los cordones de
+  Capri, pedido del usuario). Colores nuevos en el panel → Colores, etiquetas `trebol-negro`
+  #171717, `trebol-rojo` #7c3738, `trebol-azul` #2b4f7a, `trebol-blanco` #e3e1e0 (nácar),
+  `trebol-verde` #1d6651, sacados de las fotos de producto.
+- **Green Gem / Red Gem** (4 pulseras): abajo «Gema» con las mismas muestras degradadas de los
+  Vault (`gema-verde`, `gema-roja`).
+- En .cl la Red Gem de plata tenía también la etiqueta `oro` por error: se le quitó.
+- Familias unidas con el botón nuevo del panel → Productos: buscar («Clover», «Gem») y
+  «Unir estos N en una familia» (dos clics; hasta 11 joyas).
+
+### Archivados (11-nov, a pedido del usuario)
+
+- Colgantes agotados: Aurelio's Cross, Patron Tag (plata y oro), Savage Tag, Bar Pendant Oro,
+  Cross Faith, Roma Cross y Fleur de lis Oro Pendant — en .cl los 8; en .com solo existía Bar
+  Pendant Oro Pendant (borrador).
+- Conjuntos Fleur de lis (Rope, Miami 5mm, Miami 3mm y OT Fígaro, todos Oro): en las dos tiendas.
