@@ -1,7 +1,7 @@
 /* Inicio de la tienda: la cuadrícula de colecciones sobre negro (reunión
  * 9-nov). En Navidad, cada foto es la del metacampo de colección
  * custom.foto_navidad, que esta app crea. */
-import { gql, comprobarErrores } from './api.js?v=202611111132';
+import { gql, comprobarErrores } from './api.js?v=202611111136';
 
 const METACAMPO_NAVIDAD = `
   query MetacampoNavidad {

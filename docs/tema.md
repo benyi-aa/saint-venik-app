@@ -575,6 +575,42 @@ cada `deploy` (`AssetSizeAppBlockJavaScript`). Se rozó al añadir esto, así qu
 los comentarios largos del script se resumieron y el porqué completo quedó
 aquí.
 
+### Notas de sv-badges.js (11-nov)
+
+Shopify exige que `sv-badges.js` (el JavaScript del bloque «Insignias», declarado en su schema)
+pese como máximo **10000 bytes**. Cada `deploy` lo revisa (`AssetSizeAppBlockJavaScript`) y avisa
+si se pasa. El 11-nov pesaba 10165 B y se bajó a ~8,9 KB acortando los comentarios; las
+explicaciones completas quedaron aquí. Para medirlo antes de publicar:
+`npx shopify theme check --path extensions/saint-venik`. `sv-filtros.js` (19 KB) no cuenta: se
+carga con `<script src>` dentro del bloque, no desde el schema.
+
+- Los datos llegan resueltos en el JSON del bloque: el script no pide nada a la red, solo coloca
+  nodos. El grid se repinta sin recargar y no hay evento que avise: de ahí el `MutationObserver`,
+  y que decorar se pueda repetir sin duplicar (marcas `svInsignias` / `svBeneficio`).
+- El descuento vive en `sv-descuento.js`, que solo se carga si está encendido y llega después
+  (los dos van con `defer`): se le espera con el evento `sv:descuento`, y si no llega (se corta la
+  red), las insignias salen igual al `load`.
+- Un app embed no tiene garantizado `product` en todos los temas: la ficha se saca de la URL.
+- Los handles van entre barras (`|anillo|collar|`) para que «oro» no case con «collar-oro». Se
+  busca primero por id, porque el handle se traduce («anillo-signet» / «signet-ring»).
+- En el grid de una colección también vale la colección de la etiqueta (la lista de handles puede
+  ir atrasada); fuera del grid y en la ficha, solo la lista de handles, que el panel mantiene al día.
+- `anclar()`: sin contenedor posicionado, la insignia se iría a la esquina de la página.
+- El alto de la etiqueta del tema se mide una vez por pasada: por tarjeta eran ochenta reflujos
+  seguidos. Con el descuento encendido, la etiqueta «AHORRA» del tema está escondida y no cuenta;
+  «Agotado» sí.
+- En la tarjeta, el descuento va primero, arriba a la izquierda (donde estaba el del tema), y las
+  insignias de la izquierda debajo, a la altura medida (crece con la letra del tema).
+- En la ficha, la insignia va en todas las fotos (es un carrusel; así no desaparece al pasar). Con
+  «segunda», en el computador el descuento sale solo en la segunda foto (reunión 9-nov, como Lost
+  Gen); el resto lo esconde `sv-badges.css`.
+- Tarjetas: clase del tema + atributo `data-product-handle`; solo con el atributo se colaban otros
+  nodos.
+- Beneficios sobre las fotos: uno por foto desde la segunda (la primera queda limpia). El svg es de
+  la extensión (`innerHTML`); el texto es del comerciante (`textContent`).
+- El observador ignora los nodos que pone el propio script (`sv-tags`, `sv-desc-precio`,
+  `sv-benef-foto`); si no, cada insignia pintada provocaría otra pasada entera.
+
 ### Y el bloque de la ficha se quitó (5 nov 2026)
 
 Con los beneficios ya sobre las fotos, la fila bajo el botón quedaba repetida,
