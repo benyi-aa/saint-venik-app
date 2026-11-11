@@ -1,55 +1,55 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611111250';
+import { estaEmbebida } from './api.js?v=202611111318';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611111250';
+} from './colores.js?v=202611111318';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611111250';
+} from './config.js?v=202611111318';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611111250';
+} from './filtros.js?v=202611111318';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611111250';
-import { prepararNavidad } from './inicio.js?v=202611111250';
-import { quitarAguaDeColecciones } from './textos.js?v=202611111250';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111250';
+} from './productos.js?v=202611111318';
+import { prepararNavidad } from './inicio.js?v=202611111318';
+import { quitarAguaDeColecciones } from './textos.js?v=202611111318';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111318';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611111250';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111250';
+} from './temporadas.js?v=202611111318';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111318';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611111250';
+} from './guias.js?v=202611111318';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611111250';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111250';
+} from './vista-previa.js?v=202611111318';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111318';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611111250';
+} from './etiquetas.js?v=202611111318';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611111250';
-import { ICONOS, svgIcono } from './iconos.js?v=202611111250';
+} from './beneficios.js?v=202611111318';
+import { ICONOS, svgIcono } from './iconos.js?v=202611111318';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611111250';
+const VERSION = '202611111318';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1735,7 +1735,9 @@ async function pintarEtiquetas() {
           <s-number-field label="Porcentaje junto al precio" id="d-letra" value="${descuento.letra}" min="10" max="20" step="1" details="En píxeles."></s-number-field>` : ''}
           ${hayPrecios ? `
           <s-color-field label="Precio de oferta" id="d-oferta" value="${escapar(descuento.oferta)}"></s-color-field>
-          <s-color-field label="Precio tachado (antes)" id="d-tachado" value="${escapar(descuento.tachado)}"></s-color-field>` : ''}
+          <s-color-field label="Precio tachado (antes)" id="d-tachado" value="${escapar(descuento.tachado)}"></s-color-field>
+          ${camposConfig.has('precio_normal') ? `<s-color-field label="Precio sin descuento" id="d-normal" value="${escapar(descuento.normal || '#1C1D1D')}"
+            details="Las joyas sin precio tachado no van en rojo. Este es su color (el negro del tema es #1C1D1D)."></s-color-field>` : ''}` : ''}
         </s-grid>
 
         <div class="casilla-polaris">
@@ -2148,6 +2150,7 @@ function conectarDescuento(descuento, miPintado, camposConfig) {
       precioColores: el('d-precio-colores') ? el('d-precio-colores').checked : descuento.precioColores,
       oferta: el('d-oferta') ? colorPlano(el('d-oferta').value, descuento.oferta) : descuento.oferta,
       tachado: el('d-tachado') ? colorPlano(el('d-tachado').value, descuento.tachado) : descuento.tachado,
+      normal: el('d-normal') ? colorPlano(el('d-normal').value, descuento.normal || '#1C1D1D') : descuento.normal,
       fotoCompu: el('d-foto-segunda') ? (el('d-foto-segunda').checked ? 'segunda' : 'todas') : descuento.fotoCompu,
     };
   };

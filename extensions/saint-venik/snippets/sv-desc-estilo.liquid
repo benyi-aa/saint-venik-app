@@ -23,7 +23,8 @@
 {%- endif -%}
 {%- for e in shop.metaobjects.sv_configuracion_2.values -%}
   {%- if e.precio_colores.value == 'si' -%}
-    {%- assign o = e.precio_oferta.value | default: '#E32C2B' -%}{%- assign x = e.precio_tachado.value | default: '#8C8C8C' -%}
-    <style>.grid-product__price--original,.product__price--compare{color:{{ x }}}.grid-product__price--original2,.product__price.on-sale{color:{{ o }}}</style>
+    {%- assign o = e.precio_oferta.value | default: '#E32C2B' -%}{%- assign x = e.precio_tachado.value | default: '#8C8C8C' -%}{%- assign n = e.precio_normal.value -%}
+    {%- comment -%} Rojo solo con precio tachado: el tema envuelve TODO precio de tarjeta en --original2. {%- endcomment -%}
+    <style>{% if n != blank %}.grid-product__price--original2,.product__price{color:{{ n }}}{% endif %}.grid-product__price--original,.product__price--compare{color:{{ x }}}.grid-product__price:has(.grid-product__price--original) .grid-product__price--original2,.product__price.on-sale{color:{{ o }}}</style>
   {%- endif -%}{%- break -%}
 {%- endfor -%}
