@@ -117,10 +117,28 @@
     if (orden.some(function (o, i) { return o.c !== hijos[i]; })) orden.forEach(function (o) { form.appendChild(o.c); });
   }
 
-  /* Search & Discovery deja en ingles los nombres sin traducir. */
-  var NOMBRES = EN ? null : { availability: 'Disponibilidad', price: 'Precio' };
+  /* Search & Discovery deja en ingles los nombres sin traducir; en /en/ (.com), al reves:
+   * los filtros de la app (sv_color, sv_categoria, sv_tipo) tienen nombre y valores en
+   * espanol, y aqui se pasan al ingles (11-nov). */
+  var NOMBRES = EN
+    ? { 'categoría': 'Category', 'categoria': 'Category', tipo: 'Type' }
+    : { availability: 'Disponibilidad', price: 'Precio' };
+  var VALORES = EN ? {
+    dorado: 'Gold', plateado: 'Silver', anillos: 'Rings', cadenas: 'Chains', colgantes: 'Pendants',
+    pulseras: 'Bracelets', conjuntos: 'Sets', lentes: 'Sunglasses', brillantes: 'Iced',
+    cubanas: 'Cuban', perlas: 'Pearls', tenis: 'Tennis'
+  } : null;
+  function traducirValores(raizV) {
+    if (!VALORES || !raizV) return;
+    var w = document.createTreeWalker(raizV, 4);
+    var t;
+    while ((t = w.nextNode())) {
+      var m = /^(\s*)([^\s(]+)(.*)$/.exec(t.nodeValue);
+      var nuevo = m && VALORES[m[2].toLowerCase()];
+      if (nuevo) t.nodeValue = m[1] + nuevo + m[3];
+    }
+  }
   function traducir(form) {
-    if (!NOMBRES) return;
     var bs = form.querySelectorAll('.collapsible-trigger-btn');
     for (var i = 0; i < bs.length; i += 1) {
       for (var n = bs[i].firstChild; n; n = n.nextSibling) {
@@ -128,6 +146,11 @@
         if (NOMBRES[k]) n.nodeValue = ' ' + NOMBRES[k] + ' ';
       }
     }
+    if (!VALORES) return;
+    var gs = form.querySelectorAll('input[name^="filter.p.m.custom.sv_"]');
+    for (var j = 0; j < gs.length; j += 1) traducirValores(gs[j].closest('li') || gs[j].parentNode);
+    var activos = document.querySelectorAll('.tag-list--active-tags, .collection-filter__active, .active-filters');
+    for (var a = 0; a < activos.length; a += 1) traducirValores(activos[a]);
   }
 
   function el(tag, cls, txt) {
