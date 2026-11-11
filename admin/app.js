@@ -1,55 +1,55 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611111116';
+import { estaEmbebida } from './api.js?v=202611111120';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611111116';
+} from './colores.js?v=202611111120';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611111116';
+} from './config.js?v=202611111120';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611111116';
+} from './filtros.js?v=202611111120';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611111116';
-import { prepararNavidad } from './inicio.js?v=202611111116';
-import { quitarAguaDeColecciones } from './textos.js?v=202611111116';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111116';
+} from './productos.js?v=202611111120';
+import { prepararNavidad } from './inicio.js?v=202611111120';
+import { quitarAguaDeColecciones } from './textos.js?v=202611111120';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111120';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611111116';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111116';
+} from './temporadas.js?v=202611111120';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111120';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611111116';
+} from './guias.js?v=202611111120';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611111116';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111116';
+} from './vista-previa.js?v=202611111120';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111120';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611111116';
+} from './etiquetas.js?v=202611111120';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611111116';
-import { ICONOS, svgIcono } from './iconos.js?v=202611111116';
+} from './beneficios.js?v=202611111120';
+import { ICONOS, svgIcono } from './iconos.js?v=202611111120';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611111116';
+const VERSION = '202611111120';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -2604,8 +2604,15 @@ let estadoFiltros = { texto: '', ver: 'todos', simular: '' };
 
 /* Lo que dibuja un botón en la tienda, para la previa: la muestra del color o
  * el icono, y el texto. */
-function iconoBotonHtml(icono, colores) {
-  const ic = String(icono ?? '').trim();
+function iconoBotonHtml(icono, colores, boton) {
+  let ic = String(icono ?? '').trim();
+  /* Igual que blocks/filtros.liquid: un botón de categoría sin icono usa el
+   * de su valor en singular («Cadenas» → cadena). Sin esto la previa salía
+   * sin icono y la tienda con él. */
+  if (!ic && boton && boton.filtro === 'categoria') {
+    ic = String(boton.valor ?? '').trim().toLowerCase().replace(/s$/, '');
+    if (ic === 'lente') ic = 'lentes';
+  }
   if (ic.startsWith('color:')) {
     const etq = ic.slice(6).trim().toLowerCase();
     const c = colores.find((x) => x.etiqueta.trim().toLowerCase() === etq);
@@ -2624,7 +2631,7 @@ function previaFiltrosHtml(botones, colores, columnas, coleccionId) {
   return `<div class="sv-filtros"><div class="sv-filtros__dentro">${filas.map((fila) => {
     const cols = Math.min(fila.length, columnas);
     return `<div class="sv-filtros__fila${cols >= 4 ? ' sv-filtros__fila--apilada' : ''}" style="--cols:${cols}">${
-      fila.map((b, i) => `<span class="sv-filtro${i === 0 && fila === filas[0] ? ' is-activo' : ''}">${iconoBotonHtml(b.icono, colores)}<span>${escapar(b.nombre || 'Sin texto')}</span></span>`).join('')
+      fila.map((b, i) => `<span class="sv-filtro${i === 0 && fila === filas[0] ? ' is-activo' : ''}">${iconoBotonHtml(b.icono, colores, b)}<span>${escapar(b.nombre || 'Sin texto')}</span></span>`).join('')
     }</div>`;
   }).join('')}</div></div>`;
 }
@@ -2772,7 +2779,7 @@ async function pintarFiltros() {
       ${botones.map((b, i) => `
         <s-section data-boton="${escapar(b.id)}" heading="${escapar(b.nombre || 'Sin texto')}">
           <div class="cabecera-fila">
-            <span class="previa-boton" data-previa-boton>${iconoBotonHtml(b.icono, colores)}<span>${escapar(b.nombre || 'Sin texto')}</span></span>
+            <span class="previa-boton" data-previa-boton>${iconoBotonHtml(b.icono, colores, b)}<span>${escapar(b.nombre || 'Sin texto')}</span></span>
             <s-stack direction="inline" gap="small-300">
               <s-button variant="tertiary" accessibilityLabel="Subir" data-mover="arriba" ${i === 0 ? 'disabled' : ''}>↑</s-button>
               <s-button variant="tertiary" accessibilityLabel="Bajar" data-mover="abajo" ${i === botones.length - 1 ? 'disabled' : ''}>↓</s-button>
@@ -2948,7 +2955,7 @@ async function pintarFiltros() {
 
     const refrescar = () => {
       const v = comoQueda();
-      tarjeta.querySelector('[data-previa-boton]').innerHTML = `${iconoBotonHtml(v.icono, colores)}<span>${escapar(v.nombre || 'Sin texto')}</span>`;
+      tarjeta.querySelector('[data-previa-boton]').innerHTML = `${iconoBotonHtml(v.icono, colores, v)}<span>${escapar(v.nombre || 'Sin texto')}</span>`;
       tarjeta.heading = v.nombre || 'Sin texto';
       tarjeta.querySelector('[data-elegir-colecciones]').hidden = v.donde !== 'elegidas';
     };
