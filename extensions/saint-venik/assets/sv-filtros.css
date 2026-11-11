@@ -47,8 +47,9 @@
     flex-direction: row; gap: 9px; min-height: 46px; padding: 8px 14px;
     border-radius: 999px; font-size: 13.5px; letter-spacing: .02em;
   }
+  /* 20 px (11-nov): a 18 los íconos de cadena y anillo no se distinguían bien. */
   .sv-filtro svg,
-  .sv-filtros__fila--apilada .sv-filtro svg { width: 18px; height: 18px; }
+  .sv-filtros__fila--apilada .sv-filtro svg { width: 20px; height: 20px; }
   .sv-filtro__muestra { width: 17px; height: 17px; }
 }
 /* «Ordenar» dentro de Filtrar: se viste como los grupos del tema. */
