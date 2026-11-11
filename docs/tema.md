@@ -926,3 +926,44 @@ El usuario mandó siete fotos en uso, una por tarjeta del menú, que valen igual
 | Conjuntos | dos Cuban plateadas |
 
 Se recortaron en cuadrado (480 px), con la joya al centro, como `sv-menu-<clave>.jpg`. La de Anillos va con más zoom (420 px, recorte de 210 px de la foto original) para que el anillo se vea bien en la tarjeta de 80 px. Los originales están en `branding/menu/originales/` y la versión anterior en `branding/menu/v2/`.
+
+### 3x2 en inglés en .com (11-nov)
+
+.com tiene el español por defecto y el inglés en `/en/`. El «Arma tu 3x2» salía entero en
+español en `/en/pages/arma-tu-3x2` (textos de las secciones `sv3-*`, nombres de producto,
+«Oro», pastillas de filtro). Arreglado solo en el tema en vivo de .com (#161295269935):
+
+- **Snippet `sv3-t`** (nuevo): recibe un texto en español de una sección y, si la página va en
+  inglés (`request.locale.iso_code == 'en'`), devuelve su inglés de la lista; si no está en la
+  lista, lo deja igual. Las 9 secciones `sv3-*` pasan cada texto por él
+  (`{% render 'sv3-t', t: s.title %}`). En español no cambia nada.
+  **Si se cambia un texto en español en el editor del tema, hay que agregar su inglés en
+  `snippets/sv3-t.liquid`** (la clave va sin saltos de línea; un salto en el inglés se arma con
+  `| append: nl |`). Copia de lo subido: `branding/tema-com-3x2-ingles/`.
+- **`assets/sv-3x2.js`**: pide colecciones, productos y fichas con `Shopify.routes.root` delante
+  (`/en/…` en inglés), así los nombres llegan traducidos; reconoce «(Gold)» y «gold/silver»
+  para juntar la versión de oro y la de plata, y quita también «stainless steel / sterling
+  silver» de las descripciones (como ya hacía con «acero inoxidable»).
+- App (embed «Filtros rápidos»): las pastillas del 3x2 usan `nombre_en` en inglés y
+  `sv-filtros-3x2.js` pide los productos con la misma raíz.
+- Respaldo de lo anterior: `branding/respaldos-tema/2026-11-11-3x2-ingles-com/`.
+
+Comprobado: /en/ todo en inglés (portada, barra, grilla, bandeja, incluye, reseñas, cierre),
+filtros Chains y Gold funcionan igual que en español (49 joyas con dos metales, 31 en oro), y
+/pages/arma-tu-3x2 sigue igual en español.
+
+### Menú «Filter» de las colecciones en inglés (11-nov)
+
+Los filtros de la app (`sv_color`, `sv_categoria`, `sv_tipo`) tienen nombre y valores en
+español (Categoría, Tipo, Dorado, Cadenas, Cubanas…). En `/en/`, `sv-filtros.js` los pasa al
+inglés al pintar el menú (Category, Type, Gold, Chains, Cuban, Iced, Pearls, Tennis…). El valor
+que se envía al filtrar sigue siendo el español, así que filtrar funciona igual.
+
+### Muestras de las gemas Vault (11-nov)
+
+Las 4 gemas (colores NEGRA, VERDE, AZUL, ROJA con etiquetas `gema-*`, distintos de los cordones
+de Capri) tenían un color plano. Ahora llevan una imagen con el mismo degradado del plateado y
+el dorado, en los colores sacados de las fotos reales (rubí, zafiro, ónix, esmeralda):
+`branding/muestras-gemas/` y publicadas en `admin/muestras/`. Se pusieron con el panel →
+Colores → «Desde un enlace…» (nuevo: pegas la dirección de una imagen y Shopify la trae a
+Archivos), en las dos tiendas.

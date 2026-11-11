@@ -1,0 +1,112 @@
+{%- liquid
+assign s = section.settings
+assign imgs = 0
+if s.image_1 != blank
+assign imgs = imgs | plus: 1
+endif
+if s.image_2 != blank
+assign imgs = imgs | plus: 1
+endif
+if s.image_3 != blank
+assign imgs = imgs | plus: 1
+endif
+assign display_font = "'Playfair Display', serif"
+if s.display_font == 'theme'
+assign display_font = 'var(--typeHeaderPrimary), var(--typeHeaderFallback)'
+endif
+# Temporada (11-nov): con una temporada activa (Panel Saint Venik → Temporadas), la portada usa
+# el banner de esa temporada de la colección elegida (Essentials de fábrica): sv-<clave>-portada-<col>.jpg
+# y -movil.jpg, los de la pestaña Fotos. Sin temporada, o sin esa foto, quedan las fotos de aquí.
+assign sv_tm = ''
+for sv_e in shop.metaobjects.sv_configuracion_2.values
+assign sv_tm = sv_e.temporada.value | append: '' | strip | downcase
+break
+endfor
+assign sv_ti = nil
+assign sv_tim = nil
+assign sv_tc = s.temporada_banner | default: 'essentials'
+if sv_tm != blank and sv_tm != 'normal' and sv_tm != 'panel' and sv_tc != 'ninguno'
+assign sv_n = 'sv-' | append: sv_tm | append: '-portada-' | append: sv_tc
+assign sv_f = sv_n | append: '.jpg'
+assign sv_ti = images[sv_f]
+assign sv_f = sv_n | append: '-movil.jpg'
+assign sv_tim = images[sv_f]
+endif
+-%}
+{{ 'sv-3x2.css' | asset_url | stylesheet_tag }}
+{%- if s.hide_header or s.hide_announcement or s.hide_countdown -%}
+<style>
+{%- if s.hide_header -%}#HeaderWrapper,.header-wrapper{display:none!important}{%- endif -%}
+{%- if s.hide_announcement -%}.shopify-section-group-header-group[id$="__announcement"],.announcement-bar{display:none!important}{%- endif -%}
+{%- if s.hide_countdown -%}.svcd{display:none!important}{%- endif -%}
+</style>
+{%- endif -%}
+<script src="{{ 'sv-3x2.js' | asset_url }}" defer></script>
+{%- if s.ratio_m == 'wide' or s.bg_m != blank -%}
+<style>@media (max-width:749px){
+{%- if s.ratio_m == 'wide' -%}#shopify-section-{{ section.id }} .sv3-hero--m-wide{min-height:0;aspect-ratio:auto}#shopify-section-{{ section.id }} .sv3-hero--m-wide .sv3-hero__media{height:auto;aspect-ratio:100/{{ s.wide_h | default: 50 }}}#shopify-section-{{ section.id }} .sv3-hero--m-wide .sv3-hero__content{padding:22px 20px 26px}#shopify-section-{{ section.id }} .sv3-hero--m-wide .sv3-hero__cta{margin-top:18px}{%- endif -%}
+{%- if s.bg_m != blank -%}#shopify-section-{{ section.id }} .sv3-hero--m-below{background:{{ s.bg_m }};color:{{ s.text_mc | default: '#111111' }}}#shopify-section-{{ section.id }} .sv3-hero--m-below .sv3-hero__cta{background:{{ s.text_mc | default: '#111111' }};border-color:{{ s.text_mc | default: '#111111' }};color:{{ s.bg_m }}}{%- endif -%}
+}</style>
+{%- endif -%}
+{%- if s.display_font == 'playfair' -%}
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap">
+{%- endif -%}
+<section class="sv3 sv3-hero sv3-hero--{{ s.align }}{% if s.ratio_m == 'square' %} sv3-hero--m-sq{% elsif s.ratio_m == 'wide' %} sv3-hero--m-wide{% endif %}{% if s.text_m == 'below' %} sv3-hero--m-below{% endif %}" data-sv3-hero
+style="--sv3-display:{{ display_font }};--sv3-hero-text:{{ s.text }};--sv3-shade:{{ s.overlay | divided_by: 100.0 }};--sv3-h:{{ s.height }}vh;--sv3-hm:{{ s.height_m }}vh;--sv3-h1:{{ s.title_size }}px;--sv3-h1m:{{ s.title_size_m }}px">
+<div class="sv3-hero__media sv3-hero__media--{% if sv_ti %}1{% else %}{{ imgs }}{% endif %}{% if s.video == blank %}{% if sv_ti and sv_tim %} has-m{% elsif s.image_mobile != blank %} has-m{% endif %}{% endif %}">
+{%- if s.video != blank -%}
+{{ s.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, class: 'sv3-hero__video' }}
+{%- elsif sv_ti -%}
+{{ sv_ti | image_url: width: 2000 | image_tag: class: 'sv3-hero__img', fetchpriority: 'high', alt: '', sizes: '100vw', widths: '800, 1200, 1600, 2000' }}
+{%- elsif imgs > 0 -%}
+{%- for n in (1..3) -%}
+{%- assign key = 'image_' | append: n -%}
+{%- if s[key] != blank -%}
+{%- assign focal = 'object-position:' | append: s[key].presentation.focal_point -%}
+{%- assign w = '(min-width: 750px) 34vw, 100vw' -%}
+{%- if imgs == 1 -%}{%- assign w = '100vw' -%}{%- endif -%}
+{{ s[key] | image_url: width: 1400 | image_tag: class: 'sv3-hero__img', fetchpriority: 'high', style: focal, alt: s[key].alt, sizes: w, widths: '500, 800, 1100, 1400' }}
+{%- endif -%}
+{%- endfor -%}
+{%- else -%}
+{{ 'lifestyle-1' | placeholder_svg_tag: 'sv3-hero__img' }}
+{%- endif -%}
+{%- if sv_ti and sv_tim and s.video == blank -%}
+{{ sv_tim | image_url: width: 900 | image_tag: class: 'sv3-hero__img sv3-hero__img--m', alt: '', sizes: '100vw', widths: '450, 700, 900' }}
+{%- elsif s.image_mobile != blank and s.video == blank -%}
+{%- assign focal_m = 'object-position:' | append: s.image_mobile.presentation.focal_point -%}
+{{ s.image_mobile | image_url: width: 900 | image_tag: class: 'sv3-hero__img sv3-hero__img--m', style: focal_m, alt: s.image_mobile.alt, sizes: '100vw', widths: '450, 700, 900' }}
+{%- endif -%}
+</div>
+<div class="sv3-hero__shade"></div>
+<div class="sv3-hero__content">
+{%- if s.rating_text != blank -%}
+<p class="sv3-hero__kicker">
+{%- if s.show_stars -%}<span class="sv3-stars" aria-hidden="true">{% for i in (1..5) %}<svg viewBox="0 0 20 20"><path d="M10 1.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2L10 13.9 5.4 16l.9-5.2L2.4 7.1l5.2-.8z"/></svg>{% endfor %}</span>{%- endif -%}
+{% render 'sv3-t', t: s.rating_text %}
+</p>
+{%- endif -%}
+<h1 class="sv3-hero__title">{% capture sv_t %}{% render 'sv3-t', t: s.title %}{% endcapture %}{{ sv_t | newline_to_br }}</h1>
+{%- if s.subtitle != blank -%}<p class="sv3-hero__sub">{% render 'sv3-t', t: s.subtitle %}</p>{%- endif -%}
+{%- if s.cta != blank -%}<button type="button" class="sv3-hero__cta" data-sv3-go>{% render 'sv3-t', t: s.cta %}</button>{%- endif -%}
+{%- if s.note != blank -%}<p class="sv3-hero__note">{% render 'sv3-t', t: s.note %}</p>{%- endif -%}
+</div>
+</section>
+{%- if section.blocks.size > 0 -%}
+<div class="sv3 sv3-strip" style="--sv3-strip-bg:{{ s.strip_bg }};--sv3-strip-text:{{ s.strip_text }}">
+<ul class="sv3-strip__list">
+{%- for block in section.blocks -%}
+<li {{ block.shopify_attributes }}>
+{%- if block.settings.image != blank -%}
+{{ block.settings.image | image_url: width: 48 | image_tag: class: 'sv3-ico', alt: '', loading: 'lazy' }}
+{%- elsif block.settings.icon != 'none' -%}
+{%- render 'sv3-icon', icon: block.settings.icon -%}
+{%- endif -%}
+<span>{% render 'sv3-t', t: block.settings.text %}</span>
+</li>
+{%- endfor -%}
+</ul>
+</div>
+{%- endif -%}
+{% schema %}{"name":"3x2 · Portada","tag":"div","class":"sv3-section","settings":[{"type":"header","content":"Esta página"},{"type":"checkbox","id":"hide_header","label":"Ocultar el encabezado (logo y menú)","default":true},{"type":"checkbox","id":"hide_announcement","label":"Ocultar la barra de anuncios","default":false},{"type":"checkbox","id":"hide_countdown","label":"Ocultar el contador de la oferta","default":true},{"type":"paragraph","content":"Solo afecta a esta página: el resto de la tienda sigue igual."},{"type":"header","content":"Imagen o video"},{"type":"paragraph","content":"En computador se muestran hasta 3 fotos lado a lado (una por cada joya del 3x2). Con una sola foto, ocupa todo el ancho. Si cargas un video, reemplaza las fotos."},{"type":"video","id":"video","label":"Video (opcional)"},{"type":"image_picker","id":"image_1","label":"Foto 1"},{"type":"image_picker","id":"image_2","label":"Foto 2"},{"type":"image_picker","id":"image_3","label":"Foto 3"},{"type":"image_picker","id":"image_mobile","label":"Foto para celular","info":"Ideal cuadrada (1080 × 1080). Si la dejas vacía, se usa la Foto 1."},{"type":"select","id":"temporada_banner","label":"En temporada (Navidad…): banner de","info":"Con una temporada activa en Panel Saint Venik, la portada usa el banner de esa temporada de esta colección (pestaña Fotos). «Ninguno» = siempre las fotos de arriba.","default":"essentials","options":[{"value":"essentials","label":"Essentials"},{"value":"bestsellers","label":"Best Sellers"},{"value":"cadena","label":"Cadenas"},{"value":"pulsera","label":"Pulseras"},{"value":"colgantes","label":"Colgantes"},{"value":"conjuntos","label":"Conjuntos"},{"value":"anillos","label":"Anillos"},{"value":"ninguno","label":"Ninguno"}]},{"type":"range","id":"height","label":"Alto en computador","min":50,"max":100,"step":5,"unit":"vh","default":80},{"type":"select","id":"ratio_m","label":"Formato en celular","default":"square","options":[{"value":"square","label":"Cuadrado 1:1 (1080 × 1080)"},{"value":"tall","label":"Alto (usa «Alto en celular»)"},{"value":"wide","label":"Horizontal (banner bajo, la joya al centro)"}]},{"type":"range","id":"height_m","label":"Alto en celular","min":50,"max":100,"step":5,"unit":"vh","default":80},{"type":"select","id":"text_m","label":"Texto en celular","default":"below","options":[{"value":"below","label":"Debajo de la foto"},{"value":"over","label":"Sobre la foto"}]},{"type":"range","id":"wide_h","label":"Horizontal: alto de la foto","info":"En % del ancho. 50 = el doble de ancha que de alta.","min":33,"max":75,"step":1,"unit":"%","default":50},{"type":"color","id":"bg_m","label":"Fondo del texto en celular","info":"Con el texto debajo de la foto. Vacío = el oscuro de siempre."},{"type":"color","id":"text_mc","label":"Color del texto en celular","default":"#111111"},{"type":"range","id":"overlay","label":"Oscurecer la imagen","min":0,"max":90,"step":5,"unit":"%","default":55},{"type":"header","content":"Textos"},{"type":"select","id":"align","label":"Posición del texto","default":"left","options":[{"value":"left","label":"Abajo a la izquierda"},{"value":"center","label":"Abajo al centro"}]},{"type":"checkbox","id":"show_stars","label":"Mostrar estrellas","default":true},{"type":"text","id":"rating_text","label":"Línea superior","default":"4.87/5 · +50.000 clientes"},{"type":"textarea","id":"title","label":"Título","info":"Usa Enter para cortar la línea.","default":"Elige 3.\nPaga 2."},{"type":"select","id":"display_font","label":"Tipografía del título","default":"playfair","options":[{"value":"playfair","label":"Playfair Display (como la portada del inicio)"},{"value":"theme","label":"Tipografía de títulos del tema"}]},{"type":"range","id":"title_size","label":"Tamaño del título (computador)","min":32,"max":96,"step":2,"unit":"px","default":72},{"type":"range","id":"title_size_m","label":"Tamaño del título (celular)","min":28,"max":64,"step":2,"unit":"px","default":46},{"type":"text","id":"subtitle","label":"Bajada","default":"Una de las joyas va por nuestra cuenta."},{"type":"text","id":"cta","label":"Botón","default":"Armar mi 3x2"},{"type":"text","id":"note","label":"Nota inferior","default":"Oferta por tiempo limitado · Garantía Eterna"},{"type":"color","id":"text","label":"Color del texto","default":"#f5f0e8"},{"type":"header","content":"Franja de beneficios"},{"type":"paragraph","content":"Se arma con los bloques «Beneficio» de esta sección."},{"type":"color","id":"strip_bg","label":"Fondo","default":"#000000"},{"type":"color","id":"strip_text","label":"Texto","default":"#ffffff"}],"blocks":[{"type":"badge","name":"Beneficio","limit":6,"settings":[{"type":"text","id":"text","label":"Texto","default":"Garantía Eterna"},{"type":"select","id":"icon","label":"Ícono","default":"diamante","options":[{"value":"oro","label":"Oro"},{"value":"brillo","label":"No se destiñe"},{"value":"hoja","label":"Hipoalergénico"},{"value":"agua","label":"Agua y sudor"},{"value":"diamante","label":"Diamante"},{"value":"escudo","label":"Garantía"},{"value":"corazon","label":"Clientes"},{"value":"envio","label":"Envío"},{"value":"regalo","label":"Regalo"},{"value":"none","label":"Sin ícono"}]},{"type":"image_picker","id":"image","label":"Ícono propio (opcional)","info":"Reemplaza el ícono elegido. Ideal: blanco, fondo transparente."}]}],"presets":[{"name":"3x2 · Portada","blocks":[{"type":"badge","settings":{"text":"Oro 18k","icon":"oro"}},{"type":"badge","settings":{"text":"No se destiñe","icon":"brillo"}},{"type":"badge","settings":{"text":"Hipoalergénico","icon":"hoja"}},{"type":"badge","settings":{"text":"Garantía Eterna","icon":"diamante"}}]}]}{% endschema %}

@@ -1,0 +1,31 @@
+{%- assign s = section.settings -%}
+{%- assign lines = s.photos | newline_to_br | split: '<br />' -%}
+{%- assign curated = false -%}{%- if section.blocks.size == 0 and s.photos != blank -%}{%- assign curated = true -%}{%- endif -%}
+{{ 'sv-3x2.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sv-3x2.js' | asset_url }}" defer></script>
+<section class="sv3 sv3-galeria" {% if section.blocks.size == 0 and curated == false %}hidden{% endif %} style="--sv3-bg:{{ s.bg }};--sv3-text:{{ s.text }};--sv3-pt:{{ s.pad_top }}px;--sv3-pb:{{ s.pad_bottom }}px">
+<div class="sv3-wrap sv3-head sv3-head--row">
+<div>
+{%- if s.kicker != blank -%}<p class="sv3-kicker">{% render 'sv3-t', t: s.kicker %}</p>{%- endif -%}
+{%- if s.heading != blank -%}<h2 class="sv3-h">{% render 'sv3-t', t: s.heading %}</h2>{%- endif -%}
+</div>
+<div class="sv3-galnav">
+<button type="button" data-sv3-galnav="-1" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m15 5-7 7 7 7"/></svg></button>
+<button type="button" data-sv3-galnav="1" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 5 7 7-7 7"/></svg></button>
+</div>
+</div>
+<div class="sv3-gal"{% if section.blocks.size == 0 and curated == false %} data-sv3-gallery-auto data-count="{{ s.count }}"{% if s.show_names %} data-names{% endif %}{% endif %}>
+{%- if curated -%}
+{%- for line in lines -%}{%- assign parts = line | split: '|' -%}{%- assign u = parts[0] | strip -%}{%- if u != blank -%}
+<figure><img src="{{ u | escape }}" alt="{{ parts[1] | strip | escape }}" loading="lazy">{%- if s.show_names and parts[1] != blank -%}<figcaption>{{ parts[1] | strip }}</figcaption>{%- endif -%}</figure>
+{%- endif -%}{%- endfor -%}
+{%- endif -%}
+{%- for block in section.blocks -%}
+<figure {{ block.shopify_attributes }}>
+{%- if block.settings.image != blank -%}{{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy', alt: block.settings.caption }}{%- else -%}{{ 'image' | placeholder_svg_tag }}{%- endif -%}
+{%- if block.settings.caption != blank -%}<figcaption>{% render 'sv3-t', t: block.settings.caption %}</figcaption>{%- endif -%}
+</figure>
+{%- endfor -%}
+</div>
+</section>
+{% schema %}{"name":"3x2 · Así lo llevan","tag":"div","class":"sv3-section","settings":[{"type":"paragraph","content":"Orden de uso: bloques «Foto» subidos; si no hay, las fotos elegidas de abajo; si también está vacío, fotos automáticas de Loox."},{"type":"textarea","id":"photos","label":"Fotos de clientes elegidas","info":"Una por línea: enlace | nombre. Son fotos reales de reseñas de Loox; puedes quitar, agregar o reordenar líneas.","default":"https://images.loox.io/uploads/2026/9/13/U8KHdds6I_mid.jpg | Jorge S.\nhttps://images.loox.io/uploads/2026/4/7/1Y408JFg8_mid.jpg | Katrine T.\nhttps://images.loox.io/uploads/2026/6/21/DUwzmPcfR_mid.jpg | Mariano P.\nhttps://images.loox.io/uploads/2026/10/3/NkgcgjOXEk_mid.jpg | Felipe V.\nhttps://images.loox.io/uploads/2026/6/6/FgQ3XR4DF_mid.jpg | Ignacio L.\nhttps://images.loox.io/uploads/2026/2/2/XK3ac9Z0U_mid.jpg | Lorena F.\nhttps://images.loox.io/uploads/2025/11/27/1CFdWJ-fy_mid.jpg | David S.\nhttps://images.loox.io/uploads/2026/4/7/g7_XVkOor_mid.jpg | Eugenio P.\nhttps://images.loox.io/uploads/2026/6/19/XZNgCbQ37_mid.jpg | Mildred G.\nhttps://images.loox.io/uploads/2026/5/2/GuXEePlLC_mid.jpg | Miguel\nhttps://images.loox.io/uploads/2026/2/9/2VV4sAvq2T_mid.jpg | Darwin G.\nhttps://images.loox.io/uploads/2026/6/13/neK7CpZxdq_mid.jpg | Felipe Ignacio F.\nhttps://images.loox.io/uploads/2026/2/18/t0Jn6jjM5_mid.jpg | Bastian G.\nhttps://images.loox.io/uploads/2026/3/14/AS_tNoufb_mid.jpg | Diego L."},{"type":"text","id":"heading","label":"Título","default":"Así lo llevan"},{"type":"text","id":"kicker","label":"Texto superior","default":"+50.000 clientes en todo Chile"},{"type":"range","id":"count","label":"Fotos automáticas","min":4,"max":16,"step":1,"default":12},{"type":"checkbox","id":"show_names","label":"Mostrar nombre del cliente","default":true},{"type":"color","id":"bg","label":"Fondo","default":"#ffffff"},{"type":"color","id":"text","label":"Texto","default":"#1c1d1d"},{"type":"range","id":"pad_top","label":"Espacio superior","min":0,"max":100,"step":4,"unit":"px","default":24},{"type":"range","id":"pad_bottom","label":"Espacio inferior","min":0,"max":100,"step":4,"unit":"px","default":48}],"blocks":[{"type":"foto","name":"Foto","limit":16,"settings":[{"type":"image_picker","id":"image","label":"Imagen"},{"type":"text","id":"caption","label":"Texto sobre la foto"}]}],"presets":[{"name":"3x2 · Así lo llevan"}]}{% endschema %}
