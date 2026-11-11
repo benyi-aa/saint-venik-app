@@ -426,6 +426,13 @@ estrella, Compass II set, Vault Green, Faith Oro + Vault Blue).
   concepto más fluido, menos rígido.
   Mismo día: el usuario pidió volver en CADENAS a la de la sexta vuelta (cubanas oro y plata sueltas
   sobre burdeo); Pulseras se queda con P3. C4 guardada en `v7-colgando/`.
+- 11-nov (feedback del usuario en un teléfono de ~514 px de ancho, «solo en móvil»): (1) en Colgantes
+  teléfono a la placa plateada le llegaba también una cadena DORADA (salía de su argolla hacia la derecha):
+  se borró sin IA (píxeles dorados de esa zona rellenados con el fondo, protegiendo la plata); la original,
+  en `estudio-10nov/respaldo-11nov/`. (2) Pulseras se veía cortada arriba: la franja del teléfono medía 165 px
+  fijos y las fotos de temporada (2400×1000) se recortaban arriba y abajo en teléfonos de más de ~400 px.
+  Ahora, solo con foto de temporada `-movil`, la franja mide `max(165px, 100vw / 2.4)` (`sv-portada.css`):
+  la foto se ve entera en cualquier ancho y el título sigue abajo.
 - Descargas del generador (10-nov): el servidor entregaba a pocos KB/s y `erp.sh BAJAR` corta a los
   300 s (archivo truncado). Se completaron pidiendo lo que faltaba por rangos (`curl -r`) en trozos
   paralelos; la API acepta Range.

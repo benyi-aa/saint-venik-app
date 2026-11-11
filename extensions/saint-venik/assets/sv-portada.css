@@ -49,6 +49,10 @@ html.sv-portada .custom-content:has(:is(.collection-description-wrapper,[class^=
    * -movil (sv-<clave>-portada-<colección>-movil.jpg) ya traen las joyas al centro y sobre el título; se
    * muestran enteras. Las normales (sv-portada-…) tienen sus propias reglas arriba. */
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="-portada-"][src*="-movil."]:not([src*="/sv-portada-"]) { --sv-alto: 100%; --sv-encuadre: 50% 50%; }
+  /* Esas fotos miden 2400×1000 (2,4:1). Con 165 px de alto fijo, en teléfonos de más de ~400 px de ancho
+   * la foto se recortaba arriba y abajo (pulseras cortadas en un teléfono de ~514 px, 11-nov): la franja
+   * crece con el ancho y la foto se ve entera. El título va abajo con su margen fijo, no se mueve. */
+  html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img[src*="-portada-"][src*="-movil."]:not([src*="/sv-portada-"])) { height: max(165px, calc(100vw / 2.4)); }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_cadena"] { --sv-alto: 178%; --sv-encuadre: 58% 100%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_pulsera"] { --sv-alto: 128%; --sv-encuadre: 40% 100%; }
   html.sv-portada :is(.collection-description-wrapper,[class^="sv-coldesc-"]:not([class*="__"])):has(img) img[src*="coleccion_anillos"] { --sv-encuadre: 50% 100%; }
