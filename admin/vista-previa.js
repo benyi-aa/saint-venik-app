@@ -6,7 +6,7 @@
  * que los pone el tema; en estructura, orden y visibilidad por idioma, no.
  */
 
-import { svgIcono } from './iconos.js?v=202611111435';
+import { svgIcono } from './iconos.js?v=202611111443';
 
 const ID_YOUTUBE = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/;
 

@@ -715,4 +715,5 @@ body { padding-bottom: calc(48px + var(--shopify-safe-area-inset-bottom, 0px)); 
 
 /* Colores: imagen de la muestra desde un enlace (11-nov) */
 .enlace-imagen { display: flex; gap: 6px; margin-top: 8px; }
+.enlace-imagen[hidden] { display: none; }
 .enlace-imagen input { flex: 1; min-width: 0; padding: 6px 10px; border: 1px solid #c9cccf; border-radius: 8px; font: inherit; }

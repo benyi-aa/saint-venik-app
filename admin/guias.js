@@ -26,16 +26,16 @@
  * con "La capacidad no esta activada: publishable", y aqui no aporta nada: la
  * visibilidad en la tienda ya la decide PUBLIC_READ.
  */
-import { gql, comprobarErrores, capacidadActiva, enUnaPasada } from './api.js?v=202611111435';
-import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611111435';
-import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611111435';
-import { copiarArchivo } from './archivos.js?v=202611111435';
-import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611111435';
-import { faltaEstructuraFiltros, asegurarEstructuraFiltros } from './filtros.js?v=202611111435';
+import { gql, comprobarErrores, capacidadActiva, enUnaPasada } from './api.js?v=202611111443';
+import { asegurarConfig, existeConfig, faltanCamposConfig } from './config.js?v=202611111443';
+import { faltaEstructuraColor, asegurarEstructuraColor } from './colores.js?v=202611111443';
+import { copiarArchivo } from './archivos.js?v=202611111443';
+import { faltaEstructuraEtiquetas, asegurarEstructuraEtiquetas } from './etiquetas.js?v=202611111443';
+import { faltaEstructuraFiltros, asegurarEstructuraFiltros } from './filtros.js?v=202611111443';
 import {
   faltaEstructuraBeneficios, asegurarEstructuraBeneficios, sembrarBeneficios,
-} from './beneficios.js?v=202611111435';
-import { faltaEstructuraInicio, asegurarEstructuraInicio } from './inicio.js?v=202611111435';
+} from './beneficios.js?v=202611111443';
+import { faltaEstructuraInicio, asegurarEstructuraInicio } from './inicio.js?v=202611111443';
 
 export const TIPO_BLOQUE = 'bloque_guia';
 
