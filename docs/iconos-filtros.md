@@ -76,3 +76,23 @@ Publicados los cuatro de categoría en versión de línea, aprobada por el usuar
 eslabones en trazo cortado), `colgante` (cadena en V con placa), `pulsera` (óvalo de eslabones con
 broche) y `anillo` (aro con placa alargada, girado 20°). Se descartaron el destello de cuatro puntas
 y la versión detallada con eslabones reales. `conjunto`, `tenis`, `perla` y `lentes` siguen igual.
+
+### Cómo se llegó y qué queda (para seguir en otro chat)
+
+- Rondas descartadas por el usuario: (1) set genérico de siete íconos; (2) «eslabón y destello»
+  (no quiere la estrella); (3) la joya puesta en el cuerpo (ilegible a 16 px). Pidió solo cuatro
+  filtros (cadena, colgante, pulsera, anillo) y que se parezcan a lo que se vende. Eligió la versión
+  de **línea** sobre la **detallada** (eslabones reales entrelazados, trazo 1–1,2 y relleno en el
+  anillo); la detallada se puede regenerar si la pide.
+- Referencias reales: Cadena Cuban Link, Faith/Florence/Vault Pendant, Pulsera Miami Cuban (óvalo
+  acostado con broche), Anillo Black Hades (placa alargada con incrustación negra).
+- Commits: `d381b9c` (íconos + rótulos, desplegado a .cl y .com) y `27b4f73` (panel: la vista previa
+  de Filtros usa el ícono de la categoría en singular, como la tienda; solo panel, sin deploy).
+- Revisado en .cl y .com: Best Sellers en teléfono (21 px) y computador 1280/1440 (18 px, una fila);
+  «Arma tu 3x2» no usa íconos de categoría; panel → Filtros muestra los cuatro en la vista previa.
+- Sin revisar: el desplegable «Ícono» del panel (no se abre con automatización) y el trazo a tamaño
+  real en computador (la captura sale reducida).
+- Dudas abiertas: el anillo puede recordar a un llavero; a 16–18 px los eslabones se achican (opción:
+  subir el tamaño del ícono en `assets/sv-filtros.css`).
+- Para ver los íconos como imagen sin navegador: armar un SVG y `qlmanage -t -s 1800 -o . hoja.svg`.
+- El remoto de GitHub se movió a `benyi-aa/saint-venik-app` (el push funciona, conviene actualizarlo).
