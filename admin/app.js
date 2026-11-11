@@ -1,59 +1,59 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611111347';
+import { estaEmbebida } from './api.js?v=202611111352';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611111347';
+} from './colores.js?v=202611111352';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611111347';
+} from './config.js?v=202611111352';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611111347';
+} from './filtros.js?v=202611111352';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611111347';
-import { prepararNavidad } from './inicio.js?v=202611111347';
+} from './productos.js?v=202611111352';
+import { prepararNavidad } from './inicio.js?v=202611111352';
 import {
   prepararConjuntos, cargarConjuntos, cargarCatalogo, sugerirJoyas, calcular, estaAlDia, formatear, guardarConjunto,
   DESCUENTO_POR_DEFECTO as DESCUENTO_CONJUNTOS,
-} from './conjuntos.js?v=202611111347';
-import { quitarAguaDeColecciones } from './textos.js?v=202611111347';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111347';
+} from './conjuntos.js?v=202611111352';
+import { quitarAguaDeColecciones } from './textos.js?v=202611111352';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111352';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611111347';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111347';
+} from './temporadas.js?v=202611111352';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111352';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611111347';
+} from './guias.js?v=202611111352';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611111347';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111347';
+} from './vista-previa.js?v=202611111352';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111352';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611111347';
+} from './etiquetas.js?v=202611111352';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611111347';
-import { ICONOS, svgIcono } from './iconos.js?v=202611111347';
+} from './beneficios.js?v=202611111352';
+import { ICONOS, svgIcono } from './iconos.js?v=202611111352';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611111347';
+const VERSION = '202611111352';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -3319,14 +3319,17 @@ async function pintarConjuntos() {
   const joyasHtml = (c) => estado.get(c.id).joyas.map((j) => `
     <span class="conj__joya">${j.imagen ? `<img src="${escapar(j.imagen)}&width=60" alt="">` : ''}${escapar(j.titulo)} · ${fmt(j.precio)}
       <button type="button" class="conj__quitar" data-quitar="${escapar(j.id)}" aria-label="Quitar ${escapar(j.titulo)}">×</button></span>`).join('');
-  const tarjeta = (c) => {
+  const hoyHtml = (c) => {
     const v = c.variantes[0];
+    return `Hoy en la tienda: <b>${fmt(v?.precio ?? 0)}</b>${v?.antes ? ` (antes ${fmt(v.antes)})` : ''}${c.activo ? '' : ' · borrador'}`;
+  };
+  const tarjeta = (c) => {
     return `
     <s-section heading="${escapar(c.titulo)}" data-conjunto="${escapar(c.id)}">
       <div class="conj">
         ${c.imagen ? `<img class="conj__foto" src="${escapar(c.imagen)}&width=120" alt="">` : '<div class="conj__foto"></div>'}
         <div class="conj__cuerpo">
-          <p class="ayuda">Hoy en la tienda: <b>${fmt(v?.precio ?? 0)}</b>${v?.antes ? ` (antes ${fmt(v.antes)})` : ''}${c.activo ? '' : ' · borrador'}</p>
+          <p class="ayuda" data-hoy>${hoyHtml(c)}</p>
           <div class="conj__joyas" data-joyas>${joyasHtml(c)}</div>
           <div class="conj__buscar"><input type="search" placeholder="Buscar una joya para agregar…" data-buscar>
             <div class="conj__resultados" data-resultados></div></div>
@@ -3363,6 +3366,7 @@ async function pintarConjuntos() {
   };
   const refrescar = (c) => {
     const t = [...pantalla.querySelectorAll('[data-conjunto]')].find((x) => x.dataset.conjunto === c.id);
+    t.querySelector('[data-hoy]').innerHTML = hoyHtml(c);
     t.querySelector('[data-joyas]').innerHTML = joyasHtml(c);
     t.querySelector('[data-calculo]').innerHTML = calculoHtml(c);
     resumen();
