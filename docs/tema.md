@@ -500,6 +500,11 @@ Cambios, en las dos tiendas:
   en `#sv-filtros-3x2` y `sv-filtros-3x2.js` filtra la grilla en el sitio: color
   por las muestras de metal de cada tarjeta (y la pasa a ese metal), tipo por las
   etiquetas del producto (`brillantes`).
+- **Filtros como Best Sellers (11-nov, pedido del usuario):** la página muestra los mismos botones
+  que salen en Best Sellers, con sus filas (metal + Brillantes; Cadenas, Colgantes, Pulseras,
+  Anillos). Para cambiarlos: panel → Filtros, marcar o desmarcar Best Sellers en el botón. La
+  categoría se filtra por estar en la colección de ese nombre (`/collections/cadenas`…), porque
+  `products.json` no trae la categoría de la app ni está en las etiquetas.
 
 ### Brillantes: «Apto para pieles sensibles» en vez de «Hipoalergénico» (10-nov)
 

@@ -1,12 +1,14 @@
-/* Saint Venik · Filtros rápidos en «Arma tu 3x2» (Benjamín, 10-nov).
+/* Saint Venik · Filtros rápidos en «Arma tu 3x2» (Benjamín, 10-nov; filas de Best Sellers, 11-nov).
  *
- * Las mismas pastillas de la primera fila de la app (Filtros: Dorado,
- * Plateado, Brillantes...) debajo de las pestañas de la página del 3x2. La
+ * Las mismas pastillas que salen en Best Sellers (Dorado, Plateado, Brillantes;
+ * Cadenas, Colgantes, Pulseras, Anillos), por filas, debajo de las pestañas de la página del 3x2. La
  * grilla del 3x2 la dibuja el tema (sv-3x2.js) a partir de products.json, así
  * que aquí se filtra en el sitio, tarjeta por tarjeta:
  *  - Color (Dorado / Plateado): por las muestras de metal de cada tarjeta. Al
  *    elegir uno, las tarjetas que vienen en los dos metales se pasan a ese.
- *  - Tipo o categoría (Brillantes...): por las etiquetas del producto.
+ *  - Tipo (Brillantes...): por las etiquetas del producto.
+ *  - Categoría (Cadenas...): por estar en la colección de ese nombre (/collections/cadenas):
+ *    products.json no trae la categoría de la app ni la hay en las etiquetas.
  * Entre botones del mismo grupo vale cualquiera; entre grupos, todos. La lista
  * de botones la deja el embed «Filtros rápidos» en #sv-filtros-3x2. */
 (function () {
@@ -53,7 +55,26 @@
     var t = document.querySelector('[data-sv3-tab][aria-selected="true"], [data-sv3-tab].is-active');
     return t ? t.getAttribute('data-sv3-tab') : '';
   }
-  var hayEtiquetas = function () { return botones.some(function (b) { return !metal(b); }); };
+  var hayEtiquetas = function () { return botones.some(function (b) { return b.f === 'tipo'; }); };
+  var coleccionDe = function (b) { return llano(b.v).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); };
+  /* Categoría: las joyas (por nombre sin metal) de su colección. */
+  var enCategoria = {};
+  function cargarCategoria(h) {
+    if (enCategoria[h]) return;
+    enCategoria[h] = 'cargando';
+    var claves = {};
+    var pagina = 1;
+    (function siguiente() {
+      fetch('/collections/' + h + '/products.json?limit=250' + (pagina > 1 ? '&page=' + pagina : ''), { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : { products: [] }; })
+        .then(function (d) {
+          var ps = (d && d.products) || [];
+          ps.forEach(function (p) { claves[clave(p.title)] = true; });
+          if (ps.length === 250 && pagina < 8) { pagina += 1; siguiente(); } else { enCategoria[h] = claves; programar(); }
+        })
+        .catch(function () { enCategoria[h] = claves; programar(); });
+    }());
+  }
 
   /* Las etiquetas de cada colección, con las mismas direcciones que usa la
    * grilla para que el navegador ya las tenga guardadas. */
@@ -88,6 +109,11 @@
   function cumple(card, b, tags) {
     var m = metal(b);
     if (m) return !!card.querySelector('[data-sv3-color="' + m + '"]');
+    if (b.f === 'categoria') {
+      var cat = enCategoria[coleccionDe(b)];
+      if (!cat || cat === 'cargando') return true;
+      return !!cat[clave(card.getAttribute('data-sv3-key') || '')];
+    }
     if (!tags) return true;
     var lista = tags[clave(card.getAttribute('data-sv3-key') || '')] || [];
     var v = singular(llano(b.v));
@@ -102,6 +128,7 @@
     var h = pestana();
     var tags = etiquetas[h];
     if (!tags && hayEtiquetas()) cargar(h, programar);
+    botones.forEach(function (b) { if (b.f === 'categoria') cargarCategoria(coleccionDe(b)); });
     var cards = [].slice.call(grid.querySelectorAll('.sv3-card'));
     var grupos = {};
     activos.forEach(function (i) {
@@ -158,9 +185,21 @@
     var nav = document.createElement('nav');
     nav.className = 'sv-filtros sv-filtros--3x2';
     nav.setAttribute('aria-label', 'Filtros rápidos');
-    nav.innerHTML = '<div class="sv-filtros__dentro sv3-wrap"><div class="sv-filtros__fila" style="--cols:' + Math.min(botones.length, 4) + '"></div></div>';
-    var fila = nav.querySelector('.sv-filtros__fila');
+    nav.innerHTML = '<div class="sv-filtros__dentro sv3-wrap"></div>';
+    var dentro = nav.firstChild;
+    /* Una fila por cada «Fila» del panel, como en las colecciones: con 4 o más, apilada. */
+    var filas = {};
+    botones.forEach(function (b) { var r = b.r || 1; filas[r] = (filas[r] || 0) + 1; });
+    Object.keys(filas).sort().forEach(function (r) {
+      var n = filas[r];
+      var div = document.createElement('div');
+      div.className = 'sv-filtros__fila' + (Math.min(n, 4) >= 4 ? ' sv-filtros__fila--apilada' : '');
+      div.style.cssText = '--cols:' + Math.min(n, 4) + ';--n:' + n;
+      div.setAttribute('data-fila', r);
+      dentro.appendChild(div);
+    });
     botones.forEach(function (b, i) {
+      var fila = dentro.querySelector('[data-fila="' + (b.r || 1) + '"]');
       var el = document.createElement('button');
       el.type = 'button';
       el.className = 'sv-filtro';
