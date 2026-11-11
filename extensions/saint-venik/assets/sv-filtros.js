@@ -133,7 +133,7 @@
     var w = document.createTreeWalker(raizV, 4);
     var t;
     while ((t = w.nextNode())) {
-      var m = /^(\s*)([^\s(]+)(.*)$/.exec(t.nodeValue);
+      var m = /^(\s*)([^\s(]+)([\s\S]*)$/.exec(t.nodeValue);
       var nuevo = m && VALORES[m[2].toLowerCase()];
       if (nuevo) t.nodeValue = m[1] + nuevo + m[3];
     }
