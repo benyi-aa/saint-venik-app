@@ -69,3 +69,10 @@ Dorado y Plateado siguen con la muestra de color.
 
 Mostrar al usuario una hoja con el set nuevo al lado del actual, a 16 px y a 48 px, y publicar solo
 lo aprobado.
+
+## Estado (11-nov-2026)
+
+Publicados los cuatro de categoría en versión de línea, aprobada por el usuario: `cadena` (U de
+eslabones en trazo cortado), `colgante` (cadena en V con placa), `pulsera` (óvalo de eslabones con
+broche) y `anillo` (aro con placa alargada, girado 20°). Se descartaron el destello de cuatro puntas
+y la versión detallada con eslabones reales. `conjunto`, `tenis`, `perla` y `lentes` siguen igual.
