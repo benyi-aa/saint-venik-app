@@ -1,59 +1,59 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611111434';
+import { estaEmbebida } from './api.js?v=202611111435';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611111434';
+} from './colores.js?v=202611111435';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611111434';
+} from './config.js?v=202611111435';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611111434';
+} from './filtros.js?v=202611111435';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611111434';
-import { prepararNavidad } from './inicio.js?v=202611111434';
+} from './productos.js?v=202611111435';
+import { prepararNavidad } from './inicio.js?v=202611111435';
 import {
   prepararConjuntos, cargarConjuntos, cargarCatalogo, sugerirJoyas, calcular, estaAlDia, formatear, guardarConjunto,
   DESCUENTO_POR_DEFECTO as DESCUENTO_CONJUNTOS,
-} from './conjuntos.js?v=202611111434';
-import { quitarAguaDeColecciones } from './textos.js?v=202611111434';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111434';
+} from './conjuntos.js?v=202611111435';
+import { quitarAguaDeColecciones } from './textos.js?v=202611111435';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111435';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611111434';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111434';
+} from './temporadas.js?v=202611111435';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111435';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611111434';
+} from './guias.js?v=202611111435';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611111434';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111434';
+} from './vista-previa.js?v=202611111435';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111435';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611111434';
+} from './etiquetas.js?v=202611111435';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611111434';
-import { ICONOS, svgIcono } from './iconos.js?v=202611111434';
+} from './beneficios.js?v=202611111435';
+import { ICONOS, svgIcono } from './iconos.js?v=202611111435';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611111434';
+const VERSION = '202611111435';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -132,7 +132,12 @@ function tarjetaColor(color, i, total, hayNombreEn, hayFila) {
               Subir…<input type="file" accept="image/*" data-subir hidden />
             </label>
             ${hayBiblioteca() ? '<button type="button" class="secundario" data-biblioteca>Elegir de la biblioteca</button>' : ''}
+            <button type="button" class="secundario" data-enlace>Desde un enlace…</button>
             ${color.imagen ? '<button type="button" class="secundario secundario--peligro" data-quitar-imagen>Quitar</button>' : ''}
+          </div>
+          <div class="enlace-imagen" data-enlace-caja hidden>
+            <input type="url" placeholder="https://… (una imagen publicada en internet)" data-enlace-url>
+            <button type="button" class="secundario" data-enlace-usar>Usar</button>
           </div>
           <p class="ayuda" data-estado-imagen>${color.imagen ? 'Manda sobre el color.' : 'Opcional.'}</p>
         </div>
@@ -281,6 +286,21 @@ async function pintarColores() {
     tarjeta.querySelector('[data-biblioteca]')?.addEventListener('click', () => {
       decir('Abriendo la biblioteca…');
       aplicarImagen(elegirDeBiblioteca({ tipo: 'MediaImage' }));
+    });
+
+    /* Desde un enlace (11-nov): Shopify descarga la imagen de esa dirección y la deja en
+     * Archivos; sirve para muestras preparadas fuera, como las de las gemas Vault
+     * (branding/muestras-gemas, publicadas en admin/muestras/). */
+    tarjeta.querySelector('[data-enlace]')?.addEventListener('click', () => {
+      const caja = tarjeta.querySelector('[data-enlace-caja]');
+      caja.hidden = !caja.hidden;
+      if (!caja.hidden) caja.querySelector('input').focus();
+    });
+    tarjeta.querySelector('[data-enlace-usar]')?.addEventListener('click', () => {
+      const url = tarjeta.querySelector('[data-enlace-url]').value.trim();
+      if (!/^https:\/\/\S+$/i.test(url)) { avisar('Pega una dirección que empiece con https://', true); return; }
+      decir('Trayendo la imagen…');
+      aplicarImagen(copiarArchivo(url));
     });
 
     tarjeta.querySelector('[data-quitar-imagen]')?.addEventListener('click', async () => {
