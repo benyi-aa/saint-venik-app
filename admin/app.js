@@ -1,55 +1,55 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611111236';
+import { estaEmbebida } from './api.js?v=202611111248';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611111236';
+} from './colores.js?v=202611111248';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611111236';
+} from './config.js?v=202611111248';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611111236';
+} from './filtros.js?v=202611111248';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611111236';
-import { prepararNavidad } from './inicio.js?v=202611111236';
-import { quitarAguaDeColecciones } from './textos.js?v=202611111236';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111236';
+} from './productos.js?v=202611111248';
+import { prepararNavidad } from './inicio.js?v=202611111248';
+import { quitarAguaDeColecciones } from './textos.js?v=202611111248';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111248';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611111236';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111236';
+} from './temporadas.js?v=202611111248';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111248';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611111236';
+} from './guias.js?v=202611111248';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611111236';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111236';
+} from './vista-previa.js?v=202611111248';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111248';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611111236';
+} from './etiquetas.js?v=202611111248';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611111236';
-import { ICONOS, svgIcono } from './iconos.js?v=202611111236';
+} from './beneficios.js?v=202611111248';
+import { ICONOS, svgIcono } from './iconos.js?v=202611111248';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611111236';
+const VERSION = '202611111248';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -87,7 +87,7 @@ function fondoDe(color) {
   return '';
 }
 
-function tarjetaColor(color, i, total, hayNombreEn) {
+function tarjetaColor(color, i, total, hayNombreEn, hayFila) {
   const problemas = problemasDe(color);
   return `
     <s-section data-id="${escapar(color.id)}" heading="${escapar(color.nombre || 'Sin nombre')}">
@@ -114,6 +114,11 @@ function tarjetaColor(color, i, total, hayNombreEn) {
           </div>`}
         <s-text-field label="Etiqueta del producto" data-campo="etiqueta" value="${escapar(color.etiqueta)}"
           details="Los productos con esta etiqueta se muestran en este color."></s-text-field>
+        ${hayFila ? `<s-text-field label="Fila de abajo (título)" data-campo="fila" value="${escapar(color.fila)}"
+          placeholder="Vacío: fila de arriba (metal)"
+          details="Para un segundo color, como el cordón de las Capri o la gema de los Vault: escribe el título de esa fila (Cordón, Gema). Vacío, va arriba con los metales."></s-text-field>
+        <s-text-field label="Fila de abajo en inglés" data-campo="fila_en" value="${escapar(color.filaEn)}"
+          placeholder="p. ej. Cord" details="El título en /en/."></s-text-field>` : ''}
         <s-color-field label="Color de la muestra" data-campo="muestra" value="${escapar(color.muestra || '#cccccc')}"
           details="${color.imagen ? 'Hay una imagen, y la imagen manda sobre el color.' : 'Se usa si no hay imagen.'}"></s-color-field>
         <div class="icono-propio">
@@ -145,6 +150,7 @@ async function pintarColores() {
   ]);
   const colores = ordenarComoLaTienda(crudos, config.ordenColores);
   const hayNombreEn = campos.has('nombre_en');
+  const hayFila = campos.has('fila');
 
   /* Colores es la pantalla que se abre por defecto, y reordenar escribe en la
    * configuración. Si esa estructura no existe, aquí tiene que poder crearse:
@@ -164,13 +170,15 @@ async function pintarColores() {
         ${coloresHtml(colores)}
       </s-section>
 
-      ${colores.map((c) => tarjetaColor(c, ordenables.indexOf(c), ordenables.length, hayNombreEn)).join('')}
+      ${colores.map((c) => tarjetaColor(c, ordenables.indexOf(c), ordenables.length, hayNombreEn, hayFila)).join('')}
 
       <s-section heading="Añadir un color">
         <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
           <s-text-field label="Nombre en español" id="nuevo-nombre" placeholder="p. ej. ROSADO"></s-text-field>
           ${hayNombreEn ? '<s-text-field label="Nombre en inglés" id="nuevo-nombre-en" placeholder="p. ej. ROSE"></s-text-field>' : ''}
           <s-text-field label="Etiqueta" id="nueva-etiqueta" placeholder="p. ej. oro-rosa"></s-text-field>
+          ${hayFila ? `<s-text-field label="Fila de abajo (título)" id="nueva-fila" placeholder="Vacío: metal. p. ej. Cordón"></s-text-field>
+          <s-text-field label="Fila de abajo en inglés" id="nueva-fila-en" placeholder="p. ej. Cord"></s-text-field>` : ''}
           <s-color-field label="Color de la muestra" id="nueva-muestra" value="#cccccc"></s-color-field>
         </s-grid>
         <s-button slot="primary-action" variant="primary" id="anadir-color">Añadir color</s-button>
@@ -210,6 +218,8 @@ async function pintarColores() {
            * "no existe" y no lo escribe, en vez de fallar el guardado entero. */
           nombreEn: hayNombreEn ? valor('nombre_en') : undefined,
           etiqueta: valor('etiqueta'),
+          fila: hayFila ? valor('fila') : undefined,
+          filaEn: hayFila ? valor('fila_en') : undefined,
           /* En minúsculas siempre. El campo de color del admin devuelve lo que
            * se escribió, con sus mayúsculas, y guardarColor solo escribe el
            * color «si cambió»: un #C9A227 frente a un #c9a227 guardado parecía
@@ -303,6 +313,8 @@ async function pintarColores() {
         nombre,
         nombreEn: texto('nuevo-nombre-en'),
         etiqueta: texto('nueva-etiqueta'),
+        fila: texto('nueva-fila'),
+        filaEn: texto('nueva-fila-en'),
         muestra: colorPlano(document.getElementById('nueva-muestra').value, '#cccccc'),
       });
       avisar('Color añadido');

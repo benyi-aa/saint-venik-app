@@ -9,7 +9,7 @@
  * selector apareciendo en una ficha y no en la otra, que es un fallo molesto de
  * encontrar porque cada ficha por separado parece correcta.
  */
-import { gql, comprobarErrores } from './api.js?v=202611111236';
+import { gql, comprobarErrores } from './api.js?v=202611111248';
 
 const NAMESPACE = 'custom';
 const CLAVE = 'hermano_de_color';
@@ -103,14 +103,23 @@ async function escribirHermanos(idProducto, idsHermanos) {
   return comprobarErrores(r, 'metafieldsSet');
 }
 
+/* Vincular une las dos familias enteras (11-nov): con dos filas de color (metal arriba; cordón o
+ * gema abajo) cada joya tiene que conocer a todas las demás del modelo. La Capri negra de plata
+ * enlaza con la negra de oro, la azul de plata, la azul de oro... Unir dos familias que ya eran
+ * pares (oro / plata) da una de cuatro, todos con todos. */
 export async function vincular(a, b) {
   if (a.id === b.id) throw new Error('Un producto no puede ser su propio hermano de color.');
 
-  const deA = new Set([...a.hermanos.map((h) => h.id), b.id]);
-  const deB = new Set([...b.hermanos.map((h) => h.id), a.id]);
+  const familia = new Set([a.id, b.id, ...a.hermanos.map((h) => h.id), ...b.hermanos.map((h) => h.id)]);
+  /* Los hermanos de los hermanos, por si alguna familia no estaba completa. */
+  const ids = [...familia].map((id) => `id:${id.split('/').pop()}`).join(' OR ');
+  const d = await gql(BUSCAR, { consulta: ids, n: 50 });
+  for (const n of d.products.nodes.map(aProducto)) n.hermanos.forEach((h) => familia.add(h.id));
+  if (familia.size > 11) throw new Error('Una familia de color puede tener hasta 11 joyas.');
 
-  await escribirHermanos(a.id, [...deA]);
-  await escribirHermanos(b.id, [...deB]);
+  for (const id of familia) {
+    await escribirHermanos(id, [...familia].filter((x) => x !== id));
+  }
 }
 
 export async function desvincular(a, idHermano) {

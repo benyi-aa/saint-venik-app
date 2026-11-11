@@ -5,7 +5,7 @@
  * color es la etiqueta: el producto lleva `oro` o `acero-inox`, y la entrada
  * guarda esa misma etiqueta en el campo `etiqueta`.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611111236';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611111248';
 
 export const TIPO_COLOR = 'color';
 
@@ -21,6 +21,10 @@ const CAMPOS_COLOR = [
   { key: 'muestra', name: 'Muestra', type: 'color' },
   { key: 'imagen_muestra', name: 'Imagen Muestra', type: 'file_reference' },
   { key: 'etiqueta', name: 'Etiqueta', type: 'single_line_text_field' },
+  /* Fila de la ficha (11-nov): vacío = la fila de arriba (metal). Si tiene texto, el color va
+   * en una segunda fila con ese título (p. ej. «Cordón» en las Capri, «Gema» en los Vault). */
+  { key: 'fila', name: 'Fila (vacío = metal)', type: 'single_line_text_field' },
+  { key: 'fila_en', name: 'Fila en inglés', type: 'single_line_text_field' },
 ];
 
 const DEFINICION_COLOR = `
@@ -118,6 +122,8 @@ function aObjeto(entrada) {
     nombre: campos.nombre?.valor ?? '',
     nombreEn: campos.nombre_en?.valor ?? '',
     etiqueta: campos.etiqueta?.valor ?? '',
+    fila: campos.fila?.valor ?? '',
+    filaEn: campos.fila_en?.valor ?? '',
     muestra: campos.muestra?.valor ?? '',
     imagen: campos.imagen_muestra?.imagen ?? null,
     tieneImagen: Boolean(campos.imagen_muestra?.valor),
@@ -129,7 +135,7 @@ export async function cargarColores() {
   return datos.metaobjects.nodes.map(aObjeto);
 }
 
-export async function guardarColor(id, { nombre, nombreEn, etiqueta, muestra, muestraOriginal }) {
+export async function guardarColor(id, { nombre, nombreEn, etiqueta, fila, filaEn, muestra, muestraOriginal }) {
   const campos = [
     { key: 'nombre', value: nombre },
     { key: 'etiqueta', value: etiqueta },
@@ -137,6 +143,8 @@ export async function guardarColor(id, { nombre, nombreEn, etiqueta, muestra, mu
   /* undefined quiere decir "el campo todavia no existe en la tienda": escribirlo
    * haria fallar el guardado entero. Una cadena vacia si se escribe, y borra. */
   if (nombreEn !== undefined) campos.push({ key: 'nombre_en', value: nombreEn });
+  if (fila !== undefined) campos.push({ key: 'fila', value: fila });
+  if (filaEn !== undefined) campos.push({ key: 'fila_en', value: filaEn });
 
   /* Un <input type="color"> nunca está vacío, así que "no elegí color" y "elegí
    * gris" llegan aquí iguales. Solo se escribe si el usuario lo tocó de verdad,
@@ -148,9 +156,11 @@ export async function guardarColor(id, { nombre, nombreEn, etiqueta, muestra, mu
   return comprobarErrores(resultado, 'metaobjectUpdate');
 }
 
-export async function crearColor({ nombre, nombreEn, etiqueta, muestra }) {
+export async function crearColor({ nombre, nombreEn, etiqueta, fila, filaEn, muestra }) {
   const campos = [{ key: 'nombre', value: nombre }];
   if (nombreEn) campos.push({ key: 'nombre_en', value: nombreEn });
+  if (fila) campos.push({ key: 'fila', value: fila });
+  if (filaEn) campos.push({ key: 'fila_en', value: filaEn });
   if (etiqueta) campos.push({ key: 'etiqueta', value: etiqueta });
   if (muestra) campos.push({ key: 'muestra', value: muestra });
 

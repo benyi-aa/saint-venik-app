@@ -170,3 +170,6 @@
   .sv-colors__swatch { transition: none; }
   .sv-colors__item:hover .sv-colors__swatch { transform: none; }
 }
+
+/* Dos filas (11-nov): metal arriba; cordón o gema abajo (snippets/sv-color-filas.liquid). */
+.sv-colors__fila + .sv-colors__fila { margin-top: 14px; }

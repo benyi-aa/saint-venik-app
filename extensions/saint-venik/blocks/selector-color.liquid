@@ -112,11 +112,28 @@
     {%- endif -%}
   {%- endfor -%}
 
+  {%- comment -%} Dos filas (metal arriba; cordón, gema... abajo) si el producto lleva un color con «Fila». {%- endcomment -%}
+  {%- assign sv_dos_filas = false -%}
+  {%- for entrada in colores -%}
+    {%- assign sv_f = entrada.fila.value | strip -%}
+    {%- if sv_f != blank -%}
+      {%- assign sv_e = entrada.etiqueta.value | downcase | strip -%}
+      {%- assign sv_ag = sv_e | prepend: '|' | append: '|' -%}
+      {%- if sv_e != blank and etiquetas_actuales contains sv_ag -%}{%- assign sv_dos_filas = true -%}{%- break -%}{%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+
   <div
-    class="sv-colors sv-colors--{{ block.settings.forma }} sv-colors--al-{{ sv_alin }} sv-colors--{{ sv_escala }}"
+    class="sv-colors{% if sv_dos_filas %} sv-colors--dos-filas{% endif %} sv-colors--{{ block.settings.forma }} sv-colors--al-{{ sv_alin }} sv-colors--{{ sv_escala }}"
     style="--sv-size: {{ sv_tam }}px; --sv-gap: {{ block.settings.espacio }}px; --sv-ring: {{ block.settings.color_borde }}; --sv-pt: {{ block.settings.margen_superior }}px; --sv-pb: {{ block.settings.margen_inferior }}px;"
     {{ block.shopify_attributes }}
   >
+    {%- if sv_dos_filas -%}
+      {%- render 'sv-color-filas', producto: product, hermanos: hermanos, colores: colores, orden: orden, idioma: lang,
+        encabezado: encabezado, etiqueta_grupo: etiqueta_grupo,
+        mostrar_encabezado: block.settings.mostrar_encabezado, mostrar_nombre_actual: block.settings.mostrar_nombre_actual,
+        mostrar_etiqueta: block.settings.mostrar_etiquetas, marcar_agotado: block.settings.marcar_agotado -%}
+    {%- else -%}
     {%- if block.settings.mostrar_encabezado and encabezado != blank -%}
       <div class="sv-colors__heading">
         <span class="sv-colors__label">{{ encabezado }}</span>
@@ -224,6 +241,7 @@
       {%- endfor -%}
 
     </div>
+    {%- endif -%}
   </div>
 {%- endif -%}
 

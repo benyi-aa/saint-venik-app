@@ -259,6 +259,25 @@ beneficio traducido por ahi no se rompe por crear el campo.
 
 Parametros: b (entrada de sv_beneficio), lang ('es' | 'en').
 
+## snippets/sv-color-filas.liquid
+
+Selector de color en dos filas (11-nov, pedido del usuario para las pulseras Capri y los colgantes
+Vault): arriba el metal (Plateado / Dorado: el broche, el colgante), abajo un segundo color (el
+cordón de las Capri; la gema de los Vault).
+
+- Lo dibuja `blocks/selector-color.liquid` solo si el producto lleva la etiqueta de un color que
+  tiene «Fila» en el panel → Colores (campo `fila` / `fila_en` del metaobjeto `color`). Sin eso, la
+  ficha sigue con la fila única de siempre: no cambia nada para los demás productos.
+- Fila 1: las entradas sin «Fila» (los metales), en el orden de la app. Fila 2: las entradas con la
+  misma «Fila» que el color del producto; su título es esa «Fila» (`fila_en` en inglés).
+- Cada muestra enlaza a la joya de la familia (`custom.hermano_de_color`) con ese color y el mismo
+  valor en la otra fila (Capri negra de plata → «Dorado» lleva a la negra de oro; «Azul» lleva a la
+  azul de plata). Si esa combinación no existe, a cualquiera con ese color.
+- Por eso la familia tiene que estar entera: en el panel → Productos, vincular dos joyas une sus
+  familias completas (todas con todas, hasta 11).
+- Se arma una clave por hermano, `|id:metal:segundo|`, y se busca con `contains`: Liquid no tiene
+  mapas.
+
 ## snippets/sv-color-swatch.liquid
 
 ### sv-color-swatch.liquid · 1

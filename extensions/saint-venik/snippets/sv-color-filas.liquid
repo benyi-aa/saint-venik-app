@@ -1,0 +1,236 @@
+{%- comment -%}
+  Selector de color en dos filas (11-nov): arriba el metal (Plateado / Dorado), abajo un segundo
+  color: el cordón de las Capri, la gema de los Vault. Lo dibuja selector-color.liquid solo cuando
+  el producto lleva la etiqueta de un color con «Fila» (panel → Colores); los demás siguen con la
+  fila única de siempre.
+  Cada muestra lleva a la joya de la familia (custom.hermano_de_color) que tiene ese color y
+  conserva lo elegido en la otra fila; si no existe, a cualquiera con ese color.
+  Explicación completa: docs/bloques.md, «sv-color-filas.liquid».
+{%- endcomment -%}
+{%- liquid
+  assign tags_act = producto.tags | join: '|' | downcase | prepend: '|' | append: '|'
+
+  # Segundo color del producto: la primera entrada con fila que esté en sus etiquetas.
+  assign s_etq = ''
+  assign s_fila = ''
+  assign s_fila_en = ''
+  for e in colores
+    assign f = e.fila.value | strip
+    if f != blank
+      assign etq = e.etiqueta.value | downcase | strip
+      assign ag = etq | prepend: '|' | append: '|'
+      if etq != blank and tags_act contains ag
+        assign s_etq = etq
+        assign s_fila = f
+        assign s_fila_en = e.fila_en.value | strip
+        break
+      endif
+    endif
+  endfor
+
+  # Metales (entradas sin fila) y segundos colores (con la misma fila), en el orden de la app.
+  assign metales = '|'
+  assign segundos = '|'
+  for etiqueta_pedida in orden
+    assign pedida = etiqueta_pedida | downcase | strip
+    for e in colores
+      assign etq = e.etiqueta.value | downcase | strip
+      if etq != blank and etq == pedida
+        assign f = e.fila.value | strip
+        assign ag = etq | prepend: '|' | append: '|'
+        if f == blank
+          unless metales contains ag
+            assign metales = metales | append: etq | append: '|'
+          endunless
+        elsif f == s_fila
+          unless segundos contains ag
+            assign segundos = segundos | append: etq | append: '|'
+          endunless
+        endif
+      endif
+    endfor
+  endfor
+  for e in colores
+    assign etq = e.etiqueta.value | downcase | strip
+    if etq != blank
+      assign f = e.fila.value | strip
+      assign ag = etq | prepend: '|' | append: '|'
+      if f == blank
+        unless metales contains ag
+          assign metales = metales | append: etq | append: '|'
+        endunless
+      elsif f == s_fila
+        unless segundos contains ag
+          assign segundos = segundos | append: etq | append: '|'
+        endunless
+      endif
+    endif
+  endfor
+  assign lista_metales = metales | split: '|'
+  assign lista_segundos = segundos | split: '|'
+
+  # Metal del producto actual.
+  assign m_act = ''
+  for m in lista_metales
+    if m != blank
+      assign ag = m | prepend: '|' | append: '|'
+      if tags_act contains ag
+        assign m_act = m
+        break
+      endif
+    endif
+  endfor
+
+  # Clave de cada hermano: |id:metal:segundo|
+  assign claves = '|'
+  for h in hermanos
+    assign th = h.tags | join: '|' | downcase | prepend: '|' | append: '|'
+    assign mh = ''
+    for m in lista_metales
+      if m != blank
+        assign ag = m | prepend: '|' | append: '|'
+        if th contains ag
+          assign mh = m
+          break
+        endif
+      endif
+    endfor
+    assign sh = ''
+    for s in lista_segundos
+      if s != blank
+        assign ag = s | prepend: '|' | append: '|'
+        if th contains ag
+          assign sh = s
+          break
+        endif
+      endif
+    endfor
+    assign claves = claves | append: h.id | append: ':' | append: mh | append: ':' | append: sh | append: '|'
+  endfor
+
+  assign titulo2 = s_fila
+  if idioma == 'en' and s_fila_en != blank
+    assign titulo2 = s_fila_en
+  endif
+-%}
+
+{%- comment -%} Fila 1: el metal. {%- endcomment -%}
+{%- capture fila_metal -%}
+  {%- for m in lista_metales -%}
+    {%- if m != blank -%}
+      {%- liquid
+        assign prod = nil
+        assign es_act = false
+        if m == m_act
+          assign prod = producto
+          assign es_act = true
+        else
+          for h in hermanos
+            assign k = h.id | prepend: '|' | append: ':' | append: m | append: ':' | append: s_etq | append: '|'
+            if claves contains k
+              assign prod = h
+              break
+            endif
+          endfor
+          if prod == nil
+            for h in hermanos
+              assign k = h.id | prepend: '|' | append: ':' | append: m | append: ':'
+              if claves contains k
+                assign prod = h
+                break
+              endif
+            endfor
+          endif
+        endif
+      -%}
+      {%- if prod != nil -%}
+        {%- for e in colores -%}
+          {%- assign etq = e.etiqueta.value | downcase | strip -%}
+          {%- assign f = e.fila.value | strip -%}
+          {%- if etq == m and f == blank -%}
+            {%- assign nom = e.nombre.value -%}
+            {%- if idioma == 'en' and e.nombre_en.value != blank -%}{%- assign nom = e.nombre_en.value -%}{%- endif -%}
+            {%- if es_act -%}{%- assign nombre_metal = nom -%}{%- endif -%}
+            {%- render 'sv-color-swatch', producto: prod, nombre: nom, color: e.muestra.value, imagen: e.imagen_muestra.value,
+              actual: es_act, mostrar_etiqueta: mostrar_etiqueta, marcar_agotado: marcar_agotado -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- comment -%} Fila 2: el cordón, la gema... {%- endcomment -%}
+{%- capture fila_segunda -%}
+  {%- for s in lista_segundos -%}
+    {%- if s != blank -%}
+      {%- liquid
+        assign prod = nil
+        assign es_act = false
+        if s == s_etq
+          assign prod = producto
+          assign es_act = true
+        else
+          for h in hermanos
+            assign k = h.id | prepend: '|' | append: ':' | append: m_act | append: ':' | append: s | append: '|'
+            if claves contains k
+              assign prod = h
+              break
+            endif
+          endfor
+          if prod == nil
+            for h in hermanos
+              for m in lista_metales
+                assign k = h.id | prepend: '|' | append: ':' | append: m | append: ':' | append: s | append: '|'
+                if claves contains k
+                  assign prod = h
+                  break
+                endif
+              endfor
+              if prod != nil
+                break
+              endif
+            endfor
+          endif
+        endif
+      -%}
+      {%- if prod != nil -%}
+        {%- for e in colores -%}
+          {%- assign etq = e.etiqueta.value | downcase | strip -%}
+          {%- if etq == s -%}
+            {%- assign nom = e.nombre.value -%}
+            {%- if idioma == 'en' and e.nombre_en.value != blank -%}{%- assign nom = e.nombre_en.value -%}{%- endif -%}
+            {%- if es_act -%}{%- assign nombre_segundo = nom -%}{%- endif -%}
+            {%- render 'sv-color-swatch', producto: prod, nombre: nom, color: e.muestra.value, imagen: e.imagen_muestra.value,
+              actual: es_act, mostrar_etiqueta: mostrar_etiqueta, marcar_agotado: marcar_agotado -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+<div class="sv-colors__fila sv-colors__fila--metal">
+  {%- if mostrar_encabezado and encabezado != blank -%}
+    <div class="sv-colors__heading">
+      <span class="sv-colors__label">{{ encabezado }}</span>
+      {%- if mostrar_nombre_actual and nombre_metal != blank -%}
+        <span class="sv-colors__sep" aria-hidden="true">-</span>
+        <span class="sv-colors__current">{{ nombre_metal }}</span>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+  <div class="sv-colors__list" role="group" aria-label="{{ etiqueta_grupo | escape }}">{{ fila_metal }}</div>
+</div>
+<div class="sv-colors__fila sv-colors__fila--segunda">
+  <div class="sv-colors__heading">
+    <span class="sv-colors__label">{{ titulo2 }}</span>
+    {%- if mostrar_nombre_actual and nombre_segundo != blank -%}
+      <span class="sv-colors__sep" aria-hidden="true">-</span>
+      <span class="sv-colors__current">{{ nombre_segundo }}</span>
+    {%- endif -%}
+  </div>
+  <div class="sv-colors__list" role="group" aria-label="{{ titulo2 | escape }}">{{ fila_segunda }}</div>
+</div>
