@@ -1,59 +1,59 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611111443';
+import { estaEmbebida } from './api.js?v=202611111456';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611111443';
+} from './colores.js?v=202611111456';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611111443';
+} from './config.js?v=202611111456';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611111443';
+} from './filtros.js?v=202611111456';
 import {
-  buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor,
-} from './productos.js?v=202611111443';
-import { prepararNavidad } from './inicio.js?v=202611111443';
+  buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor, unirFamilia,
+} from './productos.js?v=202611111456';
+import { prepararNavidad } from './inicio.js?v=202611111456';
 import {
   prepararConjuntos, cargarConjuntos, cargarCatalogo, sugerirJoyas, calcular, estaAlDia, formatear, guardarConjunto,
   DESCUENTO_POR_DEFECTO as DESCUENTO_CONJUNTOS,
-} from './conjuntos.js?v=202611111443';
-import { quitarAguaDeColecciones } from './textos.js?v=202611111443';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111443';
+} from './conjuntos.js?v=202611111456';
+import { quitarAguaDeColecciones } from './textos.js?v=202611111456';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611111456';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611111443';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111443';
+} from './temporadas.js?v=202611111456';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611111456';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611111443';
+} from './guias.js?v=202611111456';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611111443';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111443';
+} from './vista-previa.js?v=202611111456';
+import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611111456';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611111443';
+} from './etiquetas.js?v=202611111456';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611111443';
-import { ICONOS, svgIcono } from './iconos.js?v=202611111443';
+} from './beneficios.js?v=202611111456';
+import { ICONOS, svgIcono } from './iconos.js?v=202611111456';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611111443';
+const VERSION = '202611111456';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1181,6 +1181,9 @@ async function pintarProductos() {
           </s-select>
         </s-grid>
         <p class="ayuda">${resumen}</p>
+        ${estadoProductos.texto && visibles.length >= 2 && visibles.length <= 11
+    ? `<p class="ayuda">¿Son el mismo modelo en otros colores? <button type="button" class="secundario" id="unir-familia">Unir estos ${visibles.length} en una familia</button></p>`
+    : ''}
         <s-button slot="primary-action" variant="primary" id="buscar-boton">Buscar</s-button>
       </s-section>
 
@@ -1202,6 +1205,28 @@ async function pintarProductos() {
   document.getElementById('buscar-boton').addEventListener('click', buscar);
   document.getElementById('buscar').addEventListener('keydown', (e) => { if (e.key === 'Enter') buscar(); });
   document.getElementById('filtro').addEventListener('change', buscar);
+
+  /* Dos pasos en el mismo botón: el confirm del navegador no siempre sale en el admin. */
+  document.getElementById('unir-familia')?.addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    if (!boton.dataset.seguro) {
+      boton.dataset.seguro = '1';
+      boton.textContent = `Pulsa otra vez para unir los ${visibles.length}`;
+      return;
+    }
+    boton.disabled = true;
+    boton.textContent = 'Uniendo…';
+    try {
+      const n = await unirFamilia(visibles);
+      avisar(`Familia de ${n} joyas unida`);
+      await ir('productos');
+    } catch (error) {
+      avisar(error.message, true);
+      boton.disabled = false;
+      boton.textContent = `Unir estos ${visibles.length} en una familia`;
+      delete boton.dataset.seguro;
+    }
+  });
 
   pantalla.querySelectorAll('[data-producto]').forEach((tarjeta) => {
     const id = tarjeta.dataset.producto;

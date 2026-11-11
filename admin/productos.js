@@ -9,7 +9,7 @@
  * selector apareciendo en una ficha y no en la otra, que es un fallo molesto de
  * encontrar porque cada ficha por separado parece correcta.
  */
-import { gql, comprobarErrores } from './api.js?v=202611111443';
+import { gql, comprobarErrores } from './api.js?v=202611111456';
 
 const NAMESPACE = 'custom';
 const CLAVE = 'hermano_de_color';
@@ -120,6 +120,20 @@ export async function vincular(a, b) {
   for (const id of familia) {
     await escribirHermanos(id, [...familia].filter((x) => x !== id));
   }
+}
+
+/* Unir varios productos en una sola familia (11-nov): lo que sale en una búsqueda, por ejemplo
+ * «Clover» (5 colores × plata y oro). Cada uno queda con todos los demás como hermanos,
+ * sumando las familias que ya tuvieran. */
+export async function unirFamilia(productos) {
+  if (productos.length < 2) throw new Error('Hacen falta al menos dos productos.');
+  const familia = new Set();
+  productos.forEach((p) => { familia.add(p.id); p.hermanos.forEach((h) => familia.add(h.id)); });
+  if (familia.size > 11) throw new Error(`Serían ${familia.size} joyas: una familia de color puede tener hasta 11.`);
+  for (const id of familia) {
+    await escribirHermanos(id, [...familia].filter((x) => x !== id));
+  }
+  return familia.size;
 }
 
 export async function desvincular(a, idHermano) {
