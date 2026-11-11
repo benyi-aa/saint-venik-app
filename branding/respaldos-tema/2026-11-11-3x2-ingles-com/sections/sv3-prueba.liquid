@@ -1,0 +1,30 @@
+{%- liquid
+assign s = section.settings
+assign has_avatars = false
+if s.avatar_1 != blank or s.avatar_2 != blank or s.avatar_3 != blank or s.avatar_4 != blank
+assign has_avatars = true
+endif
+assign urls = s.avatar_urls | newline_to_br | split: '<br />'
+-%}
+{{ 'sv-3x2.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sv-3x2.js' | asset_url }}" defer></script>
+<section class="sv3 sv3-social" style="--sv3-bg:{{ s.bg }};--sv3-text:{{ s.text }};--sv3-pt:{{ s.pad_top }}px;--sv3-pb:{{ s.pad_bottom }}px">
+<div class="sv3-wrap sv3-social__in">
+<div class="sv3-avatars"{% unless has_avatars or s.avatar_urls != blank %} data-sv3-avatars-auto data-source="{{ s.source.handle | default: 'best-sellers' }}"{% endunless %}>
+{%- if has_avatars -%}
+{%- for n in (1..4) -%}
+{%- assign key = 'avatar_' | append: n -%}
+{%- if s[key] != blank -%}{{ s[key] | image_url: width: 120 | image_tag: loading: 'lazy', alt: '' }}{%- endif -%}
+{%- endfor -%}
+{%- elsif s.avatar_urls != blank -%}
+{%- for u in urls limit: 5 -%}{%- assign uu = u | strip -%}{%- if uu != blank -%}<img src="{{ uu | escape }}" alt="" loading="lazy">{%- endif -%}{%- endfor -%}
+{%- else -%}<i></i><i></i><i></i><i></i>{%- endif -%}
+</div>
+<div class="sv3-social__txt">
+{%- if s.rating != blank -%}<p class="sv3-social__rating"><span class="sv3-stars" aria-hidden="true">{% for i in (1..5) %}<svg viewBox="0 0 20 20"><path d="M10 1.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2L10 13.9 5.4 16l.9-5.2L2.4 7.1l5.2-.8z"/></svg>{% endfor %}</span>{{ s.rating }}</p>{%- endif -%}
+{%- if s.title != blank -%}<p class="sv3-social__title">{{ s.title }}</p>{%- endif -%}
+{%- if s.subtitle != blank -%}<p class="sv3-social__sub">{{ s.subtitle }}</p>{%- endif -%}
+</div>
+</div>
+</section>
+{% schema %}{"name":"3x2 · Prueba social","tag":"div","class":"sv3-section","settings":[{"type":"text","id":"rating","label":"Valoración","default":"4.87/5"},{"type":"text","id":"title","label":"Título","default":"Más de 50.000 hombres en todo Chile ya llevan Saint Venik"},{"type":"text","id":"subtitle","label":"Bajada","default":"Garantía Eterna · Apto para piel sensible"},{"type":"header","content":"Fotos de clientes"},{"type":"paragraph","content":"Orden de uso: las 4 fotos subidas; si están vacías, los enlaces de abajo; si también está vacío, fotos automáticas de las reseñas de Loox."},{"type":"textarea","id":"avatar_urls","label":"Fotos de clientes elegidas (enlaces)","info":"Un enlace por línea (fotos reales de reseñas de Loox).","default":"https://images.loox.io/uploads/2026/2/12/gqkzKqdmQ_mid.jpg\nhttps://images.loox.io/uploads/2026/2/11/l4sSkpPpk_mid.jpg\nhttps://images.loox.io/uploads/2026/3/23/TRyV8gNOJ_mid.jpg\nhttps://images.loox.io/uploads/2026/2/22/ovn3z-p4gF_mid.jpg"},{"type":"collection","id":"source","label":"Tomar fotos de reseñas de","info":"Vacío = Best Sellers"},{"type":"image_picker","id":"avatar_1","label":"Foto cliente 1"},{"type":"image_picker","id":"avatar_2","label":"Foto cliente 2"},{"type":"image_picker","id":"avatar_3","label":"Foto cliente 3"},{"type":"image_picker","id":"avatar_4","label":"Foto cliente 4"},{"type":"header","content":"Colores y espacios"},{"type":"color","id":"bg","label":"Fondo","default":"#ffffff"},{"type":"color","id":"text","label":"Texto","default":"#1a1714"},{"type":"range","id":"pad_top","label":"Espacio superior","min":0,"max":80,"step":4,"unit":"px","default":28},{"type":"range","id":"pad_bottom","label":"Espacio inferior","min":0,"max":80,"step":4,"unit":"px","default":28}],"presets":[{"name":"3x2 · Prueba social"}]}{% endschema %}

@@ -18,7 +18,7 @@
 -%}
 
 {%- comment -%} nota 2: docs/bloques.md {%- endcomment -%}
-{%- if template.suffix == 'arma-tu-3x2' and f_modo != 'no' -%}
+{%- if template.suffix == 'arma-tu-3x2' and f_modo != 'no' -%}{%- assign l3 = localization.language.iso_code | slice: 0, 2 -%}
 <script type="application/json" id="sv-filtros-3x2" data-modo="{{ f_modo }}">[{%- for b in shop.metaobjects.sv_boton_filtro.values -%}{%- assign bf = b.fila.value | default: 1 -%}{%- liquid
  assign en_bs = true
  if b.donde.value == 'elegidas'
@@ -54,7 +54,7 @@
   endfor
   assign ic = ''
  endif
--%}{%- capture svg -%}{%- if ic != blank -%}{%- render 'sv-icono', nombre: ic -%}{%- endif -%}{%- endcapture -%}{"o":{{ b.orden.value | default: 0 }},"r":{{ bf }},"n":{{ b.nombre.value | json }},"f":{{ b.filtro.value | json }},"v":{{ b.valor.value | json }},"m":{{ mu | json }},"i":{{ svg | strip | json }}},{%- endif -%}{%- endfor -%}null]</script>
+-%}{%- capture svg -%}{%- if ic != blank -%}{%- render 'sv-icono', nombre: ic -%}{%- endif -%}{%- endcapture -%}{"o":{{ b.orden.value | default: 0 }},"r":{{ bf }},"n":{% if l3 == 'en' and b.nombre_en.value != blank %}{{ b.nombre_en.value | json }}{% else %}{{ b.nombre.value | json }}{% endif %},"f":{{ b.filtro.value | json }},"v":{{ b.valor.value | json }},"m":{{ mu | json }},"i":{{ svg | strip | json }}},{%- endif -%}{%- endfor -%}null]</script>
 <script src="{{ 'sv-filtros-3x2.js' | asset_url }}" defer></script>
 {%- endif -%}
 

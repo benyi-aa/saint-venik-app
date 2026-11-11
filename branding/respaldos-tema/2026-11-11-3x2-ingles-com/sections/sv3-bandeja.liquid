@@ -1,0 +1,34 @@
+{%- assign s = section.settings -%}
+{{ 'sv-3x2.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sv-3x2.js' | asset_url }}" defer></script>
+{%- if s.font == 'montserrat' -%}<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">{%- endif -%}
+<script type="application/json" data-sv3-config-tray>
+{
+"freeShipping": {{ s.free_shipping | default: 0 }},
+"checkoutUrl": {{ s.destination | json }},
+"t": {
+"free": {{ s.t_free | json }}, "remove": {{ s.t_remove | json }}, "total": {{ s.t_total | json }},
+"pickMore": {{ s.t_pick_more | json }}, "checkout": {{ s.t_checkout | json }},
+"ship": {{ s.t_ship | json }}, "shipOk": {{ s.t_ship_ok | json }}, "warranty": {{ s.t_warranty | json }}, "adding": {{ s.t_adding | json }},
+"addedToast": {{ s.t_added_toast | json }}, "done": {{ s.t_done | json }}, "fullToast": {{ s.t_full_toast | json }}
+}
+}
+</script>
+<div class="sv3-tray" data-sv3-tray style="{% if s.font == 'montserrat' %}--sv3-tray-font:'Montserrat',sans-serif;{% endif %}--sv3-tray-bg:{{ s.bg }};--sv3-tray-text:{{ s.text }};--sv3-tray-btn:{{ s.btn }};--sv3-tray-btn-text:{{ s.btn_text }};--sv3-tray-off:{{ s.btn_off }};--sv3-tray-off-text:{{ s.btn_off_text }};--sv3-tray-note:{{ s.note_color }}">
+<div class="sv3-tray__in">
+<div class="sv3-tray__row"><div class="sv3-slots" data-sv3-slots></div><span class="sv3-tray__count" data-sv3-progress data-format="{{ s.t_progress | escape }}"></span><div class="sv3-tray__sum" data-sv3-sum></div></div>
+<button type="button" class="sv3-tray__btn" data-sv3-checkout disabled></button>
+<p class="sv3-tray__note">{%- if s.note_icon == 'check' -%}<svg class="sv3-tray__tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>{%- else -%}<i></i>{%- endif -%}<b data-sv3-ship>{{ s.t_ship }}</b>{%- if s.t_warranty != blank -%}<span>·</span>{%- if s.warranty_url != blank -%}<a href="{{ s.warranty_url }}">{{ s.t_warranty }}</a>{%- else -%}<u>{{ s.t_warranty }}</u>{%- endif -%}{%- endif -%}</p>
+</div>
+</div>
+<style>.sv3-tray__tick{width:13px;height:13px;flex:none}</style>
+{%- if s.lift_selectors != blank -%}
+<style>
+body.sv3-has-tray :is({{ s.lift_selectors }}) { transform: translateY(calc(-1 * var(--sv3-tray-h, 150px))); transition: transform .35s; }
+html.sv3-lock :is({{ s.lift_selectors }}) { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+</style>
+{%- endif -%}
+{%- if request.design_mode -%}
+<div class="sv3-wrap" style="padding:14px 20px;font-size:13px;opacity:.6;text-align:center">Barra de selección 3x2: aparece fija abajo cuando el cliente llega a los productos o elige su primera joya.</div>
+{%- endif -%}
+{% schema %}{"name":"3x2 · Barra de selección","tag":"div","class":"sv3-section","settings":[{"type":"paragraph","content":"Barra fija inferior con estética CRAFTD: los 3 espacios, el total, el botón y la línea de beneficios. En computador la X para quitar aparece al pasar el cursor; en celular, con un primer toque."},{"type":"number","id":"free_shipping","label":"Envío gratis desde ($)","info":"Solo el número, sin puntos. Ej: 80000","default":80000},{"type":"select","id":"destination","label":"Al completar las 3","default":"/checkout","options":[{"value":"/checkout","label":"Ir directo al pago"},{"value":"/cart","label":"Ir al carrito"}]},{"type":"text","id":"lift_selectors","label":"Botones flotantes a subir sobre la barra","info":"Selectores CSS separados por coma (WhatsApp, popups). Se suben cuando la barra está visible y se ocultan en la vista rápida. Vacío = no tocar.","default":"#wizydiv iframe, [id^='alia-root']"},{"type":"select","id":"font","label":"Tipografía","default":"montserrat","options":[{"value":"montserrat","label":"Montserrat (como CRAFTD)"},{"value":"theme","label":"La del tema"}]},{"type":"header","content":"Textos"},{"type":"text","id":"t_progress","label":"Contador","info":"{n} = joyas elegidas","default":"{n}/3"},{"type":"text","id":"t_total","label":"Total","default":"Total"},{"type":"text","id":"t_pick_more","label":"Botón mientras faltan","info":"{n} = faltantes","default":"Elige {n} más"},{"type":"text","id":"t_checkout","label":"Botón con las 3 elegidas","default":"Ir a pagar"},{"type":"text","id":"t_free","label":"Etiqueta de la gratis","default":"GRATIS"},{"type":"text","id":"t_ship","label":"Beneficio 1 (negrita)","default":"Envío gratis sobre $80.000"},{"type":"text","id":"t_ship_ok","label":"Beneficio 1 al alcanzar el envío gratis","default":"Tienes envío gratis"},{"type":"select","id":"note_icon","label":"Ícono antes del texto","default":"dot","options":[{"value":"dot","label":"Punto"},{"value":"check","label":"Ticket ✓"}]},{"type":"text","id":"t_warranty","label":"Beneficio 2 (subrayado)","default":"Garantía Eterna incluida"},{"type":"url","id":"warranty_url","label":"Enlace del beneficio 2 (opcional)"},{"type":"text","id":"t_remove","label":"Quitar (lector de pantalla)","default":"Quitar"},{"type":"text","id":"t_adding","label":"Agregando","default":"Agregando…"},{"type":"header","content":"Mensajes"},{"type":"text","id":"t_added_toast","label":"Al añadir","info":"{n} = elegidas","default":"Añadida ({n}/3)"},{"type":"text","id":"t_done","label":"Al completar","default":"¡Listo! Una de tus joyas va por nuestra cuenta."},{"type":"text","id":"t_full_toast","label":"Si intenta una cuarta","default":"Ya elegiste tus 3. Quita una para cambiarla."},{"type":"header","content":"Colores"},{"type":"color","id":"bg","label":"Fondo","default":"#ffffff"},{"type":"color","id":"text","label":"Texto","default":"#111111"},{"type":"color","id":"btn","label":"Botón activo","default":"#111111"},{"type":"color","id":"btn_text","label":"Texto del botón activo","default":"#ffffff"},{"type":"color","id":"btn_off","label":"Botón inactivo","default":"#e5e5e5"},{"type":"color","id":"btn_off_text","label":"Texto del botón inactivo","default":"#999999"},{"type":"color","id":"note_color","label":"Línea de beneficios","default":"#4a4a44"}],"presets":[{"name":"3x2 · Barra de selección"}]}{% endschema %}

@@ -1,0 +1,37 @@
+{%- assign s = section.settings -%}
+{%- assign lines = s.curated | newline_to_br | split: '<br />' -%}
+{%- assign curated = false -%}{%- if section.blocks.size == 0 and s.curated != blank -%}{%- assign curated = true -%}{%- endif -%}
+{{ 'sv-3x2.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sv-3x2.js' | asset_url }}" defer></script>
+<section class="sv3 sv3-rev" {% if section.blocks.size == 0 and curated == false %}hidden{% endif %} style="--sv3-bg:{{ s.bg }};--sv3-text:{{ s.text }};--sv3-pt:{{ s.pad_top }}px;--sv3-pb:{{ s.pad_bottom }}px">
+<div class="sv3-wrap">
+<div class="sv3-head">
+{%- if s.summary != blank -%}<p class="sv3-kicker"><span class="sv3-stars" aria-hidden="true">{% for i in (1..5) %}<svg viewBox="0 0 20 20"><path d="M10 1.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2L10 13.9 5.4 16l.9-5.2L2.4 7.1l5.2-.8z"/></svg>{% endfor %}</span> {{ s.summary }}</p>{%- endif -%}
+{%- if s.heading != blank -%}<h2 class="sv3-h">{{ s.heading }}</h2>{%- endif -%}
+</div>
+<div class="sv3-rev__grid"
+{%- if section.blocks.size == 0 and curated == false %} data-sv3-reviews-auto data-source="{{ s.source.handle | default: 'best-sellers' }}" data-products="{{ s.products_scan }}" data-count="{{ s.count }}" data-verified="{{ s.verified | escape }}"{% endif %}>
+{%- if curated -%}
+{%- for line in lines -%}{%- assign parts = line | split: '|' -%}{%- assign u = parts[0] | strip -%}{%- if u != blank -%}
+<article class="sv3-revcard"><img src="{{ u | escape }}" alt="" loading="lazy"><div>
+<span class="sv3-stars" aria-hidden="true">{% for i in (1..5) %}<svg viewBox="0 0 20 20"><path d="M10 1.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2L10 13.9 5.4 16l.9-5.2L2.4 7.1l5.2-.8z"/></svg>{% endfor %}</span>
+<p>“{{ parts[3] | strip }}”</p>
+<footer><b>{{ parts[1] | strip }}</b><span>{{ s.verified }}{% if parts[2] != blank %} · {{ parts[2] | strip }}{% endif %}</span></footer>
+</div></article>
+{%- endif -%}{%- endfor -%}
+{%- endif -%}
+{%- for block in section.blocks -%}
+{%- assign b = block.settings -%}
+<article class="sv3-revcard" {{ block.shopify_attributes }}>
+{%- if b.image != blank -%}{{ b.image | image_url: width: 600 | image_tag: loading: 'lazy', alt: '' }}{%- endif -%}
+<div>
+<span class="sv3-stars" aria-hidden="true">{% for i in (1..5) %}<svg viewBox="0 0 20 20"><path d="M10 1.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2L10 13.9 5.4 16l.9-5.2L2.4 7.1l5.2-.8z"/></svg>{% endfor %}</span>
+<p>“{{ b.text }}”</p>
+<footer><b>{{ b.name }}</b>{% if b.product != blank %}<span>{{ b.product }}</span>{% endif %}</footer>
+</div>
+</article>
+{%- endfor -%}
+</div>
+</div>
+</section>
+{% schema %}{"name":"3x2 · Reseñas","tag":"div","class":"sv3-section","settings":[{"type":"paragraph","content":"Orden de uso: bloques «Reseña» subidos; si no hay, las reseñas elegidas de abajo; si también está vacío, reseñas automáticas de 5 estrellas con foto de Loox."},{"type":"textarea","id":"curated","label":"Reseñas elegidas","info":"Una por línea: enlace de la foto | nombre | producto | reseña. Usa solo reseñas reales.","default":"https://images.loox.io/uploads/2026/1/7/mLwebs5k-_mid.jpg | Felipe A. | Cadena Cuban Link Oro 8mm | Desde que la uso, no he parado de tener cumplidos. Excelente calidad y versátil para todo momento.\nhttps://images.loox.io/uploads/2025/2/25/_Z4dlT-ME_mid.jpg | Camilo C. | Cadena Cuban Link Oro 8mm | Hermosa cadena, no pierde brillo ni color, muy resistente al agua y sol, la recomiendo bastante\nhttps://images.loox.io/uploads/2026/7/25/ChHF1izmUM_mid.jpg | Nicolás H. | Pulsera Black Clover Oro | Al principio me compré una y ya llevo como 6. Sabía que me volvería adicto a estas joyas. Lo que más me gusta es el brillo y las terminaciones. Además todas las joyas tanto los collares como las pulseras combinan muy bien entre sí pero sin llegar a verse exagerado."},{"type":"text","id":"heading","label":"Título","default":"Lo que dicen quienes ya lo llevan"},{"type":"text","id":"summary","label":"Resumen","default":"4.87/5 · +50.000 clientes"},{"type":"header","content":"Reseñas automáticas (Loox)"},{"type":"collection","id":"source","label":"Tomar reseñas de los productos de","info":"Vacío = Best Sellers"},{"type":"range","id":"products_scan","label":"Productos a revisar","min":2,"max":10,"step":1,"default":6},{"type":"range","id":"count","label":"Reseñas a mostrar","min":1,"max":6,"step":1,"default":3},{"type":"text","id":"verified","label":"Etiqueta","default":"Compra verificada"},{"type":"header","content":"Colores y espacios"},{"type":"color","id":"bg","label":"Fondo","default":"#ffffff"},{"type":"color","id":"text","label":"Texto","default":"#1c1d1d"},{"type":"range","id":"pad_top","label":"Espacio superior","min":0,"max":100,"step":4,"unit":"px","default":56},{"type":"range","id":"pad_bottom","label":"Espacio inferior","min":0,"max":100,"step":4,"unit":"px","default":32}],"blocks":[{"type":"resena","name":"Reseña (real)","limit":6,"settings":[{"type":"paragraph","content":"Usa solo reseñas reales de clientes."},{"type":"image_picker","id":"image","label":"Foto del cliente"},{"type":"textarea","id":"text","label":"Reseña"},{"type":"text","id":"name","label":"Nombre"},{"type":"text","id":"product","label":"Producto"}]}],"presets":[{"name":"3x2 · Reseñas"}]}{% endschema %}

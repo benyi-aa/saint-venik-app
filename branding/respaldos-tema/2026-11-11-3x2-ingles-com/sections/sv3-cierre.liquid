@@ -1,0 +1,32 @@
+{%- liquid
+assign s = section.settings
+assign display_font = "'Playfair Display', serif"
+if s.display_font == 'theme'
+assign display_font = 'var(--typeHeaderPrimary), var(--typeHeaderFallback)'
+endif
+-%}
+{{ 'sv-3x2.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sv-3x2.js' | asset_url }}" defer></script>
+{%- if s.display_font == 'playfair' -%}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap">
+{%- endif -%}
+<section class="sv3 sv3-close{% if s.image != blank %} has-img{% endif %}" style="--sv3-display:{{ display_font }};--sv3-bg:{{ s.bg }};--sv3-text:{{ s.text }};--sv3-shade:{{ s.overlay | divided_by: 100.0 }};--sv3-pt:{{ s.pad_top }}px;--sv3-pb:{{ s.pad_bottom }}px">
+{%- if s.image != blank -%}
+{%- assign focal = 'object-position:' | append: s.image.presentation.focal_point -%}
+{{ s.image | image_url: width: 1800 | image_tag: class: 'sv3-close__img', loading: 'lazy', style: focal, alt: '', sizes: '100vw', widths: '600, 1000, 1400, 1800' }}
+{%- endif -%}
+<div class="sv3-wrap">
+{%- if s.kicker != blank -%}<p class="sv3-kicker">{{ s.kicker }}</p>{%- endif -%}
+{%- if s.heading != blank -%}<h2 class="sv3-close__title">{{ s.heading | newline_to_br }}</h2>{%- endif -%}
+{%- if s.subtitle != blank -%}<p class="sv3-close__sub">{{ s.subtitle }}</p>{%- endif -%}
+{%- if s.button != blank -%}<button type="button" class="sv3-hero__cta" data-sv3-go>{{ s.button }}</button>{%- endif -%}
+{%- if section.blocks.size > 0 -%}
+<ul class="sv3-feat">
+{%- for block in section.blocks -%}
+<li {{ block.shopify_attributes }}>{%- if block.settings.icon != 'none' -%}{%- render 'sv3-icon', icon: block.settings.icon -%}{%- endif -%}{{ block.settings.text }}</li>
+{%- endfor -%}
+</ul>
+{%- endif -%}
+</div>
+</section>
+{% schema %}{"name":"3x2 · Cierre","tag":"div","class":"sv3-section","settings":[{"type":"text","id":"kicker","label":"Texto superior","default":"Oferta por tiempo limitado"},{"type":"textarea","id":"heading","label":"Título","default":"Tres joyas.\nUna va por nuestra cuenta."},{"type":"text","id":"subtitle","label":"Bajada","default":"Eliges 3 joyas y la de menor valor va por nuestra cuenta. El descuento se aplica solo al pagar."},{"type":"select","id":"display_font","label":"Tipografía del título","default":"playfair","options":[{"value":"playfair","label":"Playfair Display"},{"value":"theme","label":"Tipografía de títulos del tema"}]},{"type":"text","id":"button","label":"Botón","default":"Armar mi 3x2"},{"type":"image_picker","id":"image","label":"Foto de fondo (opcional)"},{"type":"range","id":"overlay","label":"Oscurecer la foto","min":0,"max":90,"step":5,"unit":"%","default":60},{"type":"color","id":"bg","label":"Fondo","default":"#1a1714"},{"type":"color","id":"text","label":"Texto","default":"#f5f0e8"},{"type":"range","id":"pad_top","label":"Espacio superior","min":0,"max":140,"step":4,"unit":"px","default":96},{"type":"range","id":"pad_bottom","label":"Espacio inferior","min":0,"max":140,"step":4,"unit":"px","default":96}],"blocks":[{"type":"beneficio","name":"Beneficio","limit":6,"settings":[{"type":"text","id":"text","label":"Texto"},{"type":"select","id":"icon","label":"Ícono","default":"diamante","options":[{"value":"oro","label":"Oro"},{"value":"brillo","label":"No se destiñe"},{"value":"hoja","label":"Hipoalergénico"},{"value":"agua","label":"Agua y sudor"},{"value":"diamante","label":"Diamante"},{"value":"escudo","label":"Garantía"},{"value":"corazon","label":"Clientes"},{"value":"cuotas","label":"Cuotas"},{"value":"envio","label":"Envío"},{"value":"regalo","label":"Regalo"},{"value":"none","label":"Sin ícono"}]}]}],"presets":[{"name":"3x2 · Cierre"}]}{% endschema %}

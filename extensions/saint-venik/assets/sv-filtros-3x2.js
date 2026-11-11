@@ -28,12 +28,14 @@
   botones.sort(function (a, b) { return a.o - b.o; });
   if (!botones.length) return;
   var yo = document.currentScript && document.currentScript.src;
+  /* En /en/ (.com) la grilla pide los productos en inglés: aquí igual, para que los nombres calcen. */
+  var raiz = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
 
   var llano = function (s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); };
   /* El nombre sin el metal: así se juntan la versión de oro y la de plata,
    * como hace la grilla con data-sv3-key. */
   var clave = function (s) {
-    return llano(s).replace(/\b(oro|plata|plateado|plateada|dorado|dorada)\b/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
+    return llano(s).replace(/\b(oro|plata|plateado|plateada|dorado|dorada|gold|silver)\b/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
   };
   var singular = function (s) { return s.replace(/(es|s)$/, ''); };
   function metal(b) {
@@ -65,7 +67,7 @@
     var claves = {};
     var pagina = 1;
     (function siguiente() {
-      fetch('/collections/' + h + '/products.json?limit=250' + (pagina > 1 ? '&page=' + pagina : ''), { credentials: 'same-origin' })
+      fetch(raiz + 'collections/' + h + '/products.json?limit=250' + (pagina > 1 ? '&page=' + pagina : ''), { credentials: 'same-origin' })
         .then(function (r) { return r.ok ? r.json() : { products: [] }; })
         .then(function (d) {
           var ps = (d && d.products) || [];
@@ -91,7 +93,7 @@
       l.forEach(function (f) { if (f) f(); });
     }
     (function siguiente() {
-      var url = '/collections/' + h + '/products.json?limit=250' + (pagina > 1 ? '&page=' + pagina : '');
+      var url = raiz + 'collections/' + h + '/products.json?limit=250' + (pagina > 1 ? '&page=' + pagina : '');
       fetch(url, { credentials: 'same-origin' })
         .then(function (r) { return r.json(); })
         .then(function (d) {
