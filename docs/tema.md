@@ -506,6 +506,17 @@ Cambios, en las dos tiendas:
   categoría se filtra por estar en la colección de ese nombre (`/collections/cadenas`…), porque
   `products.json` no trae la categoría de la app ni está en las etiquetas.
 
+### 3x2: portada de temporada (11-nov)
+
+Pedido del usuario: en Navidad, la portada de `/pages/arma-tu-3x2` usa el mismo banner que
+Essentials. `sections/sv3-hero.liquid` (temas en vivo de .cl y .com, NO va con la extensión) lee
+la temporada activa (`sv_configuracion_2.temporada`) y, si existe `sv-<clave>-portada-<colección>.jpg`
+(y `-movil.jpg`) en Archivos, la usa en vez de las fotos de la sección. La colección se elige en el
+editor del tema: ajuste «En temporada (Navidad…): banner de» (Essentials de fábrica; «Ninguno» =
+siempre las fotos propias). Sin temporada vuelve sola a las fotos de siempre.
+**Pendiente del usuario:** definir el banner del 3x2 para cuando NO sea Navidad.
+Respaldo: `branding/respaldos-tema/2026-11-11-3x2-navidad/`.
+
 ### Brillantes: «Apto para pieles sensibles» en vez de «Hipoalergénico» (10-nov)
 
 Pedido del usuario: en los 9 productos con brillantes, el beneficio de la ficha no debe decir
