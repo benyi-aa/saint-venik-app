@@ -12,7 +12,7 @@
  * fotos las cambian sv-portada / sv-inicio de la extensión.
  * Un campo vacío en una temporada = el de Normal; vacío en Normal = el texto
  * que tenía el tema (TEXTOS_DE_HOY). Ver docs/temporadas.md. */
-import { leerTemporadas, guardarTemporadas, guardarTemporadaActiva } from './config.js?v=202611111456';
+import { leerTemporadas, guardarTemporadas, guardarTemporadaActiva } from './config.js?v=202611111527';
 
 export { leerTemporadas, guardarTemporadas, guardarTemporadaActiva };
 
