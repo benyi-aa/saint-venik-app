@@ -1,4 +1,5 @@
 {%- comment -%} docs/bloques.md: «insignias.liquid · 1» {%- endcomment -%}
+{%- if request.locale.iso_code == 'en' -%}<script src="{{ 'sv-idioma.js' | asset_url }}" defer></script>{%- endif -%}
 
 {%- liquid
  assign lang = localization.language.iso_code | slice: 0, 2 | downcase

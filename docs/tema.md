@@ -1023,3 +1023,29 @@ Referencia visual: Lost Gen Club, rótulo negro debajo del % rojo, igual que nue
 - Truco del buscador de productos del panel: la lista de resultados se corta al borde de
   la tarjeta y a veces solo se ve el primero. Se puede escribir sintaxis de búsqueda de
   Shopify: `Cadena Rope 3mm* -title:*Oro` deja solo la de plata.
+
+### Popup de Klaviyo en inglés en .com/en (13-nov)
+
+El popup de descuento de .com («Desbloqueaste un descuento extra») es un formulario de
+**Klaviyo** («Email List - POPUP», id `VKMBpJ`, cuenta de .com), no del tema ni de la app. Está
+solo en español y Klaviyo no traduce formularios: lo oficial es un formulario por idioma con
+reglas de URL, y eso se hace dentro de Klaviyo (pide iniciar sesión).
+
+Arreglo desde la app: `assets/sv-idioma.js`, cargado por el embed «Insignias de producto»
+(`blocks/insignias.liquid`, primera línea) **solo si la página está en inglés**. Vigila la página
+y, cuando aparece `form.klaviyo-form`, cambia los textos por el diccionario `TEXTOS`:
+
+- «DESBLOQUEASTE UN / DESCUENTO / EXTRA» → «YOU UNLOCKED AN / EXTRA / DISCOUNT» («DISCOUNT» se
+  achica a 0,62 para que quepa en la letra grande);
+- «RECLAMAR DESCUENTO» → «CLAIM DISCOUNT»; «Prefiero pagar el precio completo.» → «I’d rather
+  pay full price.»;
+- pantalla del correo: «Enter the email address / where you’d like to receive it», «Your email
+  here.», «CLAIM DISCOUNT!», «Invalid email address»;
+- pantalla final: «DONE, IT’S YOURS!», «Your discount code has been sent…», «KEEP SHOPPING».
+
+Si se cambia el texto del popup en Klaviyo, la línea nueva sale en español hasta agregarla al
+diccionario. Lo que no arregla: el **correo con el código** que manda Klaviyo sigue en español.
+Para eso hay que entrar a Klaviyo: duplicar el formulario en inglés, mostrarlo solo en URLs con
+`/en/` (y el español en las que no), ponerle una propiedad de idioma al suscriptor y separar el
+flujo del correo por esa propiedad. Las imágenes del formulario tenían el texto alternativo
+«Decants Lab» (venían de otra marca): el script lo cambia a «Saint Venik» en /en.
