@@ -12,13 +12,13 @@
  * El panel se abre por separado en cada tienda, así que la revisión es de la tienda
  * en la que está abierto: para las dos, se pulsa en cada una.
  */
-import { gql } from './api.js?v=202611131958';
-import { cargarColores } from './colores.js?v=202611131958';
-import { cargarEtiquetas } from './etiquetas.js?v=202611131958';
-import { cargarBeneficios } from './beneficios.js?v=202611131958';
-import { cargarBotones } from './filtros.js?v=202611131958';
-import { cargarConjuntos, calcular, estaAlDia, DESCUENTO_POR_DEFECTO, ETIQUETA_CONJUNTO } from './conjuntos.js?v=202611131958';
-import { sinColor } from './productos.js?v=202611131958';
+import { gql } from './api.js?v=202611132011';
+import { cargarColores } from './colores.js?v=202611132011';
+import { cargarEtiquetas } from './etiquetas.js?v=202611132011';
+import { cargarBeneficios } from './beneficios.js?v=202611132011';
+import { cargarBotones } from './filtros.js?v=202611132011';
+import { cargarConjuntos, calcular, estaAlDia, DESCUENTO_POR_DEFECTO, ETIQUETA_CONJUNTO } from './conjuntos.js?v=202611132011';
+import { sinColor } from './productos.js?v=202611132011';
 
 /* 25 por página: cada producto trae hasta 20 variantes y Shopify cobra por
  * adelantado lo que la consulta podría gastar. Con 50 se pasaba del máximo. */
@@ -27,7 +27,7 @@ const CATALOGO = `
     products(first: 25, after: $cursor) {
       pageInfo { hasNextPage endCursor }
       nodes {
-        id title handle status tags totalInventory tracksInventory
+        id title handle status tags totalInventory tracksInventory onlineStoreUrl
         featuredMedia { id }
         variants(first: 20) { nodes { price compareAtPrice inventoryPolicy } }
         collections(first: 1) { nodes { id } }
@@ -64,6 +64,9 @@ async function cargarCatalogo(onPaso) {
       handle: n.handle,
       estado: n.status,
       activo: n.status === 'ACTIVE',
+      /* Activo no es lo mismo que visible: un producto activo que no está publicado
+       * en la tienda online no se ve. Los avisos de «se ve en la tienda» miran esto. */
+      visible: n.status === 'ACTIVE' && Boolean(n.onlineStoreUrl),
       etiquetas: n.tags ?? [],
       stock: n.totalInventory,
       controlaStock: n.tracksInventory,
@@ -86,6 +89,19 @@ async function cargarCatalogo(onPaso) {
 /* Cada revisión devuelve { clave, titulo, explicacion, tono, items }. Un item es
  * { id, titulo, detalle } — si `id` es de un producto, la pantalla pone el enlace
  * para abrirlo en Shopify. */
+function revisionSinPublicar(activos) {
+  const items = activos
+    .filter((p) => !p.visible)
+    .map((p) => ({ id: p.id, titulo: p.titulo, detalle: 'Está activo, pero no está publicado en la tienda online: no se ve.' }));
+  return {
+    clave: 'sin-publicar',
+    info: true,
+    titulo: 'Activos sin publicar en la tienda online',
+    explicacion: 'Solo para saber: si es a propósito (en preparación), no pasa nada. Se publican en la ficha del producto, en «Canales de ventas». Los demás avisos de esta página se saltan estos productos.',
+    items,
+  };
+}
+
 function revisionColor(activos, etiquetasColor) {
   const conjunto = ETIQUETA_CONJUNTO.toLowerCase();
   const items = activos
@@ -262,6 +278,8 @@ export async function revisarTienda(onPaso) {
   const { productos, incompleto } = await cargarCatalogo(paso);
   const porId = new Map(productos.map((p) => [p.id, p]));
   const activos = productos.filter((p) => p.activo);
+  /* Lo que de verdad se ve: activo y publicado en la tienda online. */
+  const visibles = activos.filter((p) => p.visible);
   const etiquetasColor = [...new Set(colores.map((c) => c.etiqueta.trim()).filter(Boolean))];
 
   const resultados = [];
@@ -273,13 +291,13 @@ export async function revisarTienda(onPaso) {
     }
   };
 
-  await intentar('Productos sin color', () => revisionColor(activos, etiquetasColor));
+  await intentar('Productos sin color', () => revisionColor(visibles, etiquetasColor));
   await intentar('Familias de color rotas', () => revisionFamilias(productos));
   paso('Revisando los conjuntos…');
   await intentar('Conjuntos', async () => revisionConjuntos(await cargarConjuntos(), moneda));
-  await intentar('Activos y agotados', () => revisionAgotados(activos));
-  await intentar('Sin foto o sin colección', () => revisionFotosYColecciones(activos));
-  await intentar('Precios', () => revisionPrecios(activos));
+  await intentar('Activos y agotados', () => revisionAgotados(visibles));
+  await intentar('Sin foto o sin colección', () => revisionFotosYColecciones(visibles));
+  await intentar('Precios', () => revisionPrecios(visibles));
 
   paso('Revisando insignias, beneficios y filtros…');
   let etiquetas = [];
@@ -290,11 +308,13 @@ export async function revisarTienda(onPaso) {
   try { botones = await cargarBotones(); } catch (error) { botones = []; }
   await intentar('Insignias y beneficios con productos archivados', () => revisionReferencias(etiquetas, beneficios, porId));
   if (conIngles) await intentar('Falta el inglés', () => revisionIngles(colores, etiquetas, beneficios, botones));
+  await intentar('Activos sin publicar en la tienda online', () => revisionSinPublicar(activos));
 
   return {
     resultados,
     total: productos.length,
     activos: activos.length,
+    visibles: visibles.length,
     incompleto,
     moneda,
     cuando: new Date(),

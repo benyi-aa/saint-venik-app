@@ -36,6 +36,20 @@
   };
   var MARCADORES = { 'Tu correo aquí.': 'Your email here.' };
 
+  /* Lo que se edita en el panel (pestaña «Inglés», 13-nov) va encima de lo fijo. Llega en
+   * window.svIngles.popup, que escribe insignias.liquid antes de cargar este archivo. Lo que
+   * no está ahí se sigue traduciendo con el diccionario de arriba. */
+  var delPanel = window.svIngles && window.svIngles.popup;
+  if (delPanel && typeof delPanel === 'object') {
+    Object.keys(delPanel).forEach(function (k) {
+      var v = delPanel[k];
+      var nk = normal(k);
+      if (typeof v !== 'string' || !v || !nk) return;
+      if (Object.prototype.hasOwnProperty.call(MARCADORES, nk)) MARCADORES[nk] = v;
+      else TEXTOS[nk] = v;
+    });
+  }
+
   /* «EXTRA» en la primera pantalla va en letra enorme; «DISCOUNT» tiene 8 letras en vez de 5 y
    * se saldría del recuadro, así que se achica en la misma proporción. */
   var ACHICAR = { 'DISCOUNT': 0.62 };
@@ -125,4 +139,202 @@
     childList: true, subtree: true, characterData: true
   });
   programar();
+})();
+
+/* Saint Venik · Revisor de /en (13-nov).
+ *
+ * Solo se enciende con ?sv-revisar=1 en la dirección (botón «Abrir el revisor» de la pestaña
+ * «Inglés» del panel): ningún cliente lo ve. Marca los textos de la página que parecen estar
+ * en español y, si se pide, recorre las páginas principales cargándolas en un marco oculto
+ * (misma tienda, así que se puede leer lo que pintan los scripts, ya traducido).
+ *
+ * Cómo decide que algo está en español: tildes, ñ, ¿ o ¡, o palabras que solo existen en
+ * español (dos o más, o una de las «fuertes» como «carrito»). Es una ayuda para mirar, no un
+ * juez: puede marcar un nombre propio o dejar pasar una frase corta.
+ */
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  if (!q.has('sv-revisar') || window.top !== window.self) return;
+
+  var FUERTES = ['agregar', 'añadir', 'carrito', 'envío', 'gratis', 'comprar', 'descuento', 'joyas', 'pulsera',
+    'pulseras', 'colgante', 'colgantes', 'anillo', 'anillos', 'cadena', 'cadenas', 'talla', 'tallas', 'precio',
+    'ahorra', 'novedad', 'vendido', 'hombre', 'regalo', 'clientes', 'garantía', 'seguir', 'comprando', 'pagar',
+    'agotado', 'disponible', 'cantidad', 'buscar', 'búsqueda', 'resultados', 'tienda', 'inicio', 'cerrar',
+    'correo', 'iniciar', 'sesión', 'pedido', 'opiniones', 'reseñas', 'también', 'nuestra', 'nuestro', 'elige',
+    'plateado', 'dorado', 'todos', 'ahora', 'llévate', 'oferta'];
+  var DEBILES = ['de', 'el', 'la', 'los', 'las', 'del', 'para', 'con', 'por', 'una', 'tu', 'tus', 'y', 'que',
+    'en', 'es', 'se', 'al', 'lo', 'más', 'oro', 'plata', 'ver', 'todo', 'mi', 'su', 'sus'];
+  var FUERTE = new Set(FUERTES);
+  var DEBIL = new Set(DEBILES);
+
+  function pareceEspanol(texto) {
+    var t = texto.replace(/\s+/g, ' ').trim();
+    if (t.length < 3 || !/[a-záéíóúñ]/i.test(t)) return false;
+    if (/[¿¡ñÑ]|[áéíóú]/.test(t)) return true;
+    var palabras = t.toLowerCase().match(/[a-záéíóúñü]+/g) || [];
+    var fuertes = 0;
+    var debiles = 0;
+    palabras.forEach(function (p) {
+      if (FUERTE.has(p)) fuertes += 1;
+      else if (DEBIL.has(p)) debiles += 1;
+    });
+    return fuertes >= 1 || debiles >= 2;
+  }
+
+  function visible(el) {
+    if (!el || !el.getClientRects || !el.getClientRects().length) return false;
+    var cs = el.ownerDocument.defaultView.getComputedStyle(el);
+    return cs.visibility !== 'hidden' && cs.display !== 'none';
+  }
+
+  /* Devuelve [{ texto, el, oculto }] de un documento, sin repetir textos. */
+  function escanear(doc) {
+    var vistos = new Set();
+    var res = [];
+    var raiz = doc.body;
+    if (!raiz) return res;
+    var w = doc.createTreeWalker(raiz, NodeFilter.SHOW_TEXT);
+    var n;
+    while ((n = w.nextNode())) {
+      var el = n.parentElement;
+      if (!el || el.closest('script, style, noscript, template, #sv-revisor')) continue;
+      var t = n.nodeValue.replace(/\s+/g, ' ').trim();
+      if (!t || vistos.has(t) || !pareceEspanol(t)) continue;
+      vistos.add(t);
+      res.push({ texto: t, el: el, oculto: !visible(el) });
+    }
+    doc.querySelectorAll('input[placeholder], textarea[placeholder], input[type="submit"][value], button[aria-label]').forEach(function (el) {
+      if (el.closest('#sv-revisor')) return;
+      var t = (el.getAttribute('placeholder') || el.getAttribute('value') || el.getAttribute('aria-label') || '').trim();
+      if (!t || vistos.has(t) || !pareceEspanol(t)) return;
+      vistos.add(t);
+      res.push({ texto: t, el: el, oculto: !visible(el) });
+    });
+    return res.sort(function (a, b) { return (a.oculto ? 1 : 0) - (b.oculto ? 1 : 0); });
+  }
+
+  function esc(t) {
+    return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+  }
+
+  var caja = document.createElement('div');
+  caja.id = 'sv-revisor';
+  caja.setAttribute('style', 'position:fixed;left:12px;bottom:12px;z-index:2147483647;width:380px;max-width:calc(100vw - 24px);max-height:62vh;overflow:auto;background:#fff;color:#111;border:1px solid #ccc;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.25);font:13px/1.4 -apple-system,Helvetica,Arial,sans-serif;padding:12px');
+  document.body.appendChild(caja);
+
+  var marcados = [];
+  function limpiarMarcas() {
+    marcados.forEach(function (el) { el.style.outline = el.dataset.svOutline || ''; });
+    marcados = [];
+  }
+
+  function boton(txt, accion) {
+    return '<button type="button" data-a="' + accion + '" style="font:inherit;font-size:12px;padding:4px 9px;margin:0 6px 6px 0;border:1px solid #bbb;border-radius:6px;background:#f6f6f6;cursor:pointer">' + txt + '</button>';
+  }
+
+  function pintarPagina() {
+    limpiarMarcas();
+    var r = escanear(document);
+    var visibles = r.filter(function (x) { return !x.oculto; });
+    r.forEach(function (x) {
+      if (x.oculto) return;
+      x.el.dataset.svOutline = x.el.style.outline || '';
+      x.el.style.outline = '2px solid #e0007a';
+      marcados.push(x.el);
+    });
+    caja.innerHTML = '<strong>Revisor de /en</strong> · esta página<br>' +
+      '<span style="color:#555">' + (visibles.length ? visibles.length + ' texto' + (visibles.length === 1 ? '' : 's') + ' a la vista parecen español (marcados en rosa)' : 'Nada en español a la vista') +
+      (r.length - visibles.length ? '; ' + (r.length - visibles.length) + ' más en menús o ventanas cerradas' : '') + '.</span><br><br>' +
+      boton('Revisar de nuevo', 'otra') + boton('Revisar las páginas principales', 'todas') + boton('Cerrar', 'cerrar') +
+      '<ol style="margin:6px 0 0;padding-left:20px">' + r.slice(0, 80).map(function (x, i) {
+        return '<li data-i="' + i + '" style="margin:3px 0;cursor:pointer' + (x.oculto ? ';color:#777' : '') + '">' + esc(x.texto.slice(0, 140)) + (x.oculto ? ' <em>(oculto)</em>' : '') + '</li>';
+      }).join('') + '</ol>';
+    caja.querySelectorAll('li[data-i]').forEach(function (li) {
+      li.addEventListener('click', function () {
+        var x = r[Number(li.dataset.i)];
+        if (x && x.el.scrollIntoView) x.el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      });
+    });
+  }
+
+  function paginas() {
+    var raiz = (window.Shopify && Shopify.routes && Shopify.routes.root) || '/en/';
+    var lista = ['', 'collections/cadenas', 'collections/pulseras', 'collections/colgantes', 'collections/anillos',
+      'collections/best-sellers', 'pages/arma-tu-3x2', 'cart', 'search?q=cadena'].map(function (p) { return raiz + p; });
+    return fetch(raiz + 'collections/cadenas/products.json?limit=1').then(function (r) { return r.json(); })
+      .then(function (d) {
+        var h = d && d.products && d.products[0] && d.products[0].handle;
+        if (h) lista.splice(1, 0, raiz + 'products/' + h);
+        return lista;
+      }).catch(function () { return lista; });
+  }
+
+  function cargar(url) {
+    return new Promise(function (listo) {
+      var f = document.createElement('iframe');
+      f.setAttribute('style', 'position:fixed;left:-3000px;top:0;width:1280px;height:900px;border:0');
+      f.src = url + (url.indexOf('?') < 0 ? '?' : '&') + 'sv-revisar-marco=1';
+      var fin = setTimeout(function () { terminar(); }, 25000);
+      function terminar() {
+        clearTimeout(fin);
+        var r = [];
+        try { r = escanear(f.contentDocument).map(function (x) { return { texto: x.texto, oculto: x.oculto }; }); } catch (e) { r = null; }
+        f.remove();
+        listo(r);
+      }
+      f.addEventListener('load', function () { setTimeout(terminar, 4500); });
+      document.body.appendChild(f);
+    });
+  }
+
+  function revisarTodas() {
+    limpiarMarcas();
+    caja.innerHTML = '<strong>Revisor de /en</strong> · preparando…';
+    paginas().then(function (lista) {
+      var resultados = [];
+      var i = 0;
+      function siguiente() {
+        if (i >= lista.length) return pintarTodas(resultados);
+        var url = lista[i];
+        caja.innerHTML = '<strong>Revisor de /en</strong> · revisando ' + (i + 1) + ' de ' + lista.length + '…<br><span style="color:#555">' + esc(url) + '</span>';
+        cargar(url).then(function (r) {
+          resultados.push({ url: url, r: r });
+          i += 1;
+          siguiente();
+        });
+      }
+      siguiente();
+    });
+  }
+
+  function pintarTodas(resultados) {
+    var total = 0;
+    var html = resultados.map(function (p) {
+      if (p.r === null) return '<p><strong>' + esc(p.url) + '</strong><br><span style="color:#a00">No se pudo leer.</span></p>';
+      var vis = p.r.filter(function (x) { return !x.oculto; });
+      total += vis.length;
+      return '<p style="margin:8px 0 2px"><a href="' + esc(p.url) + (p.url.indexOf('?') < 0 ? '?' : '&') + 'sv-revisar=1" target="_blank"><strong>' + esc(p.url) + '</strong></a> — ' +
+        (vis.length ? vis.length + ' a la vista' : '✓ nada a la vista') + (p.r.length - vis.length ? ', ' + (p.r.length - vis.length) + ' oculto' + (p.r.length - vis.length === 1 ? '' : 's') : '') + '</p>' +
+        (p.r.length ? '<ul style="margin:0;padding-left:18px">' + p.r.slice(0, 25).map(function (x) {
+          return '<li' + (x.oculto ? ' style="color:#777"' : '') + '>' + esc(x.texto.slice(0, 120)) + (x.oculto ? ' <em>(oculto)</em>' : '') + '</li>';
+        }).join('') + '</ul>' : '');
+    }).join('');
+    caja.innerHTML = '<strong>Revisor de /en</strong> · ' + resultados.length + ' páginas, ' + total + ' textos a la vista en español<br>' +
+      '<span style="color:#555">«Oculto» = en un menú, el carrito o una ventana cerrada. El enlace de cada página la abre con el revisor.</span><br><br>' +
+      boton('Volver a esta página', 'otra') + boton('Cerrar', 'cerrar') + html;
+  }
+
+  caja.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('button[data-a]') : null;
+    if (!b) return;
+    if (b.dataset.a === 'otra') pintarPagina();
+    if (b.dataset.a === 'todas') revisarTodas();
+    if (b.dataset.a === 'cerrar') { limpiarMarcas(); caja.remove(); }
+  });
+
+  /* Se espera a que los scripts de la página (traducciones, popup) terminen. */
+  caja.innerHTML = '<strong>Revisor de /en</strong> · esperando a que la página termine de cargar…';
+  if (document.readyState === 'complete') setTimeout(pintarPagina, 3500);
+  else window.addEventListener('load', function () { setTimeout(pintarPagina, 3500); });
 })();

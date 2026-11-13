@@ -1,67 +1,68 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611131958';
+import { estaEmbebida } from './api.js?v=202611132011';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611131958';
+} from './colores.js?v=202611132011';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611131958';
+} from './config.js?v=202611132011';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611131958';
+} from './filtros.js?v=202611132011';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor, unirFamilia,
-} from './productos.js?v=202611131958';
-import { prepararNavidad } from './inicio.js?v=202611131958';
+} from './productos.js?v=202611132011';
+import { prepararNavidad } from './inicio.js?v=202611132011';
 import {
   prepararConjuntos, cargarConjuntos, cargarCatalogo, sugerirJoyas, calcular, estaAlDia, formatear, guardarConjunto,
   DESCUENTO_POR_DEFECTO as DESCUENTO_CONJUNTOS,
-} from './conjuntos.js?v=202611131958';
-import { quitarAguaDeColecciones } from './textos.js?v=202611131958';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611131958';
+} from './conjuntos.js?v=202611132011';
+import { quitarAguaDeColecciones } from './textos.js?v=202611132011';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611132011';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611131958';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611131958';
+} from './temporadas.js?v=202611132011';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611132011';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611131958';
+} from './guias.js?v=202611132011';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611131958';
+} from './vista-previa.js?v=202611132011';
 import {
   cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS, resolverPartes,
-} from './asignacion.js?v=202611131958';
+} from './asignacion.js?v=202611132011';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
   sincronizarTodas as sincronizarEtiquetas, resolverColeccionesAuto, CAMPOS_AUTO, cuantosAutomaticos,
-} from './etiquetas.js?v=202611131958';
+} from './etiquetas.js?v=202611132011';
 import {
   TIPOS_AUTO, autoEncendida, elegirAutomaticos, tocaRecalcular, HORAS_ENTRE_CALCULOS,
   CANTIDAD_POR_DEFECTO as CANTIDAD_AUTO, DIAS_POR_DEFECTO as DIAS_AUTO,
-} from './automaticas.js?v=202611131958';
+} from './automaticas.js?v=202611132011';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611131958';
-import { ICONOS, svgIcono } from './iconos.js?v=202611131958';
-import { revisarTienda } from './revision.js?v=202611131958';
+} from './beneficios.js?v=202611132011';
+import { ICONOS, svgIcono } from './iconos.js?v=202611132011';
+import { revisarTienda } from './revision.js?v=202611132011';
+import { GRUPOS, cargarIngles, guardarIngles, datosTienda } from './ingles.js?v=202611132011';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611131958';
+const VERSION = '202611132011';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1800,7 +1801,9 @@ function autoHtml(e, est, sugerida) {
         <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
           <s-number-field label="Cuántos por colección" data-auto-campo="cantidad" value="${est.autoCantidad}" min="0" max="24" step="1"
             details="En «los más vendidos», al menos 1. En «los más nuevos», 0 = todos los del período."></s-number-field>
-          <s-number-field label="Creados en los últimos (días)" data-auto-campo="dias" value="${est.autoDias}" min="1" max="365" step="1" ${est.autoTipo === 'nuevos' ? '' : 'hidden'}></s-number-field>
+          <div data-auto-dias-caja ${est.autoTipo === 'nuevos' ? '' : 'hidden'}>
+            <s-number-field label="Creados en los últimos (días)" data-auto-campo="dias" value="${est.autoDias}" min="1" max="365" step="1"></s-number-field>
+          </div>
         </s-grid>
         <div class="asigna__col auto__cols">
           <p class="asigna__titulo">Colecciones</p>
@@ -1838,7 +1841,7 @@ function conectarAuto(tarjeta, est, original, colecciones, etiquetas, estadoManu
   const opciones = caja.querySelector('[data-auto-opciones]');
   const ayuda = caja.querySelector('[data-auto-ayuda]');
   const chips = caja.querySelector('[data-chips="auto"]');
-  const campoDias = caja.querySelector('[data-auto-campo="dias"]');
+  const campoDias = caja.querySelector('[data-auto-dias-caja]');
 
   const repintar = () => {
     caja.querySelectorAll('[data-auto-tipo]').forEach((b) => {
@@ -3534,15 +3537,16 @@ function enlaceProducto(id, tienda) {
 
 function revisionHtml(r, tienda) {
   if (!r) return '';
-  const conProblemas = r.resultados.filter((x) => x.items.length || x.error);
+  const revisiones = r.resultados.filter((x) => !x.info);
+  const conProblemas = revisiones.filter((x) => x.items.length || x.error);
   const resumen = conProblemas.length
-    ? `${conProblemas.length} de ${r.resultados.length} revisiones encontraron algo.`
-    : `Todo en orden en las ${r.resultados.length} revisiones.`;
+    ? `${conProblemas.length} de ${revisiones.length} revisiones encontraron algo.`
+    : `Todo en orden en las ${revisiones.length} revisiones.`;
   const hora = r.cuando.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
   const TOPE = 40;
   return `
     <s-banner tone="${conProblemas.length ? 'warning' : 'success'}" heading="${escapar(resumen)}">
-      Revisados ${r.total} productos (${r.activos} activos) a las ${escapar(hora)}.${r.incompleto ? ' El catálogo es más grande de lo que se alcanzó a leer: faltaron algunos.' : ''}
+      Revisados ${r.total} productos: ${r.activos} activos, ${r.visibles} de ellos publicados en la tienda online. A las ${escapar(hora)}.${r.incompleto ? ' El catálogo es más grande de lo que se alcanzó a leer: faltaron algunos.' : ''}
     </s-banner>
     ${r.resultados.map((x) => `
       <s-section heading="${escapar(x.titulo)}">
@@ -3550,7 +3554,7 @@ function revisionHtml(r, tienda) {
         ${x.error ? `<p class="problema">No se pudo revisar: ${escapar(x.error)}</p>` : ''}
         ${!x.error && !x.items.length ? '<p class="revision__ok">✓ Nada que arreglar.</p>' : ''}
         ${x.items.length ? `
-          <p class="revision__cuenta">${x.items.length} aviso${x.items.length === 1 ? '' : 's'}</p>
+          <p class="revision__cuenta">${x.items.length} ${x.info ? 'producto' : 'aviso'}${x.items.length === 1 ? '' : 's'}</p>
           <ul class="revision__lista">
             ${x.items.slice(0, TOPE).map((it) => `
               <li>
@@ -3617,7 +3621,149 @@ async function pintarRevision() {
   });
 }
 
+/* ---------------------------------------------------------------------------
+ * Pestaña «Inglés» (13-nov, ingles.js): los textos en inglés de saintvenik.com/en
+ * que antes estaban fijos en el código, y el revisor de /en.
+ * ------------------------------------------------------------------------- */
+function filaIngles(es, en) {
+  return `
+    <tr>
+      <td><input class="ing__es" type="text" value="${escapar(es)}" aria-label="Texto en español"></td>
+      <td><textarea class="ing__en" rows="${Math.min(4, String(en).split('\n').length)}" aria-label="Texto en inglés">${escapar(en)}</textarea></td>
+      <td><button type="button" class="ing__quitar" data-quitar-fila title="Quitar esta fila">✕</button></td>
+    </tr>`;
+}
+
+async function pintarIngles() {
+  const miPintado = pintado;
+  pantalla.innerHTML = '<p class="cargando">Cargando los textos en inglés…</p>';
+  const [tienda, { datos, guardado }] = await Promise.all([datosTienda(), cargarIngles()]);
+  if (miPintado !== pintado) return;
+
+  if (!tienda.conIngles) {
+    pantalla.innerHTML = `
+      <s-page>
+        <div class="titular"><h1>Inglés</h1></div>
+        <s-section><s-paragraph>Esta tienda no tiene versión en inglés. Esta pestaña sirve en saintvenik.com.</s-paragraph></s-section>
+      </s-page>`;
+    return;
+  }
+
+  /* Qué falta en inglés en las otras pestañas (se cuenta en segundo plano). */
+  const otrasHtml = '<p class="ayuda" id="ing-otras">Contando…</p>';
+
+  pantalla.innerHTML = `
+    <s-page>
+      <div class="titular">
+        <h1>Inglés</h1>
+        <p class="subtitulo">Cómo se ve saintvenik.com/en. Aquí están los textos en inglés que antes estaban fijos en el código (el 3x2, el popup de descuento y el menú «Filter»), y un revisor que busca lo que quedó en español.</p>
+      </div>
+
+      <s-section heading="Revisar /en" subheading="Abre la tienda en inglés con un recuadro que marca los textos que parecen estar en español. Puede revisar esa página o recorrer las principales (inicio, colecciones, una ficha, el 3x2, el carrito). Solo lo ve quien entra por ese enlace.">
+        <s-stack direction="inline" gap="base">
+          <s-button variant="primary" href="${escapar(tienda.url)}/en?sv-revisar=1" target="_blank">Abrir el revisor</s-button>
+        </s-stack>
+      </s-section>
+
+      ${guardado ? '' : `<s-banner tone="info" heading="Todavía no se han guardado desde aquí">Lo que ves abajo es lo que usa hoy la tienda (fijo en el código). Al pulsar «Guardar» quedan en Shopify y desde ese momento se cambian aquí.</s-banner>`}
+
+      ${GRUPOS.map((g) => `
+        <s-section heading="${escapar(g.titulo)}" data-grupo="${g.clave}">
+          <p class="ayuda">${escapar(g.ayuda)}</p>
+          <div class="ing__barra">
+            <input type="search" class="ing__buscar" placeholder="Buscar…" aria-label="Buscar en ${escapar(g.titulo)}">
+            <button type="button" class="ing__anadir" data-anadir-fila>+ Añadir fila</button>
+            <span class="ayuda">${Object.keys(datos[g.clave]).length} textos</span>
+          </div>
+          <div class="ing__caja">
+            <table class="ing__tabla">
+              <thead><tr><th>Español</th><th>Inglés</th><th></th></tr></thead>
+              <tbody>${Object.entries(datos[g.clave]).map(([es, en]) => filaIngles(es, en)).join('')}</tbody>
+            </table>
+          </div>
+        </s-section>`).join('')}
+
+      <s-section>
+        <s-stack direction="inline" gap="base" alignItems="center">
+          <s-button variant="primary" id="guardar-ingles">Guardar textos en inglés</s-button>
+          <span class="ayuda">Quitar una fila de las que venían de fábrica no la borra de la tienda: para no traducir un texto, deja el inglés igual al español.</span>
+        </s-stack>
+      </s-section>
+
+      <s-section heading="Lo demás en inglés" subheading="Estos textos se traducen en su propia pestaña.">
+        ${otrasHtml}
+      </s-section>
+    </s-page>`;
+
+  pantalla.querySelectorAll('s-section[data-grupo]').forEach((sec) => {
+    const cuerpo = sec.querySelector('tbody');
+    sec.querySelector('[data-anadir-fila]').addEventListener('click', () => {
+      cuerpo.insertAdjacentHTML('afterbegin', filaIngles('', ''));
+      cuerpo.querySelector('.ing__es')?.focus();
+    });
+    cuerpo.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('[data-quitar-fila]') : null;
+      if (b) b.closest('tr').remove();
+    });
+    sec.querySelector('.ing__buscar').addEventListener('input', (e) => {
+      const q = String(e.target.value || '').toLowerCase();
+      cuerpo.querySelectorAll('tr').forEach((tr) => {
+        const texto = `${tr.querySelector('.ing__es').value} ${tr.querySelector('.ing__en').value}`.toLowerCase();
+        tr.hidden = Boolean(q) && !texto.includes(q);
+      });
+    });
+  });
+
+  document.getElementById('guardar-ingles').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    const nuevos = {};
+    pantalla.querySelectorAll('s-section[data-grupo]').forEach((sec) => {
+      const d = {};
+      sec.querySelectorAll('tbody tr').forEach((tr) => {
+        const es = tr.querySelector('.ing__es').value.replace(/\s+/g, ' ').trim();
+        const en = tr.querySelector('.ing__en').value.replace(/\r/g, '').trim();
+        if (es) d[es] = en;
+      });
+      nuevos[sec.dataset.grupo] = d;
+    });
+    boton.loading = true;
+    try {
+      await guardarIngles(nuevos);
+      avisar('Textos en inglés guardados. La tienda los usa en un minuto (lo que tarda Shopify en refrescar la página).');
+    } catch (error) {
+      avisar(error.message, true);
+    } finally {
+      boton.loading = false;
+    }
+  });
+
+  /* Las otras pestañas: cuántos textos sin inglés hay en cada una. */
+  Promise.all([
+    cargarColores().catch(() => []),
+    cargarEtiquetas().catch(() => []),
+    cargarBeneficios().catch(() => []),
+    cargarBotones().catch(() => []),
+  ]).then(([colores, etiquetas, beneficios, botones]) => {
+    if (miPintado !== pintado) return;
+    const sinIngles = (lista) => lista.filter((x) => x.activo !== false && !String(x.nombreEn ?? '').trim()).length;
+    const filas = [
+      ['colores', 'Colores (nombre del color)', sinIngles(colores.filter((c) => c.etiqueta))],
+      ['etiquetas', 'Insignias', sinIngles(etiquetas)],
+      ['beneficios', 'Beneficios', sinIngles(beneficios)],
+      ['filtros', 'Filtros (botones de arriba de las colecciones)', sinIngles(botones)],
+      ['temporadas', 'Temporadas (barra, bloque y oferta: campos «en inglés»)', null],
+    ];
+    const caja = document.getElementById('ing-otras');
+    if (!caja) return;
+    caja.outerHTML = `<ul class="revision__lista">${filas.map(([p, t, n]) => `
+      <li><strong>${escapar(t)}</strong> — ${n === null ? 'cada temporada tiene sus textos en inglés' : (n ? `<span class="problema">${n} sin inglés</span>` : '✓ todo traducido')}
+      <button type="button" class="revision__ir" data-ir="${p}">Ir a la pestaña</button></li>`).join('')}</ul>`;
+    pantalla.querySelectorAll('[data-ir]').forEach((b) => b.addEventListener('click', () => ir(b.dataset.ir)));
+  });
+}
+
 const PANTALLAS = {
+  ingles: pintarIngles,
   revision: pintarRevision,
   colores: pintarColores,
   productos: pintarProductos,
@@ -4132,6 +4278,11 @@ async function ir(nombre) {
 document.querySelectorAll('.nav__item').forEach((boton) => {
   boton.addEventListener('click', () => ir(boton.dataset.pantalla));
 });
+
+/* saintvenik.cl no tiene inglés: la pestaña «Inglés» no le sirve. */
+if ((new URLSearchParams(location.search).get('shop') || '') === 'saint-venik.myshopify.com') {
+  document.querySelector('.nav__item[data-pantalla="ingles"]')?.setAttribute('hidden', '');
+}
 
 const sello = document.getElementById('version');
 if (sello) sello.textContent = `v${VERSION}`;

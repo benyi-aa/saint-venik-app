@@ -128,6 +128,18 @@
     pulseras: 'Bracelets', conjuntos: 'Sets', lentes: 'Sunglasses', brillantes: 'Iced',
     cubanas: 'Cuban', perlas: 'Pearls', tenis: 'Tennis'
   } : null;
+  /* Lo que se edita en el panel (pestaña «Inglés», 13-nov) va encima: window.svIngles.filtros,
+   * escrito por insignias.liquid solo en /en. Sin mayúsculas, como lo de arriba. */
+  var delPanel = EN && window.svIngles && window.svIngles.filtros;
+  if (delPanel && typeof delPanel === 'object') {
+    Object.keys(delPanel).forEach(function (k) {
+      var v = delPanel[k];
+      var kk = String(k).trim().toLowerCase();
+      if (typeof v !== 'string' || !v || !kk) return;
+      if (NOMBRES[kk] || kk === 'categoría' || kk === 'categoria' || kk === 'tipo') NOMBRES[kk] = v;
+      else VALORES[kk] = v;
+    });
+  }
   function traducirValores(raizV) {
     if (!VALORES || !raizV) return;
     var w = document.createTreeWalker(raizV, 4);

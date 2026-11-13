@@ -12,7 +12,7 @@
  * conjunto lleva la etiqueta sv-conjunto y cada joya sv-conjunto-parte (Flow los busca así).
  * Detalle: docs/conjuntos.md.
  */
-import { gql, comprobarErrores } from './api.js?v=202611131958';
+import { gql, comprobarErrores } from './api.js?v=202611132011';
 
 export const CLAVE_JOYAS = 'conjunto_joyas';
 export const CLAVE_DESCUENTO = 'conjunto_descuento';

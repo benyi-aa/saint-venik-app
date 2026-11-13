@@ -12,10 +12,10 @@ import {
   CAMPOS_COMUNES, aObjetoComun, cargarEntradas, camposComunes, crearEntrada,
   guardarEntrada, borrarEntrada, faltaEstructura, asegurarEstructura,
   resolverHandles, resolverPartes, cadenaDeHandles, camposDeTipo, TOPE_ENTRADAS,
-} from './asignacion.js?v=202611131958';
+} from './asignacion.js?v=202611132011';
 import {
   autoEncendida, elegirAutomaticos, CANTIDAD_POR_DEFECTO, DIAS_POR_DEFECTO,
-} from './automaticas.js?v=202611131958';
+} from './automaticas.js?v=202611132011';
 
 export const TIPO_ETIQUETA = 'sv_etiqueta';
 export const TOPE_ETIQUETAS = TOPE_ENTRADAS;
