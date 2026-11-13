@@ -998,3 +998,28 @@ Archivos), en las dos tiendas.
   Cross Faith, Roma Cross y Fleur de lis Oro Pendant — en .cl los 8; en .com solo existía Bar
   Pendant Oro Pendant (borrador).
 - Conjuntos Fleur de lis (Rope, Miami 5mm, Miami 3mm y OT Fígaro, todos Oro): en las dos tiendas.
+
+### Insignia «Más vendido» (13-nov, video de Benjamín)
+
+Pedido en video («Agregar etiqueta más vendido a productos»): poner «Más vendido» a los
+productos que va señalando en Cadenas, Pulseras y Colgantes de .cl, **salvo los que ya
+llevan «Novedad»** (no pueden ser las dos cosas; abajo de la de novedad «no quedaría bien»).
+Referencia visual: Lost Gen Club, rótulo negro debajo del % rojo, igual que nuestra Novedad.
+
+- Panel → **Insignias** → nueva «Más vendido» / «Best seller», fondo #111111, texto
+  #FFFFFF, activa, en .cl y .com.
+- Productos sueltos (16, los mismos en las dos tiendas):
+  - Cadenas: Miami Cuban 5mm, Cuban Link 8mm, Cuban Link Oro 8mm, Rope 3mm.
+  - Pulseras: Miami Cuban 5mm, Cuban 8mm, Cuban Oro 8mm, Black Clover, Black Clover Oro,
+    Green Clover Oro, Rope 3mm, Rope Oro 3mm.
+  - Colgantes: Crucifix Pendant, Crucifix Pendant Oro, Void Onyx Pendant Oro,
+    Cross Minimal Pendant Oro.
+- Etiquetas: **`-essentials`** (resta). Novedad sale de la etiqueta `essentials`, así que
+  si algún día uno de estos pasa a ser novedad, pierde «Más vendido» solo.
+- Quedaron fuera por tener Novedad aunque los señaló: Pulsera Faith, Giglio, Eclissi,
+  Viper 4mm, White Capri Oro y Vault Blue Pendant.
+- Dudoso: al final de colgantes dice «este» justo al pasar de Cross Minimal Oro a
+  **Compass II Pendant** (plata); no se le puso. Se agrega en el panel si lo confirma.
+- Truco del buscador de productos del panel: la lista de resultados se corta al borde de
+  la tarjeta y a veces solo se ve el primero. Se puede escribir sintaxis de búsqueda de
+  Shopify: `Cadena Rope 3mm* -title:*Oro` deja solo la de plata.
