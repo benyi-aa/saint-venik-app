@@ -209,14 +209,16 @@
     var n;
     while ((n = w.nextNode())) {
       var el = n.parentElement;
-      if (!el || el.closest('script, style, noscript, template, #sv-revisor')) continue;
+      /* Las copias en español que el tema esconde en /en (tienen su gemela en inglés: sv-txt--es,
+       * svcd__txt--es) y la opción «Español» del selector de idioma no cuentan. */
+      if (!el || el.closest('script, style, noscript, template, #sv-revisor, [class*="txt--es"], .disclosure-list')) continue;
       var t = n.nodeValue.replace(/\s+/g, ' ').trim();
       if (!t || vistos.has(t) || !pareceEspanol(t)) continue;
       vistos.add(t);
       res.push({ texto: t, el: el, oculto: !visible(el) });
     }
     doc.querySelectorAll('input[placeholder], textarea[placeholder], input[type="submit"][value], button[aria-label]').forEach(function (el) {
-      if (el.closest('#sv-revisor')) return;
+      if (el.closest('#sv-revisor, [class*="txt--es"]')) return;
       var t = (el.getAttribute('placeholder') || el.getAttribute('value') || el.getAttribute('aria-label') || '').trim();
       if (!t || vistos.has(t) || !pareceEspanol(t)) return;
       vistos.add(t);

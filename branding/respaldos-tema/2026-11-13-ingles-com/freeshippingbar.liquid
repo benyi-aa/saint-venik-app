@@ -1,0 +1,128 @@
+{% comment %} {% if cart.currency.iso_code == 'USD' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'EUR' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'GBP' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'CAD' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'AUD' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'JPY' %}
+  {%- assign threshold = settings.threshold | times: 10000 -%}
+{% elsif cart.currency.iso_code == 'CNY' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'INR' %}
+  {%- assign threshold = settings.threshold | times: 10000 -%}
+{% elsif cart.currency.iso_code == 'BRL' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'RUB' %}
+  {%- assign threshold = settings.threshold | times: 10000 -%}
+{% elsif cart.currency.iso_code == 'MXN' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'ZAR' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'CHF' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'SEK' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'NOK' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'DKK' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'SGD' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'HKD' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'KRW' %}
+  {%- assign threshold = settings.threshold | times: 10000 -%}
+{% elsif cart.currency.iso_code == 'TWD' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'THB' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'IDR' %}
+  {%- assign threshold = settings.threshold | times: 100000 -%}
+{% elsif cart.currency.iso_code == 'PLN' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'CZK' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'HUF' %}
+  {%- assign threshold = settings.threshold | times: 1000 -%}
+{% elsif cart.currency.iso_code == 'ILS' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'SAR' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'AED' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'MYR' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'CLP' %}
+  {%- assign threshold = settings.threshold | times: 100000 -%}
+{% elsif cart.currency.iso_code == 'COP' %}
+  {%- assign threshold = settings.threshold | times: 100000 -%}
+{% elsif cart.currency.iso_code == 'ARS' %}
+  {%- assign threshold = settings.threshold | times: 100000 -%}
+{% elsif cart.currency.iso_code == 'PEN' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'VND' %}
+  {%- assign threshold = settings.threshold | times: 100000 -%}
+{% elsif cart.currency.iso_code == 'PKR' %}
+  {%- assign threshold = settings.threshold | times: 10000 -%}
+{% elsif cart.currency.iso_code == 'BDT' %}
+  {%- assign threshold = settings.threshold | times: 10000 -%}
+{% elsif cart.currency.iso_code == 'EGP' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'NGN' %}
+  {%- assign threshold = settings.threshold | times: 10000 -%}
+{% elsif cart.currency.iso_code == 'UAH' %}
+  {%- assign threshold = settings.threshold | times: 1000 -%}
+{% elsif cart.currency.iso_code == 'KZT' %}
+  {%- assign threshold = settings.threshold | times: 1000 -%}
+{% elsif cart.currency.iso_code == 'QAR' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'DZD' %}
+  {%- assign threshold = settings.threshold | times: 1000 -%}
+{% elsif cart.currency.iso_code == 'MAD' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'JOD' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'TND' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'OMR' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% elsif cart.currency.iso_code == 'BHD' %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% else %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+{% endif %} {% endcomment %}
+  {%- assign threshold = settings.threshold | times: 100 -%}
+
+{%- assign cart_total = cart.total_price -%}
+{%- assign percentage = cart_total | times: 100 | divided_by: threshold | at_least: 0 | at_most: 100 -%}
+{%- assign amount_remaining = threshold | minus: cart_total | money_without_trailing_zeros -%}
+<div class="free-shipping-bar" style="visibility: hidden;
+  height: 0;margin: 0;">
+  <div class="shipping-message">
+    {% if cart_total >= threshold %}
+      {{ settings.success_message | default: "🎉 ¡Envío Gratis Desbloqueado!" }}
+      <style>
+        .aftermsg{display: none;}
+      </style>
+    {% else %}
+      <style>
+        .beforemsg{display: none;}
+      </style>
+      {{ settings.message_prefix | default: "Estás a" }} 
+      <span class="customamount" customamount="{{ amount_remaining }}">{{ amount_remaining }}</span> 
+      {{ settings.message_suffix | default: "de desbloquear Envío Gratis!" }}
+    {% endif %}
+  </div>
+  <div class="progress-container">
+    <div class="progress-bar"></div>
+  </div>
+</div>
+<style>
+  .progress-bar {
+  width: {{ percentage }}%;
+}
+</style>

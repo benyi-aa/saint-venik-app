@@ -1,0 +1,717 @@
+<style>
+  .cart__item{margin-bottom: 0px;padding-bottom: 4px;
+  padding-top: 11px;}
+ .custom__slider .grid__image-ratio--portrait::before {
+  padding-bottom: 80%;
+}
+  .btn.btn--full.cart__checkout {
+  letter-spacing: 0px;
+  text-transform: inherit;
+}
+  /* .btn.cart__checkout{
+    letter-spacing: normal;
+  } */
+  .productcard {
+    max-width: 100%;
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 6px;
+  }
+
+  .product-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .product-info img {
+    width: 60px;
+    height: auto;
+    border-radius: 4px;
+  }
+
+  .product-text {
+    flex-grow: 1;
+  }
+
+  .product-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .product-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+  }
+
+  .product-compare {
+    font-size: 12px;
+    color: #999;
+    text-decoration: line-through;
+    margin-left: 6px;
+  }
+
+  .variant-selector {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+
+  select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #000;
+    appearance: none;
+    background: url('data:image/svg+xml;utf8,<svg fill="black" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center/12px 12px;
+    background-color: #f9f9f9;
+  }
+
+  /* .customprobtn {
+    width: 100%;
+    padding: 10px;
+    background-color: #000;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: inherit;
+  text-align: center;
+  }
+
+  .customprobtn:hover {
+    background-color: #333;
+  } */
+</style>
+<style>
+.close-popup {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  cursor: pointer;
+  background: #ecebeb;
+  line-height: 0;
+}
+  /* Hide the native radio buttons */
+.overlay-popup  input[type="radio"] {
+  display: none;
+}
+
+/* Style labels as buttons */
+.overlay-popup  label {
+  display: inline-block;
+  padding: 8px 16px;
+  margin: 4px 8px 8px 0;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+/* Label hover effect */
+.overlay-popup  label:hover {
+  border-color: #007bff;
+  color: #007bff;
+}
+
+/* Style label for the checked radio input */
+.overlay-popup  input[type="radio"]:checked + label {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.overlay-popup {
+  position: absolute;
+  height: 20%;
+  background: #fff;
+  width: 100%;
+  z-index: 99;
+  bottom: -100%;       /* initially hidden below view */
+  transition: bottom 0.3s ease-in-out;
+  /* optional: opacity transition */
+  opacity: 0;
+}
+
+.overlay-popup.active {
+bottom: 0px;
+  opacity: 1;
+  height: 34%!important;
+}
+
+.custom__slider .grid__image-ratio--square::before {
+  padding-bottom: 60%;
+}
+  .guarantee-text {
+    margin-bottom: 16px;
+}
+.drawer.is-empty .drawer__cart-empty {
+    height: 100%;
+    width: 100%;
+}
+  @media only screen and (min-width: 769px) {
+     .drawer--right {
+    width: 600px;
+   right: -600px;
+  }
+  .drawer--right.drawer--is-open {
+    transform: translate(-600px);
+  }
+}
+ .bottomtext {font-size: {{settings.header_base_size}}px;color: {{settings.text-color}};}
+.btn.cart__checkout {
+  padding: 12px 0px!important;
+    border-radius: 6px;
+    font-size: {{settings.buttonheaderbasesize}}px;color: {{settings.buttontextcolor}};background: {{settings.bgcolor}};
+} 
+    .custom__slider {
+    overflow: unset;
+  }
+    .drawer__scrollable {
+      overflow: scroll !important;
+      display: flex;
+      justify-content: space-between !important;
+    }  .drawer__footer.appear-animation.appear-delay-4 {
+          padding-top: 2px;
+        }
+          .upselltitle {
+          position: inherit;
+          margin-bottom: 0px;
+        }
+          #CartDrawer {
+          z-index: 9999999999;
+        }
+          .swiper {
+          overflow: hidden;
+        }
+          .cart__item--variants div{color: #8f8e8e;}
+            .cart__item--variants span{color: #000;}
+        .bottomtext {
+          width: 100%;
+
+          display: block;
+
+          padding: 0;
+
+          margin-top: 11px;
+
+
+          text-align: center;
+
+          opacity: .6;
+
+          margin-bottom: 8px;
+
+        }
+        .drawer__close-button .icon {
+          background:{{settings.Drawer-close}};
+        }
+          .image-element {
+          opacity: 1!important;
+        }
+          .upselltitle {
+          display: block;
+          position: absolute;
+          top: 0;
+        }
+          .swiper{margin: 0px!important;}
+          .swiper-button-prev {
+          rotate: 180deg!important;right: 10px !important;
+          position: relative!important;
+        }
+          .swiper-button-next {
+          rotate: 180deg!important;position: relative!important;left: 10px!important;
+        }
+          .product-recommendations .swiper {
+          padding-top: 42px!important;
+        }
+          .swiper__index {
+          position: absolute;
+          top: 16px;
+          display: flex;
+          right: 0%;
+          z-index: 999999999999;
+          overflow: revert;
+          flex-direction: row-reverse;
+        }
+
+         .product-recommendations   .swiper {
+          height: auto!important;
+        }
+         .product-recommendations  .swiper-wrapper {
+          height: auto!important;}
+          .product-recommendations  .medium-up--one-third {
+            width: 100%!important;
+          }
+          .product-recommendations   [data-aos="overflow__animation"] {
+            transform: none!important;
+
+          }
+
+          .product-recommendations .medium-up--one-third {
+
+            flex-shrink: 0;padding: 0;
+          }
+            .product-recommendations .grid-product .grid-product__price {
+            text-align: center!important;
+          }
+          .product-recommendations .cart-item_title{display: block!important;font-size: 12px;padding: 0;text-align: center;
+          position: relative;
+          top: 5px;
+        }}
+         .product-recommendations .grid-product__meta{padding: 0!important;}
+          .product-recommendations .grid-product__title.grid-product__title--body {
+        display: none!important;
+        }
+         .product-recommendations [data-add-to-cart] {
+          height: 0;
+          visibility: hidden;
+          display: list-item;
+        }
+           .product-recommendations .grid-product {
+            margin-bottom: 0px!important;
+          }
+
+           .product-recommendations  .addtocart {
+          background:{{settings.button-color}};
+          color: {{settings.button-text-color}};
+          width: 100%;
+          bottom: 0px;
+          cursor: pointer;
+              font-size: 14px;
+          padding: 6px;border-radius: 6px;
+              display: flex!important;
+              justify-content: center;
+          gap: 10px;
+        }
+
+        .totalcompare {
+          text-decoration: line-through;
+           color: {{settings.comparepricecolor}};
+          width: 50%;
+          display: flex;
+          justify-content: right;
+        }
+          .itemcompare {
+          text-decoration: line-through;
+          font-size: 16px;
+          color: #8f8e8e;
+        }
+        .compare__price {
+          text-decoration: line-through;
+          font-size: 14px;
+          color: #8f8e8e;
+        }
+          .item__price {
+          display: flex;
+          gap: 8px;align-items: center;
+        }
+          .cart__item-row {
+          margin-bottom: 0;
+          margin-top: 14px;
+        }
+          .cart__item-row.text-center {
+          display: none;
+        }
+                  .drawer.drawer--right.is-empty .item-bar{display: none!important;}
+        .item-bar {
+          /* border-bottom: solid 1px #d0d0d0; */
+        }
+         .drawer.drawer--right.is-empty  .free-shipping-bar{display: none;}
+
+          .drawer_footer .grid_item.grid-product.small--one-half.medium-up--one-third{width:50%;flex-shrink:0;padding:0px}
+          .drawer_footer .grid-product_link{min-height:50px;max-height: 50px;}
+          .drawer_footer .grid-product_image-mask{max-height:200px;}
+          .drawer_footer .grid-product_image-mask img{max-height:200px;}
+          @media only screen and (max-width: 768px) {
+
+            .drawer--right {
+    width: 100%;
+}
+.drawer {
+    max-width: 100%;
+}
+     .drawer--right {
+    width: 100%;
+   right: -100%;
+  }
+  .drawer--right.drawer--is-open {
+    transform: translate(-100%);
+  }
+
+            
+        #CartDrawer .grid__image-ratio--square::before {
+          padding-bottom: 76%;
+        }
+         #CartDrawer   .grid__image-ratio image-element{
+              height: 125%;
+            }
+           #CartDrawer   .cart__item-row {
+          margin-top: 8px;
+        }
+          .drawer_footer [data-aos="overflow_animation"] {
+            transform: translate(0);
+            transition:0;
+          }
+        }
+</style>
+{%- if settings.cart_type == 'drawer' -%}
+  <div id="CartDrawer" class="drawer drawer--right">
+    <form
+      id="CartDrawerForm"
+      action="{{ routes.cart_url }}"
+      method="post"
+      novalidate
+      class="drawer__contents"
+      data-location="cart-drawer"
+    >
+      <div class="drawer__fixed-header">
+        <div class="drawer__header appear-animation appear-delay-1">
+          <div class="h2 drawer__title">
+            <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-bag-minimal sv-cv-bolsa" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><path d="M11.375 17.863h41.25v36.75h-41.25z"/><path d="M22.25 18c0-7.105 4.35-9 9.75-9s9.75 1.895 9.75 9"/></svg>
+            <svg
+              class="sv-cv-viejo"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span
+              style="
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                background-color: black;
+                color: white;
+                border-radius: 50%;
+                text-align: center;
+                line-height: 20px;
+                font-size: 12px;
+                position: absolute;
+                left: 29px;
+              "
+              id="cart-count"
+            >
+              {{ cart.item_count }}
+            </span>
+          </div>
+          <div class="drawer__close">
+            <button type="button" class="drawer__close-button js-drawer-close">
+              <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-close" viewBox="0 0 64 64">
+                <title>icon-X</title><path d="m19 17.61 27.12 27.13m0-27.12L19 44.74"/>
+              </svg>
+              <span class="icon__fallback-text">{{ 'cart.general.close_cart' | t }}</span>
+            </button>
+          </div>
+        </div>
+
+        {% if settings['enable-content'] %}
+          <div class="item-bar">
+            <div class="promo-bar">
+              <span class="cart-item-bar">
+                {{- settings.add -}}
+                <span id="output" style="margin-right: 5px;margin-left: 5px;"></span>
+       <span>{{ settings.freeproducttext }}</span>
+              </span>
+              <span class="free-item"> {{ settings.achievementtext }} </span>
+            </div>
+          </div>
+        {% endif %}
+        {% if settings.freeproduct %}
+          {% render 'free-shipping-bar' %}
+        {% endif %}
+      </div>
+
+      <div class="drawer__inner">
+        <div class="drawer__scrollable">
+          <div data-products class="appear-animation appear-delay-2"></div>
+          {% render 'upsell' %}
+
+          {% if settings.cart_notes_enable %}
+            <div class="appear-animation appear-delay-3">
+              <label for="CartNoteDrawer">{{ 'cart.general.note' | t }}</label>
+              <textarea name="note" class="input-full cart-notes" id="CartNoteDrawer">{{ cart.note }}</textarea>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="drawer__footer appear-animation appear-delay-4">
+          <div data-discounts>
+            {% if cart.cart_level_discount_applications != blank %}
+              <div class="cart__discounts cart__item-sub cart__item-row">
+                <div>{{ 'cart.general.discounts' | t }}</div>
+                <div class="text-right">
+                  {% for cart_discount in cart.cart_level_discount_applications %}
+                    <div class="cart__discount">
+                      {{ cart_discount.title }} (-{{ cart_discount.total_allocated_amount | money }})
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="cart__item-sub cart__item-row">
+            <div class="ajaxcart__subtotal">{{ settings.discounttitle }}</div>
+            <div class="customdiscount">-  {% assign total_compare_price = 0 %}
+  {% for item in cart.items %}
+  {% assign item_total = item.product.compare_at_price | times: item.quantity %}
+  {% assign total_compare_price = total_compare_price | plus: item_total %}
+  {% if item.product.compare_at_price %}
+    {% assign total_savings = total_compare_price | minus: cart.total_price %}
+  {% if forloop.last %}
+{{ total_savings | money_without_trailing_zeros}}
+      
+      {% endif %}
+  {% endif %}
+{% endfor %}</div>
+          </div>
+          <div class="cart__item-sub cart__item-row">
+            <div class="ajaxcart__subtotal">{{ 'cart.general.subtotal' | t }}</div>
+            <span class="totalcompare">
+  {% assign total_compare_price = 0 %}
+  {% for item in cart.items %}
+  {% assign item_total = item.product.compare_at_price | times: item.quantity %}
+  {% assign total_compare_price = total_compare_price | plus: item_total %}
+  {% if item.product.compare_at_price %}
+  {% if forloop.last %}
+{{ total_compare_price | money }}
+      
+      {% endif %}
+  {% endif %}
+{% endfor %}
+  </span>
+            <div data-subtotal>{{ cart.total_price | money }}</div>
+          </div>
+
+          <div class="cart__item-row text-center">
+            <small>
+              {{ 'cart.general.shipping_at_checkout' | t -}}
+              <br>
+            </small>
+          </div>
+
+          {% if settings.cart_terms_conditions_enable %}
+            <div class="cart__item-row cart__terms">
+              <input type="checkbox" id="CartTermsDrawer" class="cart__terms-checkbox">
+              <label for="CartTermsDrawer">
+                {% if settings.cart_terms_conditions_page != blank %}
+                  {{ 'cart.general.terms_html' | t: url: settings.cart_terms_conditions_page.url }}
+                {% else %}
+                  {{ 'cart.general.terms' | t }}
+                {% endif %}
+              </label>
+            </div>
+          {% endif %}
+
+          <div class="cart__checkout-wrapper" style="margin-top: 4px;">
+            <span class="bottomtext">{{ settings.mainlabel }}</span>
+            <button
+              type="submit"
+              name="checkout"
+              data-terms-required="{{ settings.cart_terms_conditions_enable }}"
+              class="btn btn--full cart__checkout"
+            >
+{{ settings.checkoutbtn }}
+              {% comment %}
+              {{ 'cart.general.checkout' | t }}
+  {% endcomment %}
+            </button>
+
+            {% if additional_checkout_buttons and settings.cart_additional_buttons %}
+              <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
+                {{ content_for_additional_checkout_buttons }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer__cart-empty appear-animation appear-delay-2">
+        {% render 'custom-collecion-cart-page' %}
+     
+      </div>
+                      </form>
+                  {% paginate collections.all.products by 500 %}
+{% for product in collections.all.products %}
+<textarea class="hide" aria-hidden="true" aria-label="Product JSON" data-variant-json>
+  {{ product.variants | json }}
+</textarea>
+<div class="overlay-popup {{ product.handle }}">
+  <span class="close-popup"style="width: 0px;
+  font-size: 0px;
+  line-height: 0px;
+  opacity: 0;"><svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-close" viewBox="0 0 64 64">
+                <title>icon-X</title><path d="m19 17.61 27.12 27.13m0-27.12L19 44.74"></path>
+              </svg></span>
+  
+  <div class="productcard">
+    <div class="product-info">
+      {%- comment -%} img_url y no image_url: image_url revienta con un producto
+     SIN foto y escribe "invalid url input" en la pagina; img_url devuelve la
+     imagen de relleno, que es lo que hacia el tema. {%- endcomment -%}
+      <img src="{{ product.featured_image | img_url: '240x' }}" alt="{{ product.title }}" width="120" height="120" loading="lazy">
+      <div class="product-text">
+        <div class="product-title">{{ product.title }}</div>
+        <div class="product-price">
+          {{ product.selected_or_first_available_variant.price | money }}
+          {% if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}
+            <span class="product-compare">{{ product.selected_or_first_available_variant.compare_at_price | money }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="variant-selector">
+      {% for option in product.options_with_values %}
+        <select name="options[{{ option.name }}]" class="variant-select" data-option-index="{{ forloop.index0 }}">
+          {% for value in option.values %}
+            <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>
+              {{ value }}
+            </option>
+          {% endfor %}
+        </select>
+      {% endfor %}
+    </div>
+
+<span class="customprobtn btn btn--full" id="customprobtn" data-product-id="{{ product.id }}">Agregar al carrito</span>
+    <input type="hidden" name="id" class="product-variant-id" value="{{ product.selected_or_first_available_variant.id }}"> 
+
+
+
+  </div>
+</div>
+{% endfor %}
+{% endpaginate %}
+
+
+
+                  
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.variant-select').forEach(select => {
+    select.addEventListener('change', function() {
+      const productCard = this.closest('.productcard');
+      const variantJson = productCard.closest('.overlay-popup').previousElementSibling;
+      const variants = JSON.parse(variantJson.value);
+      const variantIdInput = productCard.querySelector('.product-variant-id');
+      const priceElement = productCard.querySelector('.product-price');
+      const comparePriceElement = productCard.querySelector('.product-compare');
+      const addToCartBtn = productCard.querySelector('.customprobtn');
+
+      // Get selected variant options 
+      const  selectedOptions  =  [ ] ; 
+      productCard . querySelectorAll ( '.variant-select' ) . forEach ( select  =>  { 
+        selectedOptions . push ( select . value ) ; 
+      } ) ; 
+
+      // Match variant 
+      const  matchedVariant  =  variants . find ( variant  => 
+        variant . options . every ( ( option ,  index )  =>  option  ===  selectedOptions [ index ] ) 
+      ) ; 
+
+      if (matchedVariant) {
+        // Inventory alert
+        //alert(`Inventory: ${matchedVariant.inventory_quantity ?? matchedVariant.inventory ?? 'N/A'}`);
+
+        // Availability
+        const isAvailable = matchedVariant.available ?? matchedVariant.inventory_quantity > 0;
+        //alert(isAvailable ? 'This variant is available.' : 'This variant is out of stock.');
+
+        // Update button
+        if (addToCartBtn) {
+          if (isAvailable) {
+            addToCartBtn.textContent = 'Agregar al carrito';
+            addToCartBtn.classList.remove('sold-out');
+          } else {
+            addToCartBtn.textContent = 'Sold Out';
+            addToCartBtn.classList.add('sold-out');
+          }
+        }
+
+        // Update variant ID
+        variantIdInput.value = matchedVariant.id;
+
+        // Update price
+        priceElement.innerHTML = (matchedVariant.price / 100).toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        });
+
+        // Update compare price
+        if (matchedVariant.compare_at_price > matchedVariant.price) {
+          const comparePrice = (matchedVariant.compare_at_price / 100).toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'USD'
+          });
+          if (!comparePriceElement) {
+            priceElement.innerHTML += `<span class="product-compare">${comparePrice}</span>`;
+          } else {
+            comparePriceElement.textContent = comparePrice;
+          }
+        } else if (comparePriceElement) {
+          comparePriceElement.remove();
+        }
+      }
+    });
+  });
+});
+</script>
+
+
+ 
+
+  </div>
+{%- endif -%}
+<style>
+  .addtocart.customloading {
+    position: relative;
+    pointer-events: none; /* Disable button clicks while loading */
+  } 
+
+  .addtocart.customloading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+</style>
+
+
+
+
+
+                  

@@ -1,0 +1,90 @@
+{% if current_variant %}
+  {%- form 'product', product, id: form_id, class: 'product-single__form' -%}
+
+  {%- liquid
+    assign gift_card_recipient_feature_active = false
+    if block.settings.show_gift_card_recipient and product.gift_card?
+      assign gift_card_recipient_feature_active = true
+    endif
+
+    assign enable_dynamic_buttons = false
+    if show_dynamic_checkout and template != 'product.preorder' and gift_card_recipient_feature_active == false
+      assign enable_dynamic_buttons = true
+    endif
+  -%}
+
+  {%- if gift_card_recipient_feature_active -%}
+    {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+  {%- endif -%}
+
+  {%- if enable_dynamic_buttons -%}
+    <div class="payment-buttons">
+  {%- endif -%}
+
+    {%- liquid
+      assign default_text = 'products.product.add_to_cart' | t
+      assign button_text = 'products.product.add_to_cart' | t
+      if variant_count == 1
+        assign default_text = 'AÑADIR'
+        assign button_text = 'AÑADIR'
+      endif
+      if template contains 'preorder'
+        assign default_text = 'products.product.preorder' | t
+        assign button_text = 'products.product.preorder' | t
+      endif
+      unless current_variant.available
+        assign button_text = 'products.product.sold_out' | t
+      endunless
+    -%}
+{% if variant_count == 1 %}
+<span type="submit" name="add" dataaddtocart="{{ product.variants.first.id }}" class="add-to-cart">
+      <span data-add-to-cart-text="" data-default-text="AÑADIR">
+        <svg aria-hidden="true" fill="none" focusable="false" width="16" class="icon icon-cart" viewBox="0 0 24 24"><path d="M4.75 8.25A.75.75 0 0 0 4 9L3 19.125c0 1.418 1.207 2.625 2.625 2.625h12.75c1.418 0 2.625-1.149 2.625-2.566L20 9a.75.75 0 0 0-.75-.75H4.75Zm2.75 0v-1.5a4.5 4.5 0 0 1 4.5-4.5v0a4.5 4.5 0 0 1 4.5 4.5v1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg> AÑADIR
+       </span>
+    </span>
+{% else %}
+      <button
+      {% if product.empty? %}type="button"{% else %}type="submit"{% endif %}
+      name="add"
+      data-add-to-cart
+      class="{% unless variant_count == 1 or isMsQuickViewModal %}btn btn--full{% endunless %} add-to-cart{% if enable_dynamic_buttons and product.selling_plan_groups == empty %} btn--secondary{% endif %}"
+      {% unless current_variant.available %} disabled="disabled"{% endunless %}>
+      <span data-add-to-cart-text data-default-text="{{ default_text }}">
+        {% if current_variant.available %}<svg aria-hidden="true" fill="none" focusable="false" width="16" class="icon icon-cart" viewBox="0 0 24 24"><path d="M4.75 8.25A.75.75 0 0 0 4 9L3 19.125c0 1.418 1.207 2.625 2.625 2.625h12.75c1.418 0 2.625-1.149 2.625-2.566L20 9a.75.75 0 0 0-.75-.75H4.75Zm2.75 0v-1.5a4.5 4.5 0 0 1 4.5-4.5v0a4.5 4.5 0 0 1 4.5 4.5v1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>{% endif %} {{ button_text }}
+      </span>
+    </button>
+  {% endif %}
+    {%- if enable_dynamic_buttons -%}
+      {{ form | payment_button }}
+    {%- endif -%}
+
+  {%- if enable_dynamic_buttons -%}
+    </div>
+  {%- endif -%}
+
+  <div class="shopify-payment-terms product__policies">{{ form | payment_terms }}</div>
+
+  <select name="id" data-product-select class="product-single__variants no-js">
+    {%- for variant in product.variants -%}
+      {%- if variant.available -%}
+        <option {% if variant == product.selected_or_first_available_variant %}
+          selected="selected"{% endif %}
+          value="{{ variant.id }}">
+          {{ variant.title }} - {{ variant.price | money_with_currency }}
+        </option>
+      {%- else -%}
+        <option disabled="disabled">
+          {{ variant.title }} - {{ 'products.product.sold_out' | t }}
+        </option>
+      {%- endif -%}
+    {%- endfor -%}
+  </select>
+{%- endform -%}
+
+  {% else %}
+<span type="submit" name="add" dataaddtocart="{{ product.variants.first.id }}" class="add-to-cart">
+      <span data-add-to-cart-text="" data-default-text="AÑADIR">
+        <svg aria-hidden="true" fill="none" focusable="false" width="16" class="icon icon-cart" viewBox="0 0 24 24"><path d="M4.75 8.25A.75.75 0 0 0 4 9L3 19.125c0 1.418 1.207 2.625 2.625 2.625h12.75c1.418 0 2.625-1.149 2.625-2.566L20 9a.75.75 0 0 0-.75-.75H4.75Zm2.75 0v-1.5a4.5 4.5 0 0 1 4.5-4.5v0a4.5 4.5 0 0 1 4.5 4.5v1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg> AÑADIR
+       </span>
+    </span>
+    {% endif %}
