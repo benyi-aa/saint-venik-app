@@ -1049,3 +1049,73 @@ Para eso hay que entrar a Klaviyo: duplicar el formulario en inglés, mostrarlo 
 `/en/` (y el español en las que no), ponerle una propiedad de idioma al suscriptor y separar el
 flujo del correo por esa propiedad. Las imágenes del formulario tenían el texto alternativo
 «Decants Lab» (venían de otra marca): el script lo cambia a «Saint Venik» en /en.
+
+### Inglés: fotos de Navidad del inicio y del menú en /en (13-nov)
+
+En saintvenik.com/en las colecciones tienen otro handle (`chains`, `bracelets`, `pendants`,
+`rings`, `sets`…). Dos cosas buscaban por el handle en español y en /en no encontraban nada:
+
+- **Tarjetas de colección del inicio** (`snippets/sv-inicio.liquid`): la regla de la foto de
+  Navidad buscaba `a[href$="/collections/cadenas"]`. Ahora también el handle en inglés,
+  sacado de `collections[h].url` (que en /en ya viene traducido).
+- **Menú del teléfono** (`snippets/sv-menu.liquid`): las fotos `sv-menu-<colección>.jpg`
+  se registran también con el handle en inglés.
+
+Regla para lo que venga: nada que dependa del handle de una colección o de un producto puede
+usar solo el español; en /en hay que mirar `url` o el handle traducido.
+
+### Pestaña «Revisión» del panel (13-nov)
+
+`admin/revision.js` + `pintarRevision`. Un botón que recorre la tienda (la de ese panel) y
+avisa, sin cambiar nada: productos sin color, familias de color rotas (sin vuelta, o con
+hermanos archivados), conjuntos sin sus dos joyas / con una joya archivada / con el precio
+atrasado, publicados sin stock, sin foto o sin colección, precios en 0 o con el tachado igual
+o menor, insignias y beneficios con productos archivados, y lo que falta en inglés (.com).
+Solo mira lo **publicado en la tienda online** (`onlineStoreUrl`); los activos sin publicar
+salen aparte, como dato. Primera pasada en .cl (13-nov): 35 publicados agotados, las 4 Vienna
+Link (Black/Blue, plata y oro) activas sin publicar, sin foto y con precio 0.
+
+### Insignias automáticas (13-nov)
+
+`admin/automaticas.js` + sección «Automática» de cada tarjeta en Insignias + `sincronizarTodas`
+en `admin/etiquetas.js`. Campos nuevos de `sv_etiqueta`: `auto_tipo` (`mas_vendidos` /
+`nuevos`), `auto_activo`, `auto_cantidad`, `auto_dias`, `auto_colecciones`, `auto_handles`,
+`auto_fecha` (creados con «Crear lo que falta» en las dos tiendas).
+
+- **Los más vendidos:** los N primeros de cada colección elegida en el orden «más vendidos» de
+  Shopify (`collection.products(sortKey: BEST_SELLING)`; no hace falta leer pedidos).
+- **Los más nuevos:** creados en los últimos N días (de las colecciones elegidas o de toda la
+  tienda).
+- Se **suma** a lo elegido a mano (sin repetir); nunca cae en un producto que ya lleva otra
+  insignia (manda la de más arriba), ni en lo que la insignia resta, ni en agotados o no
+  activos: se salta y se toma el siguiente.
+- Se recalcula al abrir Insignias, al guardar, y al abrir el panel en cualquier pestaña si
+  pasaron más de 6 horas. Con todas apagadas, el cálculo da exactamente lo de antes.
+- **Estado:** APAGADAS en las dos tiendas. El panel propone «Más vendido» → los más vendidos
+  (4 por colección: Cadenas, Pulseras, Colgantes, Anillos) y «Novedad» → los más nuevos (30
+  días); se guarda al pulsar Guardar y se enciende con la casilla «Automática encendida».
+  «Ver a cuáles se pondría» muestra el resultado sin guardar nada.
+
+### Pestaña «Inglés» del panel (13-nov)
+
+`admin/ingles.js` + `pintarIngles` (solo en .com; en .cl la pestaña se esconde). Metaobjeto
+`sv_ingles` (handle `textos`), tres campos JSON español → inglés:
+
+- `tres`: el «Arma tu 3x2». El snippet `sv3-t` del tema de .com lo mira primero y, si no está,
+  usa su lista fija (respaldo del archivo de antes: `branding/respaldos-tema/2026-11-13-ingles-com/`).
+  Comprobado cambiando «18K Gold» → «18k Gold» (va en mayúsculas, no se nota) y de vuelta.
+- `popup`: el popup de Klaviyo (`sv-idioma.js`).
+- `filtros`: nombres y valores del menú Filter (`sv-filtros.js`, sin mayúsculas).
+
+`insignias.liquid` (primera línea, solo en /en) escribe `window.svIngles = {popup, filtros}`
+antes de cargar `sv-idioma.js`. Lo que no está en el metaobjeto sigue con el diccionario fijo
+de cada archivo. Guardado por primera vez el 13-nov con los mismos textos de antes.
+
+**Revisor de /en:** botón «Abrir el revisor» → `saintvenik.com/en?sv-revisar=1`. Un recuadro
+marca en rosa lo que parece español en esa página (tildes, ñ, ¿¡ o palabras españolas) y
+separa lo «oculto» (menús, carrito, ventanas cerradas). «Revisar las páginas principales»
+recorre en la misma pestaña inicio, una ficha, cadenas, pulseras, colgantes, anillos, best
+sellers, el 3x2, el carrito y una búsqueda (`?sv-paso=N`, estado en sessionStorage) y al final
+muestra todo. Nada de esto lo ve un cliente. Primera pasada (13-nov): nada en español a la
+vista; ocultos con español: el cajón del carrito («¡Envío Gratis Desbloqueado!», «AÑADIR»),
+la compra rápida («Agregar al carrito») y textos de secciones escondidas.
