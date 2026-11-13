@@ -145,8 +145,8 @@
  *
  * Solo se enciende con ?sv-revisar=1 en la dirección (botón «Abrir el revisor» de la pestaña
  * «Inglés» del panel): ningún cliente lo ve. Marca los textos de la página que parecen estar
- * en español y, si se pide, recorre las páginas principales en una ventana aparte (misma
- * tienda, así que se puede leer lo que pintan los scripts, ya traducido).
+ * en español y, si se pide, recorre las páginas principales en la misma pestaña, una por
+ * una, mirando lo que de verdad se ve (ya traducido por los scripts).
  *
  * Cómo decide que algo está en español: tildes, ñ, ¿ o ¡, o palabras que solo existen en
  * español (dos o más, o una de las «fuertes» como «carrito»). Es una ayuda para mirar, no un
@@ -194,9 +194,6 @@
 
   function visible(el) {
     if (!el) return false;
-    if (!el.ownerDocument.defaultView) {
-      return !el.closest('[hidden], [aria-hidden="true"], dialog, [class*="drawer"], [class*="modal"], [class*="Drawer"], [class*="Modal"]');
-    }
     if (!el.getClientRects || !el.getClientRects().length) return false;
     var cs = el.ownerDocument.defaultView.getComputedStyle(el);
     return cs.visibility !== 'hidden' && cs.display !== 'none';
@@ -284,84 +281,58 @@
       }).catch(function () { return lista; });
   }
 
-  /* Las páginas se recorren en UNA ventana aparte (la tienda no se deja mostrar dentro de un
-   * marco: X-Frame-Options). Es de la misma tienda, así que se puede leer lo que pintan sus
-   * scripts, ya traducido. La ventana se abre en el clic (si no, el navegador la bloquea). */
-  function cargarEn(w, url, n) {
-    return new Promise(function (listo) {
-      var marca = 'sv-revisar-marco=' + n;
-      try { w.location.href = url + (url.indexOf('?') < 0 ? '?' : '&') + marca; } catch (e) { listo(null); return; }
-      var inicio = Date.now();
-      var t = setInterval(function () {
-        var d = null;
-        var aqui = '';
-        try { d = w.document; aqui = String(w.location.href); } catch (e) { d = null; }
-        var cargada = d && d.readyState === 'complete' && aqui.indexOf(marca) >= 0;
-        if (!cargada && Date.now() - inicio < 25000 && !w.closed) return;
-        clearInterval(t);
-        setTimeout(function () {
-          var r = null;
-          try { r = escanear(w.document).map(function (x) { return { texto: x.texto, oculto: x.oculto }; }); } catch (e) { r = null; }
-          listo(r);
-        }, cargada ? 4500 : 0);
-      }, 300);
-    });
+  /* «Revisar las páginas principales»: la misma pestaña va pasando por cada página (con
+   * ?sv-revisar=1&sv-paso=N), espera a que cargue y a que corran los scripts, revisa lo que de
+   * verdad se ve y sigue. Lo recorrido se guarda en sessionStorage; al final se muestra todo.
+   * (No sirve un marco ni leer el HTML: la tienda no se deja mostrar en un marco, y el HTML
+   * crudo trae en español cosas que en /en se esconden o se traducen al cargar.) */
+  var CLAVE = 'sv-revisor-recorrido';
+  function leerRecorrido() {
+    try { return JSON.parse(sessionStorage.getItem(CLAVE) || 'null'); } catch (e) { return null; }
+  }
+  function guardarRecorrido(r) {
+    try {
+      if (r) sessionStorage.setItem(CLAVE, JSON.stringify(r));
+      else sessionStorage.removeItem(CLAVE);
+    } catch (e) { /* nada */ }
+  }
+  function irA(r) {
+    var url = r.lista[r.i];
+    location.href = url + (url.indexOf('?') < 0 ? '?' : '&') + 'sv-revisar=1&sv-paso=' + r.i;
   }
 
   function revisarTodas() {
     limpiarMarcas();
-    var w = window.open('about:blank', 'sv-revisor-paginas', 'width=1280,height=900');
-    if (!w) {
-      /* Ventana bloqueada: se lee el HTML de cada página. Sirve igual para lo que viene del
-       * servidor (títulos, textos de secciones, el 3x2); lo que pintan los scripts después no
-       * se ve, y lo que ellos traducen ya se descuenta (YA). */
-      return revisarSinVentana();
-    }
-    caja.innerHTML = '<strong>Revisor de /en</strong> · preparando… (se abre una ventana que va pasando por las páginas; no la cierres)';
+    caja.innerHTML = '<strong>Revisor de /en</strong> · preparando el recorrido…';
     paginas().then(function (lista) {
-      var resultados = [];
-      var i = 0;
-      function siguiente() {
-        if (i >= lista.length || w.closed) {
-          try { w.close(); } catch (e) { /* nada */ }
-          return pintarTodas(resultados);
-        }
-        var url = lista[i];
-        caja.innerHTML = '<strong>Revisor de /en</strong> · revisando ' + (i + 1) + ' de ' + lista.length + '…<br><span style="color:#555">' + esc(url) + '</span>';
-        cargarEn(w, url, i + 1).then(function (r) {
-          resultados.push({ url: url, r: r });
-          i += 1;
-          siguiente();
-        });
-      }
-      siguiente();
+      var r = { lista: lista, i: 0, res: [], inicio: location.pathname + location.search };
+      guardarRecorrido(r);
+      irA(r);
     });
   }
 
-  function revisarSinVentana() {
-    caja.innerHTML = '<strong>Revisor de /en</strong> · el navegador bloqueó la ventana: se lee el HTML de cada página…';
-    paginas().then(function (lista) {
-      var resultados = [];
-      var i = 0;
-      function siguiente() {
-        if (i >= lista.length) return pintarTodas(resultados, true);
-        var url = lista[i];
-        caja.innerHTML = '<strong>Revisor de /en</strong> · leyendo ' + (i + 1) + ' de ' + lista.length + '…<br><span style="color:#555">' + esc(url) + '</span>';
-        fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.text(); }).then(function (html) {
-          var doc = new DOMParser().parseFromString(html, 'text/html');
-          doc.querySelectorAll('script, style, noscript, template').forEach(function (x) { x.remove(); });
-          return escanear(doc).map(function (x) { return { texto: x.texto, oculto: x.oculto }; });
-        }).catch(function () { return null; }).then(function (r) {
-          resultados.push({ url: url, r: r });
-          i += 1;
-          siguiente();
-        });
+  /* Si esta carga es un paso del recorrido: revisar, anotar y seguir. */
+  function pasoDelRecorrido() {
+    var r = leerRecorrido();
+    var paso = q.get('sv-paso');
+    if (!r || paso === null || Number(paso) !== r.i) return false;
+    caja.innerHTML = '<strong>Revisor de /en</strong> · revisando ' + (r.i + 1) + ' de ' + r.lista.length + '…<br><span style="color:#555">' + esc(r.lista[r.i]) + '</span><br>' + boton('Parar', 'parar');
+    setTimeout(function () {
+      if (!leerRecorrido()) return;
+      r.res.push({ url: r.lista[r.i], r: escanear(document).map(function (x) { return { texto: x.texto, oculto: x.oculto }; }) });
+      r.i += 1;
+      if (r.i < r.lista.length) {
+        guardarRecorrido(r);
+        irA(r);
+      } else {
+        guardarRecorrido(null);
+        pintarTodas(r.res);
       }
-      siguiente();
-    });
+    }, 4500);
+    return true;
   }
 
-  function pintarTodas(resultados, sinVentana) {
+  function pintarTodas(resultados) {
     var total = 0;
     var html = resultados.map(function (p) {
       if (p.r === null) return '<p><strong>' + esc(p.url) + '</strong><br><span style="color:#a00">No se pudo leer.</span></p>';
@@ -374,8 +345,7 @@
         }).join('') + '</ul>' : '');
     }).join('');
     caja.innerHTML = '<strong>Revisor de /en</strong> · ' + resultados.length + ' páginas, ' + total + ' textos a la vista en español<br>' +
-      '<span style="color:#555">«Oculto» = en un menú, el carrito o una ventana cerrada. El enlace de cada página la abre con el revisor.' +
-      (sinVentana ? ' Leído del HTML (el navegador bloqueó la ventana): lo que pintan los scripts después no está; para verlo, permite las ventanas emergentes de esta tienda.' : '') + '</span><br><br>' +
+      '<span style="color:#555">«Oculto» = en un menú, el carrito o una ventana cerrada. El enlace de cada página la abre con el revisor.</span><br><br>' +
       boton('Volver a esta página', 'otra') + boton('Cerrar', 'cerrar') + html;
   }
 
@@ -385,10 +355,15 @@
     if (b.dataset.a === 'otra') pintarPagina();
     if (b.dataset.a === 'todas') revisarTodas();
     if (b.dataset.a === 'cerrar') { limpiarMarcas(); caja.remove(); }
+    if (b.dataset.a === 'parar') { guardarRecorrido(null); pintarPagina(); }
   });
 
   /* Se espera a que los scripts de la página (traducciones, popup) terminen. */
   caja.innerHTML = '<strong>Revisor de /en</strong> · esperando a que la página termine de cargar…';
-  if (document.readyState === 'complete') setTimeout(pintarPagina, 3500);
-  else window.addEventListener('load', function () { setTimeout(pintarPagina, 3500); });
+  var arrancar = function () {
+    if (pasoDelRecorrido()) return;
+    setTimeout(pintarPagina, 3500);
+  };
+  if (document.readyState === 'complete') arrancar();
+  else window.addEventListener('load', arrancar);
 })();
