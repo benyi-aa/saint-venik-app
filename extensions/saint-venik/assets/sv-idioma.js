@@ -192,6 +192,15 @@
     return fuertes >= 1 || debiles >= 2;
   }
 
+  /* Gemela en español: el tema pone la versión en español y la inglesa juntas y esconde la que
+   * no toca (clases que terminan en «--es»: sv-txt--es, sv-usp--es, sv-hero-daily__frame--es…). */
+  function esGemela(el) {
+    for (var x = el; x && x.classList; x = x.parentElement) {
+      for (var i = 0; i < x.classList.length; i += 1) if (/--es$/.test(x.classList[i])) return true;
+    }
+    return false;
+  }
+
   function visible(el) {
     if (!el) return false;
     if (!el.getClientRects || !el.getClientRects().length) return false;
@@ -211,14 +220,14 @@
       var el = n.parentElement;
       /* Las copias en español que el tema esconde en /en (tienen su gemela en inglés: sv-txt--es,
        * svcd__txt--es) y la opción «Español» del selector de idioma no cuentan. */
-      if (!el || el.closest('script, style, noscript, template, #sv-revisor, [class*="txt--es"], .disclosure-list')) continue;
+      if (!el || el.closest('script, style, noscript, template, textarea, #sv-revisor, .disclosure-list, #loox-reviews-feed') || esGemela(el)) continue;
       var t = n.nodeValue.replace(/\s+/g, ' ').trim();
       if (!t || vistos.has(t) || !pareceEspanol(t)) continue;
       vistos.add(t);
       res.push({ texto: t, el: el, oculto: !visible(el) });
     }
     doc.querySelectorAll('input[placeholder], textarea[placeholder], input[type="submit"][value], button[aria-label]').forEach(function (el) {
-      if (el.closest('#sv-revisor, [class*="txt--es"]')) return;
+      if (el.closest('#sv-revisor') || esGemela(el)) return;
       var t = (el.getAttribute('placeholder') || el.getAttribute('value') || el.getAttribute('aria-label') || '').trim();
       if (!t || vistos.has(t) || !pareceEspanol(t)) return;
       vistos.add(t);
