@@ -1119,3 +1119,20 @@ sellers, el 3x2, el carrito y una búsqueda (`?sv-paso=N`, estado en sessionStor
 muestra todo. Nada de esto lo ve un cliente. Primera pasada (13-nov): nada en español a la
 vista; ocultos con español: el cajón del carrito («¡Envío Gratis Desbloqueado!», «AÑADIR»),
 la compra rápida («Agregar al carrito») y textos de secciones escondidas.
+
+### /en: botones y barra de envío gratis en inglés (13-nov)
+
+El revisor encontró español al abrir cosas en /en. Arreglado en el tema de .com (respaldos
+de los originales en `branding/respaldos-tema/2026-11-13-ingles-com/`):
+
+- `snippets/product-form.liquid` y `snippets/productform.liquid`: el botón de los productos
+  de una sola variante decía «AÑADIR» (ventana de vista rápida) → en /en «ADD».
+- `snippets/cart-drawer.liquid`: el botón de las ventanas de producto del carrito decía
+  «Agregar al carrito» (en el HTML y en el script que lo repone) → en /en «Add to cart».
+- `snippets/free-shipping-bar.liquid` y `snippets/freeshippingbar.liquid`: la barra de envío
+  gratis toma sus textos de los ajustes del tema, que están en español → en /en
+  «🎉 Free shipping unlocked!» / «You're $X away from free shipping!».
+
+En español todo sigue igual. Comprobado con un producto en el carrito (luego vaciado) y con
+el revisor: las 10 páginas principales de /en quedan sin español a la vista. El revisor ya no
+cuenta las «gemelas» en español que el tema esconde en /en (clases que terminan en `--es`).
