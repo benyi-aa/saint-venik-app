@@ -168,9 +168,19 @@
   var FUERTE = new Set(FUERTES);
   var DEBIL = new Set(DEBILES);
 
+  /* Lo que traducen los scripts al cargar (filtros, popup): en el HTML crudo sale en español,
+   * pero el cliente lo ve en inglés. */
+  var YA = new Set();
+  ['filtros', 'popup'].forEach(function (g) {
+    var d = window.svIngles && window.svIngles[g];
+    if (d && typeof d === 'object') Object.keys(d).forEach(function (k) { YA.add(k.replace(/\s+/g, ' ').trim().toLowerCase()); });
+  });
+
   function pareceEspanol(texto) {
     var t = texto.replace(/\s+/g, ' ').trim();
     if (t.length < 3 || !/[a-záéíóúñ]/i.test(t)) return false;
+    if (/^[\[{]/.test(t) && /":/.test(t)) return false;
+    if (YA.has(t.toLowerCase())) return false;
     if (/[¿¡ñÑ]|[áéíóú]/.test(t)) return true;
     var palabras = t.toLowerCase().match(/[a-záéíóúñü]+/g) || [];
     var fuertes = 0;
@@ -183,7 +193,11 @@
   }
 
   function visible(el) {
-    if (!el || !el.getClientRects || !el.getClientRects().length) return false;
+    if (!el) return false;
+    if (!el.ownerDocument.defaultView) {
+      return !el.closest('[hidden], [aria-hidden="true"], dialog, [class*="drawer"], [class*="modal"], [class*="Drawer"], [class*="Modal"]');
+    }
+    if (!el.getClientRects || !el.getClientRects().length) return false;
     var cs = el.ownerDocument.defaultView.getComputedStyle(el);
     return cs.visibility !== 'hidden' && cs.display !== 'none';
   }
@@ -298,8 +312,10 @@
     limpiarMarcas();
     var w = window.open('about:blank', 'sv-revisor-paginas', 'width=1280,height=900');
     if (!w) {
-      caja.innerHTML = '<strong>Revisor de /en</strong><br><span style="color:#a00">El navegador bloqueó la ventana. Permite las ventanas emergentes de esta tienda y vuelve a pulsar.</span><br><br>' + boton('Volver a esta página', 'otra');
-      return;
+      /* Ventana bloqueada: se lee el HTML de cada página. Sirve igual para lo que viene del
+       * servidor (títulos, textos de secciones, el 3x2); lo que pintan los scripts después no
+       * se ve, y lo que ellos traducen ya se descuenta (YA). */
+      return revisarSinVentana();
     }
     caja.innerHTML = '<strong>Revisor de /en</strong> · preparando… (se abre una ventana que va pasando por las páginas; no la cierres)';
     paginas().then(function (lista) {
@@ -322,7 +338,30 @@
     });
   }
 
-  function pintarTodas(resultados) {
+  function revisarSinVentana() {
+    caja.innerHTML = '<strong>Revisor de /en</strong> · el navegador bloqueó la ventana: se lee el HTML de cada página…';
+    paginas().then(function (lista) {
+      var resultados = [];
+      var i = 0;
+      function siguiente() {
+        if (i >= lista.length) return pintarTodas(resultados, true);
+        var url = lista[i];
+        caja.innerHTML = '<strong>Revisor de /en</strong> · leyendo ' + (i + 1) + ' de ' + lista.length + '…<br><span style="color:#555">' + esc(url) + '</span>';
+        fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.text(); }).then(function (html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          doc.querySelectorAll('script, style, noscript, template').forEach(function (x) { x.remove(); });
+          return escanear(doc).map(function (x) { return { texto: x.texto, oculto: x.oculto }; });
+        }).catch(function () { return null; }).then(function (r) {
+          resultados.push({ url: url, r: r });
+          i += 1;
+          siguiente();
+        });
+      }
+      siguiente();
+    });
+  }
+
+  function pintarTodas(resultados, sinVentana) {
     var total = 0;
     var html = resultados.map(function (p) {
       if (p.r === null) return '<p><strong>' + esc(p.url) + '</strong><br><span style="color:#a00">No se pudo leer.</span></p>';
@@ -335,7 +374,8 @@
         }).join('') + '</ul>' : '');
     }).join('');
     caja.innerHTML = '<strong>Revisor de /en</strong> · ' + resultados.length + ' páginas, ' + total + ' textos a la vista en español<br>' +
-      '<span style="color:#555">«Oculto» = en un menú, el carrito o una ventana cerrada. El enlace de cada página la abre con el revisor.</span><br><br>' +
+      '<span style="color:#555">«Oculto» = en un menú, el carrito o una ventana cerrada. El enlace de cada página la abre con el revisor.' +
+      (sinVentana ? ' Leído del HTML (el navegador bloqueó la ventana): lo que pintan los scripts después no está; para verlo, permite las ventanas emergentes de esta tienda.' : '') + '</span><br><br>' +
       boton('Volver a esta página', 'otra') + boton('Cerrar', 'cerrar') + html;
   }
 
