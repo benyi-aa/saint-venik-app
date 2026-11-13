@@ -1,68 +1,68 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611132011';
+import { estaEmbebida } from './api.js?v=202611132017';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611132011';
+} from './colores.js?v=202611132017';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611132011';
+} from './config.js?v=202611132017';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611132011';
+} from './filtros.js?v=202611132017';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor, unirFamilia,
-} from './productos.js?v=202611132011';
-import { prepararNavidad } from './inicio.js?v=202611132011';
+} from './productos.js?v=202611132017';
+import { prepararNavidad } from './inicio.js?v=202611132017';
 import {
   prepararConjuntos, cargarConjuntos, cargarCatalogo, sugerirJoyas, calcular, estaAlDia, formatear, guardarConjunto,
   DESCUENTO_POR_DEFECTO as DESCUENTO_CONJUNTOS,
-} from './conjuntos.js?v=202611132011';
-import { quitarAguaDeColecciones } from './textos.js?v=202611132011';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611132011';
+} from './conjuntos.js?v=202611132017';
+import { quitarAguaDeColecciones } from './textos.js?v=202611132017';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611132017';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611132011';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611132011';
+} from './temporadas.js?v=202611132017';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611132017';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611132011';
+} from './guias.js?v=202611132017';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611132011';
+} from './vista-previa.js?v=202611132017';
 import {
   cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS, resolverPartes,
-} from './asignacion.js?v=202611132011';
+} from './asignacion.js?v=202611132017';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
   sincronizarTodas as sincronizarEtiquetas, resolverColeccionesAuto, CAMPOS_AUTO, cuantosAutomaticos,
-} from './etiquetas.js?v=202611132011';
+} from './etiquetas.js?v=202611132017';
 import {
   TIPOS_AUTO, autoEncendida, elegirAutomaticos, tocaRecalcular, HORAS_ENTRE_CALCULOS,
   CANTIDAD_POR_DEFECTO as CANTIDAD_AUTO, DIAS_POR_DEFECTO as DIAS_AUTO,
-} from './automaticas.js?v=202611132011';
+} from './automaticas.js?v=202611132017';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611132011';
-import { ICONOS, svgIcono } from './iconos.js?v=202611132011';
-import { revisarTienda } from './revision.js?v=202611132011';
-import { GRUPOS, cargarIngles, guardarIngles, datosTienda } from './ingles.js?v=202611132011';
+} from './beneficios.js?v=202611132017';
+import { ICONOS, svgIcono } from './iconos.js?v=202611132017';
+import { revisarTienda } from './revision.js?v=202611132017';
+import { GRUPOS, cargarIngles, guardarIngles, datosTienda } from './ingles.js?v=202611132017';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611132011';
+const VERSION = '202611132017';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');

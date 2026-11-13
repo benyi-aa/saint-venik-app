@@ -145,8 +145,8 @@
  *
  * Solo se enciende con ?sv-revisar=1 en la dirección (botón «Abrir el revisor» de la pestaña
  * «Inglés» del panel): ningún cliente lo ve. Marca los textos de la página que parecen estar
- * en español y, si se pide, recorre las páginas principales cargándolas en un marco oculto
- * (misma tienda, así que se puede leer lo que pintan los scripts, ya traducido).
+ * en español y, si se pide, recorre las páginas principales en una ventana aparte (misma
+ * tienda, así que se puede leer lo que pintan los scripts, ya traducido).
  *
  * Cómo decide que algo está en español: tildes, ñ, ¿ o ¡, o palabras que solo existen en
  * español (dos o más, o una de las «fuertes» como «carrito»). Es una ayuda para mirar, no un
@@ -270,35 +270,49 @@
       }).catch(function () { return lista; });
   }
 
-  function cargar(url) {
+  /* Las páginas se recorren en UNA ventana aparte (la tienda no se deja mostrar dentro de un
+   * marco: X-Frame-Options). Es de la misma tienda, así que se puede leer lo que pintan sus
+   * scripts, ya traducido. La ventana se abre en el clic (si no, el navegador la bloquea). */
+  function cargarEn(w, url, n) {
     return new Promise(function (listo) {
-      var f = document.createElement('iframe');
-      f.setAttribute('style', 'position:fixed;left:-3000px;top:0;width:1280px;height:900px;border:0');
-      f.src = url + (url.indexOf('?') < 0 ? '?' : '&') + 'sv-revisar-marco=1';
-      var fin = setTimeout(function () { terminar(); }, 25000);
-      function terminar() {
-        clearTimeout(fin);
-        var r = [];
-        try { r = escanear(f.contentDocument).map(function (x) { return { texto: x.texto, oculto: x.oculto }; }); } catch (e) { r = null; }
-        f.remove();
-        listo(r);
-      }
-      f.addEventListener('load', function () { setTimeout(terminar, 4500); });
-      document.body.appendChild(f);
+      var marca = 'sv-revisar-marco=' + n;
+      try { w.location.href = url + (url.indexOf('?') < 0 ? '?' : '&') + marca; } catch (e) { listo(null); return; }
+      var inicio = Date.now();
+      var t = setInterval(function () {
+        var d = null;
+        var aqui = '';
+        try { d = w.document; aqui = String(w.location.href); } catch (e) { d = null; }
+        var cargada = d && d.readyState === 'complete' && aqui.indexOf(marca) >= 0;
+        if (!cargada && Date.now() - inicio < 25000 && !w.closed) return;
+        clearInterval(t);
+        setTimeout(function () {
+          var r = null;
+          try { r = escanear(w.document).map(function (x) { return { texto: x.texto, oculto: x.oculto }; }); } catch (e) { r = null; }
+          listo(r);
+        }, cargada ? 4500 : 0);
+      }, 300);
     });
   }
 
   function revisarTodas() {
     limpiarMarcas();
-    caja.innerHTML = '<strong>Revisor de /en</strong> · preparando…';
+    var w = window.open('about:blank', 'sv-revisor-paginas', 'width=1280,height=900');
+    if (!w) {
+      caja.innerHTML = '<strong>Revisor de /en</strong><br><span style="color:#a00">El navegador bloqueó la ventana. Permite las ventanas emergentes de esta tienda y vuelve a pulsar.</span><br><br>' + boton('Volver a esta página', 'otra');
+      return;
+    }
+    caja.innerHTML = '<strong>Revisor de /en</strong> · preparando… (se abre una ventana que va pasando por las páginas; no la cierres)';
     paginas().then(function (lista) {
       var resultados = [];
       var i = 0;
       function siguiente() {
-        if (i >= lista.length) return pintarTodas(resultados);
+        if (i >= lista.length || w.closed) {
+          try { w.close(); } catch (e) { /* nada */ }
+          return pintarTodas(resultados);
+        }
         var url = lista[i];
         caja.innerHTML = '<strong>Revisor de /en</strong> · revisando ' + (i + 1) + ' de ' + lista.length + '…<br><span style="color:#555">' + esc(url) + '</span>';
-        cargar(url).then(function (r) {
+        cargarEn(w, url, i + 1).then(function (r) {
           resultados.push({ url: url, r: r });
           i += 1;
           siguiente();
