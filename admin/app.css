@@ -717,3 +717,22 @@ body { padding-bottom: calc(48px + var(--shopify-safe-area-inset-bottom, 0px)); 
 .enlace-imagen { display: flex; gap: 6px; margin-top: 8px; }
 .enlace-imagen[hidden] { display: none; }
 .enlace-imagen input { flex: 1; min-width: 0; padding: 6px 10px; border: 1px solid #c9cccf; border-radius: 8px; font: inherit; }
+
+/* Pestaña «Revisión» (13-nov). */
+.revision__ok { color: #0c5132; margin: 8px 0 0; }
+.revision__cuenta { font-weight: 600; margin: 10px 0 4px; }
+.revision__lista { margin: 0 0 10px; padding-left: 18px; font-size: 13px; line-height: 1.45; }
+.revision__lista li { margin: 4px 0; }
+.revision__abrir, .revision__ir { margin-left: 8px; font-size: 12px; }
+.revision__ir { background: none; border: 0; padding: 0; color: #005bd3; text-decoration: underline; cursor: pointer; font: inherit; font-size: 12px; }
+
+/* Insignia automática (13-nov). */
+.auto { margin-top: 18px; padding-top: 14px; border-top: 1px solid #ebe8e3; }
+.auto__tipos { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.auto__tipo { font: inherit; font-size: 13px; padding: 6px 12px; border: 1px solid #c9c6c0; border-radius: 999px; background: #fff; cursor: pointer; }
+.auto__tipo.is-on { background: #1c1d1d; border-color: #1c1d1d; color: #fff; }
+.auto__cols { margin: 12px 0 4px; max-width: 420px; }
+.auto__previa { margin-top: 10px; font-size: 13px; }
+.auto__grupo { margin: 8px 0; }
+.auto__grupo p { margin: 2px 0; }
+.auto__grupo ul { margin: 2px 0 4px; padding-left: 18px; }

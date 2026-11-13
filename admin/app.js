@@ -1,59 +1,67 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611131432';
+import { estaEmbebida } from './api.js?v=202611131958';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611131432';
+} from './colores.js?v=202611131958';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611131432';
+} from './config.js?v=202611131958';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611131432';
+} from './filtros.js?v=202611131958';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor, unirFamilia,
-} from './productos.js?v=202611131432';
-import { prepararNavidad } from './inicio.js?v=202611131432';
+} from './productos.js?v=202611131958';
+import { prepararNavidad } from './inicio.js?v=202611131958';
 import {
   prepararConjuntos, cargarConjuntos, cargarCatalogo, sugerirJoyas, calcular, estaAlDia, formatear, guardarConjunto,
   DESCUENTO_POR_DEFECTO as DESCUENTO_CONJUNTOS,
-} from './conjuntos.js?v=202611131432';
-import { quitarAguaDeColecciones } from './textos.js?v=202611131432';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611131432';
+} from './conjuntos.js?v=202611131958';
+import { quitarAguaDeColecciones } from './textos.js?v=202611131958';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611131958';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611131432';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611131432';
+} from './temporadas.js?v=202611131958';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611131958';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611131432';
+} from './guias.js?v=202611131958';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611131432';
-import { cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS } from './asignacion.js?v=202611131432';
+} from './vista-previa.js?v=202611131958';
+import {
+  cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS, resolverPartes,
+} from './asignacion.js?v=202611131958';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
-  sincronizar as sincronizarEtiqueta, cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
+  cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
-} from './etiquetas.js?v=202611131432';
+  sincronizarTodas as sincronizarEtiquetas, resolverColeccionesAuto, CAMPOS_AUTO, cuantosAutomaticos,
+} from './etiquetas.js?v=202611131958';
+import {
+  TIPOS_AUTO, autoEncendida, elegirAutomaticos, tocaRecalcular, HORAS_ENTRE_CALCULOS,
+  CANTIDAD_POR_DEFECTO as CANTIDAD_AUTO, DIAS_POR_DEFECTO as DIAS_AUTO,
+} from './automaticas.js?v=202611131958';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611131432';
-import { ICONOS, svgIcono } from './iconos.js?v=202611131432';
+} from './beneficios.js?v=202611131958';
+import { ICONOS, svgIcono } from './iconos.js?v=202611131958';
+import { revisarTienda } from './revision.js?v=202611131958';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611131432';
+const VERSION = '202611131958';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -1335,9 +1343,28 @@ function cerrarBuscadores(menos) {
   cerradores.forEach((cerrar) => { if (cerrar !== menos) cerrar(); });
 }
 
+/* La lista de resultados se dibuja «fija» justo debajo del campo (13-nov): como
+ * hija de la tarjeta, cuando el campo quedaba al final de una tarjeta larga la
+ * tarjeta la cortaba y solo se veía el primer resultado. Fija, flota por encima
+ * de todo; y como no sigue al campo si la página se mueve, se cierra al hacer
+ * scroll (ponerOyentesDeCierre). */
+function flotar(caja, campo) {
+  const r = campo.getBoundingClientRect();
+  if (!r.width) return;
+  caja.style.position = 'fixed';
+  caja.style.top = `${Math.round(r.bottom + 4)}px`;
+  caja.style.left = `${Math.round(r.left)}px`;
+  caja.style.width = `${Math.round(r.width)}px`;
+  caja.style.right = 'auto';
+}
+
 function ponerOyentesDeCierre() {
   if (oyentesDeCierre) return;
   oyentesDeCierre = true;
+
+  window.addEventListener('scroll', () => {
+    cerradores.forEach((cerrar) => cerrar());
+  }, { passive: true });
 
   /* En captura y con pointerdown: asi se cierra antes de que el clic llegue a
    * su destino, y sigue funcionando el clic en un resultado porque ese esta
@@ -1506,6 +1533,7 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
 
     const pintar = (encontrados) => {
       caja.hidden = false;
+      flotar(caja, campo);
       caja.innerHTML = encontrados.length
         ? encontrados.map((x) => `
             <button type="button" class="resultado" data-anadir="${escapar(x.id)}">
@@ -1544,6 +1572,7 @@ function conectarAsignacion(tarjeta, estado, colecciones, etiquetasTienda, guard
       } catch (error) {
         if (mia !== vuelta) return;
         caja.hidden = false;
+        flotar(caja, campo);
         caja.innerHTML = `<p class="problema">${escapar(error.message)}</p>`;
       }
     };
@@ -1709,6 +1738,225 @@ function colorPlano(valor, porDefecto) {
   return partirAlfa(valor, { color: porDefecto, opacidad: 100 }).color;
 }
 
+/* ---------------------------------------------------------------------------
+ * Insignia automática (13-nov, automaticas.js): la sección «Automática» de cada
+ * tarjeta de Insignias.
+ * ------------------------------------------------------------------------- */
+
+/* Lo que se propone a una insignia que nunca se configuró, por su nombre. Solo se
+ * PROPONE en pantalla: se guarda al pulsar Guardar, y siempre apagada. */
+function sugerenciaAuto(e, colecciones) {
+  if (e.autoTipo) return null;
+  const nombre = `${e.nombre} ${e.nombreEn}`.toLowerCase();
+  if (/vendid|seller/.test(nombre)) {
+    const quiero = ['cadenas', 'pulseras', 'colgantes', 'anillos'];
+    return {
+      autoTipo: 'mas_vendidos',
+      autoCantidad: CANTIDAD_AUTO,
+      autoDias: DIAS_AUTO,
+      autoColecciones: quiero.map((h) => colecciones.find((c) => c.handle === h)).filter(Boolean),
+    };
+  }
+  if (/novedad|nuev|new\b/.test(nombre)) {
+    return { autoTipo: 'nuevos', autoCantidad: 0, autoDias: DIAS_AUTO, autoColecciones: [] };
+  }
+  return null;
+}
+
+function hace(fechaIso) {
+  const t = Date.parse(fechaIso || '');
+  if (!Number.isFinite(t)) return '';
+  const min = Math.round((Date.now() - t) / 60000);
+  if (min < 2) return 'recién';
+  if (min < 60) return `hace ${min} minutos`;
+  const h = Math.round(min / 60);
+  if (h < 48) return `hace ${h} hora${h === 1 ? '' : 's'}`;
+  return `hace ${Math.round(h / 24)} días`;
+}
+
+function estadoAutoTexto(e, encendida) {
+  if (!encendida) return 'Apagada: no cambia nada en la tienda. Usa «Ver a cuáles se pondría» para probarla sin encenderla.';
+  const n = cuantosAutomaticos(e);
+  const cuando = hace(e.autoFecha);
+  return `Encendida: hoy la pone sola en ${n} producto${n === 1 ? '' : 's'}${cuando ? ` (calculado ${cuando})` : ''}. Se recalcula sola al abrir el panel, como mucho cada ${HORAS_ENTRE_CALCULOS} horas.`;
+}
+
+function chipsAutoHtml(est) {
+  const vacio = est.autoTipo === 'nuevos' ? 'Ninguna: toda la tienda.' : 'Ninguna: elige al menos una.';
+  return chipsHtml(est.autoColecciones.map((c) => ({ id: `auto:${c.id}`, titulo: c.titulo })), vacio);
+}
+
+function autoHtml(e, est, sugerida) {
+  const tipo = TIPOS_AUTO.find((t) => t.valor === est.autoTipo) ?? TIPOS_AUTO[0];
+  return `
+    <div class="auto" data-auto>
+      <p class="asigna__titulo">Automática</p>
+      <p class="ayuda">Además de los productos elegidos a mano, la insignia puede elegirlos sola. Lo automático se suma (un producto que ya la tiene no se repite) y nunca cae en un producto que ya lleva otra insignia, como «Novedad»: ese se salta y se toma el siguiente.</p>
+      <div class="auto__tipos" role="group" aria-label="Qué productos elige sola">
+        ${TIPOS_AUTO.map((t) => `<button type="button" class="auto__tipo${t.valor === est.autoTipo ? ' is-on' : ''}" data-auto-tipo="${t.valor}" aria-pressed="${t.valor === est.autoTipo}">${escapar(t.rotulo)}</button>`).join('')}
+      </div>
+      <p class="ayuda" data-auto-ayuda>${escapar(tipo.ayuda)}${sugerida ? ' Propuesta según el nombre de la insignia: se guarda al pulsar Guardar, y queda apagada.' : ''}</p>
+      <div data-auto-opciones ${est.autoTipo ? '' : 'hidden'}>
+        <s-grid gridTemplateColumns="repeat(auto-fit, minmax(190px, 1fr))" gap="base">
+          <s-number-field label="Cuántos por colección" data-auto-campo="cantidad" value="${est.autoCantidad}" min="0" max="24" step="1"
+            details="En «los más vendidos», al menos 1. En «los más nuevos», 0 = todos los del período."></s-number-field>
+          <s-number-field label="Creados en los últimos (días)" data-auto-campo="dias" value="${est.autoDias}" min="1" max="365" step="1" ${est.autoTipo === 'nuevos' ? '' : 'hidden'}></s-number-field>
+        </s-grid>
+        <div class="asigna__col auto__cols">
+          <p class="asigna__titulo">Colecciones</p>
+          <div class="chips" data-chips="auto">${chipsAutoHtml(est)}</div>
+          <div class="buscador">
+            <s-search-field data-buscar="auto" label="Colecciones de la automática" labelAccessibilityVisibility="exclusive" placeholder="Busca una colección…"></s-search-field>
+            <div class="resultados" data-resultados="auto" hidden></div>
+          </div>
+        </div>
+        <div class="casilla-polaris">
+          <s-checkbox label="Automática encendida en la tienda" data-auto-campo="activo" ${est.autoActivo ? 'checked' : ''}></s-checkbox>
+        </div>
+        <p class="ayuda" data-auto-estado>${escapar(estadoAutoTexto(e, autoEncendida(e)))}</p>
+        <s-button data-auto-previa>Ver a cuáles se pondría</s-button>
+        <div class="auto__previa" data-auto-previa-res></div>
+      </div>
+    </div>`;
+}
+
+function previaAutoHtml(r, manuales) {
+  if (!r.grupos.length) return '<p class="problema">No hay de dónde elegir: falta elegir colecciones.</p>';
+  return r.grupos.map((g) => `
+    <div class="auto__grupo">
+      <p><strong>${escapar(g.titulo)}</strong></p>
+      ${g.elegidos.length ? `<ul>${g.elegidos.map((p) => `<li>✓ ${escapar(p.titulo)}${manuales.has(p.id) ? ' <span class="ayuda">(ya la tiene a mano)</span>' : ''}</li>`).join('')}</ul>` : '<p class="ayuda">Ninguno.</p>'}
+      ${g.saltados.length ? `<p class="ayuda">Saltados: ${g.saltados.slice(0, 12).map((x) => `${escapar(x.titulo)} (${escapar(x.motivo)})`).join(' · ')}${g.saltados.length > 12 ? ` · y ${g.saltados.length - 12} más` : ''}</p>` : ''}
+    </div>`).join('');
+}
+
+/* Conecta la sección «Automática» de una tarjeta. `est` es el estado en memoria
+ * (se guarda con el resto de la tarjeta al pulsar Guardar). */
+function conectarAuto(tarjeta, est, original, colecciones, etiquetas, estadoManual) {
+  const caja = tarjeta.querySelector('[data-auto]');
+  if (!caja) return;
+  const opciones = caja.querySelector('[data-auto-opciones]');
+  const ayuda = caja.querySelector('[data-auto-ayuda]');
+  const chips = caja.querySelector('[data-chips="auto"]');
+  const campoDias = caja.querySelector('[data-auto-campo="dias"]');
+
+  const repintar = () => {
+    caja.querySelectorAll('[data-auto-tipo]').forEach((b) => {
+      const on = b.dataset.autoTipo === est.autoTipo;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    ayuda.textContent = (TIPOS_AUTO.find((t) => t.valor === est.autoTipo) ?? TIPOS_AUTO[0]).ayuda;
+    opciones.hidden = !est.autoTipo;
+    if (campoDias) campoDias.hidden = est.autoTipo !== 'nuevos';
+    chips.innerHTML = chipsAutoHtml(est);
+  };
+
+  caja.querySelectorAll('[data-auto-tipo]').forEach((b) => {
+    b.addEventListener('click', () => {
+      est.autoTipo = b.dataset.autoTipo;
+      if (est.autoTipo === 'mas_vendidos' && !(est.autoCantidad > 0)) est.autoCantidad = CANTIDAD_AUTO;
+      const n = caja.querySelector('[data-auto-campo="cantidad"]');
+      if (n) n.value = String(est.autoCantidad);
+      repintar();
+    });
+  });
+
+  caja.addEventListener('input', (e) => {
+    const c = e.target.closest ? e.target.closest('[data-auto-campo]') : null;
+    if (!c) return;
+    if (c.dataset.autoCampo === 'cantidad') est.autoCantidad = Math.max(0, Number(c.value || 0));
+    if (c.dataset.autoCampo === 'dias') est.autoDias = Math.max(1, Number(c.value || DIAS_AUTO));
+  });
+  caja.addEventListener('change', (e) => {
+    const c = e.target.closest ? e.target.closest('[data-auto-campo="activo"]') : null;
+    if (c) est.autoActivo = Boolean(c.checked);
+  });
+
+  /* Quitar una colección: las fichas llevan «auto:» delante para no confundirse
+   * con las colecciones de la asignación a mano de la misma tarjeta. */
+  tarjeta.addEventListener('remove', (e) => {
+    const x = e.target.closest ? e.target.closest('[data-quitar]') : null;
+    if (!x || !caja.contains(x) || !x.dataset.quitar.startsWith('auto:')) return;
+    const id = x.dataset.quitar.slice(5);
+    est.autoColecciones = est.autoColecciones.filter((c) => c.id !== id);
+    repintar();
+  });
+
+  const campo = caja.querySelector('[data-buscar="auto"]');
+  const lista = caja.querySelector('[data-resultados="auto"]');
+  const cerrar = () => { lista.hidden = true; lista.innerHTML = ''; };
+  cerrar.columna = campo.closest('.asigna__col');
+  cerradores.add(cerrar);
+  ponerOyentesDeCierre();
+  const mostrar = () => {
+    const busca = String(campo.value ?? '').trim().toLowerCase();
+    const encontradas = colecciones
+      .filter((c) => !est.autoColecciones.some((x) => x.id === c.id))
+      .filter((c) => c.titulo.toLowerCase().includes(busca))
+      .slice(0, 8);
+    cerrarBuscadores(cerrar);
+    lista.hidden = false;
+    flotar(lista, campo);
+    lista.innerHTML = encontradas.length
+      ? encontradas.map((c) => `<button type="button" class="resultado" data-anadir="${escapar(c.id)}">${escapar(c.titulo)} <span class="resultado__n">${c.cuantos}</span></button>`).join('')
+      : '<p class="ayuda">Nada con ese nombre.</p>';
+    lista.querySelectorAll('[data-anadir]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const c = colecciones.find((x) => x.id === b.dataset.anadir);
+        if (c && !est.autoColecciones.some((x) => x.id === c.id)) est.autoColecciones.push(c);
+        campo.value = '';
+        cerrar();
+        repintar();
+      });
+    });
+  };
+  campo.addEventListener('input', mostrar);
+  campo.addEventListener('focusin', mostrar);
+
+  caja.querySelector('[data-auto-previa]').addEventListener('click', async (ev) => {
+    const boton = ev.currentTarget;
+    const res = caja.querySelector('[data-auto-previa-res]');
+    if (!est.autoTipo) { res.innerHTML = '<p class="ayuda">Elige primero qué productos.</p>'; return; }
+    boton.loading = true;
+    try {
+      /* Lo que ya tienen las DEMÁS insignias, tal como están guardadas. */
+      const bloqueo = new Map();
+      for (const o of etiquetas) {
+        if (o.id === original.id || !o.activo) continue;
+        String(o.handles || '').split('|').filter(Boolean).forEach((k) => { if (!bloqueo.has(k)) bloqueo.set(k, o.nombre); });
+      }
+      const partes = await resolverPartes(estadoManual);
+      const manualesIds = new Set(estadoManual.productos.map((p) => p.id));
+      const r = await elegirAutomaticos(
+        { ...original, ...est, activo: true, autoActivo: true },
+        { bloqueo, fuera: partes.fuera },
+      );
+      res.innerHTML = `<p class="ayuda">Así quedaría hoy (no se guarda nada):</p>${previaAutoHtml(r, manualesIds)}`;
+    } catch (error) {
+      res.innerHTML = `<p class="problema">${escapar(error.message)}</p>`;
+    } finally {
+      boton.loading = false;
+    }
+  });
+}
+
+/* Al abrir el panel (en cualquier pestaña): si alguna insignia automática está
+ * encendida y su cálculo tiene más de HORAS_ENTRE_CALCULOS horas, se recalcula en
+ * silencio. Sin ninguna encendida no hace nada (ni una escritura). */
+async function refrescarAutomaticasSiToca() {
+  try {
+    const campos = await camposDeEtiqueta();
+    if (!CAMPOS_AUTO.every((k) => campos.has(k))) return;
+    const lista = await cargarEtiquetas();
+    if (!lista.some((e) => tocaRecalcular(e))) return;
+    resolverColeccionesAuto(lista, await cargarColecciones());
+    await sincronizarEtiquetas(lista, { conAuto: true, cache: new Map() });
+  } catch (error) {
+    /* Silencioso: se reintenta la próxima vez que se abra el panel. */
+  }
+}
+
 async function pintarEtiquetas() {
   /* Se captura ANTES de cargar nada: si se cambia de pantalla mientras esto
    * espera a Shopify, lo que llegue tarde no debe pintar ni avisar. */
@@ -1734,6 +1982,22 @@ async function pintarEtiquetas() {
    * ofrecerlos solo serviría para que guardar fallara. */
   const hayEstilo = campos.has('opacidad');
   const { lista: etiquetas, error } = await cargarOVacio(cargarEtiquetas, !faltaLoNuestro);
+  /* La automática solo se ofrece cuando la tienda ya tiene sus campos. */
+  const hayAuto = CAMPOS_AUTO.every((k) => campos.has(k));
+  resolverColeccionesAuto(etiquetas, colecciones);
+  const estadosAuto = new Map();
+  const sugeridas = new Set();
+  for (const e of etiquetas) {
+    const sug = sugerenciaAuto(e, colecciones);
+    if (sug) sugeridas.add(e.id);
+    estadosAuto.set(e.id, {
+      autoTipo: sug ? sug.autoTipo : e.autoTipo,
+      autoActivo: e.autoActivo,
+      autoCantidad: sug ? sug.autoCantidad : e.autoCantidad,
+      autoDias: sug ? sug.autoDias : e.autoDias,
+      autoColecciones: [...(sug ? sug.autoColecciones : e.autoColecciones)],
+    });
+  }
 
   const muestras = () => etiquetas.filter((e) => e.activo).map(etiquetaHtml).join('')
     || '<p class="sv-guia__vacio">Ninguna insignia activa.</p>';
@@ -1834,6 +2098,8 @@ async function pintarEtiquetas() {
 
           ${asignacionHtml(e)}
 
+          ${hayAuto ? autoHtml(e, estadosAuto.get(e.id), sugeridas.has(e.id)) : ''}
+
           <s-button slot="primary-action" variant="primary" data-guardar>Guardar</s-button>
           <s-button slot="secondary-actions" tone="critical" data-borrar>Eliminar</s-button>
         </s-section>`).join('')}
@@ -1871,6 +2137,8 @@ async function pintarEtiquetas() {
       tarjeta, estado, colecciones, etiquetasTienda, alcanceEtiqueta(original),
     );
     conexiones.set(id, conex);
+    const estAuto = estadosAuto.get(id);
+    if (hayAuto) conectarAuto(tarjeta, estAuto, original, colecciones, etiquetas, estado);
 
     const campo = (nombre) => tarjeta.querySelector(`[data-campo="${nombre}"]`);
     const valor = (nombre) => String(campo(nombre)?.value ?? '').trim();
@@ -1934,16 +2202,33 @@ async function pintarEtiquetas() {
           etiquetas: estado.etiquetas,
           productos: estado.productos,
           colecciones: estado.colecciones,
+          ...(hayAuto ? {
+            autoTipo: estAuto.autoTipo,
+            autoActivo: estAuto.autoActivo && Boolean(estAuto.autoTipo),
+            autoCantidad: estAuto.autoCantidad,
+            autoDias: estAuto.autoDias,
+            autoColecciones: estAuto.autoColecciones,
+          } : {}),
         };
+        if (hayAuto && datos.autoActivo && datos.autoTipo === 'mas_vendidos' && !datos.autoColecciones.length) {
+          throw new Error('Para encender «Los más vendidos» elige al menos una colección.');
+        }
         /* El recálculo en segundo plano escribiría los handles de antes
          * encima de estos. */
         pase.vivo = false;
         await guardarEtiqueta(id, datos);
-        await sincronizarEtiqueta(Object.assign(original, datos));
+        Object.assign(original, datos);
+        /* Todas juntas: una automática depende de lo que tienen las demás. Sin
+         * ninguna automática encendida, da lo mismo que antes. */
+        await sincronizarEtiquetas(etiquetas, { conAuto: hayAuto, cache: new Map() });
         estado.sucio = false;
-        /* sincronizar acaba de recalcular los handles de esta entrada, así que
-         * el «alcanza a N» ya se puede poner al día de verdad. */
-        conex.alcanceAhora(alcanceEtiqueta(original));
+        sugeridas.delete(id);
+        /* sincronizar acaba de recalcular los handles, así que el «alcanza a N»
+         * ya se puede poner al día de verdad (en todas: una automática puede
+         * haber cambiado a otra). */
+        etiquetas.forEach((item) => conexiones.get(item.id)?.alcanceAhora(alcanceEtiqueta(item)));
+        const estadoAuto = tarjeta.querySelector('[data-auto-estado]');
+        if (estadoAuto) estadoAuto.textContent = estadoAutoTexto(original, autoEncendida(original));
         refrescarMuestras();
         avisar('Insignia guardada');
       } catch (error2) {
@@ -2008,9 +2293,17 @@ async function pintarEtiquetas() {
    * «Cargando…» durante todas las consultas aunque lo que se dibuja ya
    * estuviera en memoria. Ahora la pantalla aparece y los números se ponen al
    * día solos cuando llegan. */
-  recalcular(etiquetas, sincronizarEtiqueta, pase).then((cambiadas) => {
-    if (miPintado !== pintado || !pase.vivo) return;
-    etiquetas.forEach((item) => conexiones.get(item.id)?.alcanceAhora(alcanceEtiqueta(item)));
+  sincronizarEtiquetas(etiquetas, { pase, conAuto: hayAuto, cache: new Map() }).then((r) => {
+    if (!r || miPintado !== pintado || !pase.vivo) return;
+    const { cambiadas } = r;
+    if (r.cortadas.length) {
+      avisar(`Estas colecciones tienen más productos de los que la app puede leer de una vez, así que faltan algunos: ${r.cortadas.join(', ')}.`, true);
+    }
+    etiquetas.forEach((item) => {
+      conexiones.get(item.id)?.alcanceAhora(alcanceEtiqueta(item));
+      const t = pantalla.querySelector(`s-section[data-id="${item.id}"] [data-auto-estado]`);
+      if (t) t.textContent = estadoAutoTexto(item, autoEncendida(item));
+    });
     const aviso = pantalla.querySelector('[data-aviso-recalculo]');
     if (aviso && cambiadas) {
       aviso.textContent = `Se actualizaron ${cambiadas} al abrir, porque sus etiquetas o colecciones habían cambiado.`;
@@ -3226,7 +3519,106 @@ async function pintarFiltros() {
   });
 }
 
+/* ---------------------------------------------------------------------------
+ * Pestaña «Revisión»: un botón que recorre la tienda y lista lo que está mal o a
+ * medias (revision.js). Solo lee; cada aviso lleva a donde se arregla.
+ * ------------------------------------------------------------------------- */
+let ultimaRevision = null;
+
+function enlaceProducto(id, tienda) {
+  const numero = String(id ?? '').split('/').pop();
+  const handle = tienda.replace('.myshopify.com', '');
+  if (!numero || !String(id).includes('/Product/')) return '';
+  return `<a class="revision__abrir" target="_blank" rel="noopener" href="https://admin.shopify.com/store/${escapar(handle)}/products/${escapar(numero)}">Abrir en Shopify</a>`;
+}
+
+function revisionHtml(r, tienda) {
+  if (!r) return '';
+  const conProblemas = r.resultados.filter((x) => x.items.length || x.error);
+  const resumen = conProblemas.length
+    ? `${conProblemas.length} de ${r.resultados.length} revisiones encontraron algo.`
+    : `Todo en orden en las ${r.resultados.length} revisiones.`;
+  const hora = r.cuando.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+  const TOPE = 40;
+  return `
+    <s-banner tone="${conProblemas.length ? 'warning' : 'success'}" heading="${escapar(resumen)}">
+      Revisados ${r.total} productos (${r.activos} activos) a las ${escapar(hora)}.${r.incompleto ? ' El catálogo es más grande de lo que se alcanzó a leer: faltaron algunos.' : ''}
+    </s-banner>
+    ${r.resultados.map((x) => `
+      <s-section heading="${escapar(x.titulo)}">
+        <p class="ayuda">${escapar(x.explicacion)}</p>
+        ${x.error ? `<p class="problema">No se pudo revisar: ${escapar(x.error)}</p>` : ''}
+        ${!x.error && !x.items.length ? '<p class="revision__ok">✓ Nada que arreglar.</p>' : ''}
+        ${x.items.length ? `
+          <p class="revision__cuenta">${x.items.length} aviso${x.items.length === 1 ? '' : 's'}</p>
+          <ul class="revision__lista">
+            ${x.items.slice(0, TOPE).map((it) => `
+              <li>
+                <strong>${escapar(it.titulo)}</strong> — ${escapar(it.detalle)}
+                ${it.id ? enlaceProducto(it.id, tienda) : ''}
+                ${it.pantalla ? `<button type="button" class="revision__ir" data-ir="${escapar(it.pantalla)}">Ir a la pestaña</button>` : ''}
+              </li>`).join('')}
+          </ul>
+          ${x.items.length > TOPE ? `<p class="ayuda">…y ${x.items.length - TOPE} más.</p>` : ''}
+          ${x.pantalla ? `<s-button data-ir="${escapar(x.pantalla)}">Ir a ${escapar(x.pantalla === 'etiquetas' ? 'Insignias' : x.pantalla.charAt(0).toUpperCase() + x.pantalla.slice(1))}</s-button>` : ''}
+        ` : ''}
+      </s-section>`).join('')}
+  `;
+}
+
+async function pintarRevision() {
+  const miPintado = pintado;
+  const tienda = new URLSearchParams(location.search).get('shop') || '';
+  pantalla.innerHTML = `
+    <s-page>
+      <div class="titular">
+        <h1>Revisión</h1>
+        <p class="subtitulo">
+          Recorre la tienda y avisa de lo que está mal o a medias: productos sin color,
+          familias de color rotas, conjuntos sin sus joyas o con el precio atrasado,
+          activos agotados o sin foto, y lo que falta en inglés. Solo mira: no cambia nada.
+          Revisa la tienda en la que está abierto el panel; para la otra, ábrelo allí.
+        </p>
+      </div>
+      <s-section>
+        <s-stack direction="inline" gap="base" alignItems="center">
+          <s-button variant="primary" id="revisar-ahora">${ultimaRevision ? 'Revisar de nuevo' : 'Revisar ahora'}</s-button>
+          <span class="ayuda" id="revision-paso"></span>
+        </s-stack>
+      </s-section>
+      <div id="revision-resultados">${revisionHtml(ultimaRevision, tienda)}</div>
+    </s-page>`;
+
+  const conectarIr = () => {
+    pantalla.querySelectorAll('[data-ir]').forEach((b) => {
+      b.addEventListener('click', () => ir(b.dataset.ir));
+    });
+  };
+  conectarIr();
+
+  document.getElementById('revisar-ahora').addEventListener('click', async (e) => {
+    const boton = e.currentTarget;
+    const paso = document.getElementById('revision-paso');
+    boton.loading = true;
+    try {
+      const r = await revisarTienda((t) => { if (miPintado === pintado) paso.textContent = t; });
+      ultimaRevision = r;
+      if (miPintado !== pintado) return;
+      paso.textContent = '';
+      document.getElementById('revision-resultados').innerHTML = revisionHtml(r, tienda);
+      boton.textContent = 'Revisar de nuevo';
+      conectarIr();
+    } catch (error) {
+      if (miPintado === pintado) paso.textContent = '';
+      avisar(`No se pudo revisar: ${error.message}`, true);
+    } finally {
+      boton.loading = false;
+    }
+  });
+}
+
 const PANTALLAS = {
+  revision: pintarRevision,
   colores: pintarColores,
   productos: pintarProductos,
   etiquetas: pintarEtiquetas,
@@ -3754,4 +4146,7 @@ if (!estaEmbebida()) {
     </p>`;
 } else {
   ir('colores');
+  /* Insignias automáticas encendidas: se recalculan solas al abrir el panel, como
+   * mucho cada pocas horas. Sin ninguna encendida, no hace nada. */
+  setTimeout(refrescarAutomaticasSiToca, 4000);
 }

@@ -19,7 +19,7 @@
  * y el storefront, en una pagina de coleccion, se fia de la coleccion y no de
  * la cadena.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611131432';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611131958';
 
 /* Los campos que comparten los dos tipos. Cada pantalla añade los suyos. */
 export const CAMPOS_COMUNES = [
@@ -433,7 +433,15 @@ function conCache(cache, clave, traer) {
   return cache.get(clave);
 }
 
-export async function resolverHandles({ productos = [], colecciones = [], etiquetas = [] }, onPaso, cache) {
+export async function resolverHandles(entrada, onPaso, cache) {
+  const { todos, fuera, cortadas } = await resolverPartes(entrada, onPaso, cache);
+  return { cadena: cadenaDeHandles(todos.filter((h) => !fuera.has(h))), cortadas };
+}
+
+/* Lo mismo que resolverHandles, pero sin juntar: lo que suma (`todos`) y lo que
+ * resta (`fuera`) por separado. Lo usan las insignias automaticas (etiquetas.js),
+ * que tienen que saber que productos restan para saltarselos al elegir. */
+export async function resolverPartes({ productos = [], colecciones = [], etiquetas = [] }, onPaso, cache) {
   const todos = productos.flatMap(clavesDe);
   const fuera = new Set();
   const cortadas = [];
@@ -460,10 +468,10 @@ export async function resolverHandles({ productos = [], colecciones = [], etique
     if (incompleto) cortadas.push(nombre);
   }
 
-  /* La resta se aplica al final, sobre todo lo reunido: asi da igual el orden
-   * en que se escribieran las etiquetas, y tambien quita lo que hubiera
-   * entrado por coleccion o a mano. */
-  return { cadena: cadenaDeHandles(todos.filter((h) => !fuera.has(h))), cortadas };
+  /* La resta se aplica al final, sobre todo lo reunido (en resolverHandles): asi
+   * da igual el orden en que se escribieran las etiquetas, y tambien quita lo que
+   * hubiera entrado por coleccion o a mano. */
+  return { todos, fuera, cortadas };
 }
 
 /* ---------------------------------------------------------------------------
