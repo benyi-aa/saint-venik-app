@@ -1,68 +1,69 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611132017';
+import { estaEmbebida } from './api.js?v=202611142152';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611132017';
+} from './colores.js?v=202611142152';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611132017';
+} from './config.js?v=202611142152';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611132017';
+} from './filtros.js?v=202611142152';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor, unirFamilia,
-} from './productos.js?v=202611132017';
-import { prepararNavidad } from './inicio.js?v=202611132017';
+} from './productos.js?v=202611142152';
+import { prepararNavidad } from './inicio.js?v=202611142152';
 import {
   prepararConjuntos, cargarConjuntos, cargarCatalogo, sugerirJoyas, calcular, estaAlDia, formatear, guardarConjunto,
   DESCUENTO_POR_DEFECTO as DESCUENTO_CONJUNTOS,
-} from './conjuntos.js?v=202611132017';
-import { quitarAguaDeColecciones } from './textos.js?v=202611132017';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611132017';
+} from './conjuntos.js?v=202611142152';
+import { quitarAguaDeColecciones } from './textos.js?v=202611142152';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611142152';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611132017';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611132017';
+} from './temporadas.js?v=202611142152';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611142152';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611132017';
+} from './guias.js?v=202611142152';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611132017';
+} from './vista-previa.js?v=202611142152';
 import {
   cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS, resolverPartes,
-} from './asignacion.js?v=202611132017';
+} from './asignacion.js?v=202611142152';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
   sincronizarTodas as sincronizarEtiquetas, resolverColeccionesAuto, CAMPOS_AUTO, cuantosAutomaticos,
-} from './etiquetas.js?v=202611132017';
+} from './etiquetas.js?v=202611142152';
 import {
   TIPOS_AUTO, autoEncendida, elegirAutomaticos, tocaRecalcular, HORAS_ENTRE_CALCULOS,
   CANTIDAD_POR_DEFECTO as CANTIDAD_AUTO, DIAS_POR_DEFECTO as DIAS_AUTO,
-} from './automaticas.js?v=202611132017';
+} from './automaticas.js?v=202611142152';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611132017';
-import { ICONOS, svgIcono } from './iconos.js?v=202611132017';
-import { revisarTienda } from './revision.js?v=202611132017';
-import { GRUPOS, cargarIngles, guardarIngles, datosTienda } from './ingles.js?v=202611132017';
+} from './beneficios.js?v=202611142152';
+import { ICONOS, svgIcono } from './iconos.js?v=202611142152';
+import { revisarTienda } from './revision.js?v=202611142152';
+import { cargarColeccionesConFoto, cargarPlan, usaArchivo, urlDeFoto, ponerFoto } from './colecciones-fotos.js?v=202611142152';
+import { GRUPOS, cargarIngles, guardarIngles, datosTienda } from './ingles.js?v=202611142152';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611132017';
+const VERSION = '202611142152';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -3827,7 +3828,12 @@ async function pintarFotos() {
           <p class="ayuda fotos__texto">${escapar(g.texto)}</p>
           <div class="fotos">${g.fotos.map(([n, t, forma]) => tarjetaFoto(n, t, forma || g.forma, fotos[n])).join('')}</div>
         </s-section>`).join('')}
+      <s-section heading="Fotos de las colecciones (Productos → Colecciones)">
+        <p class="ayuda fotos__texto">La foto de cada colección en Shopify, la que sale en la lista de colecciones de la tienda. Las nuevas tienen el estilo de las tarjetas del inicio (joyas sobre negro azulado con haces de luz) y cada una lleva solo joyas de esa colección. No cambian con la temporada. «Volver a la anterior» pone la foto que tenía el 14-nov.</p>
+        <div id="f-colecciones"><p class="cargando">Cargando colecciones…</p></div>
+      </s-section>
     </s-page>`;
+  pintarFotosColecciones(miPintado);
 
   pantalla.querySelectorAll('s-select[data-valor]').forEach((e) => { e.value = e.dataset.valor; });
   document.getElementById('f-temporada').addEventListener('change', (e) => {
@@ -3870,6 +3876,133 @@ async function pintarFotos() {
       decir('Abriendo la biblioteca…');
       aplicar(async () => (await elegirDeBiblioteca({ tipo: 'MediaImage' }))?.url);
     });
+  });
+}
+
+/* «Fotos de las colecciones» (14-nov): la foto de cada colección de Productos → Colecciones,
+ * la actual al lado de la nueva. Ver colecciones-fotos.js. */
+async function pintarFotosColecciones(miPintado) {
+  const caja = document.getElementById('f-colecciones');
+  let colecciones;
+  let plan;
+  try {
+    [colecciones, plan] = await Promise.all([cargarColeccionesConFoto(), cargarPlan()]);
+  } catch (error) {
+    if (miPintado === pintado && caja) caja.innerHTML = `<p class="ayuda">${escapar(error.message)}</p>`;
+    return;
+  }
+  if (miPintado !== pintado || !caja) return;
+
+  const nueva = (c) => plan.nuevas[c.handle] || null;
+  const anterior = (c) => plan.anteriores[c.handle] || null;
+  const tieneNueva = (c) => usaArchivo(c.imagen, nueva(c));
+  /* Primero las que tienen foto nueva; las demás (sin foto pensada) al final. */
+  colecciones.sort((a, b) => (nueva(a) ? 0 : 1) - (nueva(b) ? 0 : 1));
+
+  const miniatura = (url) => (url
+    ? `<img src="${escapar(url)}" alt="" loading="lazy" />`
+    : '<span class="ayuda">Sin foto</span>');
+
+  const fila = (c) => {
+    const n = nueva(c);
+    const a = anterior(c);
+    const ya = tieneNueva(c);
+    const productos = n ? (plan.productos[n] || []) : [];
+    const cabecera = c.plantilla === 'no-promos' || c.plantilla === 'no-sidebar';
+    return `
+      <div class="colfoto" data-col="${escapar(c.id)}">
+        <div class="colfoto__fotos">
+          <figure><div class="colfoto__marco" data-actual>${miniatura(c.imagen ? `${c.imagen}${c.imagen.includes('?') ? '&' : '?'}width=360` : null)}</div><figcaption>Actual</figcaption></figure>
+          <figure><div class="colfoto__marco">${n ? miniatura(urlDeFoto(n)) : '<span class="ayuda">—</span>'}</div><figcaption>Nueva</figcaption></figure>
+        </div>
+        <p class="foto__titulo">${escapar(c.titulo)}</p>
+        <p class="ayuda foto__nombre">${escapar(c.handle)} · ${c.cuantos} producto${c.cuantos === 1 ? '' : 's'}</p>
+        ${productos.length ? `<p class="ayuda">Joyas: ${productos.map(escapar).join(', ')}</p>` : ''}
+        ${cabecera ? '<p class="ayuda"><b>Ojo:</b> su plantilla muestra la foto arriba de la página de la colección.</p>' : ''}
+        <div class="acciones acciones--envolver">
+          ${n ? `<button type="button" data-usar ${ya ? 'hidden' : ''}>Usar la nueva</button>` : '<span class="ayuda">Sin foto nueva</span>'}
+          ${a ? `<button type="button" class="secundario" data-volver ${ya ? '' : 'hidden'}>Volver a la anterior</button>` : ''}
+        </div>
+        <p class="ayuda" data-estado>${ya ? 'Ya tiene la nueva.' : ''}</p>
+      </div>`;
+  };
+
+  const pendientes = () => colecciones.filter((c) => nueva(c) && !tieneNueva(c));
+  caja.innerHTML = `
+    <div class="acciones acciones--envolver">
+      <button type="button" id="fc-todas">Usar todas las nuevas (${pendientes().length})</button>
+    </div>
+    <p class="ayuda">Cambia de una en una; la tienda las muestra en unos segundos. Las colecciones sin foto nueva (por ejemplo Aros o Home page) quedan como están.</p>
+    <div class="colfotos">${colecciones.map(fila).join('')}</div>`;
+
+  const todas = document.getElementById('fc-todas');
+  const contar = () => { todas.textContent = `Usar todas las nuevas (${pendientes().length})`; todas.disabled = !pendientes().length; };
+  contar();
+
+  async function poner(c, archivo, tarjeta, volviendo) {
+    const estado = tarjeta.querySelector('[data-estado]');
+    estado.textContent = volviendo ? 'Volviendo a la anterior…' : 'Poniendo la nueva…';
+    try {
+      const r = await ponerFoto(c.id, archivo, `${c.titulo} · Saint Venik`);
+      c.imagen = r.image?.url ?? null;
+      tarjeta.querySelector('[data-actual]').innerHTML = miniatura(c.imagen ? `${c.imagen}${c.imagen.includes('?') ? '&' : '?'}width=360` : null);
+      const ya = tieneNueva(c);
+      tarjeta.querySelector('[data-usar]')?.toggleAttribute('hidden', ya);
+      tarjeta.querySelector('[data-volver]')?.toggleAttribute('hidden', !ya);
+      estado.textContent = ya ? 'Lista: ya tiene la nueva.' : 'Lista: volvió a la anterior.';
+      contar();
+      return true;
+    } catch (error) {
+      estado.textContent = '';
+      avisar(`${c.titulo}: ${error.message}`, true);
+      return false;
+    }
+  }
+
+  caja.querySelectorAll('[data-col]').forEach((tarjeta) => {
+    const c = colecciones.find((x) => x.id === tarjeta.dataset.col);
+    tarjeta.querySelector('[data-usar]')?.addEventListener('click', async (e) => {
+      e.currentTarget.disabled = true;
+      if (await poner(c, nueva(c), tarjeta, false)) avisar(`Foto nueva puesta: ${c.titulo}`);
+      e.currentTarget.disabled = false;
+    });
+    tarjeta.querySelector('[data-volver]')?.addEventListener('click', async (e) => {
+      const b = e.currentTarget;
+      if (!b.dataset.seguro) {
+        b.dataset.seguro = '1';
+        b.textContent = '¿Seguro? Volver';
+        setTimeout(() => { delete b.dataset.seguro; b.textContent = 'Volver a la anterior'; }, 6000);
+        return;
+      }
+      delete b.dataset.seguro;
+      b.textContent = 'Volver a la anterior';
+      b.disabled = true;
+      if (await poner(c, `anteriores/${anterior(c)}`, tarjeta, true)) avisar(`${c.titulo}: volvió a la foto anterior`);
+      b.disabled = false;
+    });
+  });
+
+  todas.addEventListener('click', async () => {
+    const lista = pendientes();
+    if (!lista.length) return;
+    /* Dos pasos en el mismo botón: el confirm() del navegador no siempre sale dentro del admin. */
+    if (!todas.dataset.seguro) {
+      todas.dataset.seguro = '1';
+      todas.textContent = `¿Seguro? Cambiar ${lista.length} fotos`;
+      setTimeout(() => { delete todas.dataset.seguro; contar(); }, 6000);
+      return;
+    }
+    delete todas.dataset.seguro;
+    todas.disabled = true;
+    let bien = 0;
+    for (const [i, c] of lista.entries()) {
+      if (miPintado !== pintado) return;
+      todas.textContent = `Cambiando ${i + 1} de ${lista.length}…`;
+      const tarjeta = [...caja.querySelectorAll('[data-col]')].find((t) => t.dataset.col === c.id);
+      if (await poner(c, nueva(c), tarjeta, false)) bien += 1;
+    }
+    contar();
+    avisar(bien === lista.length ? `Listo: ${bien} fotos nuevas puestas.` : `Se pusieron ${bien} de ${lista.length}; revisa las que quedaron.`, bien !== lista.length);
   });
 }
 

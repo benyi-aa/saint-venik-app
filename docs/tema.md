@@ -1136,3 +1136,36 @@ de los originales en `branding/respaldos-tema/2026-11-13-ingles-com/`):
 En español todo sigue igual. Comprobado con un producto en el carrito (luego vaciado) y con
 el revisor: las 10 páginas principales de /en quedan sin español a la vista. El revisor ya no
 cuenta las «gemelas» en español que el tema esconde en /en (clases que terminan en `--es`).
+
+### Fotos de las colecciones (Productos → Colecciones, 14-nov)
+
+Pedido: que la foto de cada colección en Shopify (la de Productos → Colecciones, que sale en
+la lista de colecciones de la tienda) tenga el estilo de las tarjetas del inicio fuera de
+Navidad (joyas sobre negro azulado, haces de luz blanco-azulados desde las esquinas, piso negro
+que refleja) y que cada foto muestre **solo joyas de esa colección**: Anillos Oro, solo anillos
+de oro; «Inferior a $40.000», solo productos bajo ese precio; etc.
+
+- **Fotos:** `admin/colecciones-fotos/sv-col-<nombre>.jpg` (1600 × 1600). Anillos, Cadenas,
+  Colgantes y Pulseras usan las mismas de las tarjetas del inicio (`admin/fotos-inicio/`). Las
+  demás (24) se hicieron con el generador interno (Nano Banana Pro, 2K, US$0,09 cada una): fotos
+  reales de 2–3 joyas de la colección («reproduce estas piezas exactas») + la tarjeta del inicio
+  como «solo referencia de estilo». Qué joyas lleva cada una: `fotos.json` → `productos`.
+  Comprobado en las dos tiendas que cada joya está en su colección (en .com algunos sets tienen
+  otro handle, p. ej. `miami-cubans-set-oro-1`, pero son las mismas joyas) y, en .cl, el precio
+  de las de «Inferior a…» (la más cara de cada foto: $19.990, $27.990, $29.990 y $57.990).
+- **Qué foto va en cada colección:** `admin/colecciones-fotos/fotos.json` → `tiendas` (por
+  tienda: `saint-venik` = .cl, `vd9tn0-et` = .com; handle → archivo). Varias colecciones
+  comparten foto: Men's y Tendencias (mens), Todos los productos y «- of» (todos). Sin foto
+  nueva: Aros, Packaging Especial, Home page y Cadenas Ice (vacía).
+- **Respaldo:** la foto que tenía cada colección el 14-nov está en
+  `admin/colecciones-fotos/anteriores/` (`anteriores.json`: handle → archivo).
+- **Panel → Fotos → «Fotos de las colecciones»:** cada colección con su foto actual y la nueva,
+  «Usar la nueva», «Volver a la anterior» (dos clics) y «Usar todas las nuevas». Cambiar es
+  `collectionUpdate(image: {src: <URL de GitHub Pages>})`; Shopify descarga la foto y la guarda
+  con el mismo nombre de archivo, y así el panel sabe cuál tiene (`usaArchivo`). Código:
+  `admin/colecciones-fotos.js`.
+- **Dónde se ven en la tienda:** la lista de colecciones (`list-collections-template`) y los
+  bloques de colecciones destacadas que usen la foto de la colección. La cabecera de la página
+  de la colección (`collection-header`) tiene la foto apagada en las plantillas en uso; las
+  plantillas `no-promos` y `no-sidebar` la traen encendida por defecto y el panel lo advierte
+  en esas colecciones.

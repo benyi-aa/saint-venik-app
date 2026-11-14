@@ -1,0 +1,198 @@
+{
+ "_nota": "Foto nueva de cada colección (handle → archivo de esta carpeta), por tienda. 14-nov-2026. Ver docs/tema.md, «Fotos de las colecciones».",
+ "tiendas": {
+  "saint-venik": {
+   "anillos": "sv-col-anillos.jpg",
+   "cadenas": "sv-col-cadenas.jpg",
+   "colgantes": "sv-col-colgantes.jpg",
+   "pulseras": "sv-col-pulseras.jpg",
+   "anillos-oro": "sv-col-anillos-oro.jpg",
+   "anillos-plateados": "sv-col-anillos-plateados.jpg",
+   "best-sellers": "sv-col-best-sellers.jpg",
+   "cadenas-oro": "sv-col-cadenas-oro.jpg",
+   "cadenas-plateadas": "sv-col-cadenas-plateadas.jpg",
+   "colgantes-oro": "sv-col-colgantes-oro.jpg",
+   "colgantes-plateados": "sv-col-colgantes-plateados.jpg",
+   "conjuntos": "sv-col-conjuntos.jpg",
+   "conjuntos-oro": "sv-col-conjuntos-oro.jpg",
+   "conjuntos-plateados": "sv-col-conjuntos-plateados.jpg",
+   "oro": "sv-col-oro.jpg",
+   "pulseras-oro": "sv-col-pulseras-oro.jpg",
+   "pulseras-plateadas": "sv-col-pulseras-plateadas.jpg",
+   "inferior-a-20-000": "sv-col-inferior-a-20-000.jpg",
+   "inferior-a-30-000": "sv-col-inferior-a-30-000.jpg",
+   "inferior-a-40-000": "sv-col-inferior-a-40-000.jpg",
+   "inferior-a-60-000": "sv-col-inferior-a-60-000.jpg",
+   "real-bs": "sv-col-real-bs.jpg",
+   "sale": "sv-col-sale.jpg",
+   "essentials26-collection": "sv-col-essentials.jpg",
+   "anteojos-de-sol": "sv-col-lentes.jpg",
+   "cadenas-pulseras-pendientes-para-hombres": "sv-col-mens.jpg",
+   "tendencia": "sv-col-mens.jpg",
+   "v2": "sv-col-milan-signature.jpg",
+   "summer-2024-collection": "sv-col-summer-2024.jpg",
+   "todos-los-productos": "sv-col-todos.jpg",
+   "todos-los-productos-of": "sv-col-todos.jpg",
+   "venik-world-collection": "sv-col-venik-world.jpg",
+   "winners-collection": "sv-col-winners.jpg"
+  },
+  "vd9tn0-et": {
+   "anillos": "sv-col-anillos.jpg",
+   "cadenas": "sv-col-cadenas.jpg",
+   "colgantes": "sv-col-colgantes.jpg",
+   "pulseras": "sv-col-pulseras.jpg",
+   "anillos-oro": "sv-col-anillos-oro.jpg",
+   "anillos-plateados": "sv-col-anillos-plateados.jpg",
+   "best-sellers": "sv-col-best-sellers.jpg",
+   "cadenas-oro": "sv-col-cadenas-oro.jpg",
+   "cadenas-plateadas": "sv-col-cadenas-plateadas.jpg",
+   "colgantes-oro": "sv-col-colgantes-oro.jpg",
+   "colgantes-plateados": "sv-col-colgantes-plateados.jpg",
+   "conjuntos": "sv-col-conjuntos.jpg",
+   "conjuntos-oro": "sv-col-conjuntos-oro.jpg",
+   "conjuntos-plateados": "sv-col-conjuntos-plateados.jpg",
+   "oro": "sv-col-oro.jpg",
+   "pulseras-oro": "sv-col-pulseras-oro.jpg",
+   "pulseras-plateadas": "sv-col-pulseras-plateadas.jpg",
+   "essentials-26": "sv-col-essentials.jpg",
+   "mens": "sv-col-mens.jpg",
+   "milan-signature": "sv-col-milan-signature.jpg",
+   "todo-of": "sv-col-todos.jpg",
+   "ice": "sv-col-pulseras-ice.jpg",
+   "venik-world-collection": "sv-col-venik-world.jpg",
+   "winners-collection": "sv-col-winners.jpg"
+  }
+ },
+ "productos": {
+  "sv-col-anillos-oro.jpg": [
+   "anillo-minimal-oro",
+   "anillo-eros-oro",
+   "anillo-classic-onyx-oro"
+  ],
+  "sv-col-anillos-plateados.jpg": [
+   "anillo-eros",
+   "anillo-signet",
+   "anillo-box"
+  ],
+  "sv-col-best-sellers.jpg": [
+   "cadena-miami-cuban-5mm-1",
+   "pulsera-miami-cuban-5mm",
+   "faith-pendant"
+  ],
+  "sv-col-cadenas-oro.jpg": [
+   "cadena-miami-cuban-5mm",
+   "cadena-miami-cuban-oro-3mm"
+  ],
+  "sv-col-cadenas-plateadas.jpg": [
+   "cadena-miami-cuban-5mm-1",
+   "cadena-cuban-8mm-1"
+  ],
+  "sv-col-colgantes-oro.jpg": [
+   "florence-pendant-oro",
+   "milan-pendant-oro",
+   "faith-pendant"
+  ],
+  "sv-col-colgantes-plateados.jpg": [
+   "florence-pendant",
+   "milan-pendant",
+   "faith-pendant-1"
+  ],
+  "sv-col-conjuntos.jpg": [
+   "hermes-miami-cuban-5mm-oro-set",
+   "hermes-miami-cuban-5mm-set"
+  ],
+  "sv-col-conjuntos-oro.jpg": [
+   "miami-cubans-set-oro",
+   "hermes-miami-cuban-5mm-oro-set"
+  ],
+  "sv-col-conjuntos-plateados.jpg": [
+   "rope-figaro-3mm-set-1",
+   "miami-cubans-set"
+  ],
+  "sv-col-essentials.jpg": [
+   "pulsera-giglio",
+   "faith-pendant",
+   "anillo-signet"
+  ],
+  "sv-col-inferior-a-20-000.jpg": [
+   "cadena-miami-cuban-3mm",
+   "pulsera-figaro-oro-5mm",
+   "anillo-para-hombre-black-hades"
+  ],
+  "sv-col-inferior-a-30-000.jpg": [
+   "cadena-figaro-3mm",
+   "pulsera-rope-oro-3mm",
+   "crucifix-pendant"
+  ],
+  "sv-col-inferior-a-40-000.jpg": [
+   "cadena-miami-cuban-5mm-1",
+   "pulsera-cuban-oro-8mm",
+   "compass-ii-pendant-colgante"
+  ],
+  "sv-col-inferior-a-60-000.jpg": [
+   "cadena-tennis-5mm",
+   "pulsera-eclissi",
+   "vault-black-pendant-oro"
+  ],
+  "sv-col-lentes.jpg": [
+   "ferrara",
+   "havan-amber"
+  ],
+  "sv-col-mens.jpg": [
+   "cadena-rope-4mm",
+   "pulsera-cuban-oro-8mm",
+   "compass-pendant"
+  ],
+  "sv-col-milan-signature.jpg": [
+   "cadena-sunset-oro",
+   "pulsera-azure"
+  ],
+  "sv-col-oro.jpg": [
+   "cadena-miami-cuban-5mm",
+   "pulsera-cuban-oro-8mm",
+   "crucifix-pendant-oro"
+  ],
+  "sv-col-pulseras-ice.jpg": [
+   "pulsera-legacy",
+   "pulsera-giglio",
+   "pulsera-eclissi"
+  ],
+  "sv-col-pulseras-oro.jpg": [
+   "pulsera-cuban-oro-8mm",
+   "pulsera-rope-oro-3mm",
+   "pulsera-miami-cuban-5mm-oro"
+  ],
+  "sv-col-pulseras-plateadas.jpg": [
+   "pulsera-cuban-8mm",
+   "pulsera-miami-cuban-5mm",
+   "pulsera-rope-3mm"
+  ],
+  "sv-col-real-bs.jpg": [
+   "cadena-miami-cuban-5mm-1",
+   "pulsera-cuban-8mm"
+  ],
+  "sv-col-sale.jpg": [
+   "cadena-rope-oro-4mm"
+  ],
+  "sv-col-summer-2024.jpg": [
+   "cadena-cuban-8mm",
+   "pulsera-rope-oro-3mm",
+   "crucifix-pendant-oro"
+  ],
+  "sv-col-todos.jpg": [
+   "cadena-miami-cuban-5mm-1",
+   "pulsera-cuban-8mm",
+   "crucifix-pendant"
+  ],
+  "sv-col-venik-world.jpg": [
+   "cadena-river-pearls",
+   "pulsera-de-trebol-negra",
+   "void-onyx-oro-pendant"
+  ],
+  "sv-col-winners.jpg": [
+   "anillo-eros-oro",
+   "anillo-box",
+   "anillo-classic-onyx-oro"
+  ]
+ }
+}
