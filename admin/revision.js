@@ -12,13 +12,13 @@
  * El panel se abre por separado en cada tienda, así que la revisión es de la tienda
  * en la que está abierto: para las dos, se pulsa en cada una.
  */
-import { gql } from './api.js?v=202611142152';
-import { cargarColores } from './colores.js?v=202611142152';
-import { cargarEtiquetas } from './etiquetas.js?v=202611142152';
-import { cargarBeneficios } from './beneficios.js?v=202611142152';
-import { cargarBotones } from './filtros.js?v=202611142152';
-import { cargarConjuntos, calcular, estaAlDia, DESCUENTO_POR_DEFECTO, ETIQUETA_CONJUNTO } from './conjuntos.js?v=202611142152';
-import { sinColor } from './productos.js?v=202611142152';
+import { gql } from './api.js?v=202611142154';
+import { cargarColores } from './colores.js?v=202611142154';
+import { cargarEtiquetas } from './etiquetas.js?v=202611142154';
+import { cargarBeneficios } from './beneficios.js?v=202611142154';
+import { cargarBotones } from './filtros.js?v=202611142154';
+import { cargarConjuntos, calcular, estaAlDia, DESCUENTO_POR_DEFECTO, ETIQUETA_CONJUNTO } from './conjuntos.js?v=202611142154';
+import { sinColor } from './productos.js?v=202611142154';
 
 /* 25 por página: cada producto trae hasta 20 variantes y Shopify cobra por
  * adelantado lo que la consulta podría gastar. Con 50 se pasaba del máximo. */

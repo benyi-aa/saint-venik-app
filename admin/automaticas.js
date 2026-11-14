@@ -20,8 +20,8 @@
  *
  * Este archivo solo LEE y decide. Escribir lo hace etiquetas.js (sincronizarTodas).
  */
-import { gql } from './api.js?v=202611142152';
-import { clavesDe } from './asignacion.js?v=202611142152';
+import { gql } from './api.js?v=202611142154';
+import { clavesDe } from './asignacion.js?v=202611142154';
 
 export const TIPOS_AUTO = [
   { valor: '', rotulo: 'Ninguna', ayuda: 'Solo los productos elegidos a mano.' },

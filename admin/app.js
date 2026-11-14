@@ -1,69 +1,69 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611142152';
+import { estaEmbebida } from './api.js?v=202611142154';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611142152';
+} from './colores.js?v=202611142154';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611142152';
+} from './config.js?v=202611142154';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611142152';
+} from './filtros.js?v=202611142154';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor, unirFamilia,
-} from './productos.js?v=202611142152';
-import { prepararNavidad } from './inicio.js?v=202611142152';
+} from './productos.js?v=202611142154';
+import { prepararNavidad } from './inicio.js?v=202611142154';
 import {
   prepararConjuntos, cargarConjuntos, cargarCatalogo, sugerirJoyas, calcular, estaAlDia, formatear, guardarConjunto,
   DESCUENTO_POR_DEFECTO as DESCUENTO_CONJUNTOS,
-} from './conjuntos.js?v=202611142152';
-import { quitarAguaDeColecciones } from './textos.js?v=202611142152';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611142152';
+} from './conjuntos.js?v=202611142154';
+import { quitarAguaDeColecciones } from './textos.js?v=202611142154';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611142154';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611142152';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611142152';
+} from './temporadas.js?v=202611142154';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611142154';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611142152';
+} from './guias.js?v=202611142154';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611142152';
+} from './vista-previa.js?v=202611142154';
 import {
   cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS, resolverPartes,
-} from './asignacion.js?v=202611142152';
+} from './asignacion.js?v=202611142154';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
   sincronizarTodas as sincronizarEtiquetas, resolverColeccionesAuto, CAMPOS_AUTO, cuantosAutomaticos,
-} from './etiquetas.js?v=202611142152';
+} from './etiquetas.js?v=202611142154';
 import {
   TIPOS_AUTO, autoEncendida, elegirAutomaticos, tocaRecalcular, HORAS_ENTRE_CALCULOS,
   CANTIDAD_POR_DEFECTO as CANTIDAD_AUTO, DIAS_POR_DEFECTO as DIAS_AUTO,
-} from './automaticas.js?v=202611142152';
+} from './automaticas.js?v=202611142154';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611142152';
-import { ICONOS, svgIcono } from './iconos.js?v=202611142152';
-import { revisarTienda } from './revision.js?v=202611142152';
-import { cargarColeccionesConFoto, cargarPlan, usaArchivo, urlDeFoto, ponerFoto } from './colecciones-fotos.js?v=202611142152';
-import { GRUPOS, cargarIngles, guardarIngles, datosTienda } from './ingles.js?v=202611142152';
+} from './beneficios.js?v=202611142154';
+import { ICONOS, svgIcono } from './iconos.js?v=202611142154';
+import { revisarTienda } from './revision.js?v=202611142154';
+import { cargarColeccionesConFoto, cargarPlan, usaArchivo, urlDeFoto, ponerFoto } from './colecciones-fotos.js?v=202611142154';
+import { GRUPOS, cargarIngles, guardarIngles, datosTienda } from './ingles.js?v=202611142154';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611142152';
+const VERSION = '202611142154';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -3920,7 +3920,7 @@ async function pintarFotosColecciones(miPintado) {
         ${productos.length ? `<p class="ayuda">Joyas: ${productos.map(escapar).join(', ')}</p>` : ''}
         ${cabecera ? '<p class="ayuda"><b>Ojo:</b> su plantilla muestra la foto arriba de la página de la colección.</p>' : ''}
         <div class="acciones acciones--envolver">
-          ${n ? `<button type="button" data-usar ${ya ? 'hidden' : ''}>Usar la nueva</button>` : '<span class="ayuda">Sin foto nueva</span>'}
+          ${n ? `<button type="button" class="principal" data-usar ${ya ? 'hidden' : ''}>Usar la nueva</button>` : '<span class="ayuda">Sin foto nueva</span>'}
           ${a ? `<button type="button" class="secundario" data-volver ${ya ? '' : 'hidden'}>Volver a la anterior</button>` : ''}
         </div>
         <p class="ayuda" data-estado>${ya ? 'Ya tiene la nueva.' : ''}</p>
@@ -3930,7 +3930,7 @@ async function pintarFotosColecciones(miPintado) {
   const pendientes = () => colecciones.filter((c) => nueva(c) && !tieneNueva(c));
   caja.innerHTML = `
     <div class="acciones acciones--envolver">
-      <button type="button" id="fc-todas">Usar todas las nuevas (${pendientes().length})</button>
+      <button type="button" class="principal" id="fc-todas">Usar todas las nuevas (${pendientes().length})</button>
     </div>
     <p class="ayuda">Cambia de una en una; la tienda las muestra en unos segundos. Las colecciones sin foto nueva (por ejemplo Aros o Home page) quedan como están.</p>
     <div class="colfotos">${colecciones.map(fila).join('')}</div>`;

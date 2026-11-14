@@ -15,8 +15,8 @@
  * diccionario fijo de cada archivo (que es el mismo de aquí abajo): guardar desde el
  * panel nunca deja algo sin traducir.
  */
-import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611142152';
-import { faltaEstructura, asegurarEstructura } from './asignacion.js?v=202611142152';
+import { gql, comprobarErrores, capacidadActiva } from './api.js?v=202611142154';
+import { faltaEstructura, asegurarEstructura } from './asignacion.js?v=202611142154';
 
 export const TIPO_INGLES = 'sv_ingles';
 const HANDLE = 'textos';

@@ -10,7 +10,7 @@
  * guarda. La foto que tenía cada colección el 14-nov está copiada en anteriores/ (lista en
  * anteriores/anteriores.json), así que «Volver a la anterior» siempre tiene de dónde sacarla.
  */
-import { gql, comprobarErrores } from './api.js?v=202611142152';
+import { gql, comprobarErrores } from './api.js?v=202611142154';
 
 const COLECCIONES = `
   query ColeccionesConFoto($cursor: String) {
