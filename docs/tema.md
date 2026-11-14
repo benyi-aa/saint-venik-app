@@ -1166,6 +1166,12 @@ de oro; «Inferior a $40.000», solo productos bajo ese precio; etc.
   nombre viejo y solo cambia el contenido). Por eso la nueva lleva el texto alternativo
   «<colección> · Saint Venik» y «Volver a la anterior» la deja con el título solo; así el panel
   sabe cuál tiene. Código: `admin/colecciones-fotos.js`.
+- **Aplicadas el 14-nov** (con OK del usuario): 33 colecciones en .cl y 24 en .com. Comprobado en
+  las dos tiendas que cada colección muestra su foto (se comparó cada foto en vivo con la que le
+  tocaba). Sin foto nueva, a propósito: Aros (sus 2 productos están en borrador), Packaging
+  Especial (su producto no se ve en la tienda), Home page (colección interna) y Cadenas Ice de .com
+  (vacía). Ojo con «Usar todas»: el segundo clic tiene que llegar antes de 6 s; si Shopify responde
+  504 en alguna, se repite con «Usar la nueva» de esa colección.
 - **Dónde se ven en la tienda:** la lista de colecciones (`list-collections-template`) y los
   bloques de colecciones destacadas que usen la foto de la colección. La cabecera de la página
   de la colección (`collection-header`) tiene la foto apagada en las plantillas en uso; las
