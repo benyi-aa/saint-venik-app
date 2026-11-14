@@ -10,13 +10,13 @@
  * guarda. La foto que tenía cada colección el 14-nov está copiada en anteriores/ (lista en
  * anteriores/anteriores.json), así que «Volver a la anterior» siempre tiene de dónde sacarla.
  */
-import { gql, comprobarErrores } from './api.js?v=202611142154';
+import { gql, comprobarErrores } from './api.js?v=202611142213';
 
 const COLECCIONES = `
   query ColeccionesConFoto($cursor: String) {
     collections(first: 100, after: $cursor, sortKey: TITLE) {
       pageInfo { hasNextPage endCursor }
-      nodes { id handle title templateSuffix productsCount { count } image { url } }
+      nodes { id handle title templateSuffix productsCount { count } image { url altText } }
     }
   }
 `;
@@ -24,7 +24,7 @@ const COLECCIONES = `
 const PONER = `
   mutation PonerFotoColeccion($input: CollectionInput!) {
     collectionUpdate(input: $input) {
-      collection { id image { url } }
+      collection { id image { url altText } }
       userErrors { field message }
     }
   }
@@ -42,6 +42,7 @@ export async function cargarColeccionesConFoto() {
       plantilla: c.templateSuffix || '',
       cuantos: c.productsCount?.count ?? 0,
       imagen: c.image?.url ?? null,
+      alt: c.image?.altText ?? '',
     })));
     if (!d.collections.pageInfo.hasNextPage) break;
     cursor = d.collections.pageInfo.endCursor;
@@ -71,8 +72,14 @@ export async function cargarPlan() {
   };
 }
 
-/* Shopify guarda la foto con el nombre del archivo de origen (si ya existe uno igual le agrega
- * «_» y un código). Así se sabe si la colección ya tiene la foto nueva. */
+/* Shopify suele guardar la foto con el nombre del archivo de origen (si ya existe uno igual le
+ * agrega «_» y un código); pero si la foto anterior también era .jpg, a veces conserva el nombre
+ * viejo y solo cambia el contenido. Por eso la foto nueva va con el texto alternativo
+ * «<colección> · Saint Venik» (altNueva) y la anterior vuelve con el título solo. */
+export function altNueva(titulo) {
+  return `${titulo} · Saint Venik`;
+}
+
 export function usaArchivo(urlImagen, archivo) {
   if (!urlImagen || !archivo) return false;
   const base = archivo.split('/').pop().replace(/\.[a-z0-9]+$/i, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

@@ -1162,8 +1162,10 @@ de oro; «Inferior a $40.000», solo productos bajo ese precio; etc.
 - **Panel → Fotos → «Fotos de las colecciones»:** cada colección con su foto actual y la nueva,
   «Usar la nueva», «Volver a la anterior» (dos clics) y «Usar todas las nuevas». Cambiar es
   `collectionUpdate(image: {src: <URL de GitHub Pages>})`; Shopify descarga la foto y la guarda
-  con el mismo nombre de archivo, y así el panel sabe cuál tiene (`usaArchivo`). Código:
-  `admin/colecciones-fotos.js`.
+  con el nombre del archivo nuevo (salvo cuando la anterior también era .jpg: ahí a veces deja el
+  nombre viejo y solo cambia el contenido). Por eso la nueva lleva el texto alternativo
+  «<colección> · Saint Venik» y «Volver a la anterior» la deja con el título solo; así el panel
+  sabe cuál tiene. Código: `admin/colecciones-fotos.js`.
 - **Dónde se ven en la tienda:** la lista de colecciones (`list-collections-template`) y los
   bloques de colecciones destacadas que usen la foto de la colección. La cabecera de la página
   de la colección (`collection-header`) tiene la foto apagada en las plantillas en uso; las

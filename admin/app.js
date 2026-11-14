@@ -1,69 +1,69 @@
 /* Saint Venik · Panel de la app. Sin framework ni paso de compilacion: son
  * archivos estaticos que el admin de Shopify carga embebidos. */
-import { estaEmbebida } from './api.js?v=202611142154';
+import { estaEmbebida } from './api.js?v=202611142213';
 import {
   cargarColores, guardarColor, crearColor, borrarColor, problemasDe, ordenarComoLaTienda,
   guardarImagenColor, camposDeColor,
-} from './colores.js?v=202611142154';
+} from './colores.js?v=202611142213';
 import {
   leerConfig, guardarOrdenColores, guardarTextosBoton, guardarApariencia,
   guardarPildora, camposDeConfig, PILDORA_POR_DEFECTO,
   guardarDescuento, guardarMenu, guardarInicio, DESCUENTO_POR_DEFECTO, FORMATOS_DESCUENTO, textoDescuento, contarConDescuento,
   guardarTransicion, TRANSICION_POR_DEFECTO, guardarFiltrosConfig, FILTROS_POR_DEFECTO, asegurarConfig,
-} from './config.js?v=202611142154';
+} from './config.js?v=202611142213';
 import {
   FILTROS as FILTROS_PRODUCTO, cargarBotones, crearBoton, guardarBoton, borrarBoton,
   cargarProductosFiltro, guardarClasificacion, sugerir,
-} from './filtros.js?v=202611142154';
+} from './filtros.js?v=202611142213';
 import {
   buscarProductos, todosLosProductos, vincular, desvincular, sinHermano, sinColor, ponerEtiquetaColor, unirFamilia,
-} from './productos.js?v=202611142154';
-import { prepararNavidad } from './inicio.js?v=202611142154';
+} from './productos.js?v=202611142213';
+import { prepararNavidad } from './inicio.js?v=202611142213';
 import {
   prepararConjuntos, cargarConjuntos, cargarCatalogo, sugerirJoyas, calcular, estaAlDia, formatear, guardarConjunto,
   DESCUENTO_POR_DEFECTO as DESCUENTO_CONJUNTOS,
-} from './conjuntos.js?v=202611142154';
-import { quitarAguaDeColecciones } from './textos.js?v=202611142154';
-import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611142154';
+} from './conjuntos.js?v=202611142213';
+import { quitarAguaDeColecciones } from './textos.js?v=202611142213';
+import { gruposDe, cargarFotos, cambiarFoto } from './fotos.js?v=202611142213';
 import {
   leerTemporadas, guardarTemporadas, guardarTemporadaActiva, listaDe, claveDe, validarClave, PARTES as PARTES_TEMPORADA,
   efectivo, textosDeHoy, conIngles, aLocal, aUtc, colorValido, vistaPrevia,
-} from './temporadas.js?v=202611142154';
-import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611142154';
+} from './temporadas.js?v=202611142213';
+import { subirArchivo, elegirDeBiblioteca, hayBiblioteca, copiarArchivo, reemplazarArchivo, traerArchivo } from './archivos.js?v=202611142213';
 import {
   estadoEstructura, revisarEstructura, crearEstructura, cargarGuias, GUIAS_INICIALES,
   crearBloque, guardarBloque, borrarBloque, moverBloque, guardarGuia, guardarArchivoDeBloque, NOMBRE_TIPO,
   revisarReparto, crearGuia, TOPE_GUIAS, importarGuias,
-} from './guias.js?v=202611142154';
+} from './guias.js?v=202611142213';
 import {
   guiaHtml, coloresHtml, visible, etiquetaHtml, beneficiosHtml, estiloEtiqueta, conAlfa, iconoHtml,
-} from './vista-previa.js?v=202611142154';
+} from './vista-previa.js?v=202611142213';
 import {
   cargarColecciones, cargarEtiquetasDeTienda, esResta, sinSigno, TOPE_REFERENCIAS, resolverPartes,
-} from './asignacion.js?v=202611142154';
+} from './asignacion.js?v=202611142213';
 import {
   cargarEtiquetas, crearEtiqueta, guardarEtiqueta, borrarEtiqueta,
   cuantosAlcanza as alcanceEtiqueta, camposDeEtiqueta,
   FONDO_POR_DEFECTO, TEXTO_POR_DEFECTO,
   sincronizarTodas as sincronizarEtiquetas, resolverColeccionesAuto, CAMPOS_AUTO, cuantosAutomaticos,
-} from './etiquetas.js?v=202611142154';
+} from './etiquetas.js?v=202611142213';
 import {
   TIPOS_AUTO, autoEncendida, elegirAutomaticos, tocaRecalcular, HORAS_ENTRE_CALCULOS,
   CANTIDAD_POR_DEFECTO as CANTIDAD_AUTO, DIAS_POR_DEFECTO as DIAS_AUTO,
-} from './automaticas.js?v=202611142154';
+} from './automaticas.js?v=202611142213';
 import {
   cargarBeneficios, crearBeneficio, guardarBeneficio, borrarBeneficio,
   sincronizar as sincronizarBeneficio, cuantosAlcanza as alcanceBeneficio,
   guardarIconoImagen, camposDeBeneficio,
-} from './beneficios.js?v=202611142154';
-import { ICONOS, svgIcono } from './iconos.js?v=202611142154';
-import { revisarTienda } from './revision.js?v=202611142154';
-import { cargarColeccionesConFoto, cargarPlan, usaArchivo, urlDeFoto, ponerFoto } from './colecciones-fotos.js?v=202611142154';
-import { GRUPOS, cargarIngles, guardarIngles, datosTienda } from './ingles.js?v=202611142154';
+} from './beneficios.js?v=202611142213';
+import { ICONOS, svgIcono } from './iconos.js?v=202611142213';
+import { revisarTienda } from './revision.js?v=202611142213';
+import { cargarColeccionesConFoto, cargarPlan, usaArchivo, altNueva, urlDeFoto, ponerFoto } from './colecciones-fotos.js?v=202611142213';
+import { GRUPOS, cargarIngles, guardarIngles, datosTienda } from './ingles.js?v=202611142213';
 
 /* La sella scripts/version.mjs al publicar. No se deduce de la URL porque ahora
  * la URL lleva un sello por minuto para saltarse la cache, no la version. */
-const VERSION = '202611142154';
+const VERSION = '202611142213';
 
 const pantalla = document.getElementById('pantalla');
 const aviso = document.getElementById('aviso');
@@ -3895,7 +3895,10 @@ async function pintarFotosColecciones(miPintado) {
 
   const nueva = (c) => plan.nuevas[c.handle] || null;
   const anterior = (c) => plan.anteriores[c.handle] || null;
-  const tieneNueva = (c) => usaArchivo(c.imagen, nueva(c));
+  /* La nueva lleva el texto alternativo «<colección> · Saint Venik»; la anterior vuelve con el
+   * título solo (por si Shopify deja el mismo nombre de archivo). */
+  const tieneNueva = (c) => Boolean(nueva(c))
+    && (c.alt === altNueva(c.titulo) || (c.alt !== c.titulo && usaArchivo(c.imagen, nueva(c))));
   /* Primero las que tienen foto nueva; las demás (sin foto pensada) al final. */
   colecciones.sort((a, b) => (nueva(a) ? 0 : 1) - (nueva(b) ? 0 : 1));
 
@@ -3943,8 +3946,9 @@ async function pintarFotosColecciones(miPintado) {
     const estado = tarjeta.querySelector('[data-estado]');
     estado.textContent = volviendo ? 'Volviendo a la anterior…' : 'Poniendo la nueva…';
     try {
-      const r = await ponerFoto(c.id, archivo, `${c.titulo} · Saint Venik`);
+      const r = await ponerFoto(c.id, archivo, volviendo ? c.titulo : altNueva(c.titulo));
       c.imagen = r.image?.url ?? null;
+      c.alt = r.image?.altText ?? '';
       tarjeta.querySelector('[data-actual]').innerHTML = miniatura(c.imagen ? `${c.imagen}${c.imagen.includes('?') ? '&' : '?'}width=360` : null);
       const ya = tieneNueva(c);
       tarjeta.querySelector('[data-usar]')?.toggleAttribute('hidden', ya);
