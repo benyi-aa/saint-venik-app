@@ -33,7 +33,8 @@ caducan. Los descuentos no aplican a la compra de una gift card ni se puede paga
 
 ## Prueba (17-nov, .cl)
 Pedido preliminar #D167 → «Marcar como pagado» → pedido 1SV64600 (nota y etiqueta `prueba-gift-card`).
-Shopify creó la gift card …d73g de $25.000, «No caduca», y la envió por correo. Ojo: el pedido queda en
+Shopify creó la gift card …d73g de $25.000, «No caduca», y la envió por correo. Canje probado por el usuario en el
+pago (−$25.000 sobre un Faith Pendant, sin pagar). Después la …d73g quedó DESACTIVADA (17-nov). Ojo: el pedido queda en
 «Sucursal Amplifica Envíos» (Shopify lo marca preparado solo; no hay nada que despachar).
 
 ## Ojo
