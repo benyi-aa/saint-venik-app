@@ -23,9 +23,11 @@ caducan. Los descuentos no aplican a la compra de una gift card ni se puede paga
   `show_gift_card_recipient: true` (casilla «Quiero enviar esto como un regalo»: correo, nombre, mensaje y
   fecha de envío de quien la recibe), separador, descripción, compartir. Sin bloques de joyería.
   Respaldo de cómo estaba: `admin/gift-card/respaldo/`.
-- Fotos: `admin/gift-card/sv-gift-card-1.jpg` (con moño, principal) y `-2.jpg` (sola), 1440×2160 (2:3 como
-  las demás fichas). Generadas con Nano Banana la tarjeta SIN texto y el logo real puesto encima con PIL
-  (el generador tapaba la «k» de Venik con la cinta). Foto anterior de .cl: `admin/gift-card/respaldo/`.
+- Foto (una sola, la misma en .cl y .com): `admin/gift-card/sv-gift-card-premium-4.jpg`, 1440×2160. Acero negro
+  cepillado, horizontal en 3/4, cinta y moño burdeo en el lado izquierdo de la tarjeta, estudio oscuro azul acero
+  con piso que refleja. Elegida por Benjamín entre 4 acabados metálicos. Las esquinas venían cortadas: se redondearon
+  con una edición del generador pegando solo esas zonas (pegar-zonas.py). Antes se probaron versiones sobre fondo
+  blanco (`sv-gift-card-1/2.jpg`, descartadas por poco premium). Foto anterior de .cl: `admin/gift-card/respaldo/`.
 - .com en inglés: Translate & Adapt (título, descripción, handle `electronic-gift-card`, opción «Amount»).
   En el editor de T&A los clics no llegan con tamaño emulado: usar el tamaño propio del panel.
 
