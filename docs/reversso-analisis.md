@@ -142,6 +142,31 @@ cambios con upselling.
 **Comparación de costo:** Reversso cuesta UF 9 + IVA (~$430.000) al mes. La app propia: servidor de
 US$5–20/mes más las etiquetas que cobre Amplifica (hoy el cliente ya paga $2.368 por la de Blue Express).
 
+## 5b. Cómo saca Reversso la etiqueta de Blue Express (revisado 19-nov, tarde)
+
+Visto en Configuración → Couriers del panel de Reversso (sin guardar nada):
+
+- **Amplifica no participa en la etiqueta.** En Reversso, «Amplifica – Sucursal …» son solo puntos de entrega
+  manual (inactivos), sin credenciales ni integración. Amplifica es únicamente la **dirección de destino**
+  (Bodegas → Centro Envíos Amplifica, Carmen 1323): recibe el paquete como cualquier otro envío.
+- **Reversso se conecta directo a la API de Blue Express.** El courier Blue Express de Saint Venik usa
+  «**Credenciales de Reversso**» (la cuenta de Reversso). Por eso el cliente paga $2.368 y Reversso factura.
+- **La marca puede poner su propia cuenta de Blue Express.** Botón «Añadir credenciales» con dos tipos:
+  - **Blue Express (API Corp):** número de cuenta, **clave API Booking** (crear el envío y la etiqueta),
+    **clave API POD** (prueba de entrega / seguimiento), **clave API PUDO** (sucursales y puntos de entrega),
+    Client ID, Client secret, Token y Usuario («Código Persona»).
+  - **Blue Express (legacy):** número de cuenta, clave API, Client ID, Client secret, Token, Usuario y código
+    de usuario.
+- El estado «recibido en bodega» sale del seguimiento de Blue Express (entrega en la dirección de la bodega),
+  no de un aviso de Amplifica.
+- Otros couriers que Reversso ofrece y no están activos: 99 minutos, Alas, Recibelo, **Blue – Retiro en domicilio**.
+- Reversso tiene «Integraciones de apps: API privada y webhooks», **desactivado** en el plan actual.
+
+**Conclusión:** la API que hace falta es la **API Corp de Blue Express** (cuenta de empresa con Blue Express),
+no una de Amplifica. Con esas credenciales una app propia hace exactamente lo mismo que Reversso, 100 %
+automático. En la web de Amplifica no aparece ninguna API (ni api./docs./developers.amplifica.io existen) y no
+hay evidencia pública de que su API, si la tienen, genere etiquetas de devolución.
+
 ## 6. Próximo paso (antes de ver reglas)
 
 1. Pedir a Amplifica la **documentación de su API** y una credencial de prueba.

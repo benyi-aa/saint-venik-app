@@ -3,6 +3,10 @@
 Condición de Benjamín y del usuario: la etiqueta de Blue Express tiene que salir **100 % automática**,
 como hoy con Reversso. Sin eso no se hace la app propia (ver `docs/reversso-analisis.md`).
 
+> **Ojo (19-nov, tarde):** Reversso no usa a Amplifica para la etiqueta: usa la **API Corp de Blue Express**
+> con su propia cuenta (ver sección 5b de `docs/reversso-analisis.md`). El camino más seguro es pedirle a
+> **Blue Express** una cuenta de empresa con API Corp; este mensaje a Amplifica queda como alternativa.
+
 ---
 
 **Asunto:** API para etiquetas de devolución automáticas con Blue Express – Saint Venik
